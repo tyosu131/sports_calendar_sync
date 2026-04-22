@@ -1,0 +1,71 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helper functions ──────────────────────────────────────────────────────
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // ── users/{uid} ───────────────────────────────────────────────────────────
+    // Users can only read/write their own profile.
+    match /users/{uid} {
+      allow read: if isOwner(uid);
+      allow create: if isOwner(uid)
+        && request.resource.data.keys().hasAll(['email', 'followedTeamIds', 'preferredLanguage'])
+        && request.resource.data.followedTeamIds is list
+        && request.resource.data.preferredLanguage in ['ja', 'en'];
+      allow update: if isOwner(uid)
+        && request.resource.data.keys().hasAll(['email', 'followedTeamIds', 'preferredLanguage'])
+        // Prevent uid spoofing
+        && (!request.resource.data.keys().hasAny(['uid']) || request.resource.data.uid == uid);
+      allow delete: if isOwner(uid);
+    }
+
+    // ── leagues/{leagueId} ────────────────────────────────────────────────────
+    // Public read. Only Cloud Functions (admin SDK) can write.
+    match /leagues/{leagueId} {
+      allow read: if true;
+      allow write: if false; // admin SDK only
+    }
+
+    // ── teams/{teamId} ────────────────────────────────────────────────────────
+    // Public read. Only Cloud Functions (admin SDK) can write.
+    match /teams/{teamId} {
+      allow read: if true;
+      allow write: if false; // admin SDK only
+    }
+
+    // ── games/{gameId} ────────────────────────────────────────────────────────
+    // Public read. Only Cloud Functions (admin SDK) can write.
+    match /games/{gameId} {
+      allow read: if true;
+      allow write: if false; // admin SDK only
+    }
+
+    // ── subscriptions/{subId} ────────────────────────────────────────────────
+    // Users can read/write only their own subscriptions.
+    match /subscriptions/{subId} {
+      allow read: if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow create: if isSignedIn()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.keys().hasAll(['uid', 'teamId', 'icsUrl', 'isActive']);
+      allow update: if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.uid == request.auth.uid;
+    }
+
+    // ── translationMaps/{mapId} ───────────────────────────────────────────────
+    // Public read (used by Cloud Functions and potentially client for display).
+    // Only admin SDK can write.
+    match /translationMaps/{mapId} {
+      allow read: if true;
+      allow write: if false; // admin SDK only
+    }
+  }
+}
