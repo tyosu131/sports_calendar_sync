@@ -1,0 +1,31 @@
+{
+  "name": "sports-calendar-sync-functions",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "shell": "npm run build && firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log",
+    "seed:j1": "node scripts/seedJ1Minimum.js",
+    "verify:j1": "node scripts/verifyJ1Minimum.js"
+  },
+  "engines": {
+    "node": "20"
+  },
+  "main": "lib/index.js",
+  "dependencies": {
+    "firebase-admin": "^12.0.0",
+    "firebase-functions": "^6.0.0",
+    "axios": "^1.7.0",
+    "ical-generator": "^8.0.0",
+    "luxon": "^3.4.4"
+  },
+  "devDependencies": {
+    "@types/luxon": "^3.4.2",
+    "typescript": "^5.4.0",
+    "firebase-functions-test": "^3.1.0"
+  },
+  "private": true
+}
