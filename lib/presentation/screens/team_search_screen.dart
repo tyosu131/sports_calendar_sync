@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/config/sports_registry.dart';
 import '../../data/providers/auth_providers.dart';
 import '../../data/providers/repository_providers.dart';
 import '../../data/providers/team_providers.dart';
-import '../../domain/models/sport.dart';
 import '../widgets/team_list_tile.dart';
 
-/// Screen for searching and browsing teams by sport/league.
+/// Screen for searching and browsing teams by competition.
 class TeamSearchScreen extends ConsumerStatefulWidget {
   const TeamSearchScreen({super.key});
 
@@ -21,17 +21,37 @@ class _TeamSearchScreenState extends ConsumerState<TeamSearchScreen>
   late final TabController _tabController;
   final _searchController = TextEditingController();
 
+  // Competitions sourced from SportsRegistry — single source of truth.
+  static final _competitions = SportsRegistry.enabled;
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(
-      length: SportType.values.length + 1, // +1 for "All" tab
+      length: _competitions.length + 1, // +1 for "All" tab
       vsync: this,
     );
+    // Keep teamSearchCompetitionKeyProvider in sync with the active tab.
+    // Using an animation listener (fires on every frame during swipe as well
+    // as on tap) ensures the provider is updated for both tap and swipe.
+    _tabController.animation!.addListener(_onTabAnimationChanged);
+  }
+
+  void _onTabAnimationChanged() {
+    // Round to the nearest integer tab index so the provider follows both
+    // tap-based tab changes and swipe gestures without updating for every
+    // fractional animation value.
+    final index = _tabController.animation!.value.round();
+    final key = index == 0 ? null : _competitions[index - 1].competitionKey;
+    final notifier = ref.read(teamSearchCompetitionKeyProvider.notifier);
+    if (notifier.state != key) {
+      notifier.state = key;
+    }
   }
 
   @override
   void dispose() {
+    _tabController.animation!.removeListener(_onTabAnimationChanged);
     _tabController.dispose();
     _searchController.dispose();
     super.dispose();
@@ -69,13 +89,13 @@ class _TeamSearchScreenState extends ConsumerState<TeamSearchScreen>
                   },
                 ),
               ),
-              // Sport tabs
+              // Competition tabs — driven by SportsRegistry.enabled
               TabBar(
                 controller: _tabController,
                 isScrollable: true,
                 tabs: [
                   const Tab(text: 'すべて'),
-                  ...SportType.values.map(
+                  ..._competitions.map(
                     (s) => Tab(text: s.displayNameJa),
                   ),
                 ],
@@ -89,9 +109,11 @@ class _TeamSearchScreenState extends ConsumerState<TeamSearchScreen>
           : TabBarView(
               controller: _tabController,
               children: [
-                _LeagueBrowser(sportType: null),
-                ...SportType.values.map(
-                  (s) => _LeagueBrowser(sportType: s),
+                // "All" tab: no competition filter
+                const _LeagueBrowser(competitionKey: null),
+                // One tab per enabled competition
+                ..._competitions.map(
+                  (s) => _LeagueBrowser(competitionKey: s.competitionKey),
                 ),
               ],
             ),
@@ -130,9 +152,17 @@ class _SearchResults extends ConsumerWidget {
                 }
                 final repo = ref.read(userRepositoryProvider);
                 if (isFollowing) {
-                  await repo.unfollowTeam(user.uid, team.id);
+                  await repo.unfollowTeam(
+                    user.uid,
+                    team.id,
+                    competitionKey: team.competitionKey,
+                  );
                 } else {
-                  await repo.followTeam(user.uid, team.id);
+                  await repo.followTeam(
+                    user.uid,
+                    team.id,
+                    competitionKey: team.competitionKey,
+                  );
                 }
               },
             );
@@ -143,14 +173,16 @@ class _SearchResults extends ConsumerWidget {
   }
 }
 
-/// Browses leagues and their teams for a given sport type.
+/// Browses leagues and their teams for a given competition.
 class _LeagueBrowser extends ConsumerWidget {
-  const _LeagueBrowser({this.sportType});
-  final SportType? sportType;
+  const _LeagueBrowser({this.competitionKey});
+
+  /// null = show all competitions.
+  final String? competitionKey;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final leaguesAsync = ref.watch(leaguesProvider(sportType));
+    final leaguesAsync = ref.watch(leaguesByCompetitionProvider(competitionKey));
     final followedIds = ref.watch(followedTeamIdsProvider);
     final user = ref.watch(currentUserProvider);
 
@@ -196,9 +228,17 @@ class _LeagueBrowser extends ConsumerWidget {
                               }
                               final repo = ref.read(userRepositoryProvider);
                               if (isFollowing) {
-                                await repo.unfollowTeam(user.uid, team.id);
+                                await repo.unfollowTeam(
+                                  user.uid,
+                                  team.id,
+                                  competitionKey: team.competitionKey,
+                                );
                               } else {
-                                await repo.followTeam(user.uid, team.id);
+                                await repo.followTeam(
+                                  user.uid,
+                                  team.id,
+                                  competitionKey: team.competitionKey,
+                                );
                               }
                             },
                           );

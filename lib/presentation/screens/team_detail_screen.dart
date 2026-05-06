@@ -71,10 +71,21 @@ class TeamDetailScreen extends ConsumerWidget {
                     onPressed: () async {
                       if (user == null) return;
                       final repo = ref.read(userRepositoryProvider);
+                      // Pass competitionKey when available so per-competition
+                      // state is updated; legacy followedTeamIds is always
+                      // kept in sync inside the repository.
                       if (isFollowing) {
-                        await repo.unfollowTeam(user.uid, teamId);
+                        await repo.unfollowTeam(
+                          user.uid,
+                          teamId,
+                          competitionKey: team.competitionKey,
+                        );
                       } else {
-                        await repo.followTeam(user.uid, teamId);
+                        await repo.followTeam(
+                          user.uid,
+                          teamId,
+                          competitionKey: team.competitionKey,
+                        );
                       }
                     },
                   ),

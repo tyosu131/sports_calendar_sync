@@ -61,17 +61,58 @@ class UserRepository {
   }
 
   /// Add a team to the user's followed list.
-  Future<void> followTeam(String uid, String teamId) async {
-    await _users.doc(uid).update({
+  ///
+  /// When [competitionKey] is provided, the team is also added to
+  /// [UserProfile.favoriteTeamIdsByCompetition] for that competition, and
+  /// [UserProfile.selectedCompetitions] is updated accordingly.
+  /// The legacy [UserProfile.followedTeamIds] flat list is always kept in sync
+  /// so the existing `getCalendar` Cloud Function continues to work.
+  Future<void> followTeam(
+    String uid,
+    String teamId, {
+    String? competitionKey,
+  }) async {
+    final updates = <String, dynamic>{
+      // Legacy flat list — required by getCalendar Cloud Function.
       'followedTeamIds': FieldValue.arrayUnion([teamId]),
-    });
+    };
+
+    if (competitionKey != null) {
+      // Per-competition tracking (Phase 1+).
+      updates['favoriteTeamIdsByCompetition.$competitionKey'] =
+          FieldValue.arrayUnion([teamId]);
+      updates['selectedCompetitions'] =
+          FieldValue.arrayUnion([competitionKey]);
+    }
+
+    await _users.doc(uid).update(updates);
   }
 
   /// Remove a team from the user's followed list.
-  Future<void> unfollowTeam(String uid, String teamId) async {
-    await _users.doc(uid).update({
+  ///
+  /// When [competitionKey] is provided, the team is also removed from
+  /// [UserProfile.favoriteTeamIdsByCompetition] for that competition.
+  /// The legacy [UserProfile.followedTeamIds] flat list is always kept in sync.
+  Future<void> unfollowTeam(
+    String uid,
+    String teamId, {
+    String? competitionKey,
+  }) async {
+    final updates = <String, dynamic>{
+      // Legacy flat list — required by getCalendar Cloud Function.
       'followedTeamIds': FieldValue.arrayRemove([teamId]),
-    });
+    };
+
+    if (competitionKey != null) {
+      // Per-competition tracking (Phase 1+).
+      updates['favoriteTeamIdsByCompetition.$competitionKey'] =
+          FieldValue.arrayRemove([teamId]);
+      // Note: we intentionally do NOT remove the competitionKey from
+      // selectedCompetitions here — the user may still follow other teams in
+      // that competition, and removing it would require a read-then-write.
+    }
+
+    await _users.doc(uid).update(updates);
   }
 
   /// Sign out the current user.

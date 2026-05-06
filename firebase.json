@@ -1,1 +1,45 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"sports-calendar-sync-a4564","appId":"1:1070492584469:android:53a28feb534909c42d9c1c","fileOutput":"android/app/google-services.json"}},"ios":{"default":{"projectId":"sports-calendar-sync-a4564","appId":"1:1070492584469:ios:5b1f8ce3497accb42d9c1c","uploadDebugSymbols":false,"fileOutput":"ios/Runner/GoogleService-Info.plist"}},"macos":{"default":{"projectId":"sports-calendar-sync-a4564","appId":"1:1070492584469:ios:5b1f8ce3497accb42d9c1c","uploadDebugSymbols":false,"fileOutput":"macos/Runner/GoogleService-Info.plist"}},"dart":{"lib/firebase_options.dart":{"projectId":"sports-calendar-sync-a4564","configurations":{"android":"1:1070492584469:android:53a28feb534909c42d9c1c","ios":"1:1070492584469:ios:5b1f8ce3497accb42d9c1c","macos":"1:1070492584469:ios:5b1f8ce3497accb42d9c1c","web":"1:1070492584469:web:737fc437625067b52d9c1c","windows":"1:1070492584469:web:8c1cfae889ff08f92d9c1c"}}}}}}
+{
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "sports-calendar-sync-a4564",
+          "appId": "1:1070492584469:android:53a28feb534909c42d9c1c",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "sports-calendar-sync-a4564",
+          "appId": "1:1070492584469:ios:5b1f8ce3497accb42d9c1c",
+          "uploadDebugSymbols": false,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "macos": {
+        "default": {
+          "projectId": "sports-calendar-sync-a4564",
+          "appId": "1:1070492584469:ios:5b1f8ce3497accb42d9c1c",
+          "uploadDebugSymbols": false,
+          "fileOutput": "macos/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "sports-calendar-sync-a4564",
+          "configurations": {
+            "android": "1:1070492584469:android:53a28feb534909c42d9c1c",
+            "ios": "1:1070492584469:ios:5b1f8ce3497accb42d9c1c",
+            "macos": "1:1070492584469:ios:5b1f8ce3497accb42d9c1c",
+            "web": "1:1070492584469:web:737fc437625067b52d9c1c",
+            "windows": "1:1070492584469:web:8c1cfae889ff08f92d9c1c"
+          }
+        }
+      }
+    }
+  }
+}
