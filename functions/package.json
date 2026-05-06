@@ -7,7 +7,9 @@
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
-    "logs": "firebase functions:log"
+    "logs": "firebase functions:log",
+    "seed:j1": "node scripts/seedJ1Minimum.js",
+    "verify:j1": "node scripts/verifyJ1Minimum.js"
   },
   "engines": {
     "node": "20"
