@@ -2,7 +2,7 @@
 
 > Generated: 2026-05-07  
 > Based on: code inspection of all source files in `lib/` and `functions/src/`  
-> Build status: `flutter pub get` ✅ / `flutter build apk --debug` ✅ / `flutter build web` ✅ / `flutter analyze` 既存4警告
+> Build status: `flutter pub get` ✅ / `flutter build apk --debug` ✅ / `flutter build web` ✅ / `flutter analyze --no-pub` ✅
 
 ---
 
@@ -138,7 +138,6 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 - Blaze 化判断
 - `getCalendar` deploy
 - curl による `.ics` 実 URL 確認
-- `flutter analyze` の既存4警告修正
 - Cloud Functions / API-SPORTS sync は今後対応
 
 ---
@@ -223,14 +222,14 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 - `Content-Type: text/calendar; charset=utf-8` と `BEGIN:VCALENDAR` を確認
 - 対象 user profile と sample game 条件が合う場合、`BEGIN:VEVENT` を確認
 
-### Task 4: `flutter analyze` の既存4警告修正
-- 既存 warning / info を整理する
-- 動作確認済みの Phase 1.4B 実装と無関係な警告として別タスクで対応
-
-### Task 5: Cloud Functions / API-SPORTS sync
+### Task 4: Cloud Functions / API-SPORTS sync
 - API-SPORTS key 設定
 - `scheduledSyncFootball` / `triggerFootballSync` の deploy・動作確認
 - 実 API データで `games` が更新されることを確認
+
+### Task 5: 本番用 league/team seed 拡充
+- J1 以外、または J1 全チームの seed 方針を決める
+- API sync 前提の `leagues` / `teams` データを整備する
 
 ---
 
@@ -238,7 +237,7 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 
 ```
 error:   0
-warning/info: 4  — 既存警告
+warning/info: 0
 ```
 
-これらはアプリの動作に影響しない。Task 4 完了後に修正する。
+`flutter analyze --no-pub` は `No issues found!`。
