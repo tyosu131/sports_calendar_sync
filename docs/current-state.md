@@ -216,29 +216,32 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 
 ## Recommended Next 5 Tasks
 
-優先順（データ経路の確立を最優先とする）：
+優先順（Spark plan のまま Flutter + Firestore seed data で進める）：
 
-### Task 1: Blaze 化判断
-- Cloud Functions deploy の前提として Firebase project の Blaze 化が必要
-- Spark plan のままでは `getCalendar` の実 URL 確認まで進めない
+### Task 1: Jリーグ seed data 拡充方針決定
+- UI 表示は `Jリーグ`、内部 `competitionKey` は `football_j1` を維持する
+- まずは J1 全チームを seed する方針で進める
+- 将来 J2 / J3 を追加する場合は `football_j2` / `football_j3` として別 competition に追加する
 
-### Task 2: `getCalendar` deploy
-- `getCalendar` の current user schema 対応済み実装を Cloud Functions に反映する
-- deploy 後、Functions URL が 404 ではなく `.ics` を返すことを確認する
+### Task 2: J1 全チーム seed script 作成
+- `football_j1` のまま J1 全チームを `teams` に投入する script を作成する
+- `leagues/j1_league` は既存 seed と互換を保つ
+- seed script の J1 名称は維持し、汎用 `football_jleague` には rename しない
 
-### Task 3: curl による `.ics` 実 URL 確認
-- `https://asia-northeast1-sports-calendar-sync-a4564.cloudfunctions.net/getCalendar?uid=<uid>` を curl で確認
-- `Content-Type: text/calendar; charset=utf-8` と `BEGIN:VCALENDAR` を確認
-- 対象 user profile と sample game 条件が合う場合、`BEGIN:VEVENT` を確認
+### Task 3: J1 全チーム verify script 作成
+- J1 全チームが `competitionKey: football_j1` で取得できることを検証する
+- チーム検索用の prefix / keyword query が代表チームで通ることを確認する
+- 既存の `verifyJ1Minimum.js` とは別に、拡充 seed 用の検証を用意する
 
-### Task 4: Cloud Functions / API-SPORTS sync
-- API-SPORTS key 設定
-- `scheduledSyncFootball` / `triggerFootballSync` の deploy・動作確認
-- 実 API データで `games` が更新されることを確認
+### Task 4: Flutter UI で複数チーム検索・フォロー・ホーム表示確認
+- `Jリーグ` タブで複数チームが検索・一覧表示できることを確認する
+- 複数チームのフォロー / アンフォローを確認する
+- sample game を増やしてホーム画面で複数チームの表示を確認する
 
-### Task 5: 本番用 league/team seed 拡充
-- J1 以外、または J1 全チームの seed 方針を決める
-- API sync 前提の `leagues` / `teams` データを整備する
+### Task 5: team/game model の不足フィールド整理
+- J1 全チーム表示に必要な `Team` / `Game` フィールドを整理する
+- ロゴ、ホームスタジアム、順位・カテゴリ表示などの必要性を確認する
+- Cloud Functions deploy / `getCalendar` 実 URL 確認 / API-SPORTS sync は後回しにする
 
 ---
 
