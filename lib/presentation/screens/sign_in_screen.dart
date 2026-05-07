@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -25,18 +26,28 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
       _errorMessage = null;
     });
     try {
-      final googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) {
-        setState(() => _isLoading = false);
-        return;
+      UserCredential userCredential;
+
+      if (kIsWeb) {
+        // Web: use signInWithPopup (no google_sign_in package needed)
+        final provider = GoogleAuthProvider();
+        userCredential =
+            await FirebaseAuth.instance.signInWithPopup(provider);
+      } else {
+        // Android / iOS: use google_sign_in package
+        final googleUser = await GoogleSignIn().signIn();
+        if (googleUser == null) {
+          setState(() => _isLoading = false);
+          return;
+        }
+        final googleAuth = await googleUser.authentication;
+        final credential = GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
+        userCredential =
+            await FirebaseAuth.instance.signInWithCredential(credential);
       }
-      final googleAuth = await googleUser.authentication;
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-      final userCredential =
-          await FirebaseAuth.instance.signInWithCredential(credential);
 
       // Create Firestore profile if first sign-in
       final repo = ref.read(userRepositoryProvider);
@@ -48,7 +59,10 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
       if (mounted) context.go('/');
     } on FirebaseAuthException catch (e) {
-      setState(() => _errorMessage = e.message);
+      setState(
+          () => _errorMessage = '[${e.code}] ${e.message ?? e.toString()}');
+    } catch (e) {
+      setState(() => _errorMessage = e.toString());
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
