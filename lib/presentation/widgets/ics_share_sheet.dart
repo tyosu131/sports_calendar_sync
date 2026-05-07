@@ -107,7 +107,12 @@ class IcsShareSheet extends StatelessWidget {
             _ActionButton(
               icon: Icons.share,
               label: 'URLをシェア',
-              onTap: () => Share.share(icsUrl, subject: 'スポーツカレンダー購読URL'),
+              onTap: () => SharePlus.instance.share(
+                ShareParams(
+                  text: icsUrl,
+                  subject: 'スポーツカレンダー購読URL',
+                ),
+              ),
             ),
           ],
         ),
@@ -147,7 +152,6 @@ class _ActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return SizedBox(
       width: double.infinity,
       child: OutlinedButton.icon(
