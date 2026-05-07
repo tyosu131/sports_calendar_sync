@@ -116,9 +116,9 @@ export interface UserDoc {
   favoriteTeamIdsByCompetition?: Record<CompetitionKey, string[]>;
   /**
    * @deprecated Use favoriteTeamIdsByCompetition.
-   * Kept for the getCalendar Cloud Function which queries this field directly.
+   * Kept for backward compatibility with older user profiles.
    */
-  followedTeamIds: string[];
+  followedTeamIds?: string[];
   preferredLanguage: "ja" | "en";
   createdAt?: Timestamp;
 }

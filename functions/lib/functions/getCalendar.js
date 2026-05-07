@@ -66,7 +66,11 @@ exports.getCalendar = functions
         return;
     }
     const userData = userDoc.data();
-    let teamIds = userData.followedTeamIds ?? [];
+    const followedTeamIds = userData.followedTeamIds ?? [];
+    const favoriteTeamIds = userData.favoriteTeamIdsByCompetition ?
+        Object.values(userData.favoriteTeamIdsByCompetition).flat() :
+        [];
+    let teamIds = Array.from(new Set(followedTeamIds.length > 0 ? followedTeamIds : favoriteTeamIds));
     // If a specific teamId is requested, filter to just that team
     if (teamId) {
         if (!teamIds.includes(teamId)) {
