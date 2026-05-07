@@ -27,8 +27,8 @@ class SportsRegistry {
   static const List<SportDefinition> _definitions = [
     SportDefinition(
       competitionKey: 'football_j1',
-      displayNameJa: 'J1リーグ',
-      displayNameEn: 'J1 League',
+      displayNameJa: 'Jリーグ',
+      displayNameEn: 'J.League',
       sportCategory: 'football',
       sortOrder: 10,
       enabled: true,
