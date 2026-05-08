@@ -96,7 +96,8 @@ class TeamRepository {
   /// Two complementary strategies are combined and deduplicated by document ID:
   ///
   /// 1. `nameJa` prefix search — fast for Japanese prefix input (e.g. "鹿島").
-  ///    Upper bound uses U+F8FF so CJK characters are included in the range.
+  ///    Upper bound uses the maximum Unicode scalar suffix so CJK and
+  ///    full-width Latin characters are included in the range.
   ///
   /// 2. `searchKeywords` array-contains search — covers mid-string Japanese
   ///    matches (via aliases stored at seed/sync time) and English input.
@@ -110,11 +111,8 @@ class TeamRepository {
   }) async {
     if (query.isEmpty) return [];
 
-    // U+F8FF is used as the upper bound for prefix search so that CJK and
-    // other non-ASCII characters (which have code points > ASCII 'z') are
-    // included in the range.  Using plain 'z' would exclude any character
-    // whose code point is above U+007A (e.g. all Japanese kana/kanji).
-    final endQuery = '$query\uf8ff';
+    const maxUnicodeSuffix = '\uDBFF\uDFFF';
+    final endQuery = '$query$maxUnicodeSuffix';
 
     // Lowercase for searchKeywords matching (keywords are stored lowercase).
     final normalizedQuery = query.trim().toLowerCase();
