@@ -67,6 +67,7 @@ class Game {
     required this.timezone,
     required this.status,
     this.competitionKey,
+    this.competitionSeasonKey,
     this.homeTeamNameEn,
     this.awayTeamNameEn,
     this.homeTeamLogoUrl,
@@ -85,6 +86,12 @@ class Game {
   /// null when the Firestore document predates Phase 0 and the competition
   /// cannot be determined without ambiguity.
   final String? competitionKey;
+
+  /// Concrete competition season / tournament profile key.
+  ///
+  /// Example: "football_j1_2026_hyakunen". null for legacy documents that do
+  /// not yet carry season/tournament metadata.
+  final String? competitionSeasonKey;
 
   final String leagueId;
   final String homeTeamId;
@@ -137,6 +144,7 @@ class Game {
     return Game(
       id: docId,
       competitionKey: competitionKey,
+      competitionSeasonKey: data['competitionSeasonKey'] as String?,
       leagueId: data['leagueId'] as String,
       homeTeamId: data['homeTeamId'] as String,
       homeTeamNameJa: data['homeTeamNameJa'] as String,
@@ -167,6 +175,8 @@ class Game {
   Map<String, dynamic> toFirestore() {
     return {
       if (competitionKey != null) 'competitionKey': competitionKey,
+      if (competitionSeasonKey != null)
+        'competitionSeasonKey': competitionSeasonKey,
       // Legacy alias — kept so existing queries on `sportKey` still work.
       if (competitionKey != null) 'sportKey': competitionKey,
       'leagueId': leagueId,

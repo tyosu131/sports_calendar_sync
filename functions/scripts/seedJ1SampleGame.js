@@ -13,9 +13,15 @@
 'use strict';
 
 const { j1Teams } = require('./data/j1Teams');
+const {
+  CURRENT_J1_COMPETITION_SEASON_KEY,
+  getCompetitionSeasonProfile,
+} = require('./data/competitionSeasons');
 
 const J1_LEAGUE_ID = 'j1_league';
-const J1_COMPETITION_KEY = 'football_j1';
+const J1_COMPETITION_SEASON = getCompetitionSeasonProfile(CURRENT_J1_COMPETITION_SEASON_KEY);
+const J1_COMPETITION_KEY = J1_COMPETITION_SEASON.competitionKey;
+const J1_COMPETITION_SEASON_KEY = J1_COMPETITION_SEASON.competitionSeasonKey;
 const TIMEZONE = 'Asia/Tokyo';
 
 const sampleGameDefinitions = [
@@ -109,6 +115,7 @@ function buildSampleGameDocs({ timestampFromDate } = {}) {
       data: {
         leagueId: J1_LEAGUE_ID,
         competitionKey: J1_COMPETITION_KEY,
+        competitionSeasonKey: J1_COMPETITION_SEASON_KEY,
         sportKey: J1_COMPETITION_KEY,
         homeTeamId: home.id,
         homeTeamNameJa: home.nameJa,

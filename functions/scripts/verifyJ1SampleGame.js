@@ -13,10 +13,14 @@
 'use strict';
 
 const { buildSampleGameDocs } = require('./seedJ1SampleGame');
+const {
+  CURRENT_J1_COMPETITION_SEASON_KEY,
+} = require('./data/competitionSeasons');
 
 const REQUIRED_FIELDS = [
   'leagueId',
   'competitionKey',
+  'competitionSeasonKey',
   'sportKey',
   'homeTeamId',
   'homeTeamNameJa',
@@ -137,6 +141,7 @@ function validateDocShape(doc, now = new Date()) {
 
   allPassed = checkEqual(`${doc.id}.leagueId`, data.leagueId, 'j1_league') && allPassed;
   allPassed = checkEqual(`${doc.id}.competitionKey`, data.competitionKey, 'football_j1') && allPassed;
+  allPassed = checkEqual(`${doc.id}.competitionSeasonKey`, data.competitionSeasonKey, CURRENT_J1_COMPETITION_SEASON_KEY) && allPassed;
   allPassed = checkEqual(`${doc.id}.sportKey`, data.sportKey, 'football_j1') && allPassed;
   allPassed = checkEqual(`${doc.id}.timezone`, data.timezone, 'Asia/Tokyo') && allPassed;
   allPassed = checkEqual(`${doc.id}.status`, data.status, 'scheduled') && allPassed;
