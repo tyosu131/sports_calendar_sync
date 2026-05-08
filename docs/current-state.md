@@ -215,6 +215,8 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - `node functions/scripts/verifyCompetitionTeams.js football_j1` は修正後 PASS
 - current J1 team master review document 追加済み
   - `docs/current-j1-team-master-review.md`
+- Team / Game model gaps analysis document 追加済み
+  - `docs/team-game-model-gaps.md`
 - app-side team search 修正済み
   - `lib/data/repositories/team_repository.dart`
   - `lib/data/providers/team_providers.dart`
@@ -258,7 +260,7 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 現時点の active next tasks:
 
 - real game data coverage の検討
-- `Team` / `Game` model gaps の整理
+- `docs/team-game-model-gaps.md` に基づく real sync 前 must-have の優先順位決定
 - 他 competition への generic pipeline 展開
 
 後回し:
@@ -311,7 +313,7 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 
 | 不足フィールド | 現状 | 影響 |
 |---|---|---|
-| `homeTeamLogoUrl` / `awayTeamLogoUrl` | なし（`Team.logoUrl` を別途取得が必要） | `GameCard` でロゴを表示するには追加クエリが必要 |
+| `homeTeamLogoUrl` / `awayTeamLogoUrl` | `Game` model / J1 sample games / `football_adapter.ts` は対応済み | `GameCard` ではまだロゴを表示していない。詳細は `docs/team-game-model-gaps.md` を参照 |
 | `competitionRound` / `matchday` | なし | 「第○節」「ラウンド16」等の表示不可 |
 | `broadcastPlatforms` の実データ | 常に空配列 | 放送情報が一切表示されない |
 | `isNeutralVenue` | なし | 中立地開催の判定不可 |
@@ -342,9 +344,9 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 - 次は real game data をどう投入・更新するか検討する
 - follow / home logic の不具合ではなく、試合データ coverage の課題として扱う
 
-### Task 2: `Team` / `Game` model gaps を整理
-- real data で必要になる不足フィールドを整理する
-- ロゴ、節情報、放送情報などの扱いを確認する
+### Task 2: real sync 前 must-have fields の優先順位決定
+- `docs/team-game-model-gaps.md` に整理済みの gap を確認する
+- `competitionSeasonKey` / tournament profile、sync converter parity、status mapping、fixture ID compatibility を優先候補として扱う
 - Cloud Functions deploy / `getCalendar` 実 URL確認 / API-SPORTS sync は後回しにする
 
 ### Task 3: 他 competition への generic pipeline 展開
