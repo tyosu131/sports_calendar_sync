@@ -206,8 +206,16 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - `C大阪` → セレッソ大阪 OK
   - `ガンバ大阪` → ガンバ大阪 OK
   - `セレッソ大阪` → セレッソ大阪 OK
+  - `東京V` → 東京ヴェルディ OK
+  - `横浜FM` → 横浜Ｆ・マリノス OK
   - empty `Jリーグ` tab → 20 teams OK
-  - `東京V` / `横浜FM` は read-only query check では OK。manual UI confirmation は未記録
+- multiple team follow / unfollow は manual UI confirmation 済み
+- Home screen behavior は sample game 条件で確認済み
+  - 鹿島アントラーズ follow 時は `games/kashima_sample_001` が表示される
+  - 鹿島アントラーズ unfollow 時は sample game が消える
+  - 鹿島アントラーズ re-follow 時は sample game が再表示される
+  - 他 J1 チーム follow 時に試合が出ないのは sample games が鹿島分のみのため
+  - follow / home logic は現時点で broken ではなく、残課題は sample game / real game data coverage
 - API-SPORTS J1 team candidates inspection 済み
   - 2026 / 2025 teams endpoint は `Count: 0`
   - 2024 teams endpoint は 20 teams を返すが、current master としては採用しない
@@ -219,8 +227,8 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 
 現時点の active next tasks:
 
-- Flutter UI での `東京V` / `横浜FM` manual confirmation
-- Flutter UI での複数チームフォロー・ホーム表示確認
+- 複数チーム向け sample games / real game data coverage
+- `Team` / `Game` model gaps の整理
 
 後回し:
 
@@ -298,23 +306,24 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 
 優先順（Spark plan のまま Flutter + Firestore seed data で進める）：
 
-### Task 1: Flutter UI manual confirmation
-- `東京V` → 東京ヴェルディ
-- `横浜FM` → 横浜Ｆ・マリノス
+### Task 1: sample games / real game data coverage
+- J1 複数チームでホーム画面表示を確認するための sample games を追加するか判断する
+- 現在は `games/kashima_sample_001` のみ存在するため、鹿島以外の follow では試合が表示されない
+- これは follow / home logic の不具合ではなく、試合データ coverage の不足として扱う
 
-### Task 2: 複数チームフォロー・ホーム表示確認
-- 複数チームのフォロー / アンフォローを確認する
-- 複数チーム seed 後に Flutter UI で表示を確認する
-
-### Task 3: sample games / model gaps を検討
-- 複数チームのホーム表示確認に必要な sample games を検討する
-- `Team` / `Game` の不足フィールドを整理する
+### Task 2: `Team` / `Game` model gaps を整理
+- 複数チーム sample games または real data で必要になる不足フィールドを整理する
+- ロゴ、節情報、放送情報などの扱いを確認する
 - Cloud Functions deploy / `getCalendar` 実 URL確認 / API-SPORTS sync は後回しにする
 
-### Task 4: 他 competition への generic pipeline 展開
+### Task 3: 他 competition への generic pipeline 展開
 - NPB / MLB / NBA / Premier League などの team master data scaffold を検討する
 - competition ごとの data module を `competitionRegistry.js` に追加する
 - league-specific な season / tournament membership は team master と分離して扱う
+
+### Task 4: Flutter UI polish / regression check
+- J1 team search / follow / unfollow / home sample-game behavior は確認済み
+- 今後 sample games を追加した後に主要検索語と follow 表示を再確認する
 
 ### Task 5: Cloud Functions / API-SPORTS sync は後回し維持
 - Blaze 化判断
