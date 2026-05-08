@@ -9,7 +9,9 @@
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log",
     "seed:j1": "node scripts/seedJ1Minimum.js",
-    "verify:j1": "node scripts/verifyJ1Minimum.js"
+    "verify:j1": "node scripts/verifyJ1Minimum.js",
+    "seed:j1:teams": "node scripts/seedJ1Teams.js",
+    "verify:j1:teams": "node scripts/verifyJ1Teams.js"
   },
   "engines": {
     "node": "20"
