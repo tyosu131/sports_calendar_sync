@@ -217,6 +217,9 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - `docs/current-j1-team-master-review.md`
 - Team / Game model gaps analysis document 追加済み
   - `docs/team-game-model-gaps.md`
+- real sync implementation priority plan 追加済み
+  - `docs/real-sync-priority-plan.md`
+  - first implementation target は minimal `competitionSeasonKey` / tournament profile foundation
 - app-side team search 修正済み
   - `lib/data/repositories/team_repository.dart`
   - `lib/data/providers/team_providers.dart`
@@ -259,8 +262,8 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 
 現時点の active next tasks:
 
-- real game data coverage の検討
-- `docs/team-game-model-gaps.md` に基づく real sync 前 must-have の優先順位決定
+- `docs/real-sync-priority-plan.md` に基づく minimal `competitionSeasonKey` / tournament profile foundation の実装検討
+- explicit API season handling の設計
 - 他 competition への generic pipeline 展開
 
 後回し:
@@ -339,26 +342,29 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 
 優先順（Spark plan のまま Flutter + Firestore seed data で進める）：
 
-### Task 1: real game data coverage
-- J1 複数チームの sample games による Home 表示確認は完了
-- 次は real game data をどう投入・更新するか検討する
-- follow / home logic の不具合ではなく、試合データ coverage の課題として扱う
+### Task 1: minimal `competitionSeasonKey` / tournament profile foundation
+- `docs/real-sync-priority-plan.md` の first implementation target
+- J.League 2026 special competition / 2026-27 season complexity に備える
+- `competitionKey` は `football_j1` のまま維持し、API season を calendar year から切り離す
 
-### Task 2: real sync 前 must-have fields の優先順位決定
-- `docs/team-game-model-gaps.md` に整理済みの gap を確認する
-- `competitionSeasonKey` / tournament profile、sync converter parity、status mapping、fixture ID compatibility を優先候補として扱う
+### Task 2: explicit API season handling
+- competition season / tournament profile から `apiSeason` を参照する設計にする
+- `syncFootball.ts` の `new Date().getFullYear()` 依存を後続実装で置き換える
 - Cloud Functions deploy / `getCalendar` 実 URL確認 / API-SPORTS sync は後回しにする
 
-### Task 3: 他 competition への generic pipeline 展開
+### Task 3: sync converter parity / real game verification の設計
+- `football_adapter.ts` を single conversion point に寄せる
+- sample game と real sync の GameDoc shape を揃える
+- real game data verification script を後続候補として扱う
+
+### Task 4: 他 competition への generic pipeline 展開
 - NPB / MLB / NBA / Premier League などの team master data scaffold を検討する
 - competition ごとの data module を `competitionRegistry.js` に追加する
 - league-specific な season / tournament membership は team master と分離して扱う
 
-### Task 4: Flutter UI polish / regression check
+### Task 5: Flutter UI polish / deferred backend work
 - J1 team search / follow / unfollow / home sample-game behavior / My Teams summary は確認済み
 - 今後 real game data を追加した後に主要検索語と follow 表示を再確認する
-
-### Task 5: Cloud Functions / API-SPORTS sync は後回し維持
 - Blaze 化判断
 - `getCalendar` deploy / curl による `.ics` 実 URL確認
 - API-SPORTS sync の deploy・動作確認
