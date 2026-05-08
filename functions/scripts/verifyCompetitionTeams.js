@@ -16,6 +16,8 @@
 const { generateSearchKeywords } = require('./searchKeywords');
 const { getCompetitionTeamData, listCompetitionKeys } = require('./data/competitionRegistry');
 
+const MAX_UNICODE_SUFFIX = '\uDBFF\uDFFF';
+
 function parseArgs(argv) {
   const competitionKey = argv.find((arg) => !arg.startsWith('--'));
   return {
@@ -100,6 +102,17 @@ function expectedKeywords(team) {
     nameEn: team.nameEn,
     aliases: team.aliases,
   });
+}
+
+function representativeKeyword(team) {
+  const keywords = expectedKeywords(team);
+  if (keywords.includes(team.nameJa)) {
+    return team.nameJa;
+  }
+  if (keywords.length === 0) {
+    throw new Error(`searchKeywords would be empty for team: ${team.id}`);
+  }
+  return keywords[keywords.length - 1];
 }
 
 function verifyInMemory({ competitionKey, teams, teamsTodo }) {
@@ -192,13 +205,13 @@ async function verifyQueries({ db, competition, teams }) {
 
   for (const team of teams) {
     const namePrefix = team.nameJa.slice(0, Math.min(2, team.nameJa.length));
-    const keyword = team.aliases[0] || team.nameEn;
+    const keyword = representativeKeyword(team);
 
     console.log(`\nQuery: teams nameJa prefix "${namePrefix}" + competitionKey ...`);
     try {
       const snap = await db.collection('teams')
         .where('nameJa', '>=', namePrefix)
-        .where('nameJa', '<', `${namePrefix}\uf8ff`)
+        .where('nameJa', '<', `${namePrefix}${MAX_UNICODE_SUFFIX}`)
         .where('competitionKey', '==', competition.competitionKey)
         .limit(20)
         .get();
@@ -208,11 +221,11 @@ async function verifyQueries({ db, competition, teams }) {
       allPassed = false;
     }
 
-    console.log(`\nQuery: teams searchKeywords array-contains "${keyword}" + competitionKey ...`);
+    console.log(`\nQuery: teams searchKeywords array-contains generated keyword "${keyword}" + competitionKey ...`);
     try {
       const snap = await db.collection('teams')
         .where('competitionKey', '==', competition.competitionKey)
-        .where('searchKeywords', 'array-contains', keyword.toLowerCase())
+        .where('searchKeywords', 'array-contains', keyword)
         .limit(20)
         .get();
       allPassed = checkQueryContainsAll(`keyword query for ${team.id}`, snap.docs, [team.id]) && allPassed;
