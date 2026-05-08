@@ -60,6 +60,35 @@ function checkExists(label, exists) {
   return check(label, exists, exists ? 'document exists' : 'document MISSING');
 }
 
+function checkQueryContainsAll(label, docs, expectedIds) {
+  const actualIds = docs.map((doc) => doc.id);
+  const missing = expectedIds.filter((id) => !actualIds.includes(id));
+  return check(
+    label,
+    missing.length === 0,
+    missing.length === 0
+      ? `all expected docs found (${actualIds.join(', ')})`
+      : `missing ${JSON.stringify(missing)} (got ${JSON.stringify(actualIds)})`,
+  );
+}
+
+function chunkArray(values, size) {
+  const chunks = [];
+  for (let i = 0; i < values.length; i += size) {
+    chunks.push(values.slice(i, i + size));
+  }
+  return chunks;
+}
+
+function coveredTeamIds(docs) {
+  const ids = new Set();
+  for (const doc of docs) {
+    ids.add(doc.data.homeTeamId);
+    ids.add(doc.data.awayTeamId);
+  }
+  return Array.from(ids);
+}
+
 function startTimeDate(value) {
   if (value instanceof Date) return value;
   if (typeof value === 'string') return new Date(value);
@@ -161,6 +190,54 @@ function validatePlannedDocs(docs) {
   return allPassed;
 }
 
+async function fetchUpcomingGamesForFollowedTeams({ db, teamIds, nowTimestamp, limit = 50 }) {
+  const docsById = new Map();
+
+  for (const chunk of chunkArray(teamIds, 10)) {
+    const homeSnap = await db.collection('games')
+      .where('homeTeamId', 'in', chunk)
+      .where('startTimeUTC', '>=', nowTimestamp)
+      .orderBy('startTimeUTC')
+      .limit(limit)
+      .get();
+    console.log(`  [INFO] homeTeamId in [${chunk.join(', ')}] returned ${homeSnap.docs.length} docs`);
+
+    const awaySnap = await db.collection('games')
+      .where('awayTeamId', 'in', chunk)
+      .where('startTimeUTC', '>=', nowTimestamp)
+      .orderBy('startTimeUTC')
+      .limit(limit)
+      .get();
+    console.log(`  [INFO] awayTeamId in [${chunk.join(', ')}] returned ${awaySnap.docs.length} docs`);
+
+    for (const doc of [...homeSnap.docs, ...awaySnap.docs]) {
+      docsById.set(doc.id, doc);
+    }
+  }
+
+  return Array.from(docsById.values())
+    .sort((a, b) => startTimeDate(a.data().startTimeUTC) - startTimeDate(b.data().startTimeUTC))
+    .slice(0, limit);
+}
+
+async function verifyMultiFollowQuery({ db, plannedDocs, nowTimestamp }) {
+  const expectedIds = plannedDocs.map((doc) => doc.id);
+  const teamIds = coveredTeamIds(plannedDocs);
+
+  console.log('\n=== Section 2: Multi-follow home-screen query checks ===');
+  console.log(`Followed team IDs: ${teamIds.join(', ')}`);
+  console.log('Query shape mirrors GameRepository.fetchUpcomingGamesForTeams:');
+  console.log('  homeTeamId in chunk OR awayTeamId in chunk, startTimeUTC >= now, orderBy startTimeUTC, limit 50');
+  console.log('  status filter: none');
+
+  const docs = await fetchUpcomingGamesForFollowedTeams({ db, teamIds, nowTimestamp });
+  return checkQueryContainsAll(
+    'merged followed-team query returns planned sample games',
+    docs,
+    expectedIds,
+  );
+}
+
 async function verifyFirestore() {
   const admin = require('firebase-admin');
   const serviceAccount = require('../serviceAccountKey.json');
@@ -206,6 +283,12 @@ async function verifyFirestore() {
         awaySnap.docs.some((candidate) => candidate.id === planned.id),
       ) && allPassed;
     }
+
+    allPassed = await verifyMultiFollowQuery({
+      db,
+      plannedDocs,
+      nowTimestamp,
+    }) && allPassed;
 
     return allPassed;
   } finally {
