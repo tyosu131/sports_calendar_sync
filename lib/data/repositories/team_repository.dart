@@ -62,6 +62,40 @@ class TeamRepository {
         .toList();
   }
 
+  /// Fetch teams, optionally filtered by competition.
+  ///
+  /// null = all known teams.
+  Future<List<Team>> fetchTeams({String? competitionKey}) async {
+    if (competitionKey == null) {
+      final snapshot = await _teams
+          .orderBy('nameJa')
+          .limit(AppConstants.defaultPageSize)
+          .get();
+      return snapshot.docs
+          .map((doc) => Team.fromFirestore(doc.data(), doc.id))
+          .toList();
+    }
+
+    final primarySnap = await _teams
+        .where('competitionKey', isEqualTo: competitionKey)
+        .limit(AppConstants.defaultPageSize)
+        .get();
+    final legacySnap = await _teams
+        .where('sportKey', isEqualTo: competitionKey)
+        .limit(AppConstants.defaultPageSize)
+        .get();
+
+    final seen = <String>{};
+    final results = <Team>[];
+    for (final doc in [...primarySnap.docs, ...legacySnap.docs]) {
+      if (seen.add(doc.id)) {
+        results.add(Team.fromFirestore(doc.data(), doc.id));
+      }
+    }
+    results.sort((a, b) => a.nameJa.compareTo(b.nameJa));
+    return results;
+  }
+
   /// Fetch a single team by ID.
   Future<Team?> fetchTeam(String teamId) async {
     final doc = await _teams.doc(teamId).get();
@@ -109,17 +143,19 @@ class TeamRepository {
     String query, {
     String? competitionKey,
   }) async {
-    if (query.isEmpty) return [];
+    final trimmedQuery = query.trim();
+    if (trimmedQuery.isEmpty) {
+      return fetchTeams(competitionKey: competitionKey);
+    }
 
     const maxUnicodeSuffix = '\uDBFF\uDFFF';
-    final endQuery = '$query$maxUnicodeSuffix';
+    final endQuery = '$trimmedQuery$maxUnicodeSuffix';
 
-    // Lowercase for searchKeywords matching (keywords are stored lowercase).
-    final normalizedQuery = query.trim().toLowerCase();
+    final keywordQueries = _searchKeywordQueries(trimmedQuery);
 
     Query<Map<String, dynamic>> nameFilter(Query<Map<String, dynamic>> base) =>
         base
-            .where('nameJa', isGreaterThanOrEqualTo: query)
+            .where('nameJa', isGreaterThanOrEqualTo: trimmedQuery)
             .where('nameJa', isLessThan: endQuery);
 
     // Helper: merge docs from multiple snapshots, deduplicate by doc ID,
@@ -148,12 +184,19 @@ class TeamRepository {
           .get();
 
       // 2. searchKeywords array-contains search (no composite index needed).
-      final kwSnap = await _teams
-          .where('searchKeywords', arrayContains: normalizedQuery)
-          .limit(AppConstants.defaultPageSize)
-          .get();
+      final kwSnaps = await Future.wait(
+        keywordQueries.map(
+          (keyword) => _teams
+              .where('searchKeywords', arrayContains: keyword)
+              .limit(AppConstants.defaultPageSize)
+              .get(),
+        ),
+      );
 
-      return mergeSnapshots([prefixSnap.docs, kwSnap.docs]);
+      return mergeSnapshots([
+        prefixSnap.docs,
+        ...kwSnaps.map((snap) => snap.docs),
+      ]);
     }
 
     // Competition-filtered search.
@@ -170,25 +213,57 @@ class TeamRepository {
         .limit(AppConstants.defaultPageSize)
         .get();
 
-    // 2a. searchKeywords — primary (competitionKey field).
-    final kwPrimarySnap = await _teams
-        .where('competitionKey', isEqualTo: competitionKey)
-        .where('searchKeywords', arrayContains: normalizedQuery)
-        .limit(AppConstants.defaultPageSize)
-        .get();
-
-    // 2b. searchKeywords — legacy fallback (sportKey field).
-    final kwLegacySnap = await _teams
-        .where('sportKey', isEqualTo: competitionKey)
-        .where('searchKeywords', arrayContains: normalizedQuery)
-        .limit(AppConstants.defaultPageSize)
-        .get();
+    // 2. searchKeywords — primary and legacy fallback.
+    final kwPrimarySnaps = await Future.wait(
+      keywordQueries.map(
+        (keyword) => _teams
+            .where('competitionKey', isEqualTo: competitionKey)
+            .where('searchKeywords', arrayContains: keyword)
+            .limit(AppConstants.defaultPageSize)
+            .get(),
+      ),
+    );
+    final kwLegacySnaps = await Future.wait(
+      keywordQueries.map(
+        (keyword) => _teams
+            .where('sportKey', isEqualTo: competitionKey)
+            .where('searchKeywords', arrayContains: keyword)
+            .limit(AppConstants.defaultPageSize)
+            .get(),
+      ),
+    );
 
     return mergeSnapshots([
       prefixPrimarySnap.docs,
       prefixLegacySnap.docs,
-      kwPrimarySnap.docs,
-      kwLegacySnap.docs,
+      ...kwPrimarySnaps.map((snap) => snap.docs),
+      ...kwLegacySnaps.map((snap) => snap.docs),
     ]);
+  }
+
+  List<String> _searchKeywordQueries(String query) {
+    final asciiNormalized = _normalizeAsciiWidth(query);
+    return {
+      query,
+      query.toLowerCase(),
+      query.toUpperCase(),
+      asciiNormalized,
+      asciiNormalized.toLowerCase(),
+      asciiNormalized.toUpperCase(),
+    }.where((value) => value.isNotEmpty).toList();
+  }
+
+  String _normalizeAsciiWidth(String value) {
+    final buffer = StringBuffer();
+    for (final codePoint in value.runes) {
+      if (codePoint == 0x3000) {
+        buffer.writeCharCode(0x20);
+      } else if (codePoint >= 0xFF01 && codePoint <= 0xFF5E) {
+        buffer.writeCharCode(codePoint - 0xFEE0);
+      } else {
+        buffer.writeCharCode(codePoint);
+      }
+    }
+    return buffer.toString();
   }
 }

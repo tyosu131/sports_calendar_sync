@@ -49,7 +49,6 @@ final teamSearchCompetitionKeyProvider = StateProvider<String?>((ref) => null);
 /// Search results scoped to the current query and active competition tab.
 final teamSearchResultsProvider = FutureProvider<List<Team>>((ref) async {
   final query = ref.watch(teamSearchQueryProvider);
-  if (query.isEmpty) return [];
   final competitionKey = ref.watch(teamSearchCompetitionKeyProvider);
   return ref
       .watch(teamRepositoryProvider)

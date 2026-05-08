@@ -104,19 +104,7 @@ class _TeamSearchScreenState extends ConsumerState<TeamSearchScreen>
           ),
         ),
       ),
-      body: ref.watch(teamSearchQueryProvider).isNotEmpty
-          ? _SearchResults()
-          : TabBarView(
-              controller: _tabController,
-              children: [
-                // "All" tab: no competition filter
-                const _LeagueBrowser(competitionKey: null),
-                // One tab per enabled competition
-                ..._competitions.map(
-                  (s) => _LeagueBrowser(competitionKey: s.competitionKey),
-                ),
-              ],
-            ),
+      body: _SearchResults(),
     );
   }
 }
@@ -165,89 +153,6 @@ class _SearchResults extends ConsumerWidget {
                   );
                 }
               },
-            );
-          },
-        );
-      },
-    );
-  }
-}
-
-/// Browses leagues and their teams for a given competition.
-class _LeagueBrowser extends ConsumerWidget {
-  const _LeagueBrowser({this.competitionKey});
-
-  /// null = show all competitions.
-  final String? competitionKey;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final leaguesAsync = ref.watch(leaguesByCompetitionProvider(competitionKey));
-    final followedIds = ref.watch(followedTeamIdsProvider);
-    final user = ref.watch(currentUserProvider);
-
-    return leaguesAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('エラー: $e')),
-      data: (leagues) {
-        if (leagues.isEmpty) {
-          return const Center(child: Text('リーグが見つかりませんでした'));
-        }
-        return ListView.builder(
-          itemCount: leagues.length,
-          itemBuilder: (context, index) {
-            final league = leagues[index];
-            return ExpansionTile(
-              leading: league.logoUrl != null
-                  ? Image.network(league.logoUrl!, width: 32, height: 32)
-                  : const Icon(Icons.sports),
-              title: Text(league.nameJa),
-              subtitle: Text(league.nameEn),
-              children: [
-                Consumer(
-                  builder: (context, ref, _) {
-                    final teamsAsync =
-                        ref.watch(teamsByLeagueProvider(league.id));
-                    return teamsAsync.when(
-                      loading: () => const Padding(
-                        padding: EdgeInsets.all(16),
-                        child: CircularProgressIndicator(),
-                      ),
-                      error: (e, _) => Text('エラー: $e'),
-                      data: (teams) => Column(
-                        children: teams.map((team) {
-                          final isFollowing = followedIds.contains(team.id);
-                          return TeamListTile(
-                            team: team,
-                            isFollowing: isFollowing,
-                            onTap: () => context.push('/team/${team.id}'),
-                            onFollowToggle: () async {
-                              if (user == null) {
-                                context.push('/signin');
-                                return;
-                              }
-                              final repo = ref.read(userRepositoryProvider);
-                              if (isFollowing) {
-                                await repo.unfollowTeam(
-                                  user.uid,
-                                  team.id,
-                                  competitionKey: team.competitionKey,
-                                );
-                              } else {
-                                await repo.followTeam(
-                                  user.uid,
-                                  team.id,
-                                  competitionKey: team.competitionKey,
-                                );
-                              }
-                            },
-                          );
-                        }).toList(),
-                      ),
-                    );
-                  },
-                ),
-              ],
             );
           },
         );
