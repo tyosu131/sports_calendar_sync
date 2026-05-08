@@ -219,7 +219,18 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - `docs/team-game-model-gaps.md`
 - real sync implementation priority plan 追加済み
   - `docs/real-sync-priority-plan.md`
-  - first implementation target は minimal `competitionSeasonKey` / tournament profile foundation
+- minimal `competitionSeasonKey` / tournament profile foundation 実装済み
+  - commit: `32e7c99 Add J1 competition season foundation`
+  - `functions/scripts/data/competitionSeasons.js` 追加済み
+  - current J1 profile: `football_j1_2026_hyakunen`
+  - `seedJ1SampleGame.js` は `competitionSeasonKey` を write する
+  - `verifyJ1SampleGame.js` は `competitionSeasonKey` を required field として verify する
+  - Flutter `Game` model は optional `competitionSeasonKey` を backward compatible に read/write する
+  - actual `node functions/scripts/seedJ1SampleGame.js` により 4 J1 sample games を再write済み
+  - actual `node functions/scripts/verifyJ1SampleGame.js` は PASS
+  - multi-follow home-screen query check は PASS
+  - `flutter analyze --no-pub` は `No issues found!`
+  - validation 後の `git status --short` は clean
 - app-side team search 修正済み
   - `lib/data/repositories/team_repository.dart`
   - `lib/data/providers/team_providers.dart`
@@ -262,8 +273,11 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 
 現時点の active next tasks:
 
-- `docs/real-sync-priority-plan.md` に基づく minimal `competitionSeasonKey` / tournament profile foundation の実装検討
 - explicit API season handling の設計
+- syncFootball converter parity / `football_adapter.ts` usage
+- `externalFixtureId` / `rapidApiFixtureId` compatibility
+- API team ID → internal team ID mapping
+- status mapping verification
 - 他 competition への generic pipeline 展開
 
 後回し:
@@ -342,20 +356,20 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 
 優先順（Spark plan のまま Flutter + Firestore seed data で進める）：
 
-### Task 1: minimal `competitionSeasonKey` / tournament profile foundation
-- `docs/real-sync-priority-plan.md` の first implementation target
-- J.League 2026 special competition / 2026-27 season complexity に備える
-- `competitionKey` は `football_j1` のまま維持し、API season を calendar year から切り離す
-
-### Task 2: explicit API season handling
+### Task 1: explicit API season handling
 - competition season / tournament profile から `apiSeason` を参照する設計にする
 - `syncFootball.ts` の `new Date().getFullYear()` 依存を後続実装で置き換える
 - Cloud Functions deploy / `getCalendar` 実 URL確認 / API-SPORTS sync は後回しにする
 
-### Task 3: sync converter parity / real game verification の設計
+### Task 2: sync converter parity / `football_adapter.ts` usage
 - `football_adapter.ts` を single conversion point に寄せる
 - sample game と real sync の GameDoc shape を揃える
-- real game data verification script を後続候補として扱う
+- `competitionKey` / `competitionSeasonKey` / team logos / English names / fixture IDs を real sync に反映する
+
+### Task 3: fixture ID / team ID / status mapping verification
+- `externalFixtureId` / `rapidApiFixtureId` compatibility を維持する
+- API team ID を internal team ID に厳密に map し、placeholder team ID を避ける
+- API-SPORTS status → app `GameStatus` mapping を verify する
 
 ### Task 4: 他 competition への generic pipeline 展開
 - NPB / MLB / NBA / Premier League などの team master data scaffold を検討する
