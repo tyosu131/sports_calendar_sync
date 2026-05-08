@@ -12,6 +12,8 @@
     "verify:j1": "node scripts/verifyJ1Minimum.js",
     "seed:j1:teams": "node scripts/seedJ1Teams.js",
     "verify:j1:teams": "node scripts/verifyJ1Teams.js",
+    "seed:teams": "node scripts/seedCompetitionTeams.js",
+    "verify:teams": "node scripts/verifyCompetitionTeams.js",
     "fetch:j1:teams": "node scripts/fetchJ1TeamsFromApiSports.js"
   },
   "engines": {
