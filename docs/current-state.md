@@ -368,6 +368,27 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - 実 API-SPORTS API call は未実行
   - `j2Teams.js` / `j3Teams.js` への投入はまだ不要
   - Firestore write / non-dry seed / API sync / deploy は引き続き deferred
+- J2 / J3 API-SPORTS lookup evidence documented
+  - commit: `36d2b4b Record J2 J3 API lookup evidence`
+  - updated
+    - `docs/current-j2-j3-season-membership-review.md`
+  - API-SPORTS league discovery succeeded for Japan / 2024
+  - J1 League externalLeagueId: 98
+  - J2 League externalLeagueId: 99
+  - J3 League externalLeagueId: 100
+  - Japan Football League externalLeagueId: 497
+  - Candidate rows with API evidence found: 40
+  - Direct / near-direct evidence rows: 29
+  - Name variance review rows: 11
+  - API-SPORTS IDs verified enough for documentation evidence: 40
+  - Logo URLs found: 40
+  - Rows ready for seed data: 0
+  - `seedable` は全件 `no`
+  - `api-lookup-name-variance-review` rows は seedable 前に review が必要
+  - tracker rows are API lookup evidence only
+  - confirmed `/teams/{id}` documents ではない
+  - `j2Teams.js` / `j3Teams.js` への投入はまだ不要
+  - Firestore write / non-dry seed / API sync / deploy は引き続き deferred
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -492,10 +513,10 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 
 現時点の active next tasks:
 
-- Present exact `fetchJapanFootballTeamsFromApiSports.js` commands and reasons before any actual J2 / J3 API-SPORTS lookup
-- Run approved lookup only after explicit approval
-- Keep the API-SPORTS verification tracker `not-started` until approved lookup evidence is collected
-- Only after stable identity + API / logo verification, consider adding confirmed entries to `j2Teams.js` / `j3Teams.js`
+- Review the 11 `api-lookup-name-variance-review` rows before treating API evidence as seedable
+- Prepare the confirmed team module criteria for J2 / J3 without writing entries yet
+- Keep candidate internal team IDs as documentation-only review candidates until stable identity + API evidence + logo evidence are approved together
+- Do not create confirmed `/teams/{id}` documents or add entries to `j2Teams.js` / `j3Teams.js` yet
 - Keep Firestore write / non-dry seed / API sync / deploy deferred
 
 後回し:
@@ -580,18 +601,18 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 優先順（Spark plan のまま Flutter + Firestore seed data で進める）：
 
 ### Task 1: API / logo verification for J2 / J3 stable identities
-- `functions/scripts/fetchJapanFootballTeamsFromApiSports.js` を使う exact command と理由を提示する
-- 実 API call は approval 後にのみ実行する
-- API-SPORTS team ID / logo URL は separate lookup / verify 後にのみ seedable data にする
-- `docs/current-j2-j3-season-membership-review.md` の `API-SPORTS Verification Tracker` は approved evidence が揃うまで `not-started` / `TBD` / `no` を維持する
-- stable identity + API / logo verification が揃うまで `j2Teams.js` / `j3Teams.js` は empty のまま維持する
+- `docs/current-j2-j3-season-membership-review.md` に 40件分の API-SPORTS lookup evidence は記録済み
+- `api-lookup-name-variance-review` の 11件を seedable 前に確認する
+- API-SPORTS team ID / logo URL evidence は documentation evidence であり、confirmed `/teams/{id}` documents ではない
+- stable identity + API evidence + logo evidence が承認されるまで `j2Teams.js` / `j3Teams.js` は empty のまま維持する
 - season membership は stable team IDs confirmed 後に separate data として追加する
 - Firestore write / non-dry seed / API sync / deploy は行わない
 
 ### Task 2: Confirmed J2 / J3 team module preparation
-- stable identity + API / logo verification が完了した club のみ `j2Teams.js` / `j3Teams.js` への confirmed entry 候補にする
+- name variance review と confirmed team module criteria を先に整理する
+- stable identity + API / logo verification が承認済みの club のみ `j2Teams.js` / `j3Teams.js` への confirmed entry 候補にする
 - candidate IDs は confirmed `/teams/{id}` documents ではなく、seed data でもない状態を維持する
-- Firestore write / non-dry seed は別 approval まで行わない
+- `j2Teams.js` / `j3Teams.js` への投入、Firestore write、non-dry seed は別 approval まで行わない
 
 ### Task 3: 他 competition への generic pipeline 展開
 - Premier League / LaLiga / Serie A / Bundesliga / Ligue 1 / UEFA competitions などの team master data scaffold を検討する
