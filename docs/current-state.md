@@ -264,6 +264,20 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - `npm --prefix functions run build` は PASS
   - `flutter analyze --no-pub` は `No issues found!`
   - `rg` scan で `functions/src` / `functions/scripts` / `lib` に `football_team_` は検出されていない
+- football status mapping verification 実装済み
+  - commit: `eea5078 Add football status mapping verification`
+  - `functions/scripts/verifyFootballStatusMapping.js` 追加済み
+  - API-SPORTS football status short code mapping を verify 済み
+    - `TBD`, `NS` → `scheduled`
+    - `1H`, `HT`, `2H`, `ET`, `BT`, `P`, `SUSP`, `INT`, `LIVE` → `live`
+    - `FT`, `AET`, `PEN` → `finished`
+    - `PST` → `postponed`
+    - `CANC`, `ABD`, `AWD`, `WO` → `cancelled`
+    - unknown fallback → `scheduled`
+  - `mapFootballStatus()` の source change は不要
+  - `npm --prefix functions run build` は PASS
+  - `node functions/scripts/verifyFootballStatusMapping.js` は PASS
+  - `flutter analyze --no-pub` は `No issues found!`
 - app-side team search 修正済み
   - `lib/data/repositories/team_repository.dart`
   - `lib/data/providers/team_providers.dart`
@@ -306,7 +320,6 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 
 現時点の active next tasks:
 
-- status mapping verification
 - real game data verification script
 - 他 competition への generic pipeline 展開
 
@@ -386,25 +399,21 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 
 優先順（Spark plan のまま Flutter + Firestore seed data で進める）：
 
-### Task 1: status mapping verification
-- `externalFixtureId` / `rapidApiFixtureId` compatibility を維持する
-- API-SPORTS status → app `GameStatus` mapping を verify する
-
-### Task 2: real game data verification script
+### Task 1: real game data verification script
 - real sync data 用の read-only / dry-run verification script を追加する
 - mapped team IDs、required fields、fixture ID compatibility、home-screen query behavior を確認する
 - Cloud Functions deploy / `getCalendar` 実 URL確認 / API-SPORTS sync は後回しにする
 
-### Task 3: 他 competition への generic pipeline 展開
+### Task 2: 他 competition への generic pipeline 展開
 - NPB / MLB / NBA / Premier League などの team master data scaffold を検討する
 - competition ごとの data module を `competitionRegistry.js` に追加する
 - league-specific な season / tournament membership は team master と分離して扱う
 
-### Task 4: Flutter UI polish / regression check
+### Task 3: Flutter UI polish / regression check
 - J1 team search / follow / unfollow / home sample-game behavior / My Teams summary は確認済み
 - 今後 real game data を追加した後に主要検索語と follow 表示を再確認する
 
-### Task 5: deferred backend work
+### Task 4: deferred backend work
 - Blaze 化判断
 - `getCalendar` deploy / curl による `.ics` 実 URL確認
 - API-SPORTS sync の deploy・動作確認
