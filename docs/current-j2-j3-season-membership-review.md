@@ -39,69 +39,130 @@ Source confirmation notes:
 - `logoUrl`: `TBD` until logo source is verified.
 - `seedable`: always `no` in this review document.
 
+## Stable Internal Team ID Mapping Summary
+
+Compared against existing confirmed stable team identities in `functions/scripts/data/j1Teams.js`.
+
+- Total membership rows: 40
+- Matched to existing stable J1 team master: 0
+- Requiring new stable internal team ID review: 40
+- Existing stable team IDs reused: none
+- `externalTeamId`: remains `TBD` for every row
+- `logoUrl`: remains `TBD` for every row
+- `seedable`: remains `no` for every row
+
+Matched existing team IDs:
+
+- None
+
+Unresolved clubs requiring stable identity review:
+
+- ベガルタ仙台
+- 湘南ベルマーレ
+- ブラウブリッツ秋田
+- ＳＣ相模原
+- 横浜ＦＣ
+- モンテディオ山形
+- ザスパ群馬
+- 栃木シティ
+- 栃木ＳＣ
+- ヴァンラーレ八戸
+- ヴァンフォーレ甲府
+- いわきＦＣ
+- ＲＢ大宮アルディージャ
+- 北海道コンサドーレ札幌
+- 藤枝ＭＹＦＣ
+- ＦＣ岐阜
+- 松本山雅ＦＣ
+- ジュビロ磐田
+- 福島ユナイテッドＦＣ
+- ＡＣ長野パルセイロ
+- カターレ富山
+- 徳島ヴォルティス
+- アルビレックス新潟
+- 高知ユナイテッドＳＣ
+- 愛媛ＦＣ
+- ツエーゲン金沢
+- ＦＣ大阪
+- ＦＣ今治
+- 奈良クラブ
+- カマタマーレ讃岐
+- テゲバジャーロ宮崎
+- サガン鳥栖
+- 鹿児島ユナイテッドＦＣ
+- レノファ山口ＦＣ
+- ロアッソ熊本
+- 大分トリニータ
+- ガイナーレ鳥取
+- ギラヴァンツ北九州
+- レイラック滋賀ＦＣ
+- ＦＣ琉球
+
+This is not seedable data yet. Stable identity review, API-SPORTS team ID verification, and logo URL verification must be completed before any row can move into `j2Teams.js` or `j3Teams.js`.
+
 ## EAST-A
 
 | status | group | club nameJa | internal team id | externalTeamId | logoUrl | official source | seedable | notes |
 |---|---|---|---|---|---|---|---|---|
-| review | EAST-A | ベガルタ仙台 | TBD | TBD | TBD | J.LEAGUE standings | no | Membership evidence only |
-| review | EAST-A | 湘南ベルマーレ | TBD | TBD | TBD | J.LEAGUE standings | no | Membership evidence only |
-| review | EAST-A | ブラウブリッツ秋田 | TBD | TBD | TBD | J.LEAGUE standings | no | Membership evidence only |
-| review | EAST-A | ＳＣ相模原 | TBD | TBD | TBD | J.LEAGUE standings | no | Membership evidence only |
-| review | EAST-A | 横浜ＦＣ | TBD | TBD | TBD | J.LEAGUE standings | no | Membership evidence only |
-| review | EAST-A | モンテディオ山形 | TBD | TBD | TBD | J.LEAGUE standings | no | Membership evidence only |
-| review | EAST-A | ザスパ群馬 | TBD | TBD | TBD | J.LEAGUE standings | no | Membership evidence only |
-| review | EAST-A | 栃木シティ | TBD | TBD | TBD | J.LEAGUE standings | no | Membership evidence only |
-| review | EAST-A | 栃木ＳＣ | TBD | TBD | TBD | J.LEAGUE standings | no | Membership evidence only |
-| review | EAST-A | ヴァンラーレ八戸 | TBD | TBD | TBD | J.LEAGUE standings | no | Membership evidence only |
+| review | EAST-A | ベガルタ仙台 | TBD | TBD | TBD | J.LEAGUE standings | no | new-stable-id-candidate-needed; membership evidence only |
+| review | EAST-A | 湘南ベルマーレ | TBD | TBD | TBD | J.LEAGUE standings | no | new-stable-id-candidate-needed; membership evidence only |
+| review | EAST-A | ブラウブリッツ秋田 | TBD | TBD | TBD | J.LEAGUE standings | no | new-stable-id-candidate-needed; membership evidence only |
+| review | EAST-A | ＳＣ相模原 | TBD | TBD | TBD | J.LEAGUE standings | no | new-stable-id-candidate-needed; membership evidence only |
+| review | EAST-A | 横浜ＦＣ | TBD | TBD | TBD | J.LEAGUE standings | no | new-stable-id-candidate-needed; membership evidence only |
+| review | EAST-A | モンテディオ山形 | TBD | TBD | TBD | J.LEAGUE standings | no | new-stable-id-candidate-needed; membership evidence only |
+| review | EAST-A | ザスパ群馬 | TBD | TBD | TBD | J.LEAGUE standings | no | new-stable-id-candidate-needed; membership evidence only |
+| review | EAST-A | 栃木シティ | TBD | TBD | TBD | J.LEAGUE standings | no | new-stable-id-candidate-needed; membership evidence only |
+| review | EAST-A | 栃木ＳＣ | TBD | TBD | TBD | J.LEAGUE standings | no | new-stable-id-candidate-needed; membership evidence only |
+| review | EAST-A | ヴァンラーレ八戸 | TBD | TBD | TBD | J.LEAGUE standings | no | new-stable-id-candidate-needed; membership evidence only |
 
 ## EAST-B
 
 | status | group | club nameJa | internal team id | externalTeamId | logoUrl | official source | seedable | notes |
 |---|---|---|---|---|---|---|---|---|
-| review | EAST-B | ヴァンフォーレ甲府 | TBD | TBD | TBD | J.LEAGUE standings | no | Membership evidence only |
-| review | EAST-B | いわきＦＣ | TBD | TBD | TBD | J.LEAGUE standings | no | Membership evidence only |
-| review | EAST-B | ＲＢ大宮アルディージャ | TBD | TBD | TBD | J.LEAGUE standings | no | Membership evidence only |
-| review | EAST-B | 北海道コンサドーレ札幌 | TBD | TBD | TBD | J.LEAGUE standings | no | Membership evidence only |
-| review | EAST-B | 藤枝ＭＹＦＣ | TBD | TBD | TBD | J.LEAGUE standings | no | Membership evidence only |
-| review | EAST-B | ＦＣ岐阜 | TBD | TBD | TBD | J.LEAGUE standings | no | Membership evidence only |
-| review | EAST-B | 松本山雅ＦＣ | TBD | TBD | TBD | J.LEAGUE standings | no | Membership evidence only |
-| review | EAST-B | ジュビロ磐田 | TBD | TBD | TBD | J.LEAGUE standings | no | Membership evidence only |
-| review | EAST-B | 福島ユナイテッドＦＣ | TBD | TBD | TBD | J.LEAGUE standings | no | Membership evidence only |
-| review | EAST-B | ＡＣ長野パルセイロ | TBD | TBD | TBD | J.LEAGUE standings | no | Membership evidence only |
+| review | EAST-B | ヴァンフォーレ甲府 | TBD | TBD | TBD | J.LEAGUE standings | no | new-stable-id-candidate-needed; membership evidence only |
+| review | EAST-B | いわきＦＣ | TBD | TBD | TBD | J.LEAGUE standings | no | new-stable-id-candidate-needed; membership evidence only |
+| review | EAST-B | ＲＢ大宮アルディージャ | TBD | TBD | TBD | J.LEAGUE standings | no | new-stable-id-candidate-needed; membership evidence only |
+| review | EAST-B | 北海道コンサドーレ札幌 | TBD | TBD | TBD | J.LEAGUE standings | no | new-stable-id-candidate-needed; membership evidence only |
+| review | EAST-B | 藤枝ＭＹＦＣ | TBD | TBD | TBD | J.LEAGUE standings | no | new-stable-id-candidate-needed; membership evidence only |
+| review | EAST-B | ＦＣ岐阜 | TBD | TBD | TBD | J.LEAGUE standings | no | new-stable-id-candidate-needed; membership evidence only |
+| review | EAST-B | 松本山雅ＦＣ | TBD | TBD | TBD | J.LEAGUE standings | no | new-stable-id-candidate-needed; membership evidence only |
+| review | EAST-B | ジュビロ磐田 | TBD | TBD | TBD | J.LEAGUE standings | no | new-stable-id-candidate-needed; membership evidence only |
+| review | EAST-B | 福島ユナイテッドＦＣ | TBD | TBD | TBD | J.LEAGUE standings | no | new-stable-id-candidate-needed; membership evidence only |
+| review | EAST-B | ＡＣ長野パルセイロ | TBD | TBD | TBD | J.LEAGUE standings | no | new-stable-id-candidate-needed; membership evidence only |
 
 ## WEST-A
 
 | status | group | club nameJa | internal team id | externalTeamId | logoUrl | official source | seedable | notes |
 |---|---|---|---|---|---|---|---|---|
-| review | WEST-A | カターレ富山 | TBD | TBD | TBD | J.LEAGUE standings | no | Membership evidence only |
-| review | WEST-A | 徳島ヴォルティス | TBD | TBD | TBD | J.LEAGUE standings | no | Membership evidence only |
-| review | WEST-A | アルビレックス新潟 | TBD | TBD | TBD | J.LEAGUE standings | no | Membership evidence only |
-| review | WEST-A | 高知ユナイテッドＳＣ | TBD | TBD | TBD | J.LEAGUE standings | no | Membership evidence only |
-| review | WEST-A | 愛媛ＦＣ | TBD | TBD | TBD | J.LEAGUE standings | no | Membership evidence only |
-| review | WEST-A | ツエーゲン金沢 | TBD | TBD | TBD | J.LEAGUE standings | no | Membership evidence only |
-| review | WEST-A | ＦＣ大阪 | TBD | TBD | TBD | J.LEAGUE standings | no | Membership evidence only |
-| review | WEST-A | ＦＣ今治 | TBD | TBD | TBD | J.LEAGUE standings | no | Membership evidence only |
-| review | WEST-A | 奈良クラブ | TBD | TBD | TBD | J.LEAGUE standings | no | Membership evidence only |
-| review | WEST-A | カマタマーレ讃岐 | TBD | TBD | TBD | J.LEAGUE standings | no | Membership evidence only |
+| review | WEST-A | カターレ富山 | TBD | TBD | TBD | J.LEAGUE standings | no | new-stable-id-candidate-needed; membership evidence only |
+| review | WEST-A | 徳島ヴォルティス | TBD | TBD | TBD | J.LEAGUE standings | no | new-stable-id-candidate-needed; membership evidence only |
+| review | WEST-A | アルビレックス新潟 | TBD | TBD | TBD | J.LEAGUE standings | no | new-stable-id-candidate-needed; membership evidence only |
+| review | WEST-A | 高知ユナイテッドＳＣ | TBD | TBD | TBD | J.LEAGUE standings | no | new-stable-id-candidate-needed; membership evidence only |
+| review | WEST-A | 愛媛ＦＣ | TBD | TBD | TBD | J.LEAGUE standings | no | new-stable-id-candidate-needed; membership evidence only |
+| review | WEST-A | ツエーゲン金沢 | TBD | TBD | TBD | J.LEAGUE standings | no | new-stable-id-candidate-needed; membership evidence only |
+| review | WEST-A | ＦＣ大阪 | TBD | TBD | TBD | J.LEAGUE standings | no | new-stable-id-candidate-needed; membership evidence only |
+| review | WEST-A | ＦＣ今治 | TBD | TBD | TBD | J.LEAGUE standings | no | new-stable-id-candidate-needed; membership evidence only |
+| review | WEST-A | 奈良クラブ | TBD | TBD | TBD | J.LEAGUE standings | no | new-stable-id-candidate-needed; membership evidence only |
+| review | WEST-A | カマタマーレ讃岐 | TBD | TBD | TBD | J.LEAGUE standings | no | new-stable-id-candidate-needed; membership evidence only |
 
 ## WEST-B
 
 | status | group | club nameJa | internal team id | externalTeamId | logoUrl | official source | seedable | notes |
 |---|---|---|---|---|---|---|---|---|
-| review | WEST-B | テゲバジャーロ宮崎 | TBD | TBD | TBD | J.LEAGUE standings | no | Membership evidence only |
-| review | WEST-B | サガン鳥栖 | TBD | TBD | TBD | J.LEAGUE standings | no | Membership evidence only |
-| review | WEST-B | 鹿児島ユナイテッドＦＣ | TBD | TBD | TBD | J.LEAGUE standings | no | Membership evidence only |
-| review | WEST-B | レノファ山口ＦＣ | TBD | TBD | TBD | J.LEAGUE standings | no | Membership evidence only |
-| review | WEST-B | ロアッソ熊本 | TBD | TBD | TBD | J.LEAGUE standings | no | Membership evidence only |
-| review | WEST-B | 大分トリニータ | TBD | TBD | TBD | J.LEAGUE standings | no | Membership evidence only |
-| review | WEST-B | ガイナーレ鳥取 | TBD | TBD | TBD | J.LEAGUE standings | no | Membership evidence only |
-| review | WEST-B | ギラヴァンツ北九州 | TBD | TBD | TBD | J.LEAGUE standings | no | Membership evidence only |
-| review | WEST-B | レイラック滋賀ＦＣ | TBD | TBD | TBD | J.LEAGUE standings | no | Membership evidence only |
-| review | WEST-B | ＦＣ琉球 | TBD | TBD | TBD | J.LEAGUE standings | no | Membership evidence only |
+| review | WEST-B | テゲバジャーロ宮崎 | TBD | TBD | TBD | J.LEAGUE standings | no | new-stable-id-candidate-needed; membership evidence only |
+| review | WEST-B | サガン鳥栖 | TBD | TBD | TBD | J.LEAGUE standings | no | new-stable-id-candidate-needed; membership evidence only |
+| review | WEST-B | 鹿児島ユナイテッドＦＣ | TBD | TBD | TBD | J.LEAGUE standings | no | new-stable-id-candidate-needed; membership evidence only |
+| review | WEST-B | レノファ山口ＦＣ | TBD | TBD | TBD | J.LEAGUE standings | no | new-stable-id-candidate-needed; membership evidence only |
+| review | WEST-B | ロアッソ熊本 | TBD | TBD | TBD | J.LEAGUE standings | no | new-stable-id-candidate-needed; membership evidence only |
+| review | WEST-B | 大分トリニータ | TBD | TBD | TBD | J.LEAGUE standings | no | new-stable-id-candidate-needed; membership evidence only |
+| review | WEST-B | ガイナーレ鳥取 | TBD | TBD | TBD | J.LEAGUE standings | no | new-stable-id-candidate-needed; membership evidence only |
+| review | WEST-B | ギラヴァンツ北九州 | TBD | TBD | TBD | J.LEAGUE standings | no | new-stable-id-candidate-needed; membership evidence only |
+| review | WEST-B | レイラック滋賀ＦＣ | TBD | TBD | TBD | J.LEAGUE standings | no | new-stable-id-candidate-needed; membership evidence only |
+| review | WEST-B | ＦＣ琉球 | TBD | TBD | TBD | J.LEAGUE standings | no | new-stable-id-candidate-needed; membership evidence only |
 
 ## Unresolved Items
 
-- Map each club to an existing stable internal team ID where one already exists.
+- No clubs in this membership review currently match existing confirmed J1 stable team IDs.
 - Create new stable team IDs only after identity review confirms the club is not already present.
 - Verify API-SPORTS team IDs.
 - Verify logo URLs.
