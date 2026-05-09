@@ -254,6 +254,30 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
     - `node functions/scripts/verifyCompetitionTeams.js football_j3 --dry-run`
     - `npm --prefix functions run build`
     - `flutter analyze --no-pub`
+- J2 / J3 official membership source review documented
+  - commit: `0232f59 Document J2 J3 membership sources`
+  - updated
+    - `docs/current-j2-team-master-review.md`
+    - `docs/current-j3-team-master-review.md`
+  - added
+    - `docs/current-j2-j3-season-membership-review.md`
+  - official sources recorded
+    - J.LEAGUE special page: https://www.jleague.jp/special/2026specialseason/j2-j3/
+    - J.LEAGUE official standings: https://www.jleague.jp/standings/j2j3/
+  - `明治安田Ｊ２・Ｊ３百年構想リーグ` を documented
+  - four groups を documented
+    - `EAST-A`
+    - `EAST-B`
+    - `WEST-A`
+    - `WEST-B`
+  - all membership rows remain `review`
+  - internal team IDs remain `TBD`
+  - API-SPORTS team IDs remain `TBD`
+  - logo URLs remain `TBD`
+  - seedable remains `no`
+  - this is season / tournament membership evidence only, not stable team master seed data
+  - `j2Teams.js` / `j3Teams.js` は empty and unchanged
+  - no Firestore write / API-SPORTS call / deploy / service account or API key changes
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -378,11 +402,11 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 
 現時点の active next tasks:
 
-- Confirm official/current J2 membership source
-- Confirm official/current J3 membership source
-- Reuse existing internal team IDs for clubs already present in stable team master
-- Add confirmed stable identities to J2 / J3 team modules only after API / team / logo verification
-- Add season membership separately after stable team IDs are confirmed
+- Map J2 / J3 membership rows to existing stable internal team IDs where possible
+- Identify which clubs already exist in J1 stable team master
+- Create new stable internal team IDs only after identity review
+- Verify API-SPORTS team IDs and logo URLs separately
+- Keep seed data empty until stable identity + API / logo verification is complete
 
 後回し:
 
@@ -465,17 +489,17 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 
 優先順（Spark plan のまま Flutter + Firestore seed data で進める）：
 
-### Task 1: Confirm J2 / J3 official membership sources
-- official / current J2 membership source を確認する
-- official / current J3 membership source を確認する
-- confirmed source が取れるまで J2 / J3 team modules に actual team data を追加しない
-- Firestore write / non-dry seed / API sync / deploy は行わない
+### Task 1: Map J2 / J3 membership rows to stable team IDs
+- `docs/current-j2-j3-season-membership-review.md` の membership rows を既存 stable team master と照合する
+- J1 stable team master に既に存在する club を特定する
+- 既存 club は同じ internal team ID を reuse する
+- 新規 club は identity review 後にのみ new stable internal team ID candidate とする
 
-### Task 2: Stable team identity and API match review for J2 / J3
-- 既存 stable team master に存在する club は同じ internal team ID を reuse する
-- 新規 club は stable identity が確認できた場合のみ internal team ID を追加する
-- API-SPORTS team ID / logo URL は lookup / verify 後にのみ seedable data にする
+### Task 2: API / logo verification for J2 / J3 stable identities
+- API-SPORTS team ID / logo URL は separate lookup / verify 後にのみ seedable data にする
+- stable identity + API / logo verification が揃うまで `j2Teams.js` / `j3Teams.js` は empty のまま維持する
 - season membership は stable team IDs confirmed 後に separate data として追加する
+- Firestore write / non-dry seed / API sync / deploy は行わない
 
 ### Task 3: 他 competition への generic pipeline 展開
 - Premier League / LaLiga / Serie A / Bundesliga / Ligue 1 / UEFA competitions などの team master data scaffold を検討する
