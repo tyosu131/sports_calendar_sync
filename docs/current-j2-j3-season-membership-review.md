@@ -238,6 +238,35 @@ This table is API lookup evidence only. It is not seed data, and these rows are 
 | WEST-B | レイラック滋賀ＦＣ | `reilac_shiga` | api-lookup-name-variance-review | 7117 | `https://media.api-sports.io/football/teams/7117.png` | Biwako Shiga | JFL 2024 / 497 | API raw name differs from current J.LEAGUE name | no |
 | WEST-B | ＦＣ琉球 | `fc_ryukyu` | api-lookup-evidence-found | 2235 | `https://media.api-sports.io/football/teams/2235.png` | FC Ryukyu | J3 2024 / 100 | API-SPORTS teams?league=100&season=2024 | no |
 
+## Name Variance Review
+
+This section records documentation-only interpretation for the 11 `api-lookup-name-variance-review` rows in the API-SPORTS tracker.
+
+These rows are not seedable approvals. They remain review evidence only and are not confirmed `/teams/{id}` documents.
+
+Summary:
+
+- Name variance rows reviewed: 11
+- Rows acceptable as API evidence candidates: 10
+- Rows requiring stronger rebrand / continuity review before seedable: 1
+- Rows moved to seedable: 0
+- Confirmed `/teams/{id}` documents created: 0
+- `j2Teams.js` / `j3Teams.js` entries added: 0
+
+| candidate internal team id | current club nameJa | API raw team name | variance type | review interpretation | seedable decision |
+|---|---|---|---|---|---|
+| `sc_sagamihara` | ＳＣ相模原 | Sagamihara | prefix omitted | API raw name omits `SC`; likely same club candidate, but keep as approval target before seedable data | no |
+| `thespa_gunma` | ザスパ群馬 | Thespakusatsu Gunma | older / longer form | API raw name uses older / longer form; likely same club candidate, but keep as approval target before seedable data | no |
+| `iwaki_fc` | いわきＦＣ | Iwaki | suffix omitted | API raw name omits `FC`; likely same club candidate, but keep as approval target before seedable data | no |
+| `rb_omiya_ardija` | ＲＢ大宮アルディージャ | Omiya Ardija | current branding omitted | API raw name omits current `RB` branding; likely same club identity, but branding variance remains an approval target before seedable data | no |
+| `hokkaido_consadole_sapporo` | 北海道コンサドーレ札幌 | Consadole Sapporo | regional prefix omitted | API raw name omits `Hokkaido`; likely same club candidate, but keep as approval target before seedable data | no |
+| `ac_nagano_parceiro` | ＡＣ長野パルセイロ | Parceiro Nagano | order difference and prefix omitted | API raw name differs in order and omits `AC`; likely same club candidate, but keep as approval target before seedable data | no |
+| `zweigen_kanazawa` | ツエーゲン金沢 | Kanazawa | shortened name | API raw name is shortened to `Kanazawa`; likely same club candidate, but keep as approval target before seedable data | no |
+| `fc_osaka` | ＦＣ大阪 | Osaka | prefix omitted | API raw name omits `FC`; likely same club candidate, but keep as approval target before seedable data | no |
+| `fc_imabari` | ＦＣ今治 | Imabari | prefix omitted | API raw name omits `FC`; likely same club candidate, but keep as approval target before seedable data | no |
+| `giravanz_kitakyushu` | ギラヴァンツ北九州 | Kitakyushu | shortened name | API raw name is shortened to `Kitakyushu`; likely same club candidate, but keep as approval target before seedable data | no |
+| `reilac_shiga` | レイラック滋賀ＦＣ | Biwako Shiga | rebrand / continuity variance | API raw name differs from current J.LEAGUE name; requires stronger rebrand / continuity review before seedable data | no |
+
 ## Documentation-Only Stable Internal Team ID Candidates
 
 The candidate IDs below are review candidates only. They are not confirmed `/teams/{id}` documents, not seed data, and not safe to write until stable identity review plus API-SPORTS team ID / logo URL verification are complete.
