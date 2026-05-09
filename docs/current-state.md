@@ -317,6 +317,22 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - candidate IDs are not seed data
   - `j2Teams.js` / `j3Teams.js` は empty and unchanged
   - no source code / seed data / Firestore write / API call / deploy / serviceAccountKey or API key changes
+- J2 / J3 candidate name verification completed
+  - commit: `1137b69 Verify J2 J3 stable identity candidate names`
+  - updated
+    - `docs/current-j2-j3-season-membership-review.md`
+  - Total candidate IDs reviewed: 40
+  - Candidate IDs kept unchanged: 40
+  - Candidate IDs changed: 0
+  - Candidate IDs requiring further review: 0
+  - Confirmed internal IDs: 0
+  - API-SPORTS IDs verified: 0
+  - Logo URLs verified: 0
+  - Seedable rows: 0
+  - candidate name verification は完了済み
+  - API-SPORTS team ID / logo URL は separate verification が必要
+  - `j2Teams.js` / `j3Teams.js` への投入はまだ不要
+  - Firestore write / non-dry seed / API sync / deploy は引き続き deferred
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -441,8 +457,6 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 
 現時点の active next tasks:
 
-- Verify stable identity candidate names for J2 / J3 clubs
-- Confirm official / commonly used English names where needed
 - Verify API-SPORTS team IDs and logo URLs separately
 - Only after stable identity + API / logo verification, consider adding confirmed entries to `j2Teams.js` / `j3Teams.js`
 - Keep Firestore write / non-dry seed / API sync / deploy deferred
@@ -528,17 +542,16 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 
 優先順（Spark plan のまま Flutter + Firestore seed data で進める）：
 
-### Task 1: Verify J2 / J3 stable identity candidate names
-- documentation-only candidate internal team IDs を official / commonly used English names と照合する
-- 必要に応じて candidate names を review docs 上で修正する
-- candidate IDs は confirmed `/teams/{id}` documents ではなく、seed data でもない
-- `j2Teams.js` / `j3Teams.js` は stable identity + API / logo verification が揃うまで empty のまま維持する
-
-### Task 2: API / logo verification for J2 / J3 stable identities
+### Task 1: API / logo verification for J2 / J3 stable identities
 - API-SPORTS team ID / logo URL は separate lookup / verify 後にのみ seedable data にする
 - stable identity + API / logo verification が揃うまで `j2Teams.js` / `j3Teams.js` は empty のまま維持する
 - season membership は stable team IDs confirmed 後に separate data として追加する
 - Firestore write / non-dry seed / API sync / deploy は行わない
+
+### Task 2: Confirmed J2 / J3 team module preparation
+- stable identity + API / logo verification が完了した club のみ `j2Teams.js` / `j3Teams.js` への confirmed entry 候補にする
+- candidate IDs は confirmed `/teams/{id}` documents ではなく、seed data でもない状態を維持する
+- Firestore write / non-dry seed は別 approval まで行わない
 
 ### Task 3: 他 competition への generic pipeline 展開
 - Premier League / LaLiga / Serie A / Bundesliga / Ligue 1 / UEFA competitions などの team master data scaffold を検討する
