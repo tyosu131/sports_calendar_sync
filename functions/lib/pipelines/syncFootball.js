@@ -67,16 +67,19 @@ async function syncFootballFixtures(rapidApiKey) {
     }
     // 2. Load translation map for football
     const translationMap = await (0, translation_1.getTranslationMap)("football");
-    // 3. Load all football teams (for ID mapping: rapidApiId → docId)
+    // 3. Load all football teams (for ID mapping: externalTeamId → docId)
     const teamsSnap = await db
         .collection("teams")
         .where("sportType", "==", "football")
         .get();
-    const teamByRapidId = new Map();
+    const teamByExternalId = new Map();
     teamsSnap.forEach((doc) => {
         const data = doc.data();
-        if (data.rapidApiId) {
-            teamByRapidId.set(data.rapidApiId, {
+        const externalTeamId = typeof data.externalTeamId === "number" ?
+            data.externalTeamId :
+            data.rapidApiId;
+        if (typeof externalTeamId === "number") {
+            teamByExternalId.set(externalTeamId, {
                 docId: doc.id,
                 nameJa: data.nameJa,
             });
@@ -116,17 +119,26 @@ async function syncFootballFixtures(rapidApiKey) {
         for (const fixture of fixtures) {
             const homeRapidId = fixture.teams.home.id;
             const awayRapidId = fixture.teams.away.id;
-            // Resolve team doc IDs (fall back to creating a placeholder key)
-            const homeTeam = teamByRapidId.get(homeRapidId);
-            const awayTeam = teamByRapidId.get(awayRapidId);
-            const homeTeamDocId = homeTeam?.docId ?? `football_team_${homeRapidId}`;
-            const awayTeamDocId = awayTeam?.docId ?? `football_team_${awayRapidId}`;
+            const homeTeam = teamByExternalId.get(homeRapidId);
+            const awayTeam = teamByExternalId.get(awayRapidId);
+            if (!homeTeam || !awayTeam) {
+                const missingTeams = [
+                    !homeTeam ?
+                        `home id=${homeRapidId} name="${fixture.teams.home.name}"` :
+                        undefined,
+                    !awayTeam ?
+                        `away id=${awayRapidId} name="${fixture.teams.away.name}"` :
+                        undefined,
+                ].filter((value) => value !== undefined);
+                console.warn(`Skipping fixture ${fixture.fixture.id}: unmapped API-SPORTS team(s): ${missingTeams.join(", ")}.`);
+                continue;
+            }
             // Apply translation (fall back to English name)
-            const homeTeamNameJa = homeTeam?.nameJa ??
+            const homeTeamNameJa = homeTeam.nameJa ??
                 (0, translation_1.translateTeamName)(translationMap, fixture.teams.home.name);
-            const awayTeamNameJa = awayTeam?.nameJa ??
+            const awayTeamNameJa = awayTeam.nameJa ??
                 (0, translation_1.translateTeamName)(translationMap, fixture.teams.away.name);
-            const gameDoc = (0, football_adapter_1.adaptFootballFixtureToGameDoc)(fixture, seasonProfile.competitionKey, seasonProfile.competitionSeasonKey, leagueDoc.id, homeTeamDocId, awayTeamDocId, homeTeamNameJa, awayTeamNameJa);
+            const gameDoc = (0, football_adapter_1.adaptFootballFixtureToGameDoc)(fixture, seasonProfile.competitionKey, seasonProfile.competitionSeasonKey, leagueDoc.id, homeTeam.docId, awayTeam.docId, homeTeamNameJa, awayTeamNameJa);
             const gameRef = db
                 .collection("games")
                 .doc(`football_${fixture.fixture.id}`);

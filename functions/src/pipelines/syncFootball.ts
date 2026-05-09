@@ -24,6 +24,11 @@ import { getTranslationMap, translateTeamName } from "../utils/translation";
 const RAPID_API_HOST = "v3.football.api-sports.io";
 const RAPID_API_BASE = `https://${RAPID_API_HOST}`;
 
+interface SyncedTeamRef {
+  docId: string;
+  nameJa: string;
+}
+
 /**
  * Fetch football fixtures for a league from API-SPORTS (direct contract).
  * Base URL: https://v3.football.api-sports.io/
@@ -76,17 +81,22 @@ export async function syncFootballFixtures(rapidApiKey: string): Promise<void> {
   // 2. Load translation map for football
   const translationMap = await getTranslationMap("football");
 
-  // 3. Load all football teams (for ID mapping: rapidApiId → docId)
+  // 3. Load all football teams (for ID mapping: externalTeamId → docId)
   const teamsSnap = await db
     .collection("teams")
     .where("sportType", "==", "football")
     .get();
 
-  const teamByRapidId = new Map<number, { docId: string; nameJa: string }>();
+  const teamByExternalId = new Map<number, SyncedTeamRef>();
   teamsSnap.forEach((doc) => {
     const data = doc.data();
-    if (data.rapidApiId) {
-      teamByRapidId.set(data.rapidApiId, {
+    const externalTeamId =
+      typeof data.externalTeamId === "number" ?
+        data.externalTeamId :
+        data.rapidApiId as number | undefined;
+
+    if (typeof externalTeamId === "number") {
+      teamByExternalId.set(externalTeamId, {
         docId: doc.id,
         nameJa: data.nameJa,
       });
@@ -145,19 +155,31 @@ export async function syncFootballFixtures(rapidApiKey: string): Promise<void> {
       const homeRapidId = fixture.teams.home.id;
       const awayRapidId = fixture.teams.away.id;
 
-      // Resolve team doc IDs (fall back to creating a placeholder key)
-      const homeTeam = teamByRapidId.get(homeRapidId);
-      const awayTeam = teamByRapidId.get(awayRapidId);
+      const homeTeam = teamByExternalId.get(homeRapidId);
+      const awayTeam = teamByExternalId.get(awayRapidId);
 
-      const homeTeamDocId = homeTeam?.docId ?? `football_team_${homeRapidId}`;
-      const awayTeamDocId = awayTeam?.docId ?? `football_team_${awayRapidId}`;
+      if (!homeTeam || !awayTeam) {
+        const missingTeams = [
+          !homeTeam ?
+            `home id=${homeRapidId} name="${fixture.teams.home.name}"` :
+            undefined,
+          !awayTeam ?
+            `away id=${awayRapidId} name="${fixture.teams.away.name}"` :
+            undefined,
+        ].filter((value): value is string => value !== undefined);
+
+        console.warn(
+          `Skipping fixture ${fixture.fixture.id}: unmapped API-SPORTS team(s): ${missingTeams.join(", ")}.`
+        );
+        continue;
+      }
 
       // Apply translation (fall back to English name)
       const homeTeamNameJa =
-        homeTeam?.nameJa ??
+        homeTeam.nameJa ??
         translateTeamName(translationMap, fixture.teams.home.name);
       const awayTeamNameJa =
-        awayTeam?.nameJa ??
+        awayTeam.nameJa ??
         translateTeamName(translationMap, fixture.teams.away.name);
 
       const gameDoc = adaptFootballFixtureToGameDoc(
@@ -165,8 +187,8 @@ export async function syncFootballFixtures(rapidApiKey: string): Promise<void> {
         seasonProfile.competitionKey,
         seasonProfile.competitionSeasonKey,
         leagueDoc.id,
-        homeTeamDocId,
-        awayTeamDocId,
+        homeTeam.docId,
+        awayTeam.docId,
         homeTeamNameJa,
         awayTeamNameJa
       );
