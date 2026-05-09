@@ -244,6 +244,16 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - `npm --prefix functions run build` は PASS
   - `flutter analyze --no-pub` は `No issues found!`
   - `rg` scan で `functions/src` の current-year API season assumption は検出されていない
+- syncFootball converter parity / `football_adapter.ts` usage 実装済み
+  - commit: `eb3f9e2 Use football adapter for sync game conversion`
+  - `syncFootball.ts` は inline fixture-to-`GameDoc` conversion を持たない
+  - `syncFootball.ts` は `functions/src/adapters/football_adapter.ts` の `adaptFootballFixtureToGameDoc()` を呼ぶ
+  - adapter は `competitionSeasonKey` を受け取る
+  - adapter-produced `GameDoc` は `competitionKey` / `competitionSeasonKey` / legacy `sportKey` / `leagueId` / home-away team IDs / Japanese names / English names / logo URLs / `startTimeUTC` / `startTimeJST` / `timezone` / `status` / `venue` / scores / `broadcastPlatforms` / `externalFixtureId` / legacy `rapidApiFixtureId` を含む
+  - placeholder team ID fallback `football_team_{id}` はまだ残っており、次の strict mapping task で扱う
+  - `npm --prefix functions run build` は PASS
+  - `flutter analyze --no-pub` は `No issues found!`
+  - `rg` scan で新規 API key usage や sync-path current-year season logic は検出されていない
 - app-side team search 修正済み
   - `lib/data/repositories/team_repository.dart`
   - `lib/data/providers/team_providers.dart`
@@ -286,7 +296,6 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 
 現時点の active next tasks:
 
-- syncFootball converter parity / `football_adapter.ts` usage
 - strict API team ID → internal team ID mapping
 - status mapping verification
 - real game data verification script
@@ -368,29 +377,26 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 
 優先順（Spark plan のまま Flutter + Firestore seed data で進める）：
 
-### Task 1: sync converter parity / `football_adapter.ts` usage
-- `football_adapter.ts` を single conversion point に寄せる
-- sample game と real sync の GameDoc shape を揃える
-- `competitionKey` / `competitionSeasonKey` / team logos / English names / fixture IDs を real sync に反映する
-
-### Task 2: strict API team ID → internal team ID mapping
+### Task 1: strict API team ID → internal team ID mapping
 - J1 real sync では API team ID を internal team ID に厳密に map する
 - `football_team_{id}` placeholder fallback を避ける
 - unmapped team は skip または verification failure として明示する
 
-### Task 3: status mapping verification
+### Task 2: status mapping verification
 - `externalFixtureId` / `rapidApiFixtureId` compatibility を維持する
 - API-SPORTS status → app `GameStatus` mapping を verify する
 
-### Task 4: real game data verification script
+### Task 3: real game data verification script
 - real sync data 用の read-only / dry-run verification script を追加する
 - mapped team IDs、required fields、fixture ID compatibility、home-screen query behavior を確認する
 - Cloud Functions deploy / `getCalendar` 実 URL確認 / API-SPORTS sync は後回しにする
 
-### Task 5: 他 competition への generic pipeline 展開 / deferred backend work
+### Task 4: 他 competition への generic pipeline 展開
 - NPB / MLB / NBA / Premier League などの team master data scaffold を検討する
 - competition ごとの data module を `competitionRegistry.js` に追加する
 - league-specific な season / tournament membership は team master と分離して扱う
+
+### Task 5: Flutter UI polish / deferred backend work
 - J1 team search / follow / unfollow / home sample-game behavior / My Teams summary は確認済み
 - 今後 real game data を追加した後に主要検索語と follow 表示を再確認する
 - Blaze 化判断
