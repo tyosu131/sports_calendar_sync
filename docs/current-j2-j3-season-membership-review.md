@@ -105,6 +105,37 @@ Unresolved clubs requiring stable identity review:
 
 This is not seedable data yet. Stable identity review, API-SPORTS team ID verification, and logo URL verification must be completed before any row can move into `j2Teams.js` or `j3Teams.js`.
 
+## Candidate Name Verification
+
+Candidate internal team IDs were reviewed against J.LEAGUE English club/profile naming and commonly used romanized club names. This verification checks only whether the documentation-only candidate ID is a reasonable stable snake_case slug for the club identity.
+
+- Total candidate IDs reviewed: 40
+- Candidate IDs kept unchanged: 40
+- Candidate IDs changed: 0
+- Candidate IDs requiring further review: 0
+- Confirmed internal IDs: 0
+- API-SPORTS IDs verified: 0
+- Logo URLs verified: 0
+- Seedable rows: 0
+
+Review notes:
+
+- Candidate IDs do not encode J2 / J3 division or temporary 2026 group membership.
+- Candidate IDs are based on stable club identity and should remain usable across promotion / relegation if later confirmed.
+- `ＲＢ大宮アルディージャ` keeps `rb_omiya_ardija` to reflect current J.LEAGUE English branding as RB Omiya Ardija.
+- `レイラック滋賀ＦＣ` keeps `reilac_shiga` as a stable short slug for J.LEAGUE English name Reilac Shiga FC.
+- `ザスパ群馬` keeps `thespa_gunma` for J.LEAGUE English name Thespa Gunma.
+- `カターレ富山` keeps `kataller_toyama` for J.LEAGUE English name Kataller Toyama.
+- `ヴァンラーレ八戸` keeps `vanraure_hachinohe` for J.LEAGUE English name Vanraure Hachinohe.
+- `テゲバジャーロ宮崎` keeps `tegevajaro_miyazaki` for J.LEAGUE English name Tegevajaro Miyazaki.
+- `北海道コンサドーレ札幌` keeps `hokkaido_consadole_sapporo` for J.LEAGUE English name Hokkaido Consadole Sapporo.
+- `松本山雅ＦＣ` keeps `matsumoto_yamaga` as a stable short slug for J.LEAGUE English name Matsumoto Yamaga F.C.
+- `ＡＣ長野パルセイロ` keeps `ac_nagano_parceiro` for J.LEAGUE English name AC Nagano Parceiro.
+- `ツエーゲン金沢` keeps `zweigen_kanazawa` for J.LEAGUE English name Zweigen Kanazawa.
+- `ギラヴァンツ北九州` keeps `giravanz_kitakyushu` for J.LEAGUE English name Giravanz Kitakyushu.
+
+These candidate IDs are not confirmed `/teams/{id}` documents and are not seed data.
+
 ## Documentation-Only Stable Internal Team ID Candidates
 
 The candidate IDs below are review candidates only. They are not confirmed `/teams/{id}` documents, not seed data, and not safe to write until stable identity review plus API-SPORTS team ID / logo URL verification are complete.
