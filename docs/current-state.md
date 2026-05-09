@@ -348,6 +348,26 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - API lookup / API request は承認後に理由と exact command を提示してから実行する方針
   - `j2Teams.js` / `j3Teams.js` への投入はまだ不要
   - Firestore write / non-dry seed / API sync / deploy は引き続き deferred
+- J2 / J3 API-SPORTS team ID / logo URL read-only lookup script 追加済み
+  - commit: `3d5a5fe Add Japan football API lookup script`
+  - added
+    - `functions/scripts/fetchJapanFootballTeamsFromApiSports.js`
+  - read-only inspection 専用
+  - `API_SPORTS_KEY` env のみ使用
+  - stdout のみに出力
+  - Firebase Admin SDK 初期化なし
+  - Firestore read/write なし
+  - serviceAccountKey 読み取りなし
+  - ファイル出力なし
+  - 対応引数
+    - `--leagues --season <year>`
+    - `--league <id> --season <year>`
+    - `--search <name>`
+    - `--json`
+  - `node --check functions/scripts/fetchJapanFootballTeamsFromApiSports.js` は PASS
+  - 実 API-SPORTS API call は未実行
+  - `j2Teams.js` / `j3Teams.js` への投入はまだ不要
+  - Firestore write / non-dry seed / API sync / deploy は引き続き deferred
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -472,8 +492,8 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 
 現時点の active next tasks:
 
-- Design the approval-gated API-SPORTS lookup method for J2 / J3 team IDs and logo URLs
-- Before any actual API call, present the reason and exact command for approval
+- Present exact `fetchJapanFootballTeamsFromApiSports.js` commands and reasons before any actual J2 / J3 API-SPORTS lookup
+- Run approved lookup only after explicit approval
 - Keep the API-SPORTS verification tracker `not-started` until approved lookup evidence is collected
 - Only after stable identity + API / logo verification, consider adding confirmed entries to `j2Teams.js` / `j3Teams.js`
 - Keep Firestore write / non-dry seed / API sync / deploy deferred
@@ -560,8 +580,8 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 優先順（Spark plan のまま Flutter + Firestore seed data で進める）：
 
 ### Task 1: API / logo verification for J2 / J3 stable identities
-- API-SPORTS team ID / logo URL lookup 方法を承認制で設計する
-- 実 API call 前に理由と exact command を提示し、approval 後にのみ実行する
+- `functions/scripts/fetchJapanFootballTeamsFromApiSports.js` を使う exact command と理由を提示する
+- 実 API call は approval 後にのみ実行する
 - API-SPORTS team ID / logo URL は separate lookup / verify 後にのみ seedable data にする
 - `docs/current-j2-j3-season-membership-review.md` の `API-SPORTS Verification Tracker` は approved evidence が揃うまで `not-started` / `TBD` / `no` を維持する
 - stable identity + API / logo verification が揃うまで `j2Teams.js` / `j3Teams.js` は empty のまま維持する
