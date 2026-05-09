@@ -16,6 +16,7 @@
 
 import axios from "axios";
 import { getFirestore, Timestamp } from "firebase-admin/firestore";
+import { findCompetitionSeasonProfileForLeague } from "../config/competitionSeasons";
 import { RapidApiFootballFixture, GameDoc } from "../types";
 import { toJstStorageString, toUtcDate, mapFootballStatus } from "../utils/timezone";
 import { getTranslationMap, translateTeamName } from "../utils/translation";
@@ -59,6 +60,8 @@ async function fetchFixtures(
  */
 function fixtureToGameDoc(
   fixture: RapidApiFootballFixture,
+  competitionKey: string,
+  competitionSeasonKey: string,
   leagueDocId: string,
   homeTeamDocId: string,
   awayTeamDocId: string,
@@ -68,6 +71,9 @@ function fixtureToGameDoc(
   const utcDate = toUtcDate(fixture.fixture.date);
 
   return {
+    competitionKey,
+    competitionSeasonKey,
+    sportKey: competitionKey,
     leagueId: leagueDocId,
     homeTeamId: homeTeamDocId,
     homeTeamNameJa,
@@ -81,6 +87,7 @@ function fixtureToGameDoc(
     homeScore: fixture.goals.home ?? undefined,
     awayScore: fixture.goals.away ?? undefined,
     broadcastPlatforms: [], // Populated separately via broadcast mapping
+    externalFixtureId: fixture.fixture.id,
     rapidApiFixtureId: fixture.fixture.id,
   };
 }
@@ -91,7 +98,6 @@ function fixtureToGameDoc(
  */
 export async function syncFootballFixtures(rapidApiKey: string): Promise<void> {
   const db = getFirestore();
-  const currentSeason = new Date().getFullYear();
 
   // 1. Load all football leagues with a rapidApiId
   const leaguesSnap = await db
@@ -131,15 +137,40 @@ export async function syncFootballFixtures(rapidApiKey: string): Promise<void> {
 
   for (const leagueDoc of leaguesSnap.docs) {
     const leagueData = leagueDoc.data();
-    if (!leagueData.rapidApiId) continue;
+    const externalLeagueId =
+      leagueData.externalLeagueId as number | undefined ??
+      leagueData.rapidApiId as number | undefined;
+    const competitionKey =
+      leagueData.competitionKey as string | undefined ??
+      leagueData.sportKey as string | undefined;
+    const seasonProfile = findCompetitionSeasonProfileForLeague({
+      competitionKey,
+      externalLeagueId,
+    });
 
-    console.log(`Fetching fixtures for league: ${leagueData.nameEn}`);
+    if (!seasonProfile) {
+      console.warn(
+        `Skipping ${leagueData.nameEn}: no competition season profile found.`
+      );
+      continue;
+    }
+
+    if (!seasonProfile.apiAccessibleOnCurrentPlan) {
+      console.warn(
+        `Skipping ${leagueData.nameEn}: competitionSeasonKey=${seasonProfile.competitionSeasonKey} apiSeason=${seasonProfile.apiSeason} is marked inaccessible on the current API plan.`
+      );
+      continue;
+    }
+
+    console.log(
+      `Fetching fixtures for league: ${leagueData.nameEn}, competitionSeasonKey=${seasonProfile.competitionSeasonKey}, apiSeason=${seasonProfile.apiSeason}`
+    );
 
     let fixtures: RapidApiFootballFixture[];
     try {
       fixtures = await fetchFixtures(
-        leagueData.rapidApiId,
-        currentSeason,
+        seasonProfile.externalLeagueId,
+        seasonProfile.apiSeason,
         rapidApiKey
       );
     } catch (err) {
@@ -168,6 +199,8 @@ export async function syncFootballFixtures(rapidApiKey: string): Promise<void> {
 
       const gameDoc = fixtureToGameDoc(
         fixture,
+        seasonProfile.competitionKey,
+        seasonProfile.competitionSeasonKey,
         leagueDoc.id,
         homeTeamDocId,
         awayTeamDocId,

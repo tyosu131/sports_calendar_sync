@@ -21,6 +21,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.syncFootballFixtures = syncFootballFixtures;
 const axios_1 = __importDefault(require("axios"));
 const firestore_1 = require("firebase-admin/firestore");
+const competitionSeasons_1 = require("../config/competitionSeasons");
 const timezone_1 = require("../utils/timezone");
 const translation_1 = require("../utils/translation");
 const RAPID_API_HOST = "v3.football.api-sports.io";
@@ -52,9 +53,12 @@ async function fetchFixtures(leagueId, season, rapidApiKey) {
 /**
  * Convert an API-SPORTS fixture to a Firestore GameDoc.
  */
-function fixtureToGameDoc(fixture, leagueDocId, homeTeamDocId, awayTeamDocId, homeTeamNameJa, awayTeamNameJa) {
+function fixtureToGameDoc(fixture, competitionKey, competitionSeasonKey, leagueDocId, homeTeamDocId, awayTeamDocId, homeTeamNameJa, awayTeamNameJa) {
     const utcDate = (0, timezone_1.toUtcDate)(fixture.fixture.date);
     return {
+        competitionKey,
+        competitionSeasonKey,
+        sportKey: competitionKey,
         leagueId: leagueDocId,
         homeTeamId: homeTeamDocId,
         homeTeamNameJa,
@@ -68,6 +72,7 @@ function fixtureToGameDoc(fixture, leagueDocId, homeTeamDocId, awayTeamDocId, ho
         homeScore: fixture.goals.home ?? undefined,
         awayScore: fixture.goals.away ?? undefined,
         broadcastPlatforms: [], // Populated separately via broadcast mapping
+        externalFixtureId: fixture.fixture.id,
         rapidApiFixtureId: fixture.fixture.id,
     };
 }
@@ -77,7 +82,6 @@ function fixtureToGameDoc(fixture, leagueDocId, homeTeamDocId, awayTeamDocId, ho
  */
 async function syncFootballFixtures(rapidApiKey) {
     const db = (0, firestore_1.getFirestore)();
-    const currentSeason = new Date().getFullYear();
     // 1. Load all football leagues with a rapidApiId
     const leaguesSnap = await db
         .collection("leagues")
@@ -110,12 +114,26 @@ async function syncFootballFixtures(rapidApiKey) {
     const MAX_BATCH = 400; // Firestore batch limit is 500
     for (const leagueDoc of leaguesSnap.docs) {
         const leagueData = leagueDoc.data();
-        if (!leagueData.rapidApiId)
+        const externalLeagueId = leagueData.externalLeagueId ??
+            leagueData.rapidApiId;
+        const competitionKey = leagueData.competitionKey ??
+            leagueData.sportKey;
+        const seasonProfile = (0, competitionSeasons_1.findCompetitionSeasonProfileForLeague)({
+            competitionKey,
+            externalLeagueId,
+        });
+        if (!seasonProfile) {
+            console.warn(`Skipping ${leagueData.nameEn}: no competition season profile found.`);
             continue;
-        console.log(`Fetching fixtures for league: ${leagueData.nameEn}`);
+        }
+        if (!seasonProfile.apiAccessibleOnCurrentPlan) {
+            console.warn(`Skipping ${leagueData.nameEn}: competitionSeasonKey=${seasonProfile.competitionSeasonKey} apiSeason=${seasonProfile.apiSeason} is marked inaccessible on the current API plan.`);
+            continue;
+        }
+        console.log(`Fetching fixtures for league: ${leagueData.nameEn}, competitionSeasonKey=${seasonProfile.competitionSeasonKey}, apiSeason=${seasonProfile.apiSeason}`);
         let fixtures;
         try {
-            fixtures = await fetchFixtures(leagueData.rapidApiId, currentSeason, rapidApiKey);
+            fixtures = await fetchFixtures(seasonProfile.externalLeagueId, seasonProfile.apiSeason, rapidApiKey);
         }
         catch (err) {
             console.error(`Failed to fetch fixtures for ${leagueData.nameEn}:`, err);
@@ -134,7 +152,7 @@ async function syncFootballFixtures(rapidApiKey) {
                 (0, translation_1.translateTeamName)(translationMap, fixture.teams.home.name);
             const awayTeamNameJa = awayTeam?.nameJa ??
                 (0, translation_1.translateTeamName)(translationMap, fixture.teams.away.name);
-            const gameDoc = fixtureToGameDoc(fixture, leagueDoc.id, homeTeamDocId, awayTeamDocId, homeTeamNameJa, awayTeamNameJa);
+            const gameDoc = fixtureToGameDoc(fixture, seasonProfile.competitionKey, seasonProfile.competitionSeasonKey, leagueDoc.id, homeTeamDocId, awayTeamDocId, homeTeamNameJa, awayTeamNameJa);
             const gameRef = db
                 .collection("games")
                 .doc(`football_${fixture.fixture.id}`);

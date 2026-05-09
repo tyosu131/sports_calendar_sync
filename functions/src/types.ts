@@ -76,6 +76,8 @@ export type GameStatus =
 export interface GameDoc {
   /** Competition key matching CompetitionKey in SportsRegistry. */
   competitionKey?: CompetitionKey;
+  /** Concrete competition season / tournament profile key. */
+  competitionSeasonKey?: string;
   /** @deprecated Legacy alias for competitionKey. */
   sportKey?: CompetitionKey;
   leagueId: string;
