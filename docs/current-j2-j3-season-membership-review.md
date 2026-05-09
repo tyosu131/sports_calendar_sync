@@ -43,6 +43,8 @@ Source confirmation notes:
 
 Compared against existing confirmed stable team identities in `functions/scripts/data/j1Teams.js`.
 
+Note: this summary records the state at the stable internal team ID mapping review step. Later API-SPORTS team ID / logo URL lookup evidence is tracked separately in the `API-SPORTS Verification Tracker` below. The seedable status remains `no` for every row.
+
 - Total membership rows: 40
 - Matched to existing stable J1 team master: 0
 - Requiring new stable internal team ID review: 40
@@ -138,18 +140,23 @@ These candidate IDs are not confirmed `/teams/{id}` documents and are not seed d
 
 ## API-SPORTS Team ID / Logo URL Verification Plan
 
-This section is documentation-only planning and evidence tracking for the later API-SPORTS team ID / logo URL verification step.
+This section is documentation-only planning and evidence tracking for API-SPORTS team ID / logo URL verification.
 
-No API-SPORTS API call was run for this review update. Any future API-SPORTS call must be approved before execution, including the reason and exact command.
+The rows below reflect approved read-only API-SPORTS lookup evidence. No Firestore read/write, seed, deploy, source code change, or team module update was performed for this review update.
 
 Current status:
 
-- Candidate rows requiring API / logo verification: 40
-- API-SPORTS IDs verified: 0
-- Logo URLs verified: 0
+- API-SPORTS league discovery succeeded for Japan / 2024
+- J1 League externalLeagueId: 98
+- J2 League externalLeagueId: 99
+- J3 League externalLeagueId: 100
+- Japan Football League externalLeagueId: 497
+- Candidate rows with API evidence found: 40
+- Direct / near-direct evidence rows: 29
+- Name variance review rows: 11
+- API-SPORTS IDs verified enough for documentation evidence: 40
+- Logo URLs found: 40
 - Rows ready for seed data: 0
-- `externalTeamId`: remains `TBD` for every row
-- `logoUrl`: remains `TBD` for every row
 - `seedable`: remains `no` for every row
 - `j2Teams.js` / `j3Teams.js`: remain empty until stable identity + API / logo verification is complete and approved
 
@@ -159,8 +166,7 @@ Verification rules:
 - Do not encode J2 / J3 division or 2026 group names in stable team IDs.
 - Do not infer API-SPORTS team IDs or logo URLs from J.LEAGUE pages.
 - Record API-SPORTS evidence separately before moving any row into seedable data.
-- Treat ambiguous API matches as unresolved.
-- Keep `externalTeamId` / `logoUrl` as `TBD` until direct API-SPORTS evidence is reviewed.
+- Treat name variance rows as unresolved for seed data until reviewed.
 - Keep `seedable` as `no` until stable identity, API team ID, and logo URL are all verified.
 
 Evidence required before a row can become seedable:
@@ -178,57 +184,65 @@ Existing local reference:
 - `functions/scripts/fetchJ1TeamsFromApiSports.js` is a read-only J1 inspection script pattern.
 - A J2 / J3 lookup should follow the same read-only principle if implemented later.
 - Do not run a lookup script or API request without approval.
+- Approved read-only lookup commands used for this evidence:
+  - `--leagues --season 2024 --json`
+  - `--league 99 --season 2024 --json`
+  - `--league 100 --season 2024 --json`
+  - `--league 98 --season 2024 --json`
+  - `--league 497 --season 2024 --json`
 
 ## API-SPORTS Verification Tracker
 
-Every row remains not started. This table is not seed data.
+This table is API lookup evidence only. It is not seed data, and these rows are not confirmed `/teams/{id}` documents.
 
-| group | club nameJa | candidate internal team id | API-SPORTS verification status | externalTeamId | logoUrl | evidence | seedable |
-|---|---|---|---|---|---|---|---|
-| EAST-A | ベガルタ仙台 | `vegalta_sendai` | not-started | TBD | TBD | not checked | no |
-| EAST-A | 湘南ベルマーレ | `shonan_bellmare` | not-started | TBD | TBD | not checked | no |
-| EAST-A | ブラウブリッツ秋田 | `blaublitz_akita` | not-started | TBD | TBD | not checked | no |
-| EAST-A | ＳＣ相模原 | `sc_sagamihara` | not-started | TBD | TBD | not checked | no |
-| EAST-A | 横浜ＦＣ | `yokohama_fc` | not-started | TBD | TBD | not checked | no |
-| EAST-A | モンテディオ山形 | `montedio_yamagata` | not-started | TBD | TBD | not checked | no |
-| EAST-A | ザスパ群馬 | `thespa_gunma` | not-started | TBD | TBD | not checked | no |
-| EAST-A | 栃木シティ | `tochigi_city` | not-started | TBD | TBD | not checked | no |
-| EAST-A | 栃木ＳＣ | `tochigi_sc` | not-started | TBD | TBD | not checked | no |
-| EAST-A | ヴァンラーレ八戸 | `vanraure_hachinohe` | not-started | TBD | TBD | not checked | no |
-| EAST-B | ヴァンフォーレ甲府 | `ventforet_kofu` | not-started | TBD | TBD | not checked | no |
-| EAST-B | いわきＦＣ | `iwaki_fc` | not-started | TBD | TBD | not checked | no |
-| EAST-B | ＲＢ大宮アルディージャ | `rb_omiya_ardija` | not-started | TBD | TBD | not checked | no |
-| EAST-B | 北海道コンサドーレ札幌 | `hokkaido_consadole_sapporo` | not-started | TBD | TBD | not checked | no |
-| EAST-B | 藤枝ＭＹＦＣ | `fujieda_myfc` | not-started | TBD | TBD | not checked | no |
-| EAST-B | ＦＣ岐阜 | `fc_gifu` | not-started | TBD | TBD | not checked | no |
-| EAST-B | 松本山雅ＦＣ | `matsumoto_yamaga` | not-started | TBD | TBD | not checked | no |
-| EAST-B | ジュビロ磐田 | `jubilo_iwata` | not-started | TBD | TBD | not checked | no |
-| EAST-B | 福島ユナイテッドＦＣ | `fukushima_united` | not-started | TBD | TBD | not checked | no |
-| EAST-B | ＡＣ長野パルセイロ | `ac_nagano_parceiro` | not-started | TBD | TBD | not checked | no |
-| WEST-A | カターレ富山 | `kataller_toyama` | not-started | TBD | TBD | not checked | no |
-| WEST-A | 徳島ヴォルティス | `tokushima_vortis` | not-started | TBD | TBD | not checked | no |
-| WEST-A | アルビレックス新潟 | `albirex_niigata` | not-started | TBD | TBD | not checked | no |
-| WEST-A | 高知ユナイテッドＳＣ | `kochi_united` | not-started | TBD | TBD | not checked | no |
-| WEST-A | 愛媛ＦＣ | `ehime_fc` | not-started | TBD | TBD | not checked | no |
-| WEST-A | ツエーゲン金沢 | `zweigen_kanazawa` | not-started | TBD | TBD | not checked | no |
-| WEST-A | ＦＣ大阪 | `fc_osaka` | not-started | TBD | TBD | not checked | no |
-| WEST-A | ＦＣ今治 | `fc_imabari` | not-started | TBD | TBD | not checked | no |
-| WEST-A | 奈良クラブ | `nara_club` | not-started | TBD | TBD | not checked | no |
-| WEST-A | カマタマーレ讃岐 | `kamatamare_sanuki` | not-started | TBD | TBD | not checked | no |
-| WEST-B | テゲバジャーロ宮崎 | `tegevajaro_miyazaki` | not-started | TBD | TBD | not checked | no |
-| WEST-B | サガン鳥栖 | `sagan_tosu` | not-started | TBD | TBD | not checked | no |
-| WEST-B | 鹿児島ユナイテッドＦＣ | `kagoshima_united` | not-started | TBD | TBD | not checked | no |
-| WEST-B | レノファ山口ＦＣ | `renofa_yamaguchi` | not-started | TBD | TBD | not checked | no |
-| WEST-B | ロアッソ熊本 | `roasso_kumamoto` | not-started | TBD | TBD | not checked | no |
-| WEST-B | 大分トリニータ | `oita_trinita` | not-started | TBD | TBD | not checked | no |
-| WEST-B | ガイナーレ鳥取 | `gainare_tottori` | not-started | TBD | TBD | not checked | no |
-| WEST-B | ギラヴァンツ北九州 | `giravanz_kitakyushu` | not-started | TBD | TBD | not checked | no |
-| WEST-B | レイラック滋賀ＦＣ | `reilac_shiga` | not-started | TBD | TBD | not checked | no |
-| WEST-B | ＦＣ琉球 | `fc_ryukyu` | not-started | TBD | TBD | not checked | no |
+| group | club nameJa | candidate internal team id | API-SPORTS verification status | externalTeamId | logoUrl | API raw team name | lookup source league | evidence | seedable |
+|---|---|---|---|---:|---|---|---|---|---|
+| EAST-A | ベガルタ仙台 | `vegalta_sendai` | api-lookup-evidence-found | 286 | `https://media.api-sports.io/football/teams/286.png` | Vegalta Sendai | J2 2024 / 99 | API-SPORTS teams?league=99&season=2024 | no |
+| EAST-A | 湘南ベルマーレ | `shonan_bellmare` | api-lookup-evidence-found | 284 | `https://media.api-sports.io/football/teams/284.png` | Shonan Bellmare | J1 2024 / 98 | API-SPORTS teams?league=98&season=2024 | no |
+| EAST-A | ブラウブリッツ秋田 | `blaublitz_akita` | api-lookup-evidence-found | 4315 | `https://media.api-sports.io/football/teams/4315.png` | Blaublitz Akita | J2 2024 / 99 | API-SPORTS teams?league=99&season=2024 | no |
+| EAST-A | ＳＣ相模原 | `sc_sagamihara` | api-lookup-name-variance-review | 4324 | `https://media.api-sports.io/football/teams/4324.png` | Sagamihara | J3 2024 / 100 | API raw name omits SC | no |
+| EAST-A | 横浜ＦＣ | `yokohama_fc` | api-lookup-evidence-found | 307 | `https://media.api-sports.io/football/teams/307.png` | Yokohama FC | J2 2024 / 99 | API-SPORTS teams?league=99&season=2024 | no |
+| EAST-A | モンテディオ山形 | `montedio_yamagata` | api-lookup-evidence-found | 312 | `https://media.api-sports.io/football/teams/312.png` | Montedio Yamagata | J2 2024 / 99 | API-SPORTS teams?league=99&season=2024 | no |
+| EAST-A | ザスパ群馬 | `thespa_gunma` | api-lookup-name-variance-review | 756 | `https://media.api-sports.io/football/teams/756.png` | Thespakusatsu Gunma | J2 2024 / 99 | API raw name uses older/longer form | no |
+| EAST-A | 栃木シティ | `tochigi_city` | api-lookup-evidence-found | 7145 | `https://media.api-sports.io/football/teams/7145.png` | Tochigi City | JFL 2024 / 497 | API-SPORTS teams?league=497&season=2024 | no |
+| EAST-A | 栃木ＳＣ | `tochigi_sc` | api-lookup-evidence-found | 315 | `https://media.api-sports.io/football/teams/315.png` | Tochigi SC | J2 2024 / 99 | API-SPORTS teams?league=99&season=2024 | no |
+| EAST-A | ヴァンラーレ八戸 | `vanraure_hachinohe` | api-lookup-evidence-found | 4326 | `https://media.api-sports.io/football/teams/4326.png` | Vanraure Hachinohe | J3 2024 / 100 | API-SPORTS teams?league=100&season=2024 | no |
+| EAST-B | ヴァンフォーレ甲府 | `ventforet_kofu` | api-lookup-evidence-found | 308 | `https://media.api-sports.io/football/teams/308.png` | Ventforet Kofu | J2 2024 / 99 | API-SPORTS teams?league=99&season=2024 | no |
+| EAST-B | いわきＦＣ | `iwaki_fc` | api-lookup-name-variance-review | 7127 | `https://media.api-sports.io/football/teams/7127.png` | Iwaki | J2 2024 / 99 | API raw name omits FC | no |
+| EAST-B | ＲＢ大宮アルディージャ | `rb_omiya_ardija` | api-lookup-name-variance-review | 313 | `https://media.api-sports.io/football/teams/313.png` | Omiya Ardija | J3 2024 / 100 | API raw name omits RB branding | no |
+| EAST-B | 北海道コンサドーレ札幌 | `hokkaido_consadole_sapporo` | api-lookup-name-variance-review | 279 | `https://media.api-sports.io/football/teams/279.png` | Consadole Sapporo | J1 2024 / 98 | API raw name omits Hokkaido | no |
+| EAST-B | 藤枝ＭＹＦＣ | `fujieda_myfc` | api-lookup-evidence-found | 4317 | `https://media.api-sports.io/football/teams/4317.png` | Fujieda MYFC | J2 2024 / 99 | API-SPORTS teams?league=99&season=2024 | no |
+| EAST-B | ＦＣ岐阜 | `fc_gifu` | api-lookup-evidence-found | 297 | `https://media.api-sports.io/football/teams/297.png` | FC Gifu | J3 2024 / 100 | API-SPORTS teams?league=100&season=2024 | no |
+| EAST-B | 松本山雅ＦＣ | `matsumoto_yamaga` | api-lookup-evidence-found | 304 | `https://media.api-sports.io/football/teams/304.png` | Matsumoto Yamaga | J3 2024 / 100 | API raw name omits FC but stable name is clear | no |
+| EAST-B | ジュビロ磐田 | `jubilo_iwata` | api-lookup-evidence-found | 280 | `https://media.api-sports.io/football/teams/280.png` | Jubilo Iwata | J1 2024 / 98 | API-SPORTS teams?league=98&season=2024 | no |
+| EAST-B | 福島ユナイテッドＦＣ | `fukushima_united` | api-lookup-evidence-found | 4318 | `https://media.api-sports.io/football/teams/4318.png` | Fukushima United | J3 2024 / 100 | API raw name omits FC but stable name is clear | no |
+| EAST-B | ＡＣ長野パルセイロ | `ac_nagano_parceiro` | api-lookup-name-variance-review | 4323 | `https://media.api-sports.io/football/teams/4323.png` | Parceiro Nagano | J3 2024 / 100 | API raw name differs in order and omits AC | no |
+| WEST-A | カターレ富山 | `kataller_toyama` | api-lookup-evidence-found | 4322 | `https://media.api-sports.io/football/teams/4322.png` | Kataller Toyama | J3 2024 / 100 | API-SPORTS teams?league=100&season=2024 | no |
+| WEST-A | 徳島ヴォルティス | `tokushima_vortis` | api-lookup-evidence-found | 299 | `https://media.api-sports.io/football/teams/299.png` | Tokushima Vortis | J2 2024 / 99 | API-SPORTS teams?league=99&season=2024 | no |
+| WEST-A | アルビレックス新潟 | `albirex_niigata` | api-lookup-evidence-found | 311 | `https://media.api-sports.io/football/teams/311.png` | Albirex Niigata | J1 2024 / 98 | API-SPORTS teams?league=98&season=2024 | no |
+| WEST-A | 高知ユナイテッドＳＣ | `kochi_united` | api-lookup-evidence-found | 7129 | `https://media.api-sports.io/football/teams/7129.png` | Kochi United | JFL 2024 / 497 | API raw name omits SC but stable name is clear | no |
+| WEST-A | 愛媛ＦＣ | `ehime_fc` | api-lookup-evidence-found | 318 | `https://media.api-sports.io/football/teams/318.png` | Ehime FC | J2 2024 / 99 | API-SPORTS teams?league=99&season=2024 | no |
+| WEST-A | ツエーゲン金沢 | `zweigen_kanazawa` | api-lookup-name-variance-review | 300 | `https://media.api-sports.io/football/teams/300.png` | Kanazawa | J3 2024 / 100 | API raw name is shortened | no |
+| WEST-A | ＦＣ大阪 | `fc_osaka` | api-lookup-name-variance-review | 7138 | `https://media.api-sports.io/football/teams/7138.png` | Osaka | J3 2024 / 100 | API raw name omits FC | no |
+| WEST-A | ＦＣ今治 | `fc_imabari` | api-lookup-name-variance-review | 10075 | `https://media.api-sports.io/football/teams/10075.png` | Imabari | J3 2024 / 100 | API raw name omits FC | no |
+| WEST-A | 奈良クラブ | `nara_club` | api-lookup-evidence-found | 7135 | `https://media.api-sports.io/football/teams/7135.png` | Nara Club | J3 2024 / 100 | API-SPORTS teams?league=100&season=2024 | no |
+| WEST-A | カマタマーレ讃岐 | `kamatamare_sanuki` | api-lookup-evidence-found | 317 | `https://media.api-sports.io/football/teams/317.png` | Kamatamare Sanuki | J3 2024 / 100 | API-SPORTS teams?league=100&season=2024 | no |
+| WEST-B | テゲバジャーロ宮崎 | `tegevajaro_miyazaki` | api-lookup-evidence-found | 10409 | `https://media.api-sports.io/football/teams/10409.png` | Tegevajaro Miyazaki | J3 2024 / 100 | API-SPORTS teams?league=100&season=2024 | no |
+| WEST-B | サガン鳥栖 | `sagan_tosu` | api-lookup-evidence-found | 295 | `https://media.api-sports.io/football/teams/295.png` | Sagan Tosu | J1 2024 / 98 | API-SPORTS teams?league=98&season=2024 | no |
+| WEST-B | 鹿児島ユナイテッドＦＣ | `kagoshima_united` | api-lookup-evidence-found | 2236 | `https://media.api-sports.io/football/teams/2236.png` | Kagoshima United | J2 2024 / 99 | API raw name omits FC but stable name is clear | no |
+| WEST-B | レノファ山口ＦＣ | `renofa_yamaguchi` | api-lookup-evidence-found | 309 | `https://media.api-sports.io/football/teams/309.png` | Renofa Yamaguchi | J2 2024 / 99 | API raw name omits FC but stable name is clear | no |
+| WEST-B | ロアッソ熊本 | `roasso_kumamoto` | api-lookup-evidence-found | 314 | `https://media.api-sports.io/football/teams/314.png` | Roasso Kumamoto | J2 2024 / 99 | API-SPORTS teams?league=99&season=2024 | no |
+| WEST-B | 大分トリニータ | `oita_trinita` | api-lookup-evidence-found | 298 | `https://media.api-sports.io/football/teams/298.png` | Oita Trinita | J2 2024 / 99 | API-SPORTS teams?league=99&season=2024 | no |
+| WEST-B | ガイナーレ鳥取 | `gainare_tottori` | api-lookup-evidence-found | 4319 | `https://media.api-sports.io/football/teams/4319.png` | Gainare Tottori | J3 2024 / 100 | API-SPORTS teams?league=100&season=2024 | no |
+| WEST-B | ギラヴァンツ北九州 | `giravanz_kitakyushu` | api-lookup-name-variance-review | 805 | `https://media.api-sports.io/football/teams/805.png` | Kitakyushu | J3 2024 / 100 | API raw name is shortened | no |
+| WEST-B | レイラック滋賀ＦＣ | `reilac_shiga` | api-lookup-name-variance-review | 7117 | `https://media.api-sports.io/football/teams/7117.png` | Biwako Shiga | JFL 2024 / 497 | API raw name differs from current J.LEAGUE name | no |
+| WEST-B | ＦＣ琉球 | `fc_ryukyu` | api-lookup-evidence-found | 2235 | `https://media.api-sports.io/football/teams/2235.png` | FC Ryukyu | J3 2024 / 100 | API-SPORTS teams?league=100&season=2024 | no |
 
 ## Documentation-Only Stable Internal Team ID Candidates
 
 The candidate IDs below are review candidates only. They are not confirmed `/teams/{id}` documents, not seed data, and not safe to write until stable identity review plus API-SPORTS team ID / logo URL verification are complete.
+
+Note: this table is for stable ID candidate review. The current source of truth for API team ID / logo URL evidence is the `API-SPORTS Verification Tracker` above. Candidate IDs remain unconfirmed review candidates, not confirmed `/teams/{id}` documents and not seed data.
 
 | group | club nameJa | candidate internal team id | candidate status | reason | API/team/logo status | seedable |
 |---|---|---|---|---|---|---|
@@ -336,8 +350,8 @@ The candidate IDs below are review candidates only. They are not confirmed `/tea
 ## Unresolved Items
 
 - No clubs in this membership review currently match existing confirmed J1 stable team IDs.
-- Create new stable team IDs only after identity review confirms the club is not already present.
-- Verify API-SPORTS team IDs.
-- Verify logo URLs.
+- Candidate internal team IDs remain documentation-only review candidates.
+- Review `api-lookup-name-variance-review` rows before treating API evidence as seedable.
+- Do not create confirmed `/teams/{id}` documents until stable identity + API evidence + logo evidence are approved together.
 - Add season membership data separately after stable team IDs are confirmed.
 - Keep `j2Teams.js` and `j3Teams.js` empty until seedable stable identities are approved.
