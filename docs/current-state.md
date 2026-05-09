@@ -230,6 +230,30 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - competitionKey は stable かつ explicit に維持する
   - API availability / API IDs / team IDs / logo URLs は seedable data 化前に lookup / verify する
   - 次の実装候補は Phase 1A: `football_j2` / `football_j3` scaffold
+- Phase 1A `football_j2` / `football_j3` scaffold 実装済み
+  - commit: `ea16c1e Add J2 J3 competition scaffold`
+  - `functions/scripts/data/competitionRegistry.js` に `football_j2` / `football_j3` を追加済み
+  - stable team identity scaffold modules 追加済み
+    - `functions/scripts/data/j2Teams.js`
+    - `functions/scripts/data/j3Teams.js`
+  - J2 / J3 の confirmed teams は意図的に空
+  - data-only season membership scaffold 追加済み
+    - `functions/scripts/data/competitionSeasonMemberships.js`
+  - review docs 追加済み
+    - `docs/current-j2-team-master-review.md`
+    - `docs/current-j3-team-master-review.md`
+  - promotion / relegation policy は維持
+    - stable club identity は `/teams/{id}` に維持する
+    - division membership は separate season membership data として扱う
+    - promoted / relegated clubs は J1 / J2 / J3 間で同じ internal team ID を reuse する
+    - division ごとの duplicate club docs は作成しない
+  - dry-run validation は PASS
+    - `node functions/scripts/seedCompetitionTeams.js football_j2 --dry-run`
+    - `node functions/scripts/verifyCompetitionTeams.js football_j2 --dry-run`
+    - `node functions/scripts/seedCompetitionTeams.js football_j3 --dry-run`
+    - `node functions/scripts/verifyCompetitionTeams.js football_j3 --dry-run`
+    - `npm --prefix functions run build`
+    - `flutter analyze --no-pub`
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -354,11 +378,19 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 
 現時点の active next tasks:
 
-- 他 competition への generic pipeline 展開
-- Flutter UI polish / regression check
+- Confirm official/current J2 membership source
+- Confirm official/current J3 membership source
+- Reuse existing internal team IDs for clubs already present in stable team master
+- Add confirmed stable identities to J2 / J3 team modules only after API / team / logo verification
+- Add season membership separately after stable team IDs are confirmed
 
 後回し:
 
+- Firestore write
+- non-dry seed
+- API-SPORTS sync
+- deploy
+- service account / API key work
 - Blaze 化判断
 - `getCalendar` deploy
 - curl による `.ics` 実 URL 確認
@@ -433,30 +465,32 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 
 優先順（Spark plan のまま Flutter + Firestore seed data で進める）：
 
-### Task 1: Phase 1A `football_j2` / `football_j3` scaffold
-- `docs/competition-expansion-roadmap.md` に沿って J2 / J3 から football expansion を始める
-- competition registry entries を追加する
-- J2 / J3 team master review docs を作成する
-- promotion / relegation を考慮し、J1 / J2 / J3 間で同じ club を duplicate team docs にしない
-- season membership は stable team master data とは別に verify できるようにする
-- generic seed / verify dry-run path を確認する
-- confirmed data になるまで Firestore write / API sync / deploy は行わない
+### Task 1: Confirm J2 / J3 official membership sources
+- official / current J2 membership source を確認する
+- official / current J3 membership source を確認する
+- confirmed source が取れるまで J2 / J3 team modules に actual team data を追加しない
+- Firestore write / non-dry seed / API sync / deploy は行わない
 
-### Task 2: 他 competition への generic pipeline 展開
+### Task 2: Stable team identity and API match review for J2 / J3
+- 既存 stable team master に存在する club は同じ internal team ID を reuse する
+- 新規 club は stable identity が確認できた場合のみ internal team ID を追加する
+- API-SPORTS team ID / logo URL は lookup / verify 後にのみ seedable data にする
+- season membership は stable team IDs confirmed 後に separate data として追加する
+
+### Task 3: 他 competition への generic pipeline 展開
 - Premier League / LaLiga / Serie A / Bundesliga / Ligue 1 / UEFA competitions などの team master data scaffold を検討する
 - competition ごとの data module を `competitionRegistry.js` に追加する
 - league-specific な season / tournament membership は team master と分離して扱う
 
-### Task 3: in-app followed-team calendar idea
+### Task 4: in-app followed-team calendar idea
 - followed teams の試合だけを表示する in-app calendar view を検討する
 - external `.ics` delivery とは別の Flutter UI task として扱う
 - Home と同じ followed-team game query behavior を再利用する
 
-### Task 4: Flutter UI polish / regression check
+### Task 5: Flutter UI polish / regression check / deferred backend work
 - J1 team search / follow / unfollow / home sample-game behavior / My Teams summary は確認済み
 - 今後 real game data を追加した後に主要検索語と follow 表示を再確認する
-
-### Task 5: deferred backend work
+- Firestore write / non-dry seed / API-SPORTS sync / deploy / service account work は後回し
 - Blaze 化判断
 - `getCalendar` deploy / curl による `.ics` 実 URL確認
 - API-SPORTS sync の deploy・動作確認
