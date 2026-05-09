@@ -9,11 +9,8 @@
  * (RapidApiFootballFixture) and the domain model (GameDoc).  Changes to the
  * API response format should be handled here only.
  *
- * ## Phase 0 status
- * The function is defined here as a placeholder.  syncFootball.ts still
- * performs its own inline conversion.  Phase 1 will move that logic here.
- *
- * TODO (Phase 1): migrate fixtureToGameDoc from syncFootball.ts to this file.
+ * syncFootball.ts delegates fixture conversion here so the sync pipeline and
+ * app model stay aligned.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.adaptFootballFixtureToGameDoc = adaptFootballFixtureToGameDoc;
@@ -24,16 +21,18 @@ const timezone_1 = require("../utils/timezone");
  *
  * @param fixture       - One element from the API-SPORTS /fixtures response.
  * @param competitionKey - SportsRegistry competition key, e.g. "football_j1".
+ * @param competitionSeasonKey - Concrete competition season / tournament key.
  * @param leagueDocId   - Firestore /leagues/{id} document ID.
  * @param homeTeamDocId - Firestore /teams/{id} document ID for the home team.
  * @param awayTeamDocId - Firestore /teams/{id} document ID for the away team.
  * @param homeTeamNameJa - Japanese team name (from translation map or Firestore).
  * @param awayTeamNameJa - Japanese team name.
  */
-function adaptFootballFixtureToGameDoc(fixture, competitionKey, leagueDocId, homeTeamDocId, awayTeamDocId, homeTeamNameJa, awayTeamNameJa) {
+function adaptFootballFixtureToGameDoc(fixture, competitionKey, competitionSeasonKey, leagueDocId, homeTeamDocId, awayTeamDocId, homeTeamNameJa, awayTeamNameJa) {
     const utcDate = (0, timezone_1.toUtcDate)(fixture.fixture.date);
     return {
         competitionKey,
+        competitionSeasonKey,
         // Legacy alias — written so existing queries on `sportKey` still work.
         sportKey: competitionKey,
         leagueId: leagueDocId,

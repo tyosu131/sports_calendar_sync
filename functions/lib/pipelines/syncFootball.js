@@ -21,8 +21,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.syncFootballFixtures = syncFootballFixtures;
 const axios_1 = __importDefault(require("axios"));
 const firestore_1 = require("firebase-admin/firestore");
+const football_adapter_1 = require("../adapters/football_adapter");
 const competitionSeasons_1 = require("../config/competitionSeasons");
-const timezone_1 = require("../utils/timezone");
 const translation_1 = require("../utils/translation");
 const RAPID_API_HOST = "v3.football.api-sports.io";
 const RAPID_API_BASE = `https://${RAPID_API_HOST}`;
@@ -49,32 +49,6 @@ async function fetchFixtures(leagueId, season, rapidApiKey) {
         },
     });
     return response.data.response;
-}
-/**
- * Convert an API-SPORTS fixture to a Firestore GameDoc.
- */
-function fixtureToGameDoc(fixture, competitionKey, competitionSeasonKey, leagueDocId, homeTeamDocId, awayTeamDocId, homeTeamNameJa, awayTeamNameJa) {
-    const utcDate = (0, timezone_1.toUtcDate)(fixture.fixture.date);
-    return {
-        competitionKey,
-        competitionSeasonKey,
-        sportKey: competitionKey,
-        leagueId: leagueDocId,
-        homeTeamId: homeTeamDocId,
-        homeTeamNameJa,
-        awayTeamId: awayTeamDocId,
-        awayTeamNameJa,
-        startTimeUTC: firestore_1.Timestamp.fromDate(utcDate),
-        startTimeJST: (0, timezone_1.toJstStorageString)(fixture.fixture.date),
-        timezone: fixture.fixture.timezone ?? "UTC",
-        status: (0, timezone_1.mapFootballStatus)(fixture.fixture.status.short),
-        venue: fixture.fixture.venue?.name,
-        homeScore: fixture.goals.home ?? undefined,
-        awayScore: fixture.goals.away ?? undefined,
-        broadcastPlatforms: [], // Populated separately via broadcast mapping
-        externalFixtureId: fixture.fixture.id,
-        rapidApiFixtureId: fixture.fixture.id,
-    };
 }
 /**
  * Main sync pipeline for football.
@@ -152,7 +126,7 @@ async function syncFootballFixtures(rapidApiKey) {
                 (0, translation_1.translateTeamName)(translationMap, fixture.teams.home.name);
             const awayTeamNameJa = awayTeam?.nameJa ??
                 (0, translation_1.translateTeamName)(translationMap, fixture.teams.away.name);
-            const gameDoc = fixtureToGameDoc(fixture, seasonProfile.competitionKey, seasonProfile.competitionSeasonKey, leagueDoc.id, homeTeamDocId, awayTeamDocId, homeTeamNameJa, awayTeamNameJa);
+            const gameDoc = (0, football_adapter_1.adaptFootballFixtureToGameDoc)(fixture, seasonProfile.competitionKey, seasonProfile.competitionSeasonKey, leagueDoc.id, homeTeamDocId, awayTeamDocId, homeTeamNameJa, awayTeamNameJa);
             const gameRef = db
                 .collection("games")
                 .doc(`football_${fixture.fixture.id}`);
