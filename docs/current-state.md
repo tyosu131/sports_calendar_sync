@@ -278,6 +278,24 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - this is season / tournament membership evidence only, not stable team master seed data
   - `j2Teams.js` / `j3Teams.js` は empty and unchanged
   - no Firestore write / API-SPORTS call / deploy / service account or API key changes
+- J2 / J3 stable internal team ID mapping review documented
+  - commit: `8d7c960 Document J2 J3 stable ID mapping review`
+  - updated
+    - `docs/current-j2-j3-season-membership-review.md`
+    - `docs/current-j2-team-master-review.md`
+    - `docs/current-j3-team-master-review.md`
+  - total membership rows reviewed: 40
+  - matched to existing confirmed J1 stable team IDs: 0
+  - unresolved rows requiring stable identity review: 40
+  - existing team IDs reused: none
+  - every membership row remains `review`
+  - every internal team ID remains `TBD`
+  - every `externalTeamId` remains `TBD`
+  - every `logoUrl` remains `TBD`
+  - every `seedable` remains `no`
+  - rows are marked as `new-stable-id-candidate-needed; membership evidence only`
+  - `j2Teams.js` / `j3Teams.js` は empty and unchanged
+  - no source code / seed data / Firestore write / API call / deploy / serviceAccountKey or API key changes
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -402,11 +420,10 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 
 現時点の active next tasks:
 
-- Map J2 / J3 membership rows to existing stable internal team IDs where possible
-- Identify which clubs already exist in J1 stable team master
-- Create new stable internal team IDs only after identity review
+- Perform stable identity review for 40 unresolved J2 / J3 clubs
+- Decide stable internal team ID candidates only after identity review
 - Verify API-SPORTS team IDs and logo URLs separately
-- Keep seed data empty until stable identity + API / logo verification is complete
+- Keep `j2Teams.js` and `j3Teams.js` empty until stable identity + API / logo verification is complete
 
 後回し:
 
@@ -489,11 +506,11 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 
 優先順（Spark plan のまま Flutter + Firestore seed data で進める）：
 
-### Task 1: Map J2 / J3 membership rows to stable team IDs
-- `docs/current-j2-j3-season-membership-review.md` の membership rows を既存 stable team master と照合する
-- J1 stable team master に既に存在する club を特定する
-- 既存 club は同じ internal team ID を reuse する
-- 新規 club は identity review 後にのみ new stable internal team ID candidate とする
+### Task 1: Stable identity review for 40 unresolved J2 / J3 clubs
+- `docs/current-j2-j3-season-membership-review.md` の 40 unresolved clubs を stable identity review する
+- stable internal team ID candidates は identity review 後にのみ決める
+- duplicate club docs を作らない
+- `j2Teams.js` / `j3Teams.js` は stable identity + API / logo verification が揃うまで empty のまま維持する
 
 ### Task 2: API / logo verification for J2 / J3 stable identities
 - API-SPORTS team ID / logo URL は separate lookup / verify 後にのみ seedable data にする
