@@ -219,6 +219,14 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - `docs/team-game-model-gaps.md`
 - real sync implementation priority plan 追加済み
   - `docs/real-sync-priority-plan.md`
+- competition expansion roadmap 追加済み
+  - `docs/competition-expansion-roadmap.md`
+  - Phase 1 は football expansion: J2 / J3 から開始し、Premier League / LaLiga / Serie A / Bundesliga / Ligue 1 / UEFA competitions へ展開する方針
+  - league / tournament / cup competitions は stable team master data と分離して扱う
+  - team は複数 competition seasons / tournaments に所属し得る
+  - competitionKey は stable かつ explicit に維持する
+  - API availability / API IDs / team IDs / logo URLs は seedable data 化前に lookup / verify する
+  - 次の実装候補は Phase 1A: `football_j2` / `football_j3` scaffold
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -422,16 +430,28 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 
 優先順（Spark plan のまま Flutter + Firestore seed data で進める）：
 
-### Task 1: 他 competition への generic pipeline 展開
-- NPB / MLB / NBA / Premier League などの team master data scaffold を検討する
+### Task 1: Phase 1A `football_j2` / `football_j3` scaffold
+- `docs/competition-expansion-roadmap.md` に沿って J2 / J3 から football expansion を始める
+- competition registry entries を追加する
+- J2 / J3 team master review docs を作成する
+- generic seed / verify dry-run path を確認する
+- confirmed data になるまで Firestore write / API sync / deploy は行わない
+
+### Task 2: 他 competition への generic pipeline 展開
+- Premier League / LaLiga / Serie A / Bundesliga / Ligue 1 / UEFA competitions などの team master data scaffold を検討する
 - competition ごとの data module を `competitionRegistry.js` に追加する
 - league-specific な season / tournament membership は team master と分離して扱う
 
-### Task 2: Flutter UI polish / regression check
+### Task 3: in-app followed-team calendar idea
+- followed teams の試合だけを表示する in-app calendar view を検討する
+- external `.ics` delivery とは別の Flutter UI task として扱う
+- Home と同じ followed-team game query behavior を再利用する
+
+### Task 4: Flutter UI polish / regression check
 - J1 team search / follow / unfollow / home sample-game behavior / My Teams summary は確認済み
 - 今後 real game data を追加した後に主要検索語と follow 表示を再確認する
 
-### Task 3: deferred backend work
+### Task 5: deferred backend work
 - Blaze 化判断
 - `getCalendar` deploy / curl による `.ics` 実 URL確認
 - API-SPORTS sync の deploy・動作確認
