@@ -29,10 +29,25 @@ This document is the review table used before adding confirmed stable J2 club id
 
 ## Sources
 
-- Official/current J2 membership source: 未確認
+- Official/current J2/J3 special competition source: <https://www.jleague.jp/special/2026specialseason/j2-j3/>
+- Official/current J2/J3 standings source: <https://www.jleague.jp/standings/j2j3/>
+- Season membership review: `docs/current-j2-j3-season-membership-review.md`
 - API-SPORTS team ID / logo lookup source: 未確認
 - Existing stable team master baseline: `functions/scripts/data/j1Teams.js`
 - Season membership scaffold: `functions/scripts/data/competitionSeasonMemberships.js`
+
+## 2026 J2 / J3 Special Competition Source
+
+J.LEAGUE official sources identify the 2026 special competition as `明治安田Ｊ２・Ｊ３百年構想リーグ`.
+
+- The competition combines J2 and J3 clubs.
+- The regional league round is organized into four groups: `EAST-A`, `EAST-B`, `WEST-A`, and `WEST-B`.
+- Each group contains 10 clubs.
+- J.LEAGUE states that the J2/J3 special competition results do not cause promotion or relegation.
+- This is season / tournament membership evidence only.
+- It must not be treated as permanent J2 team master data.
+- It does not by itself make any row seedable in `j2Teams.js`.
+- API-SPORTS team IDs and logo URLs remain unverified.
 
 ## Review Table
 
@@ -40,7 +55,7 @@ Do not move rows into `j2Teams.js` until the club identity, API-SPORTS team ID, 
 
 | status | internal team id | club nameJa | club nameEn | externalTeamId | logoUrl | already exists in stable team master? | membership source | API match source | season membership note | unresolved items |
 |---|---|---|---|---|---|---|---|---|---|---|
-| pending | 要確認 | 要確認 | 要確認 | 要確認 | 要確認 | 要確認 | 未確認 | 未確認 | Add only as season membership after stable team identity is confirmed. | Official membership source, stable team ID, API team ID, logo URL |
+| pending | 要確認 | 要確認 | 要確認 | 要確認 | 要確認 | 要確認 | J.LEAGUE official J2/J3 special competition / standings source recorded in `docs/current-j2-j3-season-membership-review.md` | 未確認 | Add only as season membership after stable team identity is confirmed. | Stable team ID, API team ID, logo URL |
 
 ## Season Membership Scaffold
 
