@@ -278,6 +278,29 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - `npm --prefix functions run build` は PASS
   - `node functions/scripts/verifyFootballStatusMapping.js` は PASS
   - `flutter analyze --no-pub` は `No issues found!`
+- football real game data verification script 実装済み
+  - commit: `ed48905 Add football real game verification`
+  - `functions/scripts/verifyFootballRealGames.js` 追加済み
+  - script は read-only
+  - dry-run は Firebase Admin SDK を initialize せず、Firestore read/write もしない
+  - non-dry mode は Firestore read のみ
+  - default target は `competitionKey: football_j1` / `competitionSeasonKey: football_j1_2026_hyakunen`
+  - real sync docs は document ID が `football_` で始まる docs として扱う
+  - non-real / sample docs はそれ以外として情報表示のみ行う
+  - required field checks / team mapping checks / fixture ID compatibility checks は real sync docs のみに適用する
+  - real sync docs が 0件の場合、default では warning + exit 0
+  - `--require-games` では real sync docs 0件を failure とする
+  - required `GameDoc` fields を verify する
+  - `competitionKey === sportKey` を verify する
+  - `externalFixtureId === rapidApiFixtureId` を verify する
+  - supported `status` を verify する
+  - home / away team IDs が `/teams` に存在することを verify する
+  - team docs の competition key と external team ID を verify する
+  - placeholder-like `football_team_` team IDs がないことを verify する
+  - Home query shape を `homeTeamId` / `awayTeamId` `in`、`startTimeUTC >= now`、`orderBy startTimeUTC` で verify する
+  - `npm --prefix functions run build` は PASS
+  - `node functions/scripts/verifyFootballRealGames.js --dry-run` は PASS
+  - `flutter analyze --no-pub` は `No issues found!`
 - app-side team search 修正済み
   - `lib/data/repositories/team_repository.dart`
   - `lib/data/providers/team_providers.dart`
@@ -320,8 +343,8 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 
 現時点の active next tasks:
 
-- real game data verification script
 - 他 competition への generic pipeline 展開
+- Flutter UI polish / regression check
 
 後回し:
 
@@ -399,21 +422,16 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 
 優先順（Spark plan のまま Flutter + Firestore seed data で進める）：
 
-### Task 1: real game data verification script
-- real sync data 用の read-only / dry-run verification script を追加する
-- mapped team IDs、required fields、fixture ID compatibility、home-screen query behavior を確認する
-- Cloud Functions deploy / `getCalendar` 実 URL確認 / API-SPORTS sync は後回しにする
-
-### Task 2: 他 competition への generic pipeline 展開
+### Task 1: 他 competition への generic pipeline 展開
 - NPB / MLB / NBA / Premier League などの team master data scaffold を検討する
 - competition ごとの data module を `competitionRegistry.js` に追加する
 - league-specific な season / tournament membership は team master と分離して扱う
 
-### Task 3: Flutter UI polish / regression check
+### Task 2: Flutter UI polish / regression check
 - J1 team search / follow / unfollow / home sample-game behavior / My Teams summary は確認済み
 - 今後 real game data を追加した後に主要検索語と follow 表示を再確認する
 
-### Task 4: deferred backend work
+### Task 3: deferred backend work
 - Blaze 化判断
 - `getCalendar` deploy / curl による `.ics` 実 URL確認
 - API-SPORTS sync の deploy・動作確認
