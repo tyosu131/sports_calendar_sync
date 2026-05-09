@@ -267,6 +267,34 @@ Summary:
 | `giravanz_kitakyushu` | ギラヴァンツ北九州 | Kitakyushu | shortened name | API raw name is shortened to `Kitakyushu`; likely same club candidate, but keep as approval target before seedable data | no |
 | `reilac_shiga` | レイラック滋賀ＦＣ | Biwako Shiga | rebrand / continuity variance | API raw name differs from current J.LEAGUE name; requires stronger rebrand / continuity review before seedable data | no |
 
+## Confirmed Team Module Criteria
+
+This section defines the documentation-only criteria for later adding confirmed entries to `functions/scripts/data/j2Teams.js` or `functions/scripts/data/j3Teams.js`.
+
+It does not create confirmed entries, seed data, Firestore documents, or competition season membership rows.
+
+Summary:
+
+- Confirmed team module criteria documented: yes
+- Confirmed entries added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- Firestore writes: 0
+- Seedable rows changed: 0
+
+A club row can be considered for a confirmed team module entry only after all of the following are true:
+
+- The candidate internal team ID is approved as the stable club identity.
+- The API-SPORTS `externalTeamId` is confirmed from API lookup evidence.
+- The `logoUrl` is confirmed from API lookup evidence.
+- Any name variance row has passed additional review / approval.
+- `reilac_shiga` / `Biwako Shiga` has completed stronger rebrand / continuity review before being considered as a confirmed entry.
+- Stable team master data remains separate from season / tournament membership data.
+- A confirmed `/teams/{id}` document is not treated as the same thing as competition membership.
+- Firestore write and non-dry seed execution wait for separate approval.
+
+Do not add rows to `j2Teams.js` or `j3Teams.js` from this review document alone. The tracker and name variance review are evidence, not seedable master data.
+
 ## Documentation-Only Stable Internal Team ID Candidates
 
 The candidate IDs below are review candidates only. They are not confirmed `/teams/{id}` documents, not seed data, and not safe to write until stable identity review plus API-SPORTS team ID / logo URL verification are complete.
