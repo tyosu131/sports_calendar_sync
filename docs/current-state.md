@@ -224,6 +224,9 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - Phase 1 は football expansion: J2 / J3 から開始し、Premier League / LaLiga / Serie A / Bundesliga / Ligue 1 / UEFA competitions へ展開する方針
   - league / tournament / cup competitions は stable team master data と分離して扱う
   - team は複数 competition seasons / tournaments に所属し得る
+  - J.League の division membership は team master ではなく competition season membership として扱う
+  - promotion / relegation では同じ internal team ID を J1 / J2 / J3 season memberships 間で移動し、club docs を division ごとに複製しない
+  - seed / verify は stable team identity と season membership を分離して確認できるようにする
   - competitionKey は stable かつ explicit に維持する
   - API availability / API IDs / team IDs / logo URLs は seedable data 化前に lookup / verify する
   - 次の実装候補は Phase 1A: `football_j2` / `football_j3` scaffold
@@ -434,6 +437,8 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 - `docs/competition-expansion-roadmap.md` に沿って J2 / J3 から football expansion を始める
 - competition registry entries を追加する
 - J2 / J3 team master review docs を作成する
+- promotion / relegation を考慮し、J1 / J2 / J3 間で同じ club を duplicate team docs にしない
+- season membership は stable team master data とは別に verify できるようにする
 - generic seed / verify dry-run path を確認する
 - confirmed data になるまで Firestore write / API sync / deploy は行わない
 

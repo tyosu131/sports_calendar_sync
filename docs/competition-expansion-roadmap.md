@@ -18,8 +18,13 @@ Current baseline:
 
 - League, tournament, and cup competitions must be modeled separately from stable team master data.
 - A team may belong to multiple competition seasons or tournaments.
+- League membership is not permanent team master data.
+- Team master data must stay stable across `football_j1`, `football_j2`, and `football_j3`.
+- J.League division membership must be modeled per competition season.
+- Promotion and relegation should move the same internal team ID between J1 / J2 / J3 season memberships, not create duplicate club documents.
 - Internal `competitionKey` values should remain stable, explicit, and human-auditable.
 - Cup and tournament competitions should use their own competition keys rather than being forced into league keys.
+- Seed / verify workflows should support checking season membership separately from team identity.
 - Real API availability must be verified before each competition moves from roadmap to seedable data.
 - API IDs, team IDs, and logo URLs must be looked up or verified. Do not guess them.
 - Uncertain teams must stay out of seed data until confirmed.
@@ -45,8 +50,10 @@ Primary next implementation phase. Start with J.League lower divisions, then exp
 Recommended next implementation after this roadmap:
 
 - Add competition registry entries for `football_j2` and `football_j3`.
-- Create team master review docs for J2 / J3.
+- Create team master review docs for J2 / J3 without duplicating clubs already present in team master data.
+- Add or design season membership review data separately from stable team identity.
 - Add seed / verify dry-run path through the existing generic pipeline.
+- Add dry-run verification that season membership references existing stable team IDs.
 - Keep uncertain teams out of seed data.
 - Do not write Firestore until membership and API ID / logo matches are confirmed.
 - Do not enable API sync or deploy.
@@ -114,10 +121,11 @@ Before moving any roadmap competition into seedable data:
 - Confirm official/current competition membership source.
 - Confirm stable internal `competitionKey`.
 - Confirm league / tournament / cup separation.
+- Confirm whether the work is adding stable team identity, season membership, or both.
+- Confirm promoted / relegated clubs reuse existing internal team IDs.
 - Confirm API provider and API availability for the target season.
 - Confirm external league ID, API season, team IDs, and logo URLs.
 - Create review doc before seed data changes.
 - Add dry-run seed / verify path.
 - Run dry-run validation.
 - Get approval before any Firestore write.
-
