@@ -53,7 +53,7 @@ J.LEAGUE official sources identify the 2026 special competition as `明治安田
 
 Do not move rows into `j3Teams.js` until the club identity, API-SPORTS team ID, logo URL, and season membership source are confirmed.
 
-Stable internal team ID mapping review is tracked in `docs/current-j2-j3-season-membership-review.md`. API-SPORTS team ID / logo verification remains pending.
+Stable internal team ID mapping review and documentation-only candidate IDs are tracked in `docs/current-j2-j3-season-membership-review.md`. API-SPORTS team ID / logo verification remains pending.
 
 | status | internal team id | club nameJa | club nameEn | externalTeamId | logoUrl | already exists in stable team master? | membership source | API match source | season membership note | unresolved items |
 |---|---|---|---|---|---|---|---|---|---|---|

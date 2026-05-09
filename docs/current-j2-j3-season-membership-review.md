@@ -47,6 +47,11 @@ Compared against existing confirmed stable team identities in `functions/scripts
 - Matched to existing stable J1 team master: 0
 - Requiring new stable internal team ID review: 40
 - Existing stable team IDs reused: none
+- Documentation-only candidate internal team IDs proposed: 40
+- Confirmed internal team IDs: 0
+- API-SPORTS IDs verified: 0
+- Logo URLs verified: 0
+- Seedable rows: 0
 - `externalTeamId`: remains `TBD` for every row
 - `logoUrl`: remains `TBD` for every row
 - `seedable`: remains `no` for every row
@@ -99,6 +104,53 @@ Unresolved clubs requiring stable identity review:
 - ＦＣ琉球
 
 This is not seedable data yet. Stable identity review, API-SPORTS team ID verification, and logo URL verification must be completed before any row can move into `j2Teams.js` or `j3Teams.js`.
+
+## Documentation-Only Stable Internal Team ID Candidates
+
+The candidate IDs below are review candidates only. They are not confirmed `/teams/{id}` documents, not seed data, and not safe to write until stable identity review plus API-SPORTS team ID / logo URL verification are complete.
+
+| group | club nameJa | candidate internal team id | candidate status | reason | API/team/logo status | seedable |
+|---|---|---|---|---|---|---|
+| EAST-A | ベガルタ仙台 | `vegalta_sendai` | candidate-review | Common romanized club name; no existing J1 stable ID match | externalTeamId TBD; logoUrl TBD | no |
+| EAST-A | 湘南ベルマーレ | `shonan_bellmare` | candidate-review | Common romanized club name; no existing J1 stable ID match | externalTeamId TBD; logoUrl TBD | no |
+| EAST-A | ブラウブリッツ秋田 | `blaublitz_akita` | candidate-review | Common romanized club name; no existing J1 stable ID match | externalTeamId TBD; logoUrl TBD | no |
+| EAST-A | ＳＣ相模原 | `sc_sagamihara` | candidate-review | Common romanized club name; no existing J1 stable ID match | externalTeamId TBD; logoUrl TBD | no |
+| EAST-A | 横浜ＦＣ | `yokohama_fc` | candidate-review | Common romanized club name; no existing J1 stable ID match | externalTeamId TBD; logoUrl TBD | no |
+| EAST-A | モンテディオ山形 | `montedio_yamagata` | candidate-review | Common romanized club name; no existing J1 stable ID match | externalTeamId TBD; logoUrl TBD | no |
+| EAST-A | ザスパ群馬 | `thespa_gunma` | candidate-review | Common romanized club name; no existing J1 stable ID match | externalTeamId TBD; logoUrl TBD | no |
+| EAST-A | 栃木シティ | `tochigi_city` | candidate-review | Common romanized club name; no existing J1 stable ID match | externalTeamId TBD; logoUrl TBD | no |
+| EAST-A | 栃木ＳＣ | `tochigi_sc` | candidate-review | Common romanized club name; no existing J1 stable ID match | externalTeamId TBD; logoUrl TBD | no |
+| EAST-A | ヴァンラーレ八戸 | `vanraure_hachinohe` | candidate-review | Common romanized club name; no existing J1 stable ID match | externalTeamId TBD; logoUrl TBD | no |
+| EAST-B | ヴァンフォーレ甲府 | `ventforet_kofu` | candidate-review | Common romanized club name; no existing J1 stable ID match | externalTeamId TBD; logoUrl TBD | no |
+| EAST-B | いわきＦＣ | `iwaki_fc` | candidate-review | Common romanized club name; no existing J1 stable ID match | externalTeamId TBD; logoUrl TBD | no |
+| EAST-B | ＲＢ大宮アルディージャ | `rb_omiya_ardija` | candidate-review | Common romanized club name; no existing J1 stable ID match | externalTeamId TBD; logoUrl TBD | no |
+| EAST-B | 北海道コンサドーレ札幌 | `hokkaido_consadole_sapporo` | candidate-review | Common romanized club name; no existing J1 stable ID match | externalTeamId TBD; logoUrl TBD | no |
+| EAST-B | 藤枝ＭＹＦＣ | `fujieda_myfc` | candidate-review | Common romanized club name; no existing J1 stable ID match | externalTeamId TBD; logoUrl TBD | no |
+| EAST-B | ＦＣ岐阜 | `fc_gifu` | candidate-review | Common romanized club name; no existing J1 stable ID match | externalTeamId TBD; logoUrl TBD | no |
+| EAST-B | 松本山雅ＦＣ | `matsumoto_yamaga` | candidate-review | Common romanized club name; no existing J1 stable ID match | externalTeamId TBD; logoUrl TBD | no |
+| EAST-B | ジュビロ磐田 | `jubilo_iwata` | candidate-review | Common romanized club name; no existing J1 stable ID match | externalTeamId TBD; logoUrl TBD | no |
+| EAST-B | 福島ユナイテッドＦＣ | `fukushima_united` | candidate-review | Common romanized club name; no existing J1 stable ID match | externalTeamId TBD; logoUrl TBD | no |
+| EAST-B | ＡＣ長野パルセイロ | `ac_nagano_parceiro` | candidate-review | Common romanized club name; no existing J1 stable ID match | externalTeamId TBD; logoUrl TBD | no |
+| WEST-A | カターレ富山 | `kataller_toyama` | candidate-review | Common romanized club name; no existing J1 stable ID match | externalTeamId TBD; logoUrl TBD | no |
+| WEST-A | 徳島ヴォルティス | `tokushima_vortis` | candidate-review | Common romanized club name; no existing J1 stable ID match | externalTeamId TBD; logoUrl TBD | no |
+| WEST-A | アルビレックス新潟 | `albirex_niigata` | candidate-review | Common romanized club name; no existing J1 stable ID match | externalTeamId TBD; logoUrl TBD | no |
+| WEST-A | 高知ユナイテッドＳＣ | `kochi_united` | candidate-review | Common romanized club name; no existing J1 stable ID match | externalTeamId TBD; logoUrl TBD | no |
+| WEST-A | 愛媛ＦＣ | `ehime_fc` | candidate-review | Common romanized club name; no existing J1 stable ID match | externalTeamId TBD; logoUrl TBD | no |
+| WEST-A | ツエーゲン金沢 | `zweigen_kanazawa` | candidate-review | Common romanized club name; no existing J1 stable ID match | externalTeamId TBD; logoUrl TBD | no |
+| WEST-A | ＦＣ大阪 | `fc_osaka` | candidate-review | Common romanized club name; no existing J1 stable ID match | externalTeamId TBD; logoUrl TBD | no |
+| WEST-A | ＦＣ今治 | `fc_imabari` | candidate-review | Common romanized club name; no existing J1 stable ID match | externalTeamId TBD; logoUrl TBD | no |
+| WEST-A | 奈良クラブ | `nara_club` | candidate-review | Common romanized club name; no existing J1 stable ID match | externalTeamId TBD; logoUrl TBD | no |
+| WEST-A | カマタマーレ讃岐 | `kamatamare_sanuki` | candidate-review | Common romanized club name; no existing J1 stable ID match | externalTeamId TBD; logoUrl TBD | no |
+| WEST-B | テゲバジャーロ宮崎 | `tegevajaro_miyazaki` | candidate-review | Common romanized club name; no existing J1 stable ID match | externalTeamId TBD; logoUrl TBD | no |
+| WEST-B | サガン鳥栖 | `sagan_tosu` | candidate-review | Common romanized club name; no existing J1 stable ID match | externalTeamId TBD; logoUrl TBD | no |
+| WEST-B | 鹿児島ユナイテッドＦＣ | `kagoshima_united` | candidate-review | Common romanized club name; no existing J1 stable ID match | externalTeamId TBD; logoUrl TBD | no |
+| WEST-B | レノファ山口ＦＣ | `renofa_yamaguchi` | candidate-review | Common romanized club name; no existing J1 stable ID match | externalTeamId TBD; logoUrl TBD | no |
+| WEST-B | ロアッソ熊本 | `roasso_kumamoto` | candidate-review | Common romanized club name; no existing J1 stable ID match | externalTeamId TBD; logoUrl TBD | no |
+| WEST-B | 大分トリニータ | `oita_trinita` | candidate-review | Common romanized club name; no existing J1 stable ID match | externalTeamId TBD; logoUrl TBD | no |
+| WEST-B | ガイナーレ鳥取 | `gainare_tottori` | candidate-review | Common romanized club name; no existing J1 stable ID match | externalTeamId TBD; logoUrl TBD | no |
+| WEST-B | ギラヴァンツ北九州 | `giravanz_kitakyushu` | candidate-review | Common romanized club name; no existing J1 stable ID match | externalTeamId TBD; logoUrl TBD | no |
+| WEST-B | レイラック滋賀ＦＣ | `reilac_shiga` | candidate-review | Common romanized club name; no existing J1 stable ID match | externalTeamId TBD; logoUrl TBD | no |
+| WEST-B | ＦＣ琉球 | `fc_ryukyu` | candidate-review | Common romanized club name; no existing J1 stable ID match | externalTeamId TBD; logoUrl TBD | no |
 
 ## EAST-A
 
