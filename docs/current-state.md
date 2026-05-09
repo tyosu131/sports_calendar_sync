@@ -389,6 +389,20 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - confirmed `/teams/{id}` documents ではない
   - `j2Teams.js` / `j3Teams.js` への投入はまだ不要
   - Firestore write / non-dry seed / API sync / deploy は引き続き deferred
+- J2 / J3 API name variance review documented
+  - commit: `37cb071 Document J2 J3 API name variance review`
+  - updated
+    - `docs/current-j2-j3-season-membership-review.md`
+  - `Name Variance Review` section 追加済み
+  - 11件の `api-lookup-name-variance-review` rows を documentation-only で整理済み
+  - Rows acceptable as API evidence candidates: 10
+  - Rows requiring stronger rebrand / continuity review before seedable: 1
+  - `reilac_shiga` / `Biwako Shiga` は seedable 前に強めの continuity review が必要な高注意行
+  - Rows moved to seedable: 0
+  - Confirmed `/teams/{id}` documents created: 0
+  - `j2Teams.js` / `j3Teams.js` entries added: 0
+  - `seedable` は全件 `no`
+  - Firestore write / non-dry seed / API sync / deploy は実行していない
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -513,8 +527,8 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 
 現時点の active next tasks:
 
-- Review the 11 `api-lookup-name-variance-review` rows before treating API evidence as seedable
-- Prepare the confirmed team module criteria for J2 / J3 without writing entries yet
+- Prepare confirmed team module criteria for J2 / J3 without writing entries yet
+- Keep `reilac_shiga` / `Biwako Shiga` as a stronger continuity review item before seedable approval
 - Keep candidate internal team IDs as documentation-only review candidates until stable identity + API evidence + logo evidence are approved together
 - Do not create confirmed `/teams/{id}` documents or add entries to `j2Teams.js` / `j3Teams.js` yet
 - Keep Firestore write / non-dry seed / API sync / deploy deferred
@@ -602,14 +616,16 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 
 ### Task 1: API / logo verification for J2 / J3 stable identities
 - `docs/current-j2-j3-season-membership-review.md` に 40件分の API-SPORTS lookup evidence は記録済み
-- `api-lookup-name-variance-review` の 11件を seedable 前に確認する
+- `api-lookup-name-variance-review` の 11件は documentation-only review として整理済み
+- `reilac_shiga` / `Biwako Shiga` は seedable 前に強めの continuity review が必要
 - API-SPORTS team ID / logo URL evidence は documentation evidence であり、confirmed `/teams/{id}` documents ではない
 - stable identity + API evidence + logo evidence が承認されるまで `j2Teams.js` / `j3Teams.js` は empty のまま維持する
 - season membership は stable team IDs confirmed 後に separate data として追加する
 - Firestore write / non-dry seed / API sync / deploy は行わない
 
 ### Task 2: Confirmed J2 / J3 team module preparation
-- name variance review と confirmed team module criteria を先に整理する
+- confirmed team module criteria を先に整理する
+- `reilac_shiga` / `Biwako Shiga` は continuity review 完了まで confirmed entry 候補にしない
 - stable identity + API / logo verification が承認済みの club のみ `j2Teams.js` / `j3Teams.js` への confirmed entry 候補にする
 - candidate IDs は confirmed `/teams/{id}` documents ではなく、seed data でもない状態を維持する
 - `j2Teams.js` / `j3Teams.js` への投入、Firestore write、non-dry seed は別 approval まで行わない
