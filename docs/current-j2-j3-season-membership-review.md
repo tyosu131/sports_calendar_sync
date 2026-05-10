@@ -267,6 +267,41 @@ Summary:
 | `giravanz_kitakyushu` | ギラヴァンツ北九州 | Kitakyushu | shortened name | API raw name is shortened to `Kitakyushu`; likely same club candidate, but keep as approval target before seedable data | no |
 | `reilac_shiga` | レイラック滋賀ＦＣ | Biwako Shiga | rebrand / continuity variance | API raw name differs from current J.LEAGUE name; requires stronger rebrand / continuity review before seedable data | no |
 
+## Reilac Shiga Continuity Review
+
+This section records documentation-only continuity review for the high-attention `reilac_shiga` / `Biwako Shiga` API name variance row.
+
+Summary:
+
+- Reilac / Biwako continuity review documented: yes
+- Continuity approval completed: no
+- Confirmed entries added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- Firestore writes: 0
+- Seedable rows changed: 0
+
+| field | value |
+|---|---|
+| current candidate internal team id | `reilac_shiga` |
+| current J.LEAGUE / club name | Reilac Shiga FC / レイラック滋賀FC |
+| API-SPORTS raw team name | Biwako Shiga |
+| API-SPORTS externalTeamId | 7117 |
+| logoUrl | `https://media.api-sports.io/football/teams/7117.png` |
+| lookup source | JFL 2024 / 497 |
+| variance reason | API-SPORTS raw name differs from the current official-facing club name |
+| continuity interpretation | Treat `Biwako Shiga` as API raw / older-name evidence for the `reilac_shiga` candidate only after explicit continuity approval |
+| seedable decision | no |
+
+Review policy:
+
+- `Reilac Shiga FC` / `レイラック滋賀FC` is treated as the current official-facing name.
+- `Biwako Shiga` is treated as API-SPORTS raw / older-name evidence.
+- API-SPORTS externalTeamId `7117` and logoUrl remain documentation evidence.
+- The raw name difference is large enough that continuity approval is required before this row can become seedable.
+- Do not create a confirmed `/teams/{id}` document for this row yet.
+- Keep season membership separate from stable team master data.
+
 ## Confirmed Team Module Criteria
 
 This section defines the documentation-only criteria for later adding confirmed entries to `functions/scripts/data/j2Teams.js` or `functions/scripts/data/j3Teams.js`.
