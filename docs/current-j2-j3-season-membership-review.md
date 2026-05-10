@@ -396,6 +396,33 @@ What approval does not enable:
 - Season membership write.
 - Automatic confirmed `/teams/{id}` creation.
 
+## Per-Club Approval Batch 1
+
+This section records the first documentation-only per-club approval candidate list.
+
+It is not final approval. No club in this batch is approved for module entry yet, and this section does not create seed data, confirmed `/teams/{id}` documents, `j2Teams.js` entries, `j3Teams.js` entries, Firestore writes, API sync, or deploy changes.
+
+Summary:
+
+- Per-club approval batch 1 documented: yes
+- Batch 1 candidates listed: 5
+- Batch 1 candidates approved for module entry: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- Firestore writes: 0
+- Seedable rows changed: 0
+- `reilac_shiga` included: no
+
+Batch 1 intentionally contains only direct / near-direct rows whose API raw team name and current club identity are straightforward matches. `reilac_shiga` remains excluded until continuity approval is completed.
+
+| candidate internal team id | club nameJa | API raw team name | externalTeamId | logoUrl | lookup source | variance status | recommended approval state | approval decision | notes |
+|---|---|---|---:|---|---|---|---|---|---|
+| `vegalta_sendai` | ベガルタ仙台 | Vegalta Sendai | 286 | `https://media.api-sports.io/football/teams/286.png` | J2 2024 / 99 | direct-or-near-direct | approval-ready | not-approved-yet | First-batch candidate only; seedable remains no |
+| `shonan_bellmare` | 湘南ベルマーレ | Shonan Bellmare | 284 | `https://media.api-sports.io/football/teams/284.png` | J1 2024 / 98 | direct-or-near-direct | approval-ready | not-approved-yet | First-batch candidate only; seedable remains no |
+| `blaublitz_akita` | ブラウブリッツ秋田 | Blaublitz Akita | 4315 | `https://media.api-sports.io/football/teams/4315.png` | J2 2024 / 99 | direct-or-near-direct | approval-ready | not-approved-yet | First-batch candidate only; seedable remains no |
+| `yokohama_fc` | 横浜ＦＣ | Yokohama FC | 307 | `https://media.api-sports.io/football/teams/307.png` | J2 2024 / 99 | direct-or-near-direct | approval-ready | not-approved-yet | First-batch candidate only; seedable remains no |
+| `montedio_yamagata` | モンテディオ山形 | Montedio Yamagata | 312 | `https://media.api-sports.io/football/teams/312.png` | J2 2024 / 99 | direct-or-near-direct | approval-ready | not-approved-yet | First-batch candidate only; seedable remains no |
+
 ## Documentation-Only Stable Internal Team ID Candidates
 
 The candidate IDs below are review candidates only. They are not confirmed `/teams/{id}` documents, not seed data, and not safe to write until stable identity review plus API-SPORTS team ID / logo URL verification are complete.
