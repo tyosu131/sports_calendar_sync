@@ -477,6 +477,23 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - confirmed entries はまだ作らない
   - `j2Teams.js` / `j3Teams.js` への投入はまだ不要
   - Firestore write / non-dry seed / API sync / deploy は引き続き deferred
+- Vegalta Sendai per-club approval decision review documented
+  - commit: `a4146e1 Review Vegalta Sendai approval decision`
+  - updated
+    - `docs/current-j2-j3-season-membership-review.md`
+  - `Per-Club Approval Decision Review - vegalta_sendai` section 追加済み
+  - Reviewed club: `vegalta_sendai`
+  - Review result: `approved-for-module-entry-candidate`
+  - Actual module entry added: 0
+  - `j2Teams.js` entries added: 0
+  - `j3Teams.js` entries added: 0
+  - Firestore writes: 0
+  - Seedable rows changed: 0
+  - Batch 1 table changed: no
+  - `vegalta_sendai` は docs-only で module entry candidate として前進しただけ
+  - actual `approved-for-module-entry` file change ではない
+  - `j2Teams.js` / `j3Teams.js` への投入はまだ不要
+  - Firestore write / non-dry seed / API sync / deploy は引き続き deferred
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -601,7 +618,8 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 
 現時点の active next tasks:
 
-- Review the 5 Batch 1 candidates one club row at a time to decide whether each can move to `approved-for-module-entry`
+- Review the next Batch 1 candidate, `shonan_bellmare`, as a single-club approval decision review
+- Keep `vegalta_sendai` as docs-only `approved-for-module-entry-candidate`; do not write a module file entry yet
 - Do not use bulk approval for Batch 1
 - Keep all Batch 1 approval decisions docs-only until separately approved
 - Keep `reilac_shiga` / `Biwako Shiga` excluded from seedable / confirmed entry candidates until continuity approval is completed
@@ -705,7 +723,9 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 - confirmed team module criteria は documentation-only で整理済み
 - per-club confirmed entry approval flow は documentation-only で整理済み
 - Batch 1 の5件は `approval-ready` / `not-approved-yet` として documentation-only で整理済み
-- 次は Batch 1 の5件を `approved-for-module-entry` に進めるか1件ずつ確認する
+- `vegalta_sendai` は docs-only で `approved-for-module-entry-candidate` まで review 済み
+- `vegalta_sendai` の actual module file entry はまだ作らない
+- 次は Batch 1 の `shonan_bellmare` を1件だけ review する
 - bulk approval は行わない
 - `reilac_shiga` / `Biwako Shiga` は continuity review 完了まで confirmed entry 候補にしない
 - stable identity + API / logo verification が承認済みの club のみ `j2Teams.js` / `j3Teams.js` への confirmed entry 候補にする
