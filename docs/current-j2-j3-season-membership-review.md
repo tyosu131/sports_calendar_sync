@@ -330,6 +330,72 @@ A club row can be considered for a confirmed team module entry only after all of
 
 Do not add rows to `j2Teams.js` or `j3Teams.js` from this review document alone. The tracker and name variance review are evidence, not seedable master data.
 
+## Per-Club Confirmed Entry Approval Flow
+
+This section defines the documentation-only approval flow for turning a reviewed club row into a later confirmed team module entry candidate.
+
+It does not approve any club, edit `j2Teams.js` or `j3Teams.js`, create seed data, write Firestore documents, run API sync, or deploy.
+
+Summary:
+
+- Per-club approval flow documented: yes
+- Clubs approved for module entry: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- Firestore writes: 0
+- Seedable rows changed: 0
+- `reilac_shiga` approval status: blocked until continuity approval
+
+Approval unit:
+
+- Approve one club row at a time.
+- Do not use bulk approval for all J2 / J3 candidates.
+- Review candidate internal team ID, API-SPORTS `externalTeamId`, `logoUrl`, API raw team name, current club name, and name variance evidence for each club independently.
+
+Required checks per club:
+
+- Candidate internal team ID is acceptable as the stable club identity.
+- API-SPORTS `externalTeamId` matches the tracker evidence.
+- `logoUrl` matches the tracker evidence.
+- API raw team name and current club name variance is acceptable for the intended stable club identity.
+- Name variance rows have their variance review checked before approval.
+- Season membership and stable team master data are not confused.
+- Approval does not create a duplicate `/teams/{id}` document.
+- Approval does not collide with an existing confirmed J1 team ID.
+
+Approval states:
+
+- `approval-not-started`: no per-club approval review has started.
+- `approval-ready`: direct / near-direct evidence appears ready for per-club approval.
+- `approval-blocked-name-variance`: name variance must be reviewed before approval.
+- `approval-blocked-continuity`: rebrand / continuity review must be completed before approval.
+- `approved-for-module-entry`: club may be proposed for a later confirmed module entry file change.
+- `rejected`: club should not be added from the current evidence.
+
+Current recommended state:
+
+- Direct / near-direct rows: 29 `approval-ready` candidates.
+- Name variance rows excluding `reilac_shiga`: 10 `approval-ready-after-variance-review` candidates.
+- `reilac_shiga`: `approval-blocked-continuity`.
+- `approved-for-module-entry`: 0.
+- `rejected`: 0.
+- Seedable rows changed: 0.
+
+What approval enables:
+
+- Approved clubs can become candidates for later `j2Teams.js` / `j3Teams.js` confirmed entries.
+- Actual file changes to `j2Teams.js` / `j3Teams.js` still require separate approval.
+- Firestore write and non-dry seed execution require further separate approval.
+
+What approval does not enable:
+
+- Firestore write.
+- Non-dry seed.
+- API sync.
+- Deploy.
+- Season membership write.
+- Automatic confirmed `/teams/{id}` creation.
+
 ## Documentation-Only Stable Internal Team ID Candidates
 
 The candidate IDs below are review candidates only. They are not confirmed `/teams/{id}` documents, not seed data, and not safe to write until stable identity review plus API-SPORTS team ID / logo URL verification are complete.
