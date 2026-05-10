@@ -459,6 +459,42 @@ Decision:
 - Do not add `vegalta_sendai` to `j2Teams.js` or `j3Teams.js` from this review alone.
 - Keep `seedable` as `no` until a separate confirmed module entry approval and later seed approval are completed.
 
+## Per-Club Approval Decision Review - shonan_bellmare
+
+This section records a documentation-only approval decision review for one Batch 1 club row.
+
+It does not change the Batch 1 table, create a module entry, create seed data, write Firestore documents, run API sync, or deploy.
+
+Summary:
+
+- Approval decision review documented: yes
+- Reviewed club: `shonan_bellmare`
+- Review result: `approved-for-module-entry-candidate`
+- Actual module entry added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- Firestore writes: 0
+- Seedable rows changed: 0
+- Batch 1 table changed: no
+
+| check | review note | result |
+|---|---|---|
+| candidate internal team id | `shonan_bellmare` is a stable club identity candidate for 湘南ベルマーレ and does not encode temporary J2 / J3 group membership | pass |
+| API raw team name | `Shonan Bellmare` is a direct / near-direct match for the current club identity | pass |
+| externalTeamId | `284` matches the API-SPORTS tracker evidence | pass |
+| logoUrl | `https://media.api-sports.io/football/teams/284.png` matches the API-SPORTS tracker evidence | pass |
+| name variance review | Not required for this direct / near-direct row | pass |
+| existing J1 confirmed team ID collision | No existing confirmed J1 team ID collision is recorded in this review document | pass |
+| season membership separation | The `J1 2024 / 98` lookup source is API evidence for stable club identity only, not 2026 J2 / J3 special competition membership or permanent division membership | pass |
+| duplicate `/teams/{id}` policy | Do not create a duplicate `/teams/{id}` document; only a later approved module entry may propose this stable ID | pass |
+
+Decision:
+
+- `shonan_bellmare` may move forward as an `approved-for-module-entry-candidate` in documentation.
+- This is not an actual `approved-for-module-entry` file change.
+- Do not add `shonan_bellmare` to `j2Teams.js` or `j3Teams.js` from this review alone.
+- Keep `seedable` as `no` until a separate confirmed module entry approval and later seed approval are completed.
+
 ## Documentation-Only Stable Internal Team ID Candidates
 
 The candidate IDs below are review candidates only. They are not confirmed `/teams/{id}` documents, not seed data, and not safe to write until stable identity review plus API-SPORTS team ID / logo URL verification are complete.
