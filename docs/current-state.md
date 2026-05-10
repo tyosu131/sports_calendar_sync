@@ -453,6 +453,30 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - Seedable rows changed: 0
   - `j2Teams.js` / `j3Teams.js` への投入はまだ不要
   - Firestore write / non-dry seed / API sync / deploy は引き続き deferred
+- J2 / J3 per-club approval batch 1 documented
+  - commit: `ad59b42 Document J2 J3 approval batch 1`
+  - updated
+    - `docs/current-j2-j3-season-membership-review.md`
+  - `Per-Club Approval Batch 1` section 追加済み
+  - Batch 1 candidates listed: 5
+  - 対象
+    - `vegalta_sendai`
+    - `shonan_bellmare`
+    - `blaublitz_akita`
+    - `yokohama_fc`
+    - `montedio_yamagata`
+  - variance status: 全件 `direct-or-near-direct`
+  - recommended approval state: 全件 `approval-ready`
+  - approval decision: 全件 `not-approved-yet`
+  - Batch 1 candidates approved for module entry: 0
+  - `reilac_shiga` included: no
+  - `j2Teams.js` entries added: 0
+  - `j3Teams.js` entries added: 0
+  - Firestore writes: 0
+  - Seedable rows changed: 0
+  - confirmed entries はまだ作らない
+  - `j2Teams.js` / `j3Teams.js` への投入はまだ不要
+  - Firestore write / non-dry seed / API sync / deploy は引き続き deferred
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -577,8 +601,9 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 
 現時点の active next tasks:
 
-- Prepare the first per-club approval batch using the documented approval flow, without writing confirmed entries yet
-- Review candidates one club row at a time; do not use bulk approval
+- Review the 5 Batch 1 candidates one club row at a time to decide whether each can move to `approved-for-module-entry`
+- Do not use bulk approval for Batch 1
+- Keep all Batch 1 approval decisions docs-only until separately approved
 - Keep `reilac_shiga` / `Biwako Shiga` excluded from seedable / confirmed entry candidates until continuity approval is completed
 - Do not write confirmed entries while preparing per-club approval decisions
 - Keep candidate internal team IDs as documentation-only review candidates until stable identity + API evidence + logo evidence are approved together
@@ -679,7 +704,8 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 ### Task 2: Confirmed J2 / J3 team module preparation
 - confirmed team module criteria は documentation-only で整理済み
 - per-club confirmed entry approval flow は documentation-only で整理済み
-- 次は flow に沿って confirmed entry 候補を1件ずつ承認する前段整理を行う
+- Batch 1 の5件は `approval-ready` / `not-approved-yet` として documentation-only で整理済み
+- 次は Batch 1 の5件を `approved-for-module-entry` に進めるか1件ずつ確認する
 - bulk approval は行わない
 - `reilac_shiga` / `Biwako Shiga` は continuity review 完了まで confirmed entry 候補にしない
 - stable identity + API / logo verification が承認済みの club のみ `j2Teams.js` / `j3Teams.js` への confirmed entry 候補にする
