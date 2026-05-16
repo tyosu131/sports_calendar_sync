@@ -530,6 +530,24 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - lookup source `J2 2024 / 99` は stable club identity の API evidence であり、2026 J2/J3 special competition membership や permanent division membership を意味しない
   - `j2Teams.js` / `j3Teams.js` への投入はまだ不要
   - Firestore write / non-dry seed / API sync / deploy は引き続き deferred
+- Yokohama FC per-club approval decision review documented
+  - commit: `cceed69 Review Yokohama FC approval decision`
+  - updated
+    - `docs/current-j2-j3-season-membership-review.md`
+  - `Per-Club Approval Decision Review - yokohama_fc` section 追加済み
+  - Reviewed club: `yokohama_fc`
+  - Review result: `approved-for-module-entry-candidate`
+  - Actual module entry added: 0
+  - `j2Teams.js` entries added: 0
+  - `j3Teams.js` entries added: 0
+  - Firestore writes: 0
+  - Seedable rows changed: 0
+  - Batch 1 table changed: no
+  - `yokohama_fc` は docs-only で module entry candidate として前進しただけ
+  - actual `approved-for-module-entry` file change ではない
+  - lookup source `J2 2024 / 99` は stable club identity の API evidence であり、2026 J2/J3 special competition membership や permanent division membership を意味しない
+  - `j2Teams.js` / `j3Teams.js` への投入はまだ不要
+  - Firestore write / non-dry seed / API sync / deploy は引き続き deferred
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -654,8 +672,8 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 
 現時点の active next tasks:
 
-- Review the next Batch 1 candidate, `yokohama_fc`, as a single-club approval decision review
-- Keep `vegalta_sendai`, `shonan_bellmare`, and `blaublitz_akita` as docs-only `approved-for-module-entry-candidate`; do not write module file entries yet
+- Review the next Batch 1 candidate, `montedio_yamagata`, as a single-club approval decision review
+- Keep `vegalta_sendai`, `shonan_bellmare`, `blaublitz_akita`, and `yokohama_fc` as docs-only `approved-for-module-entry-candidate`; do not write module file entries yet
 - Do not use bulk approval for Batch 1
 - Keep all Batch 1 approval decisions docs-only until separately approved
 - Keep `reilac_shiga` / `Biwako Shiga` excluded from seedable / confirmed entry candidates until continuity approval is completed
@@ -762,8 +780,9 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 - `vegalta_sendai` は docs-only で `approved-for-module-entry-candidate` まで review 済み
 - `shonan_bellmare` は docs-only で `approved-for-module-entry-candidate` まで review 済み
 - `blaublitz_akita` は docs-only で `approved-for-module-entry-candidate` まで review 済み
-- `vegalta_sendai` / `shonan_bellmare` / `blaublitz_akita` の actual module file entry はまだ作らない
-- 次は Batch 1 の `yokohama_fc` を1件だけ review する
+- `yokohama_fc` は docs-only で `approved-for-module-entry-candidate` まで review 済み
+- `vegalta_sendai` / `shonan_bellmare` / `blaublitz_akita` / `yokohama_fc` の actual module file entry はまだ作らない
+- 次は Batch 1 の `montedio_yamagata` を1件だけ review する
 - bulk approval は行わない
 - `reilac_shiga` / `Biwako Shiga` は continuity review 完了まで confirmed entry 候補にしない
 - stable identity + API / logo verification が承認済みの club のみ `j2Teams.js` / `j3Teams.js` への confirmed entry 候補にする
