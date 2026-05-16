@@ -722,6 +722,24 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - `vanraure_hachinohe` は `j3Teams.js` candidate だが、actual `j3Teams.js` entry はまだ作らない
   - `j2Teams.js` / `j3Teams.js` は unchanged
   - Firestore write / non-dry seed / API sync / deploy は引き続き deferred
+- Ventforet Kofu per-club approval decision review documented
+  - commit: `e27815f Review Ventforet Kofu approval decision`
+  - updated
+    - `docs/current-j2-j3-season-membership-review.md`
+  - `Per-Club Approval Decision Review - ventforet_kofu` section 追加済み
+  - Reviewed club: `ventforet_kofu`
+  - Review result: `approved-for-module-entry-candidate`
+  - Actual module entry added: 0
+  - `j2Teams.js` entries added: 0
+  - `j3Teams.js` entries added: 0
+  - Firestore writes: 0
+  - Seedable rows changed: 0
+  - Batch 2 table changed: no
+  - Batch 2 individual reviews completed: 4 / 5
+  - `ventforet_kofu` は docs-only で module entry candidate として前進しただけ
+  - actual `approved-for-module-entry` file change ではない
+  - `j2Teams.js` / `j3Teams.js` は unchanged
+  - Firestore write / non-dry seed / API sync / deploy は引き続き deferred
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -848,9 +866,9 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 
 - Batch 1 の5件は actual `j2Teams.js` module entries 追加後の docs 更新まで完了
 - Batch 2 の候補を1件ずつ approval decision review する
-- `tochigi_city` / `tochigi_sc` / `vanraure_hachinohe` は docs-only `approved-for-module-entry-candidate`; actual module file entry はまだ作らない
+- `tochigi_city` / `tochigi_sc` / `vanraure_hachinohe` / `ventforet_kofu` は docs-only `approved-for-module-entry-candidate`; actual module file entry はまだ作らない
 - `vanraure_hachinohe` は `j3Teams.js` candidate だが、actual `j3Teams.js` entry はまだ作らない
-- Next single-club review target: `ventforet_kofu`
+- Next single-club review target: `fujieda_myfc`
 - Do not use bulk approval for Batch 1 or future batches
 - Keep `reilac_shiga` / `Biwako Shiga` excluded from seedable / confirmed entry candidates until continuity approval is completed
 - Do not add more confirmed entries while preparing future per-club approval decisions
@@ -980,10 +998,11 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 - `tochigi_city` は docs-only で `approved-for-module-entry-candidate` まで review 済み
 - `tochigi_sc` は docs-only で `approved-for-module-entry-candidate` まで review 済み
 - `vanraure_hachinohe` は docs-only で `approved-for-module-entry-candidate` まで review 済み
-- `tochigi_city` / `tochigi_sc` / `vanraure_hachinohe` は actual module file entry ではない
+- `ventforet_kofu` は docs-only で `approved-for-module-entry-candidate` まで review 済み
+- `tochigi_city` / `tochigi_sc` / `vanraure_hachinohe` / `ventforet_kofu` は actual module file entry ではない
 - `vanraure_hachinohe` は `j3Teams.js` candidate だが、actual `j3Teams.js` entry はまだ作らない
-- Batch 2 individual reviews completed: 3 / 5
-- 次候補は `ventforet_kofu` の単独 review とする
+- Batch 2 individual reviews completed: 4 / 5
+- 次候補は `fujieda_myfc` の単独 review とする
 - bulk approval は行わない
 - `reilac_shiga` / `Biwako Shiga` は continuity review 完了まで confirmed entry 候補にしない
 - stable identity + API / logo verification が承認済みの club のみ `j2Teams.js` / `j3Teams.js` への confirmed entry 候補にする
