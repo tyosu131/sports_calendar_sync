@@ -639,6 +639,41 @@ Preparation policy:
 | `yokohama_fc` | 横浜ＦＣ | Yokohama FC | 307 | `https://media.api-sports.io/football/teams/307.png` | J2 2024 / 99 | approved-for-module-entry-candidate | ready-for-separate-module-entry-approval | `j2Teams.js` candidate | Documentation-only target; no file write yet |
 | `montedio_yamagata` | モンテディオ山形 | Montedio Yamagata | 312 | `https://media.api-sports.io/football/teams/312.png` | J2 2024 / 99 | approved-for-module-entry-candidate | ready-for-separate-module-entry-approval | `j2Teams.js` candidate | Documentation-only target; no file write yet |
 
+## Batch 1 j2Teams.js Exact Diff Plan
+
+This section records a documentation-only exact diff plan for the five Batch 1 entries that may later be added to `functions/scripts/data/j2Teams.js`.
+
+It does not edit `j2Teams.js` or `j3Teams.js`, create actual module entries, create seed data, write Firestore documents, run API sync, deploy, or change any seedable status.
+
+Summary:
+
+- Batch 1 j2Teams exact diff plan documented: yes
+- Planned target file: `functions/scripts/data/j2Teams.js`
+- Planned entries: 5
+- Actual module entries added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- Firestore writes: 0
+- Seedable rows changed: 0
+- `reilac_shiga` included: no
+
+Implementation policy:
+
+- `j2Teams.js` is treated as stable team master data candidate storage, not direct 2026 J2 / J3 special competition membership data.
+- Season membership remains separate from stable team master data.
+- Do not represent 2026 J2 / J3 special competition membership directly in `j2Teams.js`.
+- `j3Teams.js` is outside the scope of this Batch 1 plan.
+- Keep `seedable` as `no` until separate module entry approval and later seed approval are completed.
+- Do not run Firestore write or non-dry seed from this plan.
+
+| target file | candidate internal team id | nameJa | nameEn | externalTeamId | logoUrl | competitionKey candidate | source evidence | implementation status | notes |
+|---|---|---|---|---:|---|---|---|---|---|
+| `functions/scripts/data/j2Teams.js` | `vegalta_sendai` | ベガルタ仙台 | Vegalta Sendai | 286 | `https://media.api-sports.io/football/teams/286.png` | `football_j2` | API-SPORTS teams?league=99&season=2024 | planned-not-written | Stable team master candidate only; no file write yet |
+| `functions/scripts/data/j2Teams.js` | `shonan_bellmare` | 湘南ベルマーレ | Shonan Bellmare | 284 | `https://media.api-sports.io/football/teams/284.png` | `football_j2` | API-SPORTS teams?league=98&season=2024 | planned-not-written | J1 2024 lookup is stable identity evidence only, not 2026 J2/J3 membership evidence; no file write yet |
+| `functions/scripts/data/j2Teams.js` | `blaublitz_akita` | ブラウブリッツ秋田 | Blaublitz Akita | 4315 | `https://media.api-sports.io/football/teams/4315.png` | `football_j2` | API-SPORTS teams?league=99&season=2024 | planned-not-written | Stable team master candidate only; no file write yet |
+| `functions/scripts/data/j2Teams.js` | `yokohama_fc` | 横浜ＦＣ | Yokohama FC | 307 | `https://media.api-sports.io/football/teams/307.png` | `football_j2` | API-SPORTS teams?league=99&season=2024 | planned-not-written | Stable team master candidate only; no file write yet |
+| `functions/scripts/data/j2Teams.js` | `montedio_yamagata` | モンテディオ山形 | Montedio Yamagata | 312 | `https://media.api-sports.io/football/teams/312.png` | `football_j2` | API-SPORTS teams?league=99&season=2024 | planned-not-written | Stable team master candidate only; no file write yet |
+
 ## Documentation-Only Stable Internal Team ID Candidates
 
 The candidate IDs below are review candidates only. They are not confirmed `/teams/{id}` documents, not seed data, and not safe to write until stable identity review plus API-SPORTS team ID / logo URL verification are complete.
