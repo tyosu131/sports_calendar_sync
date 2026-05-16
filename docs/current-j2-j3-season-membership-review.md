@@ -604,6 +604,41 @@ Decision:
 - Do not add `montedio_yamagata` to `j2Teams.js` or `j3Teams.js` from this review alone.
 - Keep `seedable` as `no` until a separate confirmed module entry approval and later seed approval are completed.
 
+## Batch 1 Actual Module Entry Preparation Review
+
+This section records a documentation-only final preparation review before any Batch 1 club is moved into an actual team module entry.
+
+It does not create `approved-for-module-entry` file entries, edit `j2Teams.js` or `j3Teams.js`, create seed data, write Firestore documents, run API sync, deploy, or change any seedable status.
+
+Summary:
+
+- Batch 1 actual module entry preparation review documented: yes
+- Batch 1 reviewed candidates: 5
+- Batch 1 ready for separate module entry approval: 5
+- Actual module entries added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- Firestore writes: 0
+- Seedable rows changed: 0
+- Batch 2 created: no
+- `reilac_shiga` included: no
+
+Preparation policy:
+
+- Target module candidates below are documentation-only candidates and are not actual file writes.
+- All five Batch 1 rows still require separate approval before any `j2Teams.js` module entry is created.
+- Keep `seedable` as `no` until separate confirmed module entry approval and later seed approval are completed.
+- Keep season membership separate from stable team master data.
+- The `J1 2024 / 98` lookup source for `shonan_bellmare` is API evidence for stable club identity only. It does not imply 2026 J2 / J3 special competition membership or permanent division membership.
+
+| candidate internal team id | club nameJa | API raw team name | externalTeamId | logoUrl | lookup source | per-club review status | module entry preparation status | target module candidate | notes |
+|---|---|---|---:|---|---|---|---|---|---|
+| `vegalta_sendai` | ベガルタ仙台 | Vegalta Sendai | 286 | `https://media.api-sports.io/football/teams/286.png` | J2 2024 / 99 | approved-for-module-entry-candidate | ready-for-separate-module-entry-approval | `j2Teams.js` candidate | Documentation-only target; no file write yet |
+| `shonan_bellmare` | 湘南ベルマーレ | Shonan Bellmare | 284 | `https://media.api-sports.io/football/teams/284.png` | J1 2024 / 98 | approved-for-module-entry-candidate | ready-for-separate-module-entry-approval | `j2Teams.js` candidate | J1 lookup is stable identity API evidence only; no membership implication and no file write yet |
+| `blaublitz_akita` | ブラウブリッツ秋田 | Blaublitz Akita | 4315 | `https://media.api-sports.io/football/teams/4315.png` | J2 2024 / 99 | approved-for-module-entry-candidate | ready-for-separate-module-entry-approval | `j2Teams.js` candidate | Documentation-only target; no file write yet |
+| `yokohama_fc` | 横浜ＦＣ | Yokohama FC | 307 | `https://media.api-sports.io/football/teams/307.png` | J2 2024 / 99 | approved-for-module-entry-candidate | ready-for-separate-module-entry-approval | `j2Teams.js` candidate | Documentation-only target; no file write yet |
+| `montedio_yamagata` | モンテディオ山形 | Montedio Yamagata | 312 | `https://media.api-sports.io/football/teams/312.png` | J2 2024 / 99 | approved-for-module-entry-candidate | ready-for-separate-module-entry-approval | `j2Teams.js` candidate | Documentation-only target; no file write yet |
+
 ## Documentation-Only Stable Internal Team ID Candidates
 
 The candidate IDs below are review candidates only. They are not confirmed `/teams/{id}` documents, not seed data, and not safe to write until stable identity review plus API-SPORTS team ID / logo URL verification are complete.
