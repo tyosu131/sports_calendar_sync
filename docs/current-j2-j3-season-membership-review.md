@@ -531,6 +531,42 @@ Decision:
 - Do not add `blaublitz_akita` to `j2Teams.js` or `j3Teams.js` from this review alone.
 - Keep `seedable` as `no` until a separate confirmed module entry approval and later seed approval are completed.
 
+## Per-Club Approval Decision Review - yokohama_fc
+
+This section records a documentation-only approval decision review for one Batch 1 club row.
+
+It does not change the Batch 1 table, create a module entry, create seed data, write Firestore documents, run API sync, or deploy.
+
+Summary:
+
+- Approval decision review documented: yes
+- Reviewed club: `yokohama_fc`
+- Review result: `approved-for-module-entry-candidate`
+- Actual module entry added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- Firestore writes: 0
+- Seedable rows changed: 0
+- Batch 1 table changed: no
+
+| check | review note | result |
+|---|---|---|
+| candidate internal team id | `yokohama_fc` is a stable club identity candidate for 横浜ＦＣ and does not encode temporary J2 / J3 group membership | pass |
+| API raw team name | `Yokohama FC` is a direct / near-direct match for the current club identity | pass |
+| externalTeamId | `307` matches the API-SPORTS tracker evidence | pass |
+| logoUrl | `https://media.api-sports.io/football/teams/307.png` matches the API-SPORTS tracker evidence | pass |
+| name variance review | Not required for this direct / near-direct row | pass |
+| existing J1 confirmed team ID collision | No existing confirmed J1 team ID collision is recorded in this review document | pass |
+| season membership separation | The `J2 2024 / 99` lookup source is API evidence for stable club identity only, not 2026 J2 / J3 special competition membership or permanent division membership | pass |
+| duplicate `/teams/{id}` policy | Do not create a duplicate `/teams/{id}` document; only a later approved module entry may propose this stable ID | pass |
+
+Decision:
+
+- `yokohama_fc` may move forward as an `approved-for-module-entry-candidate` in documentation.
+- This is not an actual `approved-for-module-entry` file change.
+- Do not add `yokohama_fc` to `j2Teams.js` or `j3Teams.js` from this review alone.
+- Keep `seedable` as `no` until a separate confirmed module entry approval and later seed approval are completed.
+
 ## Documentation-Only Stable Internal Team ID Candidates
 
 The candidate IDs below are review candidates only. They are not confirmed `/teams/{id}` documents, not seed data, and not safe to write until stable identity review plus API-SPORTS team ID / logo URL verification are complete.
