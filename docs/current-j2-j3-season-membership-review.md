@@ -639,6 +639,44 @@ Decision:
 - Do not add `fujieda_myfc` to `j2Teams.js` or `j3Teams.js` from this review alone.
 - Keep `seedable` as `no` until a separate confirmed module entry approval and later seed approval are completed.
 
+## Batch 2 Actual Module Entry Preparation Review
+
+This section records a documentation-only final preparation review before any Batch 2 club is moved into an actual team module entry.
+
+It does not create `approved-for-module-entry` file entries, edit `j2Teams.js` or `j3Teams.js`, create seed data, write Firestore documents, run API sync, deploy, or change any seedable status.
+
+Summary:
+
+- Batch 2 actual module entry preparation review documented: yes
+- Batch 2 reviewed candidates: 5
+- Batch 2 ready for separate module entry approval: 5
+- Actual module entries added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- Firestore writes: 0
+- Seedable rows changed: 0
+- `reilac_shiga` included: no
+- `vanraure_hachinohe` target module candidate: `j3Teams.js`
+- Batch 3 created: no
+
+Preparation policy:
+
+- Target module candidates below are documentation-only candidates and are not actual file writes.
+- All five Batch 2 rows still require separate approval before any `j2Teams.js` or `j3Teams.js` module entry is created.
+- `vanraure_hachinohe` is the only Batch 2 `j3Teams.js` candidate; the other four rows are `j2Teams.js` candidates.
+- Keep `seedable` as `no` until separate confirmed module entry approval and later seed approval are completed.
+- Keep season membership separate from stable team master data.
+- Lookup source league names are API evidence for stable club identity only. They do not imply 2026 J2 / J3 special competition membership or permanent division membership.
+- `reilac_shiga` remains excluded until continuity approval is completed.
+
+| candidate internal team id | club nameJa | API raw team name | externalTeamId | logoUrl | lookup source | per-club review status | module entry preparation status | target module candidate | notes |
+|---|---|---|---:|---|---|---|---|---|---|
+| `tochigi_city` | 栃木シティ | Tochigi City | 7145 | `https://media.api-sports.io/football/teams/7145.png` | JFL 2024 / 497 | approved-for-module-entry-candidate | ready-for-separate-module-entry-approval | `j2Teams.js` candidate | JFL lookup is stable identity API evidence only; no membership implication and no file write yet |
+| `tochigi_sc` | 栃木ＳＣ | Tochigi SC | 315 | `https://media.api-sports.io/football/teams/315.png` | J2 2024 / 99 | approved-for-module-entry-candidate | ready-for-separate-module-entry-approval | `j2Teams.js` candidate | Documentation-only target; no file write yet |
+| `vanraure_hachinohe` | ヴァンラーレ八戸 | Vanraure Hachinohe | 4326 | `https://media.api-sports.io/football/teams/4326.png` | J3 2024 / 100 | approved-for-module-entry-candidate | ready-for-separate-module-entry-approval | `j3Teams.js` candidate | The only Batch 2 `j3Teams.js` candidate; J3 lookup is stable identity API evidence only and no file write yet |
+| `ventforet_kofu` | ヴァンフォーレ甲府 | Ventforet Kofu | 308 | `https://media.api-sports.io/football/teams/308.png` | J2 2024 / 99 | approved-for-module-entry-candidate | ready-for-separate-module-entry-approval | `j2Teams.js` candidate | Documentation-only target; no file write yet |
+| `fujieda_myfc` | 藤枝ＭＹＦＣ | Fujieda MYFC | 4317 | `https://media.api-sports.io/football/teams/4317.png` | J2 2024 / 99 | approved-for-module-entry-candidate | ready-for-separate-module-entry-approval | `j2Teams.js` candidate | Documentation-only target; no file write yet |
+
 ## Per-Club Approval Decision Review - vegalta_sendai
 
 This section records a documentation-only approval decision review for one Batch 1 club row.
