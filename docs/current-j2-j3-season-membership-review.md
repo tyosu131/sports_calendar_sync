@@ -602,6 +602,43 @@ Decision:
 - Do not add `ventforet_kofu` to `j2Teams.js` or `j3Teams.js` from this review alone.
 - Keep `seedable` as `no` until a separate confirmed module entry approval and later seed approval are completed.
 
+## Per-Club Approval Decision Review - fujieda_myfc
+
+This section records a documentation-only approval decision review for one Batch 2 club row.
+
+It does not change the Batch 2 table, create a module entry, create seed data, write Firestore documents, run API sync, or deploy.
+
+Summary:
+
+- Approval decision review documented: yes
+- Reviewed club: `fujieda_myfc`
+- Review result: `approved-for-module-entry-candidate`
+- Actual module entry added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- Firestore writes: 0
+- Seedable rows changed: 0
+- Batch 2 table changed: no
+- Batch 2 individual reviews completed: 5 / 5
+
+| check | review note | result |
+|---|---|---|
+| candidate internal team id | `fujieda_myfc` is a stable club identity candidate for 藤枝ＭＹＦＣ and does not encode temporary J2 / J3 group membership | pass |
+| API raw team name | `Fujieda MYFC` is a direct / near-direct match for the current club identity | pass |
+| externalTeamId | `4317` matches the API-SPORTS tracker evidence | pass |
+| logoUrl | `https://media.api-sports.io/football/teams/4317.png` matches the API-SPORTS tracker evidence | pass |
+| name variance review | Not required for this direct / near-direct row | pass |
+| existing confirmed team ID collision | No existing confirmed team ID collision is recorded in this review document | pass |
+| season membership separation | The `J2 2024 / 99` lookup source is API evidence for stable club identity only, not 2026 J2 / J3 special competition membership or permanent division membership | pass |
+| duplicate `/teams/{id}` policy | Do not create a duplicate `/teams/{id}` document; only a later approved module entry may propose this stable ID | pass |
+
+Decision:
+
+- `fujieda_myfc` may move forward as an `approved-for-module-entry-candidate` in documentation.
+- This is not an actual `approved-for-module-entry` file change.
+- Do not add `fujieda_myfc` to `j2Teams.js` or `j3Teams.js` from this review alone.
+- Keep `seedable` as `no` until a separate confirmed module entry approval and later seed approval are completed.
+
 ## Per-Club Approval Decision Review - vegalta_sendai
 
 This section records a documentation-only approval decision review for one Batch 1 club row.
