@@ -25,10 +25,61 @@ const J2_SPORT_TYPE = 'football';
 /**
  * Confirmed stable team identities for J2.
  *
- * Keep this empty until club identity, API-SPORTS team ID, and logo URL are
+ * Add teams only after club identity, API-SPORTS team ID, and logo URL are
  * confirmed. Do not add season membership-only candidates here.
  */
-const j2Teams = [];
+const j2Teams = [
+  {
+    id: 'vegalta_sendai',
+    nameJa: 'ベガルタ仙台',
+    nameEn: 'Vegalta Sendai',
+    aliases: ['仙台', 'ベガルタ', 'Vegalta Sendai'],
+    externalTeamId: 286,
+    logoUrl: 'https://media.api-sports.io/football/teams/286.png',
+    source: 'API-SPORTS teams?league=99&season=2024 + Batch 1 j2Teams.js Exact Diff Plan',
+    status: 'confirmed',
+  },
+  {
+    id: 'shonan_bellmare',
+    nameJa: '湘南ベルマーレ',
+    nameEn: 'Shonan Bellmare',
+    aliases: ['湘南', 'ベルマーレ', 'Shonan Bellmare'],
+    externalTeamId: 284,
+    logoUrl: 'https://media.api-sports.io/football/teams/284.png',
+    source: 'API-SPORTS teams?league=98&season=2024 stable identity evidence + Batch 1 j2Teams.js Exact Diff Plan',
+    status: 'confirmed',
+  },
+  {
+    id: 'blaublitz_akita',
+    nameJa: 'ブラウブリッツ秋田',
+    nameEn: 'Blaublitz Akita',
+    aliases: ['秋田', 'ブラウブリッツ', 'Blaublitz Akita'],
+    externalTeamId: 4315,
+    logoUrl: 'https://media.api-sports.io/football/teams/4315.png',
+    source: 'API-SPORTS teams?league=99&season=2024 + Batch 1 j2Teams.js Exact Diff Plan',
+    status: 'confirmed',
+  },
+  {
+    id: 'yokohama_fc',
+    nameJa: '横浜ＦＣ',
+    nameEn: 'Yokohama FC',
+    aliases: ['横浜FC', '横浜', 'Yokohama FC'],
+    externalTeamId: 307,
+    logoUrl: 'https://media.api-sports.io/football/teams/307.png',
+    source: 'API-SPORTS teams?league=99&season=2024 + Batch 1 j2Teams.js Exact Diff Plan',
+    status: 'confirmed',
+  },
+  {
+    id: 'montedio_yamagata',
+    nameJa: 'モンテディオ山形',
+    nameEn: 'Montedio Yamagata',
+    aliases: ['山形', 'モンテディオ', 'Montedio Yamagata'],
+    externalTeamId: 312,
+    logoUrl: 'https://media.api-sports.io/football/teams/312.png',
+    source: 'API-SPORTS teams?league=99&season=2024 + Batch 1 j2Teams.js Exact Diff Plan',
+    status: 'confirmed',
+  },
+];
 
 /**
  * Review-only placeholder. These entries are intentionally ignored by generic
