@@ -620,6 +620,29 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - docs-only の exact diff plan であり、actual `j2Teams.js` file change ではない
   - `j2Teams.js` / `j3Teams.js` への投入はまだ不要
   - Firestore write / non-dry seed / API sync / deploy は引き続き deferred
+- J2 Batch 1 actual team module entries added
+  - commit: `9546bde Add J2 batch 1 team entries`
+  - updated
+    - `functions/scripts/data/j2Teams.js`
+  - Actual `j2Teams.js` entries added: 5
+  - 追加済み entries
+    - `vegalta_sendai`
+    - `shonan_bellmare`
+    - `blaublitz_akita`
+    - `yokohama_fc`
+    - `montedio_yamagata`
+  - Batch 1 の5件は docs-only planned から actual `j2Teams.js` module entries に進んだ
+  - `j3Teams.js` entries added: 0
+  - Firestore writes: 0
+  - non-dry seed: 0
+  - API calls: 0
+  - deploy: 0
+  - `reilac_shiga` included: no
+  - validation
+    - `node --check functions/scripts/data/j2Teams.js` PASS
+    - `node functions/scripts/seedCompetitionTeams.js football_j2 --dry-run` は confirmed teams: 5 / Firestore will not be written
+    - `node functions/scripts/verifyCompetitionTeams.js football_j2 --dry-run` は all 5 team shapes valid / In-memory team master checks PASSED
+  - Firestore write / non-dry seed / API sync / deploy は引き続き deferred
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -744,14 +767,13 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 
 現時点の active next tasks:
 
-- Make the final separate approval decision on whether to add Batch 1's 5 `planned-not-written` entries as actual `j2Teams.js` module entries
-- Keep `vegalta_sendai`, `shonan_bellmare`, `blaublitz_akita`, `yokohama_fc`, and `montedio_yamagata` as docs-only planned entries; do not write module file entries yet
+- Batch 1 の5件は actual `j2Teams.js` module entries 追加後の docs 更新まで完了
+- Next step is optional extra dry-run / build confirmation or deciding whether to prepare Batch 2; do not proceed to non-dry seed yet
 - Do not use bulk approval for Batch 1 or future batches
-- Keep all Batch 1 preparation decisions docs-only until separately approved for actual `j2Teams.js` module file entries
 - Keep `reilac_shiga` / `Biwako Shiga` excluded from seedable / confirmed entry candidates until continuity approval is completed
-- Do not write confirmed entries while preparing per-club approval decisions
+- Do not add more confirmed entries while preparing future per-club approval decisions
 - Keep candidate internal team IDs as documentation-only review candidates until stable identity + API evidence + logo evidence are approved together
-- Do not create confirmed `/teams/{id}` documents or add entries to `j2Teams.js` / `j3Teams.js` yet
+- Do not create confirmed `/teams/{id}` documents, add `j3Teams.js` entries, or add additional `j2Teams.js` entries yet
 - Keep Firestore write / non-dry seed / API sync / deploy deferred
 
 後回し:
@@ -862,13 +884,17 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 - Planned target file: `functions/scripts/data/j2Teams.js`
 - Planned entries: 5
 - implementation status: 全件 `planned-not-written`
-- `vegalta_sendai` / `shonan_bellmare` / `blaublitz_akita` / `yokohama_fc` / `montedio_yamagata` の actual module file entry はまだ作らない
-- 次は Batch 1 の5件を actual `j2Teams.js` module entries として追加するかどうかの最終承認判断を行う
+- Batch 1 actual `j2Teams.js` module entries added: 5
+- `vegalta_sendai` / `shonan_bellmare` / `blaublitz_akita` / `yokohama_fc` / `montedio_yamagata` は actual `j2Teams.js` module entries に追加済み
+- `node --check functions/scripts/data/j2Teams.js` PASS
+- `node functions/scripts/seedCompetitionTeams.js football_j2 --dry-run` は confirmed teams: 5 / Firestore will not be written
+- `node functions/scripts/verifyCompetitionTeams.js football_j2 --dry-run` は all 5 team shapes valid / In-memory team master checks PASSED
+- 次は non-dry seed ではなく、必要なら dry-run / build 追加確認または Batch 2 準備判断を行う
 - bulk approval は行わない
 - `reilac_shiga` / `Biwako Shiga` は continuity review 完了まで confirmed entry 候補にしない
 - stable identity + API / logo verification が承認済みの club のみ `j2Teams.js` / `j3Teams.js` への confirmed entry 候補にする
 - candidate IDs は confirmed `/teams/{id}` documents ではなく、seed data でもない状態を維持する
-- `j2Teams.js` / `j3Teams.js` への投入、Firestore write、non-dry seed は別 approval まで行わない
+- 追加の `j2Teams.js` / `j3Teams.js` への投入、Firestore write、non-dry seed は別 approval まで行わない
 
 ### Task 3: 他 competition への generic pipeline 展開
 - Premier League / LaLiga / Serie A / Bundesliga / Ligue 1 / UEFA competitions などの team master data scaffold を検討する
