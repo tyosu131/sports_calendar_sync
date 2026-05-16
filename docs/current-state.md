@@ -643,6 +643,30 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
     - `node functions/scripts/seedCompetitionTeams.js football_j2 --dry-run` は confirmed teams: 5 / Firestore will not be written
     - `node functions/scripts/verifyCompetitionTeams.js football_j2 --dry-run` は all 5 team shapes valid / In-memory team master checks PASSED
   - Firestore write / non-dry seed / API sync / deploy は引き続き deferred
+- J2 / J3 per-club approval batch 2 documented
+  - commit: `79ee857 Document J2 J3 approval batch 2`
+  - updated
+    - `docs/current-j2-j3-season-membership-review.md`
+  - `Per-Club Approval Batch 2` section 追加済み
+  - Batch 2 candidates listed: 5
+  - 対象
+    - `tochigi_city`
+    - `tochigi_sc`
+    - `vanraure_hachinohe`
+    - `ventforet_kofu`
+    - `fujieda_myfc`
+  - recommended approval state: 全件 `approval-ready`
+  - approval decision: 全件 `not-approved-yet`
+  - Actual module entries added: 0
+  - `j2Teams.js` entries added: 0
+  - `j3Teams.js` entries added: 0
+  - Firestore writes: 0
+  - Seedable rows changed: 0
+  - `reilac_shiga` included: no
+  - Batch 1 entries changed: no
+  - Batch 2 は docs-only の candidate list であり、actual module entry ではない
+  - `j2Teams.js` / `j3Teams.js` は unchanged
+  - Firestore write / non-dry seed / API sync / deploy は引き続き deferred
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -768,7 +792,8 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 現時点の active next tasks:
 
 - Batch 1 の5件は actual `j2Teams.js` module entries 追加後の docs 更新まで完了
-- Next step is optional extra dry-run / build confirmation or deciding whether to prepare Batch 2; do not proceed to non-dry seed yet
+- Batch 2 の候補を1件ずつ approval decision review する
+- Next single-club review target: `tochigi_city`
 - Do not use bulk approval for Batch 1 or future batches
 - Keep `reilac_shiga` / `Biwako Shiga` excluded from seedable / confirmed entry candidates until continuity approval is completed
 - Do not add more confirmed entries while preparing future per-club approval decisions
@@ -889,7 +914,13 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 - `node --check functions/scripts/data/j2Teams.js` PASS
 - `node functions/scripts/seedCompetitionTeams.js football_j2 --dry-run` は confirmed teams: 5 / Firestore will not be written
 - `node functions/scripts/verifyCompetitionTeams.js football_j2 --dry-run` は all 5 team shapes valid / In-memory team master checks PASSED
-- 次は non-dry seed ではなく、必要なら dry-run / build 追加確認または Batch 2 準備判断を行う
+- Batch 2 docs-only candidate list documented
+- Batch 2 candidates listed: 5
+- Batch 2 対象: `tochigi_city`, `tochigi_sc`, `vanraure_hachinohe`, `ventforet_kofu`, `fujieda_myfc`
+- Batch 2 recommended approval state: 全件 `approval-ready`
+- Batch 2 approval decision: 全件 `not-approved-yet`
+- 次は Batch 2 の候補を1件ずつ approval decision review する
+- まず次候補は `tochigi_city` の単独 review とする
 - bulk approval は行わない
 - `reilac_shiga` / `Biwako Shiga` は continuity review 完了まで confirmed entry 候補にしない
 - stable identity + API / logo verification が承認済みの club のみ `j2Teams.js` / `j3Teams.js` への confirmed entry 候補にする
