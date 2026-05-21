@@ -797,6 +797,32 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - docs-only の準備レビューであり、actual `approved-for-module-entry` file entry ではない
   - `j2Teams.js` / `j3Teams.js` への投入はまだ不要
   - Firestore write / non-dry seed / API sync / deploy は引き続き deferred
+- Batch 2 j2Teams.js / j3Teams.js exact diff plan documented
+  - commit: `8c34858 Document J2 J3 batch 2 exact diff plan`
+  - updated
+    - `docs/current-j2-j3-season-membership-review.md`
+  - `Batch 2 j2Teams.js / j3Teams.js Exact Diff Plan` section 追加済み
+  - Planned target files
+    - `functions/scripts/data/j2Teams.js`
+    - `functions/scripts/data/j3Teams.js`
+  - Planned `j2Teams.js` entries: 4
+    - `tochigi_city`
+    - `tochigi_sc`
+    - `ventforet_kofu`
+    - `fujieda_myfc`
+  - Planned `j3Teams.js` entries: 1
+    - `vanraure_hachinohe`
+  - `vanraure_hachinohe` だけが Batch 2 の `j3Teams.js` planned entry
+  - implementation status: all rows `planned-not-written`
+  - Actual module entries added: 0
+  - `j2Teams.js` entries added: 0
+  - `j3Teams.js` entries added: 0
+  - Firestore writes: 0
+  - Seedable rows changed: 0
+  - `reilac_shiga` included: no
+  - docs-only の exact diff plan であり、actual `j2Teams.js` / `j3Teams.js` file change ではない
+  - `j2Teams.js` / `j3Teams.js` への投入はまだ不要
+  - Firestore write / non-dry seed / API sync / deploy は引き続き deferred
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -926,8 +952,11 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 - Batch 2 の5件はすべて `ready-for-separate-module-entry-approval` まで preparation review 済み
 - `tochigi_city` / `tochigi_sc` / `ventforet_kofu` / `fujieda_myfc` は `j2Teams.js` candidate
 - `vanraure_hachinohe` は `j3Teams.js` candidate
-- Next task: Batch 2 exact diff plan を作る
-- Batch 2 exact diff plan では `j2Teams.js` と `j3Teams.js` の両方を分けて扱う
+- Batch 2 exact diff plan は docs-only で追加済み
+- Planned `j2Teams.js` entries: 4 (`tochigi_city`, `tochigi_sc`, `ventforet_kofu`, `fujieda_myfc`)
+- Planned `j3Teams.js` entries: 1 (`vanraure_hachinohe`)
+- Next decision point: Batch 2 actual module entries を追加するかどうか別承認で判断する
+- actual 追加に進む場合も `j2Teams.js` 4件と `j3Teams.js` 1件を分けて変更する
 - `tochigi_city` / `tochigi_sc` / `vanraure_hachinohe` / `ventforet_kofu` / `fujieda_myfc` は actual module file entry ではない
 - まだ actual `j2Teams.js` / `j3Teams.js` entries は追加しない
 - `vanraure_hachinohe` は `j3Teams.js` candidate だが、actual `j3Teams.js` entry はまだ作らない
@@ -1070,8 +1099,17 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 - Batch 2 ready for separate module entry approval: 5
 - `tochigi_city` / `tochigi_sc` / `ventforet_kofu` / `fujieda_myfc` は `j2Teams.js` candidate
 - `vanraure_hachinohe` だけが `j3Teams.js` candidate
-- 次は Batch 2 exact diff plan を作る
-- Batch 2 exact diff plan では `j2Teams.js` と `j3Teams.js` の両方を分けて扱う
+- Batch 2 exact diff plan documented
+- Planned `j2Teams.js` entries: 4
+  - `tochigi_city`
+  - `tochigi_sc`
+  - `ventforet_kofu`
+  - `fujieda_myfc`
+- Planned `j3Teams.js` entries: 1
+  - `vanraure_hachinohe`
+- implementation status: all rows `planned-not-written`
+- 次は Batch 2 actual module entries を追加するかどうか別承認で判断する
+- actual 追加に進む場合も `j2Teams.js` 4件と `j3Teams.js` 1件を分けて変更する
 - まだ actual `j2Teams.js` / `j3Teams.js` entries は追加しない
 - bulk approval は行わない
 - `reilac_shiga` / `Biwako Shiga` は continuity review 完了まで confirmed entry 候補にしない
