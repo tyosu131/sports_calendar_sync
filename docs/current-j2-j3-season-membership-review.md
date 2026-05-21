@@ -677,6 +677,54 @@ Preparation policy:
 | `ventforet_kofu` | ヴァンフォーレ甲府 | Ventforet Kofu | 308 | `https://media.api-sports.io/football/teams/308.png` | J2 2024 / 99 | approved-for-module-entry-candidate | ready-for-separate-module-entry-approval | `j2Teams.js` candidate | Documentation-only target; no file write yet |
 | `fujieda_myfc` | 藤枝ＭＹＦＣ | Fujieda MYFC | 4317 | `https://media.api-sports.io/football/teams/4317.png` | J2 2024 / 99 | approved-for-module-entry-candidate | ready-for-separate-module-entry-approval | `j2Teams.js` candidate | Documentation-only target; no file write yet |
 
+## Batch 2 j2Teams.js / j3Teams.js Exact Diff Plan
+
+This section records a documentation-only exact diff plan for the five Batch 2 entries that may later be added to `functions/scripts/data/j2Teams.js` or `functions/scripts/data/j3Teams.js`.
+
+It does not edit `j2Teams.js` or `j3Teams.js`, create actual module entries, create seed data, write Firestore documents, run API sync, deploy, or change any seedable status.
+
+Summary:
+
+- Batch 2 exact diff plan documented: yes
+- Planned target files:
+  - `functions/scripts/data/j2Teams.js`
+  - `functions/scripts/data/j3Teams.js`
+- Planned `j2Teams.js` entries: 4
+- Planned `j3Teams.js` entries: 1
+- Actual module entries added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- Firestore writes: 0
+- Seedable rows changed: 0
+- `reilac_shiga` included: no
+- implementation status: all rows `planned-not-written`
+
+Implementation policy:
+
+- `j2Teams.js` and `j3Teams.js` are treated as stable team master data candidate storage, not direct 2026 J2 / J3 special competition membership data.
+- Season membership remains separate from stable team master data.
+- Do not represent 2026 J2 / J3 special competition membership directly in `j2Teams.js` or `j3Teams.js`.
+- Lookup source league names are API evidence for stable club identity only. They do not imply 2026 J2 / J3 special competition membership or permanent division membership.
+- `vanraure_hachinohe` is the only Batch 2 `j3Teams.js` planned entry.
+- `reilac_shiga` remains excluded until continuity approval is completed.
+- Keep `seedable` as `no` until separate module entry approval and later seed approval are completed.
+- Do not run Firestore write or non-dry seed from this plan.
+
+Planned `j2Teams.js` entries:
+
+| target file | candidate internal team id | nameJa | nameEn | externalTeamId | logoUrl | competitionKey candidate | source evidence | implementation status | notes |
+|---|---|---|---|---:|---|---|---|---|---|
+| `functions/scripts/data/j2Teams.js` | `tochigi_city` | 栃木シティ | Tochigi City | 7145 | `https://media.api-sports.io/football/teams/7145.png` | `football_j2` | API-SPORTS teams?league=497&season=2024 + Batch 2 j2Teams.js / j3Teams.js Exact Diff Plan | planned-not-written | JFL 2024 lookup is stable identity API evidence only; not permanent division membership |
+| `functions/scripts/data/j2Teams.js` | `tochigi_sc` | 栃木ＳＣ | Tochigi SC | 315 | `https://media.api-sports.io/football/teams/315.png` | `football_j2` | API-SPORTS teams?league=99&season=2024 + Batch 2 j2Teams.js / j3Teams.js Exact Diff Plan | planned-not-written | Stable team master candidate only; no file write yet |
+| `functions/scripts/data/j2Teams.js` | `ventforet_kofu` | ヴァンフォーレ甲府 | Ventforet Kofu | 308 | `https://media.api-sports.io/football/teams/308.png` | `football_j2` | API-SPORTS teams?league=99&season=2024 + Batch 2 j2Teams.js / j3Teams.js Exact Diff Plan | planned-not-written | Stable team master candidate only; no file write yet |
+| `functions/scripts/data/j2Teams.js` | `fujieda_myfc` | 藤枝ＭＹＦＣ | Fujieda MYFC | 4317 | `https://media.api-sports.io/football/teams/4317.png` | `football_j2` | API-SPORTS teams?league=99&season=2024 + Batch 2 j2Teams.js / j3Teams.js Exact Diff Plan | planned-not-written | Stable team master candidate only; no file write yet |
+
+Planned `j3Teams.js` entries:
+
+| target file | candidate internal team id | nameJa | nameEn | externalTeamId | logoUrl | competitionKey candidate | source evidence | implementation status | notes |
+|---|---|---|---|---:|---|---|---|---|---|
+| `functions/scripts/data/j3Teams.js` | `vanraure_hachinohe` | ヴァンラーレ八戸 | Vanraure Hachinohe | 4326 | `https://media.api-sports.io/football/teams/4326.png` | `football_j3` | API-SPORTS teams?league=100&season=2024 + Batch 2 j2Teams.js / j3Teams.js Exact Diff Plan | planned-not-written | Only Batch 2 `j3Teams.js` planned entry; stable team master candidate only and no file write yet |
+
 ## Per-Club Approval Decision Review - vegalta_sendai
 
 This section records a documentation-only approval decision review for one Batch 1 club row.
