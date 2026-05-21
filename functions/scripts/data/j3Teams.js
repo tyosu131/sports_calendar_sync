@@ -25,10 +25,21 @@ const J3_SPORT_TYPE = 'football';
 /**
  * Confirmed stable team identities for J3.
  *
- * Keep this empty until club identity, API-SPORTS team ID, and logo URL are
+ * Add teams only after club identity, API-SPORTS team ID, and logo URL are
  * confirmed. Do not add season membership-only candidates here.
  */
-const j3Teams = [];
+const j3Teams = [
+  {
+    id: 'vanraure_hachinohe',
+    nameJa: 'ヴァンラーレ八戸',
+    nameEn: 'Vanraure Hachinohe',
+    aliases: ['八戸', 'ヴァンラーレ', 'Vanraure Hachinohe'],
+    externalTeamId: 4326,
+    logoUrl: 'https://media.api-sports.io/football/teams/4326.png',
+    source: 'API-SPORTS teams?league=100&season=2024 + Batch 2 j2Teams.js / j3Teams.js Exact Diff Plan',
+    status: 'confirmed',
+  },
+];
 
 /**
  * Review-only placeholder. These entries are intentionally ignored by generic
