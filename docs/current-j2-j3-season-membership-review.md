@@ -487,6 +487,43 @@ Season membership remains separate from stable team master data. Lookup source l
 | `fukushima_united` | 福島ユナイテッドＦＣ | Fukushima United | 4318 | `https://media.api-sports.io/football/teams/4318.png` | J3 2024 / 100 | direct-or-near-direct | approval-ready | not-approved-yet | `j3Teams.js` candidate | API raw name omits FC, but stable club identity is clear; no file write yet |
 | `kataller_toyama` | カターレ富山 | Kataller Toyama | 4322 | `https://media.api-sports.io/football/teams/4322.png` | J3 2024 / 100 | direct-or-near-direct | approval-ready | not-approved-yet | `j3Teams.js` candidate | Batch 3 candidate only; no file write yet |
 
+## Per-Club Approval Decision Review - fc_gifu
+
+This section records a documentation-only approval decision review for one Batch 3 club row.
+
+It does not change the Batch 3 table, create a module entry, create seed data, write Firestore documents, run API sync, or deploy.
+
+Summary:
+
+- Approval decision review documented: yes
+- Reviewed club: `fc_gifu`
+- Review result: `approved-for-module-entry-candidate`
+- Actual module entry added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- Firestore writes: 0
+- Seedable rows changed: 0
+- Batch 3 table changed: no
+- Batch 3 individual reviews completed: 1 / 5
+
+| check | review note | result |
+|---|---|---|
+| candidate internal team id | `fc_gifu` is a stable club identity candidate for ＦＣ岐阜 and does not encode temporary J2 / J3 group membership | pass |
+| API raw team name | `FC Gifu` is a direct / near-direct match for the current club identity | pass |
+| externalTeamId | `297` matches the API-SPORTS tracker evidence | pass |
+| logoUrl | `https://media.api-sports.io/football/teams/297.png` matches the API-SPORTS tracker evidence | pass |
+| name variance review | Not required for this direct / near-direct row | pass |
+| existing confirmed team ID collision | No existing confirmed team ID collision is recorded in this review document | pass |
+| season membership separation | The `J3 2024 / 100` lookup source is API evidence for stable club identity only, not 2026 J2 / J3 special competition membership or permanent division membership | pass |
+| duplicate `/teams/{id}` policy | Do not create a duplicate `/teams/{id}` document; only a later approved module entry may propose this stable ID | pass |
+
+Decision:
+
+- `fc_gifu` may move forward as an `approved-for-module-entry-candidate` in documentation.
+- This is not an actual `approved-for-module-entry` file change.
+- Do not add `fc_gifu` to `j2Teams.js` or `j3Teams.js` from this review alone.
+- Keep `seedable` as `no` until a separate confirmed module entry approval and later seed approval are completed.
+
 ## Per-Club Approval Decision Review - tochigi_city
 
 This section records a documentation-only approval decision review for one Batch 2 club row.
