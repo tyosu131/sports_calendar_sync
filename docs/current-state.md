@@ -926,6 +926,26 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - actual `j3Teams.js` entry はまだ作らない
   - Firestore write / non-dry seed / API sync / deploy / API call は実行していない
   - Firestore write / non-dry seed / API sync / deploy は引き続き deferred
+- Matsumoto Yamaga per-club approval decision review documented
+  - commit: `e486680 Review Matsumoto Yamaga approval decision`
+  - updated
+    - `docs/current-j2-j3-season-membership-review.md`
+  - `Per-Club Approval Decision Review - matsumoto_yamaga` section 追加済み
+  - Reviewed club: `matsumoto_yamaga`
+  - Review result: `approved-for-module-entry-candidate`
+  - Batch 3 individual reviews completed: 2 / 5
+  - `matsumoto_yamaga` は Batch 3 の `j3Teams.js` candidate
+  - Actual module entry added: 0
+  - `j2Teams.js` entries added: 0
+  - `j3Teams.js` entries added: 0
+  - Firestore writes: 0
+  - Seedable rows changed: 0
+  - Batch 3 table changed: no
+  - `matsumoto_yamaga` は docs-only で module entry candidate として前進しただけ
+  - actual `approved-for-module-entry` file change ではない
+  - actual `j3Teams.js` entry はまだ作らない
+  - Firestore write / non-dry seed / API sync / deploy / API call は実行していない
+  - Firestore write / non-dry seed / API sync / deploy は引き続き deferred
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -1073,10 +1093,12 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 - `jubilo_iwata` だけが Batch 3 の `j2Teams.js` candidate
 - `fc_gifu` / `matsumoto_yamaga` / `fukushima_united` / `kataller_toyama` は Batch 3 の `j3Teams.js` candidate
 - `fc_gifu` は docs-only で `approved-for-module-entry-candidate` まで review 済み
-- Batch 3 individual reviews completed: 1 / 5
+- `matsumoto_yamaga` は docs-only で `approved-for-module-entry-candidate` まで review 済み
+- Batch 3 individual reviews completed: 2 / 5
 - Batch 3 は bulk approval しない
 - Next task: Batch 3 の候補を1件ずつ approval decision review する
-- 次の単独 review 対象: `matsumoto_yamaga`
+- 次の単独 review 対象: `jubilo_iwata`
+- `jubilo_iwata` は Batch 3 の唯一の `j2Teams.js` candidate
 - Batch 3 actual module entries はまだ追加しない
 - actual `j3Teams.js` entry はまだ作らない
 - まだ Firestore write / non-dry seed には進まない
@@ -1259,10 +1281,12 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 - approval decision: 全件 `not-approved-yet`
 - Batch 3 は docs-only candidate list であり、actual module entry ではない
 - `fc_gifu` は docs-only で `approved-for-module-entry-candidate` まで review 済み
-- Batch 3 individual reviews completed: 1 / 5
+- `matsumoto_yamaga` は docs-only で `approved-for-module-entry-candidate` まで review 済み
+- Batch 3 individual reviews completed: 2 / 5
 - actual `j3Teams.js` entry はまだ作らない
 - 次は Batch 3 の候補を1件ずつ approval decision review する
-- 次の単独 review 対象: `matsumoto_yamaga`
+- 次の単独 review 対象: `jubilo_iwata`
+- `jubilo_iwata` は Batch 3 の唯一の `j2Teams.js` candidate
 - Batch 3 は bulk approval しない
 - まだ Firestore write / non-dry seed には進まない
 - bulk approval は行わない
