@@ -454,6 +454,39 @@ Season membership remains separate from stable team master data. Lookup source l
 | `ventforet_kofu` | ヴァンフォーレ甲府 | Ventforet Kofu | 308 | `https://media.api-sports.io/football/teams/308.png` | J2 2024 / 99 | direct-or-near-direct | approval-ready | not-approved-yet | `j2Teams.js` candidate | Batch 2 candidate only; seedable remains no |
 | `fujieda_myfc` | 藤枝ＭＹＦＣ | Fujieda MYFC | 4317 | `https://media.api-sports.io/football/teams/4317.png` | J2 2024 / 99 | direct-or-near-direct | approval-ready | not-approved-yet | `j2Teams.js` candidate | Batch 2 candidate only; seedable remains no |
 
+## Per-Club Approval Batch 3
+
+This section records the third documentation-only per-club approval candidate list.
+
+It is not final approval. No club in this batch is approved for module entry yet, and this section does not create seed data, confirmed `/teams/{id}` documents, `j2Teams.js` entries, `j3Teams.js` entries, Firestore writes, API sync, or deploy changes.
+
+Summary:
+
+- Per-club approval batch 3 documented: yes
+- Batch 3 candidates listed: 5
+- Batch 3 candidates approved for module entry: 0
+- Actual module entries added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- Firestore writes: 0
+- Seedable rows changed: 0
+- `reilac_shiga` included: no
+- name variance rows included: no
+- Batch 1 entries changed: no
+- Batch 2 entries changed: no
+
+Batch 3 intentionally contains only direct / near-direct / stable-clear API evidence rows. Name variance rows are not included. `reilac_shiga` remains excluded until continuity approval is completed.
+
+Season membership remains separate from stable team master data. Lookup source league names below are API evidence for stable club identity only, not 2026 J2 / J3 special competition membership or permanent division membership. The `J1 2024 / 98` lookup source for `jubilo_iwata` is stable club identity evidence only.
+
+| candidate internal team id | club nameJa | API raw team name | externalTeamId | logoUrl | lookup source | variance status | recommended approval state | approval decision | target module candidate | notes |
+|---|---|---|---:|---|---|---|---|---|---|---|
+| `fc_gifu` | ＦＣ岐阜 | FC Gifu | 297 | `https://media.api-sports.io/football/teams/297.png` | J3 2024 / 100 | direct-or-near-direct | approval-ready | not-approved-yet | `j3Teams.js` candidate | Batch 3 candidate only; no file write yet |
+| `matsumoto_yamaga` | 松本山雅ＦＣ | Matsumoto Yamaga | 304 | `https://media.api-sports.io/football/teams/304.png` | J3 2024 / 100 | direct-or-near-direct | approval-ready | not-approved-yet | `j3Teams.js` candidate | API raw name omits FC, but stable club identity is clear; no file write yet |
+| `jubilo_iwata` | ジュビロ磐田 | Jubilo Iwata | 280 | `https://media.api-sports.io/football/teams/280.png` | J1 2024 / 98 | direct-or-near-direct | approval-ready | not-approved-yet | `j2Teams.js` candidate | J1 lookup is stable identity API evidence only; not permanent division membership; no file write yet |
+| `fukushima_united` | 福島ユナイテッドＦＣ | Fukushima United | 4318 | `https://media.api-sports.io/football/teams/4318.png` | J3 2024 / 100 | direct-or-near-direct | approval-ready | not-approved-yet | `j3Teams.js` candidate | API raw name omits FC, but stable club identity is clear; no file write yet |
+| `kataller_toyama` | カターレ富山 | Kataller Toyama | 4322 | `https://media.api-sports.io/football/teams/4322.png` | J3 2024 / 100 | direct-or-near-direct | approval-ready | not-approved-yet | `j3Teams.js` candidate | Batch 3 candidate only; no file write yet |
+
 ## Per-Club Approval Decision Review - tochigi_city
 
 This section records a documentation-only approval decision review for one Batch 2 club row.
