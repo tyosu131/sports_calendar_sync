@@ -966,6 +966,26 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - actual `j2Teams.js` entry はまだ作らない
   - Firestore write / non-dry seed / API sync / deploy / API call は実行していない
   - Firestore write / non-dry seed / API sync / deploy は引き続き deferred
+- Fukushima United per-club approval decision review documented
+  - commit: `dbe519c Review Fukushima United approval decision`
+  - updated
+    - `docs/current-j2-j3-season-membership-review.md`
+  - `Per-Club Approval Decision Review - fukushima_united` section 追加済み
+  - Reviewed club: `fukushima_united`
+  - Review result: `approved-for-module-entry-candidate`
+  - Batch 3 individual reviews completed: 4 / 5
+  - `fukushima_united` は Batch 3 の `j3Teams.js` candidate
+  - Actual module entry added: 0
+  - `j2Teams.js` entries added: 0
+  - `j3Teams.js` entries added: 0
+  - Firestore writes: 0
+  - Seedable rows changed: 0
+  - Batch 3 table changed: no
+  - `fukushima_united` は docs-only で module entry candidate として前進しただけ
+  - actual `approved-for-module-entry` file change ではない
+  - actual `j3Teams.js` entry はまだ作らない
+  - Firestore write / non-dry seed / API sync / deploy / API call は実行していない
+  - Firestore write / non-dry seed / API sync / deploy は引き続き deferred
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -1115,12 +1135,14 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 - `fc_gifu` は docs-only で `approved-for-module-entry-candidate` まで review 済み
 - `matsumoto_yamaga` は docs-only で `approved-for-module-entry-candidate` まで review 済み
 - `jubilo_iwata` は docs-only で `approved-for-module-entry-candidate` まで review 済み
-- Batch 3 individual reviews completed: 3 / 5
+- `fukushima_united` は docs-only で `approved-for-module-entry-candidate` まで review 済み
+- Batch 3 individual reviews completed: 4 / 5
 - Batch 3 は bulk approval しない
 - Next task: Batch 3 の候補を1件ずつ approval decision review する
-- 次の単独 review 対象: `fukushima_united`
+- 次の単独 review 対象: `kataller_toyama`
 - `jubilo_iwata` は Batch 3 の唯一の `j2Teams.js` candidate
 - `fukushima_united` は Batch 3 の `j3Teams.js` candidate
+- `kataller_toyama` は Batch 3 の `j3Teams.js` candidate
 - Batch 3 actual module entries はまだ追加しない
 - actual `j2Teams.js` entry はまだ作らない
 - actual `j3Teams.js` entry はまだ作らない
@@ -1306,13 +1328,15 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 - `fc_gifu` は docs-only で `approved-for-module-entry-candidate` まで review 済み
 - `matsumoto_yamaga` は docs-only で `approved-for-module-entry-candidate` まで review 済み
 - `jubilo_iwata` は docs-only で `approved-for-module-entry-candidate` まで review 済み
-- Batch 3 individual reviews completed: 3 / 5
+- `fukushima_united` は docs-only で `approved-for-module-entry-candidate` まで review 済み
+- Batch 3 individual reviews completed: 4 / 5
 - actual `j2Teams.js` entry はまだ作らない
 - actual `j3Teams.js` entry はまだ作らない
 - 次は Batch 3 の候補を1件ずつ approval decision review する
-- 次の単独 review 対象: `fukushima_united`
+- 次の単独 review 対象: `kataller_toyama`
 - `jubilo_iwata` は Batch 3 の唯一の `j2Teams.js` candidate
 - `fukushima_united` は Batch 3 の `j3Teams.js` candidate
+- `kataller_toyama` は Batch 3 の `j3Teams.js` candidate
 - Batch 3 は bulk approval しない
 - まだ Firestore write / non-dry seed には進まない
 - bulk approval は行わない
