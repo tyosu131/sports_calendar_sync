@@ -823,6 +823,36 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - docs-only の exact diff plan であり、actual `j2Teams.js` / `j3Teams.js` file change ではない
   - `j2Teams.js` / `j3Teams.js` への投入はまだ不要
   - Firestore write / non-dry seed / API sync / deploy は引き続き deferred
+- J2 / J3 Batch 2 actual team module entries added
+  - commit: `af32d18 Add J2 J3 batch 2 team entries`
+  - updated
+    - `functions/scripts/data/j2Teams.js`
+    - `functions/scripts/data/j3Teams.js`
+  - Batch 2 docs-only planned entries は actual module entries に進んだ
+  - Actual `j2Teams.js` entries added: 4
+    - `tochigi_city`
+    - `tochigi_sc`
+    - `ventforet_kofu`
+    - `fujieda_myfc`
+  - Actual `j3Teams.js` entries added: 1
+    - `vanraure_hachinohe`
+  - `vanraure_hachinohe` は `j3Teams.js` にのみ追加済みで、`j2Teams.js` には追加していない
+  - `football_j2` confirmed teams: 9
+  - `football_j3` confirmed teams: 1
+  - Firestore writes: 0
+  - non-dry seed: 0
+  - API calls: 0
+  - deploy: 0
+  - `reilac_shiga` included: no
+  - validation
+    - `node --check functions/scripts/data/j2Teams.js` PASS
+    - `node --check functions/scripts/data/j3Teams.js` PASS
+    - `node functions/scripts/seedCompetitionTeams.js football_j2 --dry-run` は confirmed teams: 9 / Firestore will not be written
+    - `node functions/scripts/verifyCompetitionTeams.js football_j2 --dry-run` は In-memory team master checks PASSED
+    - `node functions/scripts/seedCompetitionTeams.js football_j3 --dry-run` は confirmed teams: 1 / Firestore will not be written
+    - `node functions/scripts/verifyCompetitionTeams.js football_j3 --dry-run` は In-memory team master checks PASSED
+    - `API_SPORTS_KEY|serviceAccountKey|node_modules|DS_Store` 禁止対象スキャンは出力なし
+  - Firestore write / non-dry seed / API sync / deploy は引き続き deferred
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -955,16 +985,19 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 - Batch 2 exact diff plan は docs-only で追加済み
 - Planned `j2Teams.js` entries: 4 (`tochigi_city`, `tochigi_sc`, `ventforet_kofu`, `fujieda_myfc`)
 - Planned `j3Teams.js` entries: 1 (`vanraure_hachinohe`)
-- Next decision point: Batch 2 actual module entries を追加するかどうか別承認で判断する
-- actual 追加に進む場合も `j2Teams.js` 4件と `j3Teams.js` 1件を分けて変更する
-- `tochigi_city` / `tochigi_sc` / `vanraure_hachinohe` / `ventforet_kofu` / `fujieda_myfc` は actual module file entry ではない
-- まだ actual `j2Teams.js` / `j3Teams.js` entries は追加しない
-- `vanraure_hachinohe` は `j3Teams.js` candidate だが、actual `j3Teams.js` entry はまだ作らない
+- Batch 2 actual module entries は追加済み
+- Actual `j2Teams.js` entries added: 4 (`tochigi_city`, `tochigi_sc`, `ventforet_kofu`, `fujieda_myfc`)
+- Actual `j3Teams.js` entries added: 1 (`vanraure_hachinohe`)
+- `vanraure_hachinohe` は `j3Teams.js` にのみ追加済みで、`j2Teams.js` には追加していない
+- `football_j2` confirmed teams: 9
+- `football_j3` confirmed teams: 1
+- Next decision point: 追加 dry-run / build 確認を行うか、Batch 3 準備に進むかを判断する
+- まだ Firestore write / non-dry seed には進まない
 - Do not use bulk approval for Batch 1 or future batches
 - Keep `reilac_shiga` / `Biwako Shiga` excluded from seedable / confirmed entry candidates until continuity approval is completed
 - Do not add more confirmed entries while preparing future per-club approval decisions
 - Keep candidate internal team IDs as documentation-only review candidates until stable identity + API evidence + logo evidence are approved together
-- Do not create confirmed `/teams/{id}` documents, add `j3Teams.js` entries, or add additional `j2Teams.js` entries yet
+- Do not create confirmed `/teams/{id}` documents or add additional `j2Teams.js` / `j3Teams.js` entries yet
 - Keep Firestore write / non-dry seed / API sync / deploy deferred
 
 後回し:
@@ -1108,9 +1141,19 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 - Planned `j3Teams.js` entries: 1
   - `vanraure_hachinohe`
 - implementation status: all rows `planned-not-written`
-- 次は Batch 2 actual module entries を追加するかどうか別承認で判断する
-- actual 追加に進む場合も `j2Teams.js` 4件と `j3Teams.js` 1件を分けて変更する
-- まだ actual `j2Teams.js` / `j3Teams.js` entries は追加しない
+- Batch 2 actual module entries added
+- Actual `j2Teams.js` entries added: 4
+  - `tochigi_city`
+  - `tochigi_sc`
+  - `ventforet_kofu`
+  - `fujieda_myfc`
+- Actual `j3Teams.js` entries added: 1
+  - `vanraure_hachinohe`
+- `vanraure_hachinohe` は `j3Teams.js` にのみ追加済みで、`j2Teams.js` には追加していない
+- `football_j2` confirmed teams: 9
+- `football_j3` confirmed teams: 1
+- 次は追加 dry-run / build 確認、または Batch 3 準備判断に進む
+- まだ Firestore write / non-dry seed には進まない
 - bulk approval は行わない
 - `reilac_shiga` / `Biwako Shiga` は continuity review 完了まで confirmed entry 候補にしない
 - stable identity + API / logo verification が承認済みの club のみ `j2Teams.js` / `j3Teams.js` への confirmed entry 候補にする
