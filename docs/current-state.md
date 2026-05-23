@@ -906,6 +906,26 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - Batch 3 は docs-only の candidate list であり、actual module entry ではない
   - Firestore write / non-dry seed / API sync / deploy / API call は実行していない
   - Firestore write / non-dry seed / API sync / deploy は引き続き deferred
+- FC Gifu per-club approval decision review documented
+  - commit: `96b6a8e Review FC Gifu approval decision`
+  - updated
+    - `docs/current-j2-j3-season-membership-review.md`
+  - `Per-Club Approval Decision Review - fc_gifu` section 追加済み
+  - Reviewed club: `fc_gifu`
+  - Review result: `approved-for-module-entry-candidate`
+  - Batch 3 individual reviews completed: 1 / 5
+  - `fc_gifu` は Batch 3 の `j3Teams.js` candidate
+  - Actual module entry added: 0
+  - `j2Teams.js` entries added: 0
+  - `j3Teams.js` entries added: 0
+  - Firestore writes: 0
+  - Seedable rows changed: 0
+  - Batch 3 table changed: no
+  - `fc_gifu` は docs-only で module entry candidate として前進しただけ
+  - actual `approved-for-module-entry` file change ではない
+  - actual `j3Teams.js` entry はまだ作らない
+  - Firestore write / non-dry seed / API sync / deploy / API call は実行していない
+  - Firestore write / non-dry seed / API sync / deploy は引き続き deferred
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -1052,10 +1072,13 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 - Batch 3 candidates: `fc_gifu`, `matsumoto_yamaga`, `jubilo_iwata`, `fukushima_united`, `kataller_toyama`
 - `jubilo_iwata` だけが Batch 3 の `j2Teams.js` candidate
 - `fc_gifu` / `matsumoto_yamaga` / `fukushima_united` / `kataller_toyama` は Batch 3 の `j3Teams.js` candidate
+- `fc_gifu` は docs-only で `approved-for-module-entry-candidate` まで review 済み
+- Batch 3 individual reviews completed: 1 / 5
 - Batch 3 は bulk approval しない
 - Next task: Batch 3 の候補を1件ずつ approval decision review する
-- 次の単独 review 対象: `fc_gifu`
+- 次の単独 review 対象: `matsumoto_yamaga`
 - Batch 3 actual module entries はまだ追加しない
+- actual `j3Teams.js` entry はまだ作らない
 - まだ Firestore write / non-dry seed には進まない
 - Do not use bulk approval for Batch 1 or future batches
 - Keep `reilac_shiga` / `Biwako Shiga` excluded from seedable / confirmed entry candidates until continuity approval is completed
@@ -1235,8 +1258,11 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 - recommended approval state: 全件 `approval-ready`
 - approval decision: 全件 `not-approved-yet`
 - Batch 3 は docs-only candidate list であり、actual module entry ではない
+- `fc_gifu` は docs-only で `approved-for-module-entry-candidate` まで review 済み
+- Batch 3 individual reviews completed: 1 / 5
+- actual `j3Teams.js` entry はまだ作らない
 - 次は Batch 3 の候補を1件ずつ approval decision review する
-- 次の単独 review 対象: `fc_gifu`
+- 次の単独 review 対象: `matsumoto_yamaga`
 - Batch 3 は bulk approval しない
 - まだ Firestore write / non-dry seed には進まない
 - bulk approval は行わない
