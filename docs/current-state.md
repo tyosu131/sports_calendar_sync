@@ -853,6 +853,25 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
     - `node functions/scripts/verifyCompetitionTeams.js football_j3 --dry-run` は In-memory team master checks PASSED
     - `API_SPORTS_KEY|serviceAccountKey|node_modules|DS_Store` 禁止対象スキャンは出力なし
   - Firestore write / non-dry seed / API sync / deploy は引き続き deferred
+- J2 / J3 Batch 2 actual module entries post-add validation completed
+  - based on commit: `c6feaad Update current state after J2 J3 batch 2 team entries`
+  - file changes during validation: none
+  - initial `git status --short`: clean
+  - `node --check functions/scripts/data/j2Teams.js`: PASS
+  - `node --check functions/scripts/data/j3Teams.js`: PASS
+  - `node functions/scripts/seedCompetitionTeams.js football_j2 --dry-run`
+    - confirmed teams: 9
+    - Firestore will not be written
+  - `node functions/scripts/verifyCompetitionTeams.js football_j2 --dry-run`: In-memory team master checks PASSED
+  - `node functions/scripts/seedCompetitionTeams.js football_j3 --dry-run`
+    - confirmed teams: 1
+    - Firestore will not be written
+  - `node functions/scripts/verifyCompetitionTeams.js football_j3 --dry-run`: In-memory team master checks PASSED
+  - `npm --prefix functions run build`: PASS
+  - `flutter analyze --no-pub`: No issues found
+  - final `git status --short`: clean
+  - Firestore write / non-dry seed / API sync / deploy / API call は実行していない
+  - Firestore write / non-dry seed / API sync / deploy は引き続き deferred
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -991,7 +1010,11 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 - `vanraure_hachinohe` は `j3Teams.js` にのみ追加済みで、`j2Teams.js` には追加していない
 - `football_j2` confirmed teams: 9
 - `football_j3` confirmed teams: 1
-- Next decision point: 追加 dry-run / build 確認を行うか、Batch 3 準備に進むかを判断する
+- Batch 2 actual module entries 追加後の追加 validation は完了済み
+  - `npm --prefix functions run build`: PASS
+  - `flutter analyze --no-pub`: No issues found
+  - final `git status --short`: clean
+- Next decision point: Batch 3 準備判断、または追加 J2 / J3 candidates の per-club approval batch 作成判断に進む
 - まだ Firestore write / non-dry seed には進まない
 - Do not use bulk approval for Batch 1 or future batches
 - Keep `reilac_shiga` / `Biwako Shiga` excluded from seedable / confirmed entry candidates until continuity approval is completed
@@ -1152,7 +1175,14 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 - `vanraure_hachinohe` は `j3Teams.js` にのみ追加済みで、`j2Teams.js` には追加していない
 - `football_j2` confirmed teams: 9
 - `football_j3` confirmed teams: 1
-- 次は追加 dry-run / build 確認、または Batch 3 準備判断に進む
+- Batch 2 actual module entries 追加後の追加 validation は完了済み
+  - `node --check functions/scripts/data/j2Teams.js` PASS
+  - `node --check functions/scripts/data/j3Teams.js` PASS
+  - `football_j2` dry-run / verify dry-run PASS
+  - `football_j3` dry-run / verify dry-run PASS
+  - `npm --prefix functions run build` PASS
+  - `flutter analyze --no-pub` No issues found
+- 次は Batch 3 準備判断、または追加 J2 / J3 candidates の per-club approval batch 作成判断に進む
 - まだ Firestore write / non-dry seed には進まない
 - bulk approval は行わない
 - `reilac_shiga` / `Biwako Shiga` は continuity review 完了まで confirmed entry 候補にしない
