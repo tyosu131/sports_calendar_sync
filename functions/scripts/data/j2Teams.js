@@ -119,6 +119,16 @@ const j2Teams = [
     source: 'API-SPORTS teams?league=99&season=2024 + Batch 2 j2Teams.js / j3Teams.js Exact Diff Plan',
     status: 'confirmed',
   },
+  {
+    id: 'jubilo_iwata',
+    nameJa: 'ジュビロ磐田',
+    nameEn: 'Jubilo Iwata',
+    aliases: ['磐田', 'ジュビロ', 'Jubilo Iwata'],
+    externalTeamId: 280,
+    logoUrl: 'https://media.api-sports.io/football/teams/280.png',
+    source: 'API-SPORTS teams?league=98&season=2024 + Batch 3 j2Teams.js / j3Teams.js Exact Diff Plan',
+    status: 'confirmed',
+  },
 ];
 
 /**
