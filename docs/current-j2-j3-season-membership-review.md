@@ -712,6 +712,55 @@ Preparation policy:
 | `fukushima_united` | 福島ユナイテッドＦＣ | Fukushima United | 4318 | `https://media.api-sports.io/football/teams/4318.png` | J3 2024 / 100 | approved-for-module-entry-candidate | ready-for-separate-module-entry-approval | `j3Teams.js` candidate | API raw name omits FC, but stable club identity is clear; no file write yet |
 | `kataller_toyama` | カターレ富山 | Kataller Toyama | 4322 | `https://media.api-sports.io/football/teams/4322.png` | J3 2024 / 100 | approved-for-module-entry-candidate | ready-for-separate-module-entry-approval | `j3Teams.js` candidate | Documentation-only target; no file write yet |
 
+## Batch 3 j2Teams.js / j3Teams.js Exact Diff Plan
+
+This section records a documentation-only exact diff plan for the five Batch 3 entries that may later be added to `functions/scripts/data/j2Teams.js` or `functions/scripts/data/j3Teams.js`.
+
+It does not edit `j2Teams.js` or `j3Teams.js`, create actual module entries, create seed data, write Firestore documents, run API sync, deploy, or change any seedable status.
+
+Summary:
+
+- Batch 3 exact diff plan documented: yes
+- Planned target files:
+  - `functions/scripts/data/j2Teams.js`
+  - `functions/scripts/data/j3Teams.js`
+- Planned `j2Teams.js` entries: 1
+- Planned `j3Teams.js` entries: 4
+- Actual module entries added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- Firestore writes: 0
+- Seedable rows changed: 0
+- `reilac_shiga` included: no
+- implementation status: all rows `planned-not-written`
+
+Implementation policy:
+
+- `j2Teams.js` and `j3Teams.js` are treated as stable team master data candidate storage, not direct 2026 J2 / J3 special competition membership data.
+- Season membership remains separate from stable team master data.
+- Do not represent 2026 J2 / J3 special competition membership directly in `j2Teams.js` or `j3Teams.js`.
+- Lookup source league names are API evidence for stable club identity only. They do not imply 2026 J2 / J3 special competition membership or permanent division membership.
+- `jubilo_iwata` is the only Batch 3 `j2Teams.js` planned entry.
+- The other four Batch 3 planned entries go to `j3Teams.js`.
+- `reilac_shiga` remains excluded until continuity approval is completed.
+- Keep `seedable` as `no` until separate module entry approval and later seed approval are completed.
+- Do not run Firestore write or non-dry seed from this plan.
+
+Planned `j2Teams.js` entries:
+
+| target file | candidate internal team id | nameJa | nameEn | externalTeamId | logoUrl | competitionKey candidate | source evidence | implementation status | notes |
+|---|---|---|---|---:|---|---|---|---|---|
+| `functions/scripts/data/j2Teams.js` | `jubilo_iwata` | ジュビロ磐田 | Jubilo Iwata | 280 | `https://media.api-sports.io/football/teams/280.png` | `football_j2` | API-SPORTS teams?league=98&season=2024 + Batch 3 j2Teams.js / j3Teams.js Exact Diff Plan | planned-not-written | J1 2024 lookup is stable identity evidence only, not permanent division membership |
+
+Planned `j3Teams.js` entries:
+
+| target file | candidate internal team id | nameJa | nameEn | externalTeamId | logoUrl | competitionKey candidate | source evidence | implementation status | notes |
+|---|---|---|---|---:|---|---|---|---|---|
+| `functions/scripts/data/j3Teams.js` | `fc_gifu` | ＦＣ岐阜 | FC Gifu | 297 | `https://media.api-sports.io/football/teams/297.png` | `football_j3` | API-SPORTS teams?league=100&season=2024 + Batch 3 j2Teams.js / j3Teams.js Exact Diff Plan | planned-not-written | Stable team master candidate only; no file write yet |
+| `functions/scripts/data/j3Teams.js` | `matsumoto_yamaga` | 松本山雅ＦＣ | Matsumoto Yamaga | 304 | `https://media.api-sports.io/football/teams/304.png` | `football_j3` | API-SPORTS teams?league=100&season=2024 + Batch 3 j2Teams.js / j3Teams.js Exact Diff Plan | planned-not-written | API raw name omits FC, but stable club identity is clear; no file write yet |
+| `functions/scripts/data/j3Teams.js` | `fukushima_united` | 福島ユナイテッドＦＣ | Fukushima United | 4318 | `https://media.api-sports.io/football/teams/4318.png` | `football_j3` | API-SPORTS teams?league=100&season=2024 + Batch 3 j2Teams.js / j3Teams.js Exact Diff Plan | planned-not-written | API raw name omits FC, but stable club identity is clear; no file write yet |
+| `functions/scripts/data/j3Teams.js` | `kataller_toyama` | カターレ富山 | Kataller Toyama | 4322 | `https://media.api-sports.io/football/teams/4322.png` | `football_j3` | API-SPORTS teams?league=100&season=2024 + Batch 3 j2Teams.js / j3Teams.js Exact Diff Plan | planned-not-written | Stable team master candidate only; no file write yet |
+
 ## Per-Club Approval Decision Review - tochigi_city
 
 This section records a documentation-only approval decision review for one Batch 2 club row.
