@@ -1074,6 +1074,40 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - actual `j2Teams.js` / `j3Teams.js` entries はまだ追加していない
   - Firestore write / non-dry seed / API sync / deploy / API call は実行していない
   - Firestore write / non-dry seed / API sync / deploy は引き続き deferred
+- J2 / J3 Batch 3 actual team module entries added
+  - commit: `98791fc Add J2 J3 batch 3 team entries`
+  - updated
+    - `functions/scripts/data/j2Teams.js`
+    - `functions/scripts/data/j3Teams.js`
+  - Batch 3 docs-only planned entries は actual module entries に進んだ
+  - Actual `j2Teams.js` entries added: 1
+    - `jubilo_iwata`
+  - Actual `j3Teams.js` entries added: 4
+    - `fc_gifu`
+    - `matsumoto_yamaga`
+    - `fukushima_united`
+    - `kataller_toyama`
+  - `jubilo_iwata` は `j2Teams.js` にのみ追加済みで、`j3Teams.js` には追加していない
+  - `fc_gifu` / `matsumoto_yamaga` / `fukushima_united` / `kataller_toyama` は `j3Teams.js` にのみ追加済みで、`j2Teams.js` には追加していない
+  - `football_j2` confirmed teams: 10
+  - `football_j3` confirmed teams: 5
+  - Firestore writes: 0
+  - non-dry seed: 0
+  - API calls: 0
+  - API sync: 0
+  - deploy: 0
+  - `reilac_shiga` included: no
+  - docs changes in actual entries commit: 0
+  - validation
+    - `node --check functions/scripts/data/j2Teams.js` PASS
+    - `node --check functions/scripts/data/j3Teams.js` PASS
+    - `node functions/scripts/seedCompetitionTeams.js football_j2 --dry-run` は confirmed teams: 10 / Firestore will not be written
+    - `node functions/scripts/verifyCompetitionTeams.js football_j2 --dry-run` は In-memory team master checks PASSED
+    - `node functions/scripts/seedCompetitionTeams.js football_j3 --dry-run` は confirmed teams: 5 / Firestore will not be written
+    - `node functions/scripts/verifyCompetitionTeams.js football_j3 --dry-run` は In-memory team master checks PASSED
+    - `API_SPORTS_KEY|serviceAccountKey|node_modules|DS_Store` 禁止対象スキャンは出力なし
+  - Firestore write / non-dry seed / API sync / deploy / API call は実行していない
+  - Firestore write / non-dry seed / API sync / deploy は引き続き deferred
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -1242,11 +1276,23 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 - `jubilo_iwata` だけが Batch 3 の `j2Teams.js` planned entry
 - `fc_gifu` / `matsumoto_yamaga` / `fukushima_united` / `kataller_toyama` は Batch 3 の `j3Teams.js` planned entries
 - implementation status: all rows `planned-not-written`
-- Next task: Batch 3 actual module entries 追加の別承認判断
-- actual 追加時も `j2Teams.js` 1件 / `j3Teams.js` 4件を分けて変更する
-- Batch 3 actual module entries はまだ追加しない
-- actual `j2Teams.js` entry はまだ作らない
-- actual `j3Teams.js` entry はまだ作らない
+- Batch 3 actual module entries は追加済み
+- Actual `j2Teams.js` entries added: 1 (`jubilo_iwata`)
+- Actual `j3Teams.js` entries added: 4 (`fc_gifu`, `matsumoto_yamaga`, `fukushima_united`, `kataller_toyama`)
+- `jubilo_iwata` は `j2Teams.js` にのみ追加済み
+- `fc_gifu` / `matsumoto_yamaga` / `fukushima_united` / `kataller_toyama` は `j3Teams.js` にのみ追加済み
+- `football_j2` confirmed teams: 10
+- `football_j3` confirmed teams: 5
+- Next task: Batch 3 actual module entries 追加後の追加 validation 段階
+- 追加 validation では以下を実行する
+  - `node --check functions/scripts/data/j2Teams.js`
+  - `node --check functions/scripts/data/j3Teams.js`
+  - `node functions/scripts/seedCompetitionTeams.js football_j2 --dry-run`
+  - `node functions/scripts/verifyCompetitionTeams.js football_j2 --dry-run`
+  - `node functions/scripts/seedCompetitionTeams.js football_j3 --dry-run`
+  - `node functions/scripts/verifyCompetitionTeams.js football_j3 --dry-run`
+  - `npm --prefix functions run build`
+  - `flutter analyze --no-pub`
 - まだ Firestore write / non-dry seed には進まない
 - Do not use bulk approval for Batch 1 or future batches
 - Keep `reilac_shiga` / `Biwako Shiga` excluded from seedable / confirmed entry candidates until continuity approval is completed
@@ -1450,12 +1496,20 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - `fukushima_united`
   - `kataller_toyama`
 - implementation status: all rows `planned-not-written`
-- actual `j2Teams.js` entry はまだ作らない
-- actual `j3Teams.js` entry はまだ作らない
-- 次は Batch 3 actual module entries 追加の別承認判断
-- actual 追加時も `j2Teams.js` 1件 / `j3Teams.js` 4件を分けて変更する
-- `jubilo_iwata` は Batch 3 の唯一の `j2Teams.js` planned entry
-- `fc_gifu` / `matsumoto_yamaga` / `fukushima_united` / `kataller_toyama` は Batch 3 の `j3Teams.js` planned entries
+- Batch 3 actual module entries added
+- Actual `j2Teams.js` entries added: 1
+  - `jubilo_iwata`
+- Actual `j3Teams.js` entries added: 4
+  - `fc_gifu`
+  - `matsumoto_yamaga`
+  - `fukushima_united`
+  - `kataller_toyama`
+- `jubilo_iwata` は `j2Teams.js` にのみ追加済み
+- `fc_gifu` / `matsumoto_yamaga` / `fukushima_united` / `kataller_toyama` は `j3Teams.js` にのみ追加済み
+- `football_j2` confirmed teams: 10
+- `football_j3` confirmed teams: 5
+- 次は Batch 3 actual module entries 追加後の追加 validation 段階
+- 追加 validation では `node --check` / `seedCompetitionTeams --dry-run` / `verifyCompetitionTeams --dry-run` / `npm --prefix functions run build` / `flutter analyze --no-pub` を実行する
 - Batch 3 は bulk approval しない
 - まだ Firestore write / non-dry seed には進まない
 - bulk approval は行わない
