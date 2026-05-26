@@ -128,6 +128,228 @@ A normal league season without groups could omit `groups` and use flat membershi
 - Move to `seeded` only after a separately approved Firestore write or non-dry seed.
 - Firestore write, non-dry seed, API sync, and deploy remain deferred for this design step.
 
+## J2 / J3 Season Membership Exact Data Module Plan
+
+This section records a docs-only exact data module plan for future J2 / J3 season membership data.
+
+It does not edit `functions/scripts/data/competitionSeasonMemberships.js`, create actual source code changes, create seed data, write Firestore documents, run a non-dry seed, call an API, run API sync, or deploy.
+
+Summary:
+
+- Target future module: `functions/scripts/data/competitionSeasonMemberships.js`
+- Actual file entries added: 0
+- Firestore writes: 0
+- non-dry seed: 0
+- API calls: 0
+- deploy: 0
+- `reilac_shiga` included as confirmed/seedable: no
+
+### Planned Module Responsibility
+
+- `competitionSeasonMemberships.js` should be a data-only module for season / tournament membership, not stable team master data.
+- `j2Teams.js` / `j3Teams.js` / `j1Teams.js` remain stable team identity master modules and must not directly represent group membership.
+- `competitionSeasonMemberships.js` should manage season profiles and membership rows scoped by `competitionSeasonKey`.
+- 2026 `EAST-A` / `EAST-B` / `WEST-A` / `WEST-B` are season / tournament group metadata, not team master fields.
+- 2027 / 2028+ normal J2 / J3 seasons or other tournaments should use the same structure with new `competitionSeasonKey` values.
+- Promotion / relegation should be represented by adding a membership row under a new `competitionSeasonKey` while reusing the same stable `teamId`.
+
+### Planned Export Shape
+
+The planned module shape is below. Do not create or edit the actual file from this document alone.
+
+```js
+'use strict';
+
+const competitionSeasonMemberships = [
+  {
+    competitionSeasonKey: 'football_j2_j3_2026_hyakunen',
+    seasonYear: 2026,
+    competitionKey: 'football_j2_j3_special',
+    displayNameJa: '明治安田Ｊ２・Ｊ３百年構想リーグ',
+    membershipType: 'special_tournament',
+    source: {
+      official: [
+        'https://www.jleague.jp/special/2026specialseason/j2-j3/',
+        'https://www.jleague.jp/standings/j2j3/',
+      ],
+      reviewDocument: 'docs/current-j2-j3-season-membership-review.md',
+    },
+    groups: [
+      {
+        groupKey: 'east_a',
+        displayNameJa: 'EAST-A',
+        teamIds: [],
+      },
+      {
+        groupKey: 'east_b',
+        displayNameJa: 'EAST-B',
+        teamIds: [],
+      },
+      {
+        groupKey: 'west_a',
+        displayNameJa: 'WEST-A',
+        teamIds: [],
+      },
+      {
+        groupKey: 'west_b',
+        displayNameJa: 'WEST-B',
+        teamIds: [],
+      },
+    ],
+    status: 'review',
+    seedable: false,
+  },
+];
+
+module.exports = {
+  competitionSeasonMemberships,
+};
+```
+
+### Planned Membership Row Shape
+
+The grouped structure above should also be expandable to one row per team membership when validation or seed preparation needs flat rows.
+
+```js
+{
+  competitionSeasonKey: 'football_j2_j3_2026_hyakunen',
+  seasonYear: 2026,
+  competitionKey: 'football_j2_j3_special',
+  membershipType: 'special_tournament',
+  groupKey: 'east_a',
+  teamId: 'vegalta_sendai',
+  teamIdStatus: 'confirmed_team_master',
+  membershipStatus: 'review',
+  seedable: false,
+  source: 'J.LEAGUE official 2026 special season page + docs/current-j2-j3-season-membership-review.md',
+}
+```
+
+### Team ID Status Policy
+
+| teamIdStatus | Meaning | Seedable implication |
+|---|---|---|
+| `confirmed_team_master` | `teamId` exists as a confirmed team master entry in `j2Teams.js`, `j3Teams.js`, or `j1Teams.js`. | May become seedable only after membership review and separate approval. |
+| `candidate_not_confirmed` | `teamId` exists only as a documentation candidate and has not become an actual team module entry. | Not seedable. |
+| `blocked_continuity` | `teamId` is blocked by unresolved continuity review, such as `reilac_shiga` / `Biwako Shiga`. | Not seedable. |
+| `missing_team_master` | Season membership evidence exists, but the stable team master identity is not yet confirmed. | Not seedable. |
+
+### 2026 Planned Group Membership Table
+
+This table is a docs-only plan for the 2026 special season. It is not actual seed data. `seedable` is `false` for every row at this planning stage.
+
+| groupKey | teamId | teamIdStatus | seedable |
+|---|---|---|---|
+| `east_a` | `vegalta_sendai` | `confirmed_team_master` | false |
+| `east_a` | `shonan_bellmare` | `confirmed_team_master` | false |
+| `east_a` | `blaublitz_akita` | `confirmed_team_master` | false |
+| `east_a` | `sc_sagamihara` | `candidate_not_confirmed` | false |
+| `east_a` | `yokohama_fc` | `confirmed_team_master` | false |
+| `east_a` | `montedio_yamagata` | `confirmed_team_master` | false |
+| `east_a` | `thespa_gunma` | `candidate_not_confirmed` | false |
+| `east_a` | `tochigi_city` | `confirmed_team_master` | false |
+| `east_a` | `tochigi_sc` | `confirmed_team_master` | false |
+| `east_a` | `vanraure_hachinohe` | `confirmed_team_master` | false |
+| `east_b` | `ventforet_kofu` | `confirmed_team_master` | false |
+| `east_b` | `iwaki_fc` | `candidate_not_confirmed` | false |
+| `east_b` | `rb_omiya_ardija` | `candidate_not_confirmed` | false |
+| `east_b` | `hokkaido_consadole_sapporo` | `candidate_not_confirmed` | false |
+| `east_b` | `fujieda_myfc` | `confirmed_team_master` | false |
+| `east_b` | `fc_gifu` | `confirmed_team_master` | false |
+| `east_b` | `matsumoto_yamaga` | `confirmed_team_master` | false |
+| `east_b` | `jubilo_iwata` | `confirmed_team_master` | false |
+| `east_b` | `fukushima_united` | `confirmed_team_master` | false |
+| `east_b` | `ac_nagano_parceiro` | `candidate_not_confirmed` | false |
+| `west_a` | `kataller_toyama` | `confirmed_team_master` | false |
+| `west_a` | `tokushima_vortis` | `candidate_not_confirmed` | false |
+| `west_a` | `albirex_niigata` | `candidate_not_confirmed` | false |
+| `west_a` | `kochi_united` | `candidate_not_confirmed` | false |
+| `west_a` | `ehime_fc` | `candidate_not_confirmed` | false |
+| `west_a` | `zweigen_kanazawa` | `candidate_not_confirmed` | false |
+| `west_a` | `fc_osaka` | `candidate_not_confirmed` | false |
+| `west_a` | `fc_imabari` | `candidate_not_confirmed` | false |
+| `west_a` | `nara_club` | `candidate_not_confirmed` | false |
+| `west_a` | `kamatamare_sanuki` | `candidate_not_confirmed` | false |
+| `west_b` | `tegevajaro_miyazaki` | `candidate_not_confirmed` | false |
+| `west_b` | `sagan_tosu` | `candidate_not_confirmed` | false |
+| `west_b` | `kagoshima_united` | `candidate_not_confirmed` | false |
+| `west_b` | `renofa_yamaguchi` | `candidate_not_confirmed` | false |
+| `west_b` | `roasso_kumamoto` | `candidate_not_confirmed` | false |
+| `west_b` | `oita_trinita` | `candidate_not_confirmed` | false |
+| `west_b` | `gainare_tottori` | `candidate_not_confirmed` | false |
+| `west_b` | `giravanz_kitakyushu` | `candidate_not_confirmed` | false |
+| `west_b` | `reilac_shiga` | `blocked_continuity` | false |
+| `west_b` | `fc_ryukyu` | `candidate_not_confirmed` | false |
+
+### Current Confirmed Team Master Coverage
+
+Confirmed `football_j2` team master entries: 10
+
+- `vegalta_sendai`
+- `shonan_bellmare`
+- `blaublitz_akita`
+- `yokohama_fc`
+- `montedio_yamagata`
+- `tochigi_city`
+- `tochigi_sc`
+- `ventforet_kofu`
+- `fujieda_myfc`
+- `jubilo_iwata`
+
+Confirmed `football_j3` team master entries: 5
+
+- `vanraure_hachinohe`
+- `fc_gifu`
+- `matsumoto_yamaga`
+- `fukushima_united`
+- `kataller_toyama`
+
+### Seedability Policy
+
+- Season membership rows are not seedable until the referenced `teamId` exists as confirmed stable team master data.
+- `candidate_not_confirmed` rows are not seedable.
+- `blocked_continuity` rows are not seedable.
+- `reilac_shiga` remains excluded from confirmed / seedable rows until continuity approval is completed.
+- Group metadata can be planned before every team is confirmed, but Firestore seed must wait until referenced team IDs are safe.
+- Firestore write / non-dry seed requires separate approval.
+
+### Planned Validation Policy
+
+After actual `competitionSeasonMemberships.js` entries are added in a later approved step, validation should check:
+
+- `node --check functions/scripts/data/competitionSeasonMemberships.js`
+- season profile has unique `competitionSeasonKey`
+- group keys are unique within a season
+- every group has expected number of teams for 2026 special season
+  - `EAST-A`: 10
+  - `EAST-B`: 10
+  - `WEST-A`: 10
+  - `WEST-B`: 10
+- no duplicate `teamId` within a `competitionSeasonKey`
+- all seedable rows reference confirmed stable team master entries
+- blocked / unconfirmed rows must not be seedable
+- `reilac_shiga` must remain non-seedable until continuity approval
+- Firestore write must remain separate from validation
+
+### Future-Year Examples
+
+- `football_j2_2027`
+  - `membershipType`: `league`
+  - `groupKey`: `null` or omitted
+- `football_j3_2027`
+  - `membershipType`: `league`
+  - `groupKey`: `null` or omitted
+- `football_j2_2028` / `football_j3_2028` can use the same pattern.
+- Promoted / relegated clubs are represented by adding a new membership row under a new `competitionSeasonKey`, while keeping the same `teamId`.
+
+### Next-Step Recommendation
+
+- First, commit / push this docs-only exact data module plan.
+- Next, reflect the result in `docs/current-state.md`.
+- Then, with separate approval, add actual entries to `functions/scripts/data/competitionSeasonMemberships.js`.
+- After that, add a season membership verify script or extend an existing verify flow.
+- Firestore write / non-dry seed remains the final separately approved step.
+
 ## Review Fields
 
 - `status`: `review` means official membership evidence exists, but the row is not seedable.
