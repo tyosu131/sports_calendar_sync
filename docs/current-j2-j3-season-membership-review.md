@@ -29,6 +29,105 @@ Source confirmation notes:
 - Do not add these rows to `j2Teams.js` or `j3Teams.js` until stable identity and API / logo verification are complete.
 - Do not infer API-SPORTS team IDs or logo URLs from these official J.LEAGUE pages.
 
+## J2 / J3 Multi-Year Season Membership Data Design
+
+This section defines a docs-only design for J2 / J3 season membership data that can be reused beyond the 2026 `明治安田Ｊ２・Ｊ３百年構想リーグ`.
+
+This is not actual seed data, a Firestore write, a source code change, an API call, an API sync, a deploy change, or a non-dry seed execution.
+
+### Design Goal
+
+- Model 2026 special tournament membership and 2027 / 2028+ normal seasons or other tournaments with the same structure.
+- Keep stable team master data separate from season / tournament membership data.
+- Treat `/teams/{id}` as the stable club identity. Promotion / relegation must reuse the same internal team ID.
+- Do not create duplicate club docs per division, year, group, or tournament.
+- Keep division, group, tournament, and year membership on `competitionSeasonKey` scoped data.
+- Keep `reilac_shiga` / `Biwako Shiga` excluded from confirmed entry / seedable candidates until continuity approval is completed.
+
+### Proposed Key Concepts
+
+| Field | Examples | Meaning |
+|---|---|---|
+| `competitionKey` | `football_j2`, `football_j3`, `football_j2_j3_special` | Competition family / display bucket. It should not duplicate stable club identity. |
+| `competitionSeasonKey` | `football_j2_j3_2026_hyakunen`, `football_j2_2027`, `football_j3_2027` | Specific season / tournament / format key. This is the primary scope for membership rows. |
+| `seasonYear` | `2026`, `2027`, `2028` | Calendar / competition year for the season profile. |
+| `membershipType` | `league`, `special_tournament`, `cup`, `playoff` | Format of the membership set. |
+| `groupKey` | `east_a`, `east_b`, `west_a`, `west_b`, `null` | Optional group within a season. Omit or set to `null` for normal leagues without groups. |
+| `teamId` | `jubilo_iwata`, `fc_gifu` | Stable `/teams/{id}` reference. |
+| `source` | official source URL, API evidence note, review document section | Evidence trail for why a team is included in the season membership. |
+| `status` | `review`, `approved`, `seedable`, `seeded` | Review / execution state of the membership row or season profile. |
+
+Notes:
+
+- `competitionKey` is not enough to identify a specific year. Use `competitionSeasonKey` for season-scoped membership.
+- A team can appear under different `competitionSeasonKey` values over time while keeping the same `teamId`.
+- 2026 group membership is season / tournament evidence only. It does not mean permanent J2 or J3 division membership.
+- Future J2 / J3 normal seasons can use the same design without groups.
+
+### Proposed Data Shape
+
+The following is an example data-only object structure. Do not create this file or seed it from this document alone.
+
+```js
+{
+  competitionSeasonKey: 'football_j2_j3_2026_hyakunen',
+  seasonYear: 2026,
+  competitionKey: 'football_j2_j3_special',
+  displayNameJa: '明治安田Ｊ２・Ｊ３百年構想リーグ',
+  membershipType: 'special_tournament',
+  groups: [
+    {
+      groupKey: 'east_a',
+      displayNameJa: 'EAST-A',
+      teamIds: [
+        'vegalta_sendai',
+        'shonan_bellmare',
+      ],
+    },
+  ],
+  source: {
+    official: [
+      'https://www.jleague.jp/special/2026specialseason/j2-j3/',
+      'https://www.jleague.jp/standings/j2j3/',
+    ],
+    reviewDocument: 'docs/current-j2-j3-season-membership-review.md',
+  },
+  status: 'review',
+}
+```
+
+A normal league season without groups could omit `groups` and use flat membership rows.
+
+```js
+{
+  competitionSeasonKey: 'football_j2_2027',
+  seasonYear: 2027,
+  competitionKey: 'football_j2',
+  displayNameJa: '明治安田Ｊ２リーグ',
+  membershipType: 'league',
+  teamIds: [
+    '...',
+  ],
+  source: {
+    official: [
+      'TBD',
+    ],
+    reviewDocument: 'docs/current-j2-j3-season-membership-review.md',
+  },
+  status: 'review',
+}
+```
+
+### Review / Seed Flow
+
+- Add or update stable team master entries only after stable identity, API team ID, and logo URL evidence are approved together.
+- Add season membership rows only after the relevant `teamId` exists as a confirmed stable identity.
+- Keep membership rows in `review` until official source evidence and target season profile are reviewed.
+- Move to `approved` only after the season membership is checked against stable team IDs and no duplicate club docs are introduced.
+- Move to `seedable` only after a separate exact diff plan and approval.
+- Move to `seeded` only after a separately approved Firestore write or non-dry seed.
+- Firestore write, non-dry seed, API sync, and deploy remain deferred for this design step.
+
 ## Review Fields
 
 - `status`: `review` means official membership evidence exists, but the row is not seedable.
