@@ -1108,6 +1108,27 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
     - `API_SPORTS_KEY|serviceAccountKey|node_modules|DS_Store` 禁止対象スキャンは出力なし
   - Firestore write / non-dry seed / API sync / deploy / API call は実行していない
   - Firestore write / non-dry seed / API sync / deploy は引き続き deferred
+- J2 / J3 Batch 3 actual module entries post-add validation completed
+  - based on commit: `184bd8b Update current state after J2 J3 batch 3 team entries`
+  - file changes during validation: none
+  - initial `git status --short`: clean
+  - `node --check functions/scripts/data/j2Teams.js`: PASS
+  - `node --check functions/scripts/data/j3Teams.js`: PASS
+  - `node functions/scripts/seedCompetitionTeams.js football_j2 --dry-run`
+    - confirmed teams: 10
+    - Firestore will not be written
+  - `node functions/scripts/verifyCompetitionTeams.js football_j2 --dry-run`: In-memory team master checks PASSED
+  - `node functions/scripts/seedCompetitionTeams.js football_j3 --dry-run`
+    - confirmed teams: 5
+    - Firestore will not be written
+  - `node functions/scripts/verifyCompetitionTeams.js football_j3 --dry-run`: In-memory team master checks PASSED
+  - `npm --prefix functions run build`: PASS
+  - `flutter analyze --no-pub`: No issues found
+  - final `git status --short`: clean
+  - Firestore read/write は実行していない
+  - non-dry seed は実行していない
+  - API sync / deploy / 追加 API call は実行していない
+  - Firestore write / non-dry seed / API sync / deploy は引き続き deferred
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -1283,16 +1304,18 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 - `fc_gifu` / `matsumoto_yamaga` / `fukushima_united` / `kataller_toyama` は `j3Teams.js` にのみ追加済み
 - `football_j2` confirmed teams: 10
 - `football_j3` confirmed teams: 5
-- Next task: Batch 3 actual module entries 追加後の追加 validation 段階
-- 追加 validation では以下を実行する
-  - `node --check functions/scripts/data/j2Teams.js`
-  - `node --check functions/scripts/data/j3Teams.js`
-  - `node functions/scripts/seedCompetitionTeams.js football_j2 --dry-run`
-  - `node functions/scripts/verifyCompetitionTeams.js football_j2 --dry-run`
-  - `node functions/scripts/seedCompetitionTeams.js football_j3 --dry-run`
-  - `node functions/scripts/verifyCompetitionTeams.js football_j3 --dry-run`
-  - `npm --prefix functions run build`
-  - `flutter analyze --no-pub`
+- Batch 3 actual module entries 追加後の追加 validation は完了済み
+  - file changes during validation: none
+  - initial / final `git status --short`: clean
+  - `node --check` J2 / J3: PASS
+  - `football_j2` dry-run confirmed teams: 10 / verify PASS
+  - `football_j3` dry-run confirmed teams: 5 / verify PASS
+  - `npm --prefix functions run build`: PASS
+  - `flutter analyze --no-pub`: No issues found
+- Next task: 次の判断段階
+  - Batch 4 candidate list 作成
+  - J2 / J3 season membership data 設計
+  - Firestore seed approval 判断
 - まだ Firestore write / non-dry seed には進まない
 - Do not use bulk approval for Batch 1 or future batches
 - Keep `reilac_shiga` / `Biwako Shiga` excluded from seedable / confirmed entry candidates until continuity approval is completed
@@ -1508,8 +1531,15 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 - `fc_gifu` / `matsumoto_yamaga` / `fukushima_united` / `kataller_toyama` は `j3Teams.js` にのみ追加済み
 - `football_j2` confirmed teams: 10
 - `football_j3` confirmed teams: 5
-- 次は Batch 3 actual module entries 追加後の追加 validation 段階
-- 追加 validation では `node --check` / `seedCompetitionTeams --dry-run` / `verifyCompetitionTeams --dry-run` / `npm --prefix functions run build` / `flutter analyze --no-pub` を実行する
+- Batch 3 actual module entries 追加後の追加 validation completed
+- validation 中の file changes: none
+- initial / final `git status --short`: clean
+- `node --check` J2 / J3: PASS
+- `football_j2` dry-run confirmed teams: 10 / verify PASS
+- `football_j3` dry-run confirmed teams: 5 / verify PASS
+- `npm --prefix functions run build`: PASS
+- `flutter analyze --no-pub`: No issues found
+- 次は Batch 4 candidate list 作成、J2/J3 season membership data 設計、Firestore seed approval 判断のいずれか
 - Batch 3 は bulk approval しない
 - まだ Firestore write / non-dry seed には進まない
 - bulk approval は行わない
