@@ -1129,6 +1129,24 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - non-dry seed は実行していない
   - API sync / deploy / 追加 API call は実行していない
   - Firestore write / non-dry seed / API sync / deploy は引き続き deferred
+- J2 / J3 multi-year season membership data design documented
+  - commit: `bc1e106 Document J2 J3 multi-year membership design`
+  - updated
+    - `docs/current-j2-j3-season-membership-review.md`
+  - `J2 / J3 Multi-Year Season Membership Data Design` section 追加済み
+  - docs-only design であり、actual seed data / Firestore write / source code change / API call / API sync / deploy / non-dry seed ではない
+  - 2026 `明治安田Ｊ２・Ｊ３百年構想リーグ` だけでなく、2027 / 2028+ の通常シーズンや別大会にも使える multi-year design として整理済み
+  - stable team master と season membership は分離する
+  - `/teams/{id}` は stable club identity として扱う
+  - promotion / relegation があっても同じ internal team ID を reuse する
+  - division / year / group / tournament ごとに duplicate club docs は作らない
+  - season / tournament membership は `competitionSeasonKey` scoped data として扱う
+  - `competitionKey` は competition family / display bucket を表す
+  - 特定年度・大会・特殊フォーマットを識別するには `competitionSeasonKey` を使う
+  - `groupKey` は optional とし、group がない通常リーグでは `null` または omit できる
+  - 2026 の `EAST-A` / `EAST-B` / `WEST-A` / `WEST-B` は team master ではなく season / tournament group metadata として扱う
+  - `reilac_shiga` / `Biwako Shiga` は continuity approval 完了まで confirmed entry / seedable candidates から除外する
+  - Firestore write / non-dry seed / API sync / deploy は引き続き deferred
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -1312,10 +1330,17 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - `football_j3` dry-run confirmed teams: 5 / verify PASS
   - `npm --prefix functions run build`: PASS
   - `flutter analyze --no-pub`: No issues found
-- Next task: 次の判断段階
-  - Batch 4 candidate list 作成
-  - J2 / J3 season membership data 設計
-  - Firestore seed approval 判断
+- J2 / J3 multi-year season membership data design は docs-only で追加済み
+  - 2026 special tournament と 2027 / 2028+ の通常シーズン・別大会に対応する設計
+  - stable team master と season membership を分離
+  - season / tournament membership は `competitionSeasonKey` scoped data として扱う
+  - 2026 group (`EAST-A` / `EAST-B` / `WEST-A` / `WEST-B`) は season / tournament group metadata であり、team master ではない
+- Next task: J2 / J3 season membership data の exact data module plan 作成段階
+  - docs-only exact data module plan を先に作成する
+  - その後 `functions/scripts/data/competitionSeasonMemberships.js` への actual entries 追加を別承認する
+  - その後 dry-run verify 作成または既存 verify 拡張を検討する
+  - Firestore write / non-dry seed は最後に別承認する
+  - Batch 4 candidate list 作成や Firestore seed approval 判断よりも、先に season membership data module plan を固める
 - まだ Firestore write / non-dry seed には進まない
 - Do not use bulk approval for Batch 1 or future batches
 - Keep `reilac_shiga` / `Biwako Shiga` excluded from seedable / confirmed entry candidates until continuity approval is completed
