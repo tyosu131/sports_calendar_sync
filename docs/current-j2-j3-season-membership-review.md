@@ -350,6 +350,132 @@ After actual `competitionSeasonMemberships.js` entries are added in a later appr
 - After that, add a season membership verify script or extend an existing verify flow.
 - Firestore write / non-dry seed remains the final separately approved step.
 
+## J2 / J3 Season Membership Verification Plan
+
+This section records a docs-only verification plan for future J2 / J3 season membership data.
+
+It does not create a verify script, edit source code, create seed data, write Firestore documents, run a non-dry seed, call an API, run API sync, or deploy.
+
+### Verification Target
+
+- Future module: `functions/scripts/data/competitionSeasonMemberships.js`
+- Future verify script candidate: `functions/scripts/verifyCompetitionSeasonMemberships.js`
+- This step does not create the verify script.
+- This step is a docs-only verification plan.
+
+### Required Validation Checks
+
+Future validation should check:
+
+- `node --check functions/scripts/data/competitionSeasonMemberships.js`
+- module exports `competitionSeasonMemberships`
+- each season profile has required fields:
+  - `competitionSeasonKey`
+  - `seasonYear`
+  - `competitionKey`
+  - `displayNameJa`
+  - `membershipType`
+  - `source`
+  - `status`
+  - `seedable`
+- `competitionSeasonKey` is unique across profiles
+- `seasonYear` is a number
+- `membershipType` is one of:
+  - `league`
+  - `special_tournament`
+  - `cup`
+  - `playoff`
+- `status` is one of:
+  - `review`
+  - `approved`
+  - `seedable`
+  - `seeded`
+- `seedable` is boolean
+
+### Group Validation Checks
+
+For the 2026 special season:
+
+- `football_j2_j3_2026_hyakunen` has exactly 4 groups:
+  - `east_a`
+  - `east_b`
+  - `west_a`
+  - `west_b`
+- group keys are unique within a season
+- each group has exactly 10 team IDs
+- total teams across all groups is 40
+- no duplicate `teamId` within the same `competitionSeasonKey`
+- group metadata is season / tournament data, not stable team master data
+
+### Team Master Reference Checks
+
+- `teamIdStatus: confirmed_team_master` rows must reference actual confirmed team IDs from:
+  - `j1Teams.js`
+  - `j2Teams.js`
+  - `j3Teams.js`
+- `candidate_not_confirmed` rows must not be seedable.
+- `blocked_continuity` rows must not be seedable.
+- `missing_team_master` rows must not be seedable.
+- `reilac_shiga` must remain `blocked_continuity` and `seedable: false` until continuity approval is completed.
+- seedable rows must never reference unconfirmed or blocked team IDs.
+
+### Seedability Validation Policy
+
+- A season profile can be planned with unconfirmed teams, but it must remain `seedable: false`.
+- A row or season can become seedable only after all referenced `teamId` values are confirmed stable team master entries.
+- Firestore write / non-dry seed requires separate approval even if validation passes.
+- Validation passing does not mean Firestore seed approval.
+
+### Future-Year Validation
+
+- Normal league season profiles such as `football_j2_2027` / `football_j3_2027` may omit `groups`.
+- Normal league season profiles may use flat `teamIds` or membership rows.
+- If `groupKey` is omitted or `null`, group count validation should not apply.
+- Promoted / relegated clubs should keep the same stable `teamId`.
+- A club moving divisions should appear under a new `competitionSeasonKey`, not as a duplicate `/teams/{id}`.
+
+### Dry-Run Behavior
+
+If a future verify script is created:
+
+- default mode should be read-only
+- dry-run must not initialize Firebase Admin SDK
+- dry-run must not read or write Firestore
+- validation should run against local data modules only
+- Firestore write must remain separate from validation
+
+### Expected First Actual Validation Commands
+
+After actual module entries are added in a separately approved step, expected validation commands are:
+
+```bash
+node --check functions/scripts/data/competitionSeasonMemberships.js
+node functions/scripts/verifyCompetitionSeasonMemberships.js --dry-run
+npm --prefix functions run build
+flutter analyze --no-pub
+```
+
+### Current Known Expected Values
+
+- `football_j2_j3_2026_hyakunen`
+  - groups: 4
+  - teams per group: 10
+  - total teams: 40
+- current confirmed team master coverage:
+  - `football_j2`: 10
+  - `football_j3`: 5
+- `reilac_shiga`
+  - `teamIdStatus`: `blocked_continuity`
+  - `seedable`: false
+
+### Verification Plan Next-Step Recommendation
+
+- First, commit / push this docs-only verification plan.
+- Next, reflect the result in `docs/current-state.md`.
+- Then, with separate approval, add actual entries to `functions/scripts/data/competitionSeasonMemberships.js`.
+- After that, add `functions/scripts/verifyCompetitionSeasonMemberships.js` or extend an existing verify flow.
+- Firestore write / non-dry seed remains the final separately approved step.
+
 ## Review Fields
 
 - `status`: `review` means official membership evidence exists, but the row is not seedable.
