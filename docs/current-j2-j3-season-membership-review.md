@@ -2084,6 +2084,160 @@ Note: this table is for stable ID candidate review. The current source of truth 
 | review | WEST-B | レイラック滋賀ＦＣ | TBD | TBD | TBD | J.LEAGUE standings | no | new-stable-id-candidate-needed; membership evidence only |
 | review | WEST-B | ＦＣ琉球 | TBD | TBD | TBD | J.LEAGUE standings | no | new-stable-id-candidate-needed; membership evidence only |
 
+## J2 / J3 Season Membership Seedability Readiness Review
+
+### Summary
+
+- docs-only seedability readiness review: yes
+- target competitionSeasonKey: `football_j2_j3_2026_hyakunen`
+- current status: `review`
+- current seedable: false
+- total membership teamIds: 40
+- confirmed team references: 15
+- blocked / unconfirmed rows: 25
+- Firestore writes: 0
+- non-dry seed: 0
+- `--write` executed: 0
+- API calls: 0
+- deploy: 0
+- this review is not Firestore seed approval
+- this review does not change seedability
+
+### Confirmed Team Master Coverage
+
+Confirmed team master rows:
+
+- `vegalta_sendai`
+- `shonan_bellmare`
+- `blaublitz_akita`
+- `yokohama_fc`
+- `montedio_yamagata`
+- `tochigi_city`
+- `tochigi_sc`
+- `ventforet_kofu`
+- `fujieda_myfc`
+- `jubilo_iwata`
+- `vanraure_hachinohe`
+- `fc_gifu`
+- `matsumoto_yamaga`
+- `fukushima_united`
+- `kataller_toyama`
+
+### Candidate Not Confirmed Rows
+
+Candidate not confirmed rows:
+
+- `sc_sagamihara`
+- `thespa_gunma`
+- `iwaki_fc`
+- `rb_omiya_ardija`
+- `hokkaido_consadole_sapporo`
+- `ac_nagano_parceiro`
+- `tokushima_vortis`
+- `albirex_niigata`
+- `kochi_united`
+- `ehime_fc`
+- `zweigen_kanazawa`
+- `fc_osaka`
+- `fc_imabari`
+- `nara_club`
+- `kamatamare_sanuki`
+- `tegevajaro_miyazaki`
+- `sagan_tosu`
+- `kagoshima_united`
+- `renofa_yamaguchi`
+- `roasso_kumamoto`
+- `oita_trinita`
+- `gainare_tottori`
+- `giravanz_kitakyushu`
+- `fc_ryukyu`
+
+### Blocked Continuity Rows
+
+Blocked continuity rows:
+
+- `reilac_shiga`
+  - reason: `Reilac Shiga` / `Biwako Shiga` continuity approval is not completed
+  - current action: keep excluded from confirmed / seedable rows
+  - seedable: false
+
+### Seedable True Prerequisites
+
+- all 40 teamIds must be confirmed stable team master entries
+- all 40 teamIds must have approved stable internal team IDs
+- all 40 teamIds must have API evidence and logo evidence approved enough for module entry
+- all `candidate_not_confirmed` rows must be converted to `confirmed_team_master`
+- `reilac_shiga` continuity approval must be completed, or the row must remain excluded from seedable data
+- no `blocked_continuity` rows
+- no `missing_team_master` rows
+- no duplicate team IDs within `competitionSeasonKey`
+- verify dry-run must PASS
+- seed preparation dry-run must PASS
+- `write candidates` must remain 0 until explicit Firestore seed approval
+- Firestore write / non-dry seed requires separate approval
+
+### Recommended Next Path
+
+1. Keep `football_j2_j3_2026_hyakunen` as `status: review` / `seedable: false`
+2. Start next confirmed team master approval batch for remaining `candidate_not_confirmed` rows
+3. Do not use bulk approval
+4. Continue per-club approval decision review
+5. Add actual `j2Teams.js` / `j3Teams.js` entries only after separate exact diff plan and approval
+6. Re-run team master dry-run / verify after each batch
+7. Update `teamIdStatuses` only after actual confirmed team module entries exist
+8. Re-run `verifyCompetitionSeasonMemberships.js --dry-run`
+9. Re-run `seedCompetitionSeasonMemberships.js --dry-run`
+10. Only after all 40 rows are safe, consider separate `seedable: true` approval
+11. Firestore write / non-dry seed / `--write` remains last and separately approved
+
+### All-Sports Season Rollover Policy
+
+- `competitionSeasonKey` is not specific to J2 / J3 2026; it is the season / tournament membership scope for all sports and all years.
+- This app requires annual season membership data updates.
+- Annual updates do not mean duplicating the app itself or duplicating stable team master data every year.
+- `/teams/{id}` remains the stable team identity.
+- Season / tournament / league membership is added on the `competitionSeasonKey` side.
+- When a season changes, create a new season membership candidate for the new `competitionSeasonKey`.
+- Promotion / relegation / league expansion / conference change / division change is represented as new season membership rows, not as team master duplication.
+- Automation may cover candidate generation / diff detection / validation / dry-run.
+- `seedable: true`, Firestore write, non-dry seed, and `--write` require human approval.
+- The 2026 special season is only the first concrete example of this general season membership model.
+
+Example future `competitionSeasonKey` values:
+
+- `football_j1_2027`
+- `football_j2_2027`
+- `football_j3_2027`
+- `football_j1_2028`
+- `baseball_npb_2027`
+- `basketball_b_league_2027`
+- `american_football_nfl_2027`
+- `rugby_league_one_2027`
+
+Annual operation flow:
+
+1. Generate next season membership candidates
+2. Compare against previous season
+3. Detect promoted / relegated / new / removed / renamed / rebranded teams
+4. Mark uncertain rows as `candidate_not_confirmed`, `blocked_continuity`, or `missing_team_master`
+5. Run verify dry-run
+6. Run seed preparation dry-run
+7. Human review / approval
+8. Only then consider `seedable: true`
+9. Firestore write / non-dry seed / `--write` remains last and separately approved
+
+### Explicit Deferred Items
+
+- `seedable: true`
+- Firestore write
+- non-dry seed
+- `--write`
+- API sync
+- deploy
+- `reilac_shiga` / `Biwako Shiga` continuity approval
+- additional confirmed team module entries
+- additional API calls unless separately approved
+
 ## Unresolved Items
 
 - No clubs in this membership review currently match existing confirmed J1 stable team IDs.

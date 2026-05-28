@@ -1597,6 +1597,54 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - `reilac_shiga` / `Biwako Shiga` continuity approval は未完了
   - 2027 / 2028+ にも使える multi-year design、stable team master と season membership の分離、promotion / relegation 時の同一 `/teams/{id}` reuse、duplicate club docs を作らない方針を維持
   - Firestore write / non-dry seed / `--write` / API sync / deploy は引き続き deferred
+- J2 / J3 Season Membership Seedability Readiness Review documented
+  - same docs-only readiness review step
+  - updated
+    - `docs/current-j2-j3-season-membership-review.md`
+    - `docs/current-state.md`
+  - `J2 / J3 Season Membership Seedability Readiness Review` を docs-only で追加済み
+  - target competitionSeasonKey: `football_j2_j3_2026_hyakunen`
+  - current status: `review`
+  - current seedable: false
+  - total membership teamIds: 40
+  - confirmed team references: 15
+  - blocked / unconfirmed rows: 25
+  - `candidate_not_confirmed` rows: 24
+  - `blocked_continuity` rows: 1
+  - `reilac_shiga` remains `blocked_continuity`
+  - Firestore writes: 0
+  - non-dry seed: 0
+  - `--write`: 0
+  - API calls: 0
+  - deploy: 0
+  - this review is not Firestore seed approval
+  - `seedable: true` には変更していない
+  - `All-Sports Season Rollover Policy` を docs-only で追加済み
+  - this app requires annual season membership data updates
+  - automatic candidate generation is acceptable
+  - automatic Firestore seed is not acceptable
+  - new season candidates must start as `review` / `seedable: false`
+  - human approval is required before `seedable: true`
+  - human approval is required before Firestore write / non-dry seed / `--write`
+  - policy applies beyond J2 / J3 2026 to future seasons and other sports
+  - example future `competitionSeasonKey` values
+    - `football_j1_2027`
+    - `football_j2_2027`
+    - `football_j3_2027`
+    - `football_j1_2028`
+    - `baseball_npb_2027`
+    - `basketball_b_league_2027`
+    - `american_football_nfl_2027`
+    - `rugby_league_one_2027`
+  - readiness review で整理した不足分
+    - all 40 teamIds must be confirmed stable team master entries
+    - all `candidate_not_confirmed` rows must be converted to `confirmed_team_master`
+    - `reilac_shiga` / `Biwako Shiga` continuity approval must be completed before seedable data
+    - no `blocked_continuity` / `missing_team_master` rows
+    - verify dry-run / seed preparation dry-run must PASS before future seedability review
+    - Firestore write / non-dry seed requires separate approval
+  - 2027 / 2028+ にも使える multi-year design、stable team master と season membership の分離、promotion / relegation 時の同一 `/teams/{id}` reuse、duplicate club docs を作らない方針を維持
+  - Firestore write / non-dry seed / `--write` / API sync / deploy は引き続き deferred
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -1931,17 +1979,48 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - final `git status --short`: clean
   - Firestore read/write / non-dry seed / `--write` / API sync / deploy / additional API call: 0
   - local validation / seed preparation dry-run は PASS したが Firestore seed approval ではない
+- J2 / J3 Season Membership Seedability Readiness Review は docs-only で追加済み
+  - same docs-only readiness review step
+  - target competitionSeasonKey: `football_j2_j3_2026_hyakunen`
+  - current status: `review`
+  - current seedable: false
+  - total membership teamIds: 40
+  - confirmed team references: 15
+  - blocked / unconfirmed rows: 25
+  - `candidate_not_confirmed` rows: 24
+  - `blocked_continuity` rows: 1
+  - `reilac_shiga` remains `blocked_continuity`
+  - Firestore writes / non-dry seed / `--write` / API calls / deploy: 0
+  - this review is not Firestore seed approval
+  - `seedable: true` には変更していない
+  - all-sports season rollover policy を docs-only で追加済み
+  - this app requires annual season membership data updates
+  - automatic candidate generation is acceptable
+  - automatic Firestore seed is not acceptable
+  - new season candidates must start as `review` / `seedable: false`
+  - human approval is required before `seedable: true`
+  - human approval is required before Firestore write / non-dry seed / `--write`
+  - applies beyond J2 / J3 2026 to future seasons and other sports
+  - examples: `football_j1_2027`, `football_j2_2027`, `football_j3_2027`, `baseball_npb_2027`, `basketball_b_league_2027`, `american_football_nfl_2027`, `rugby_league_one_2027`
 - Next task: 次の判断段階
+  - current readiness review + all-sports rollover policy を commit / push する
+  - remaining `candidate_not_confirmed` rows の per-club approval batch を検討する
+  - bulk approval はしない
+  - `reilac_shiga` / `Biwako Shiga` continuity approval は別タスク
+  - future next-season candidate generation script は別設計で検討する
   - `football_j2_j3_2026_hyakunen` は `status: review` / `seedable: false` のまま維持
   - `seedable: true` への変更は別承認
   - Firestore write / non-dry seed / `--write` はまだ行わない
-  - `reilac_shiga` / `Biwako Shiga` continuity approval は未完了のまま維持
   - local validation / seed preparation dry-run は PASS したが Firestore seed approval ではない
 - 次の合理的な順序
-  1. `docs/current-state.md` に seed preparation validation 結果を反映
-  2. `seedable: true` にするかどうかは別承認
-  3. `reilac_shiga` / `Biwako Shiga` continuity approval は別タスク
-  4. Firestore write / non-dry seed / `--write` は最後に別承認
+  1. current readiness review + all-sports rollover policy を commit / push
+  2. remaining `candidate_not_confirmed` rows の next per-club approval batch を検討
+  3. club row ごとに approval decision review を継続
+  4. separate exact diff plan and approval 後にのみ追加の `j2Teams.js` / `j3Teams.js` entries を作る
+  5. actual confirmed team module entries 後に `teamIdStatuses` 更新を別承認で検討
+  6. future next-season candidate generation script は別設計で検討
+  7. all 40 rows が safe になった後に `seedable: true` を別承認で検討
+  8. Firestore write / non-dry seed / `--write` は最後に別承認
 - まだ Firestore write / non-dry seed / `--write` には進まない
 - Do not use bulk approval for Batch 1 or future batches
 - Keep `reilac_shiga` / `Biwako Shiga` excluded from seedable / confirmed entry candidates until continuity approval is completed
