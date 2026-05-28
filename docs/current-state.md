@@ -1302,6 +1302,42 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - 2027 / 2028+ にも使える multi-year design、stable team master と season membership の分離、promotion / relegation 時の同一 `/teams/{id}` reuse、duplicate club docs を作らない方針を維持
   - Firestore read/write、non-dry seed、API sync、deploy、追加 API call は実行していない
   - Firestore write / non-dry seed / API sync / deploy は引き続き deferred
+- J2 / J3 2026 special season membership actual data module entry added
+  - commit: `0cca28a Add J2 J3 season membership data`
+  - updated
+    - `functions/scripts/data/competitionSeasonMemberships.js`
+  - actual `competitionSeasonMemberships.js` entry added: 1
+  - added `competitionSeasonKey`: `football_j2_j3_2026_hyakunen`
+  - `seasonYear`: 2026
+  - `competitionKey`: `football_j2_j3_special`
+  - `displayNameJa`: `明治安田Ｊ２・Ｊ３百年構想リーグ`
+  - `membershipType`: `special_tournament`
+  - `status`: `review`
+  - `seedable`: false
+  - groups: 4
+    - `east_a`: 10 teams
+    - `east_b`: 10 teams
+    - `west_a`: 10 teams
+    - `west_b`: 10 teams
+  - total teamIds: 40
+  - `teamIdStatuses` added
+  - `confirmed_team_master` rows are present for currently confirmed J2 / J3 team master entries
+  - unconfirmed rows remain `candidate_not_confirmed`
+  - `reilac_shiga` remains `blocked_continuity`
+  - `reilac_shiga` seedable remains false
+  - `listCompetitionSeasonMembershipKeys()` now includes both actual `competitionSeasonMemberships` and existing `jLeagueMembershipScaffolds`
+  - `competitionSeasonMemberships` is exported from the module
+  - `node --check functions/scripts/data/competitionSeasonMemberships.js`: PASS
+  - forbidden file scan output: none
+  - Firestore read/write: 0
+  - non-dry seed: 0
+  - API sync: 0
+  - deploy: 0
+  - additional API call: 0
+  - verify script はまだ作成していない
+  - 2027 / 2028+ にも使える multi-year design、stable team master と season membership の分離、promotion / relegation 時の同一 `/teams/{id}` reuse、duplicate club docs を作らない方針を維持
+  - `reilac_shiga` / `Biwako Shiga` は continuity approval 完了まで confirmed entry / seedable candidates から除外する方針を維持
+  - Firestore write / non-dry seed / API sync / deploy は引き続き deferred
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -1514,17 +1550,31 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - non-dry seed / API calls / deploy: 0
   - planned CLI behavior / validation checks / 2026 special season checks / team master reference checks / output format / first validation commands は記録済み
   - `reilac_shiga` seedable: false
+- J2 / J3 2026 special season membership actual data module entry は追加済み
+  - `competitionSeasonKey`: `football_j2_j3_2026_hyakunen`
+  - actual `competitionSeasonMemberships.js` entry added: 1
+  - groups: 4 / total teamIds: 40
+  - `teamIdStatuses` added
+  - `competitionSeasonMemberships` export 追加済み
+  - `listCompetitionSeasonMembershipKeys()` は actual `competitionSeasonMemberships` と existing `jLeagueMembershipScaffolds` の両方を含む
+  - `status`: `review` / `seedable`: false
+  - `reilac_shiga`: `blocked_continuity` / seedable false
+  - `node --check functions/scripts/data/competitionSeasonMemberships.js`: PASS
+  - forbidden file scan output: none
 - Next task: 次の判断段階
-  - `competitionSeasonMemberships.js` actual entries 追加の別承認判断
-  - season membership verify script 追加または既存 verify 拡張の別承認判断
+  - actual `functions/scripts/verifyCompetitionSeasonMemberships.js` 追加の別承認判断
+  - local season membership validation の実装
+  - `node --check` / dry-run validation / build / analyze の実行
   - Firestore write / non-dry seed はまだ行わない
 - 次の合理的な順序
-  1. docs-only verify script exact diff plan を commit / push
-  2. 別承認で `functions/scripts/data/competitionSeasonMemberships.js` actual entries を追加
-  3. `node --check` と local season membership validation を実行
-  4. 別承認で `functions/scripts/verifyCompetitionSeasonMemberships.js` を追加、または既存 verify を拡張
-  5. `npm --prefix functions run build` / `flutter analyze --no-pub` を実行
-  6. Firestore write / non-dry seed は最後に別承認
+  1. `docs/current-state.md` に actual season membership data 追加結果を反映
+  2. 別承認で `functions/scripts/verifyCompetitionSeasonMemberships.js` を追加
+  3. `node --check functions/scripts/data/competitionSeasonMemberships.js`
+  4. `node --check functions/scripts/verifyCompetitionSeasonMemberships.js`
+  5. `node functions/scripts/verifyCompetitionSeasonMemberships.js --dry-run`
+  6. `npm --prefix functions run build`
+  7. `flutter analyze --no-pub`
+  8. Firestore write / non-dry seed は最後に別承認
 - まだ Firestore write / non-dry seed には進まない
 - Do not use bulk approval for Batch 1 or future batches
 - Keep `reilac_shiga` / `Biwako Shiga` excluded from seedable / confirmed entry candidates until continuity approval is completed
