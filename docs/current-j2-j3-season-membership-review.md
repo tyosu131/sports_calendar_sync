@@ -593,6 +593,134 @@ npm --prefix functions run build
 flutter analyze --no-pub
 ```
 
+## J2 / J3 Season Membership Seed Script Design Plan
+
+This section records a docs-only design / exact diff plan for a future J2 / J3 season membership seed script.
+
+It does not create the seed script, edit source code, create seed data, write Firestore documents, run a non-dry seed, call an API, run API sync, or deploy. Validation passing does not mean Firestore seed approval.
+
+### Seed Script Design Plan Summary
+
+- docs-only seed script design plan: yes
+- target future script: `functions/scripts/seedCompetitionSeasonMemberships.js`
+- target data module: `functions/scripts/data/competitionSeasonMemberships.js`
+- target verify script: `functions/scripts/verifyCompetitionSeasonMemberships.js`
+- actual seed script added: 0
+- package.json changes: 0
+- Firestore reads: 0
+- Firestore writes: 0
+- non-dry seed: 0
+- API calls: 0
+- deploy: 0
+- `football_j2_j3_2026_hyakunen` current status: `review`
+- `football_j2_j3_2026_hyakunen` current seedable: false
+- `reilac_shiga` seedable: false
+- this plan is not Firestore seed approval
+
+### Planned Responsibility
+
+- Read local `competitionSeasonMemberships.js`.
+- Only seed season profiles that are seedable.
+- Exclude `seedable: false` season profiles from non-dry seed.
+- Exclude `status: review` season profiles from non-dry seed.
+- Exclude season profiles that contain `candidate_not_confirmed`, `blocked_continuity`, or `missing_team_master`.
+- Run validation equivalent to `verifyCompetitionSeasonMemberships.js --dry-run` before seed.
+- Validation passing is not seed approval.
+- Firestore write is allowed only after explicit approval.
+
+### Planned Firestore Shape
+
+Candidate collection:
+
+- `competitionSeasonMemberships/{competitionSeasonKey}`
+
+Candidate document fields:
+
+- `competitionSeasonKey`
+- `seasonYear`
+- `competitionKey`
+- `displayNameJa`
+- `membershipType`
+- `status`
+- `seedable`
+- `source`
+- `groups`
+- `createdAt`
+- `updatedAt`
+
+Groups shape:
+
+- `groupKey`
+- `displayNameJa`
+- `teamIds`
+
+Notes:
+
+- `/teams/{id}` is stable team master.
+- Season membership must not duplicate `/teams/{id}` documents.
+- Group metadata is not team master data.
+- 2026 special season group keys `east_a`, `east_b`, `west_a`, and `west_b` are season / tournament metadata.
+
+### Planned CLI Behavior
+
+- default: dry-run
+- `--dry-run` supported
+- `--season <competitionSeasonKey>` supported
+- `--allow-review` should not be created, or should remain unused for now
+- non-dry mode requires an explicit flag, for example `--write`
+- do not write Firestore unless `--write` is present
+- do not write `seedable: false` profiles even when `--write` is present
+- do not write seasons that contain blocked or unconfirmed teams even when `--write` is present
+- exit code 0 on pass
+- exit code 1 on validation or seedability failure
+
+### Planned Pre-Seed Checks
+
+- `node --check functions/scripts/data/competitionSeasonMemberships.js`
+- `node --check functions/scripts/verifyCompetitionSeasonMemberships.js`
+- `node functions/scripts/verifyCompetitionSeasonMemberships.js --dry-run`
+- `node functions/scripts/verifyCompetitionSeasonMemberships.js --dry-run --season <competitionSeasonKey>`
+- season profile `seedable === true`
+- season profile `status` is in a seed-allowed state
+- all team IDs are `confirmed_team_master`
+- all team IDs exist in local confirmed team master data
+- no `candidate_not_confirmed`
+- no `blocked_continuity`
+- no `missing_team_master`
+- exclude `reilac_shiga` / `Biwako Shiga` until continuity approval is completed
+
+### Current Non-Seedable Reason
+
+Do not seed `football_j2_j3_2026_hyakunen` yet because:
+
+- `status: review`
+- `seedable: false`
+- confirmed team references: 15 of 40 teamIds
+- blocked / unconfirmed rows: 25
+- `reilac_shiga` is `blocked_continuity`
+- `reilac_shiga` / `Biwako Shiga` continuity approval is not completed
+- local validation is passing, but this is not Firestore seed approval
+
+### Future Implementation Order
+
+1. Commit / push this docs-only seed script design plan.
+2. Reflect this same docs-only planning step in `docs/current-state.md`.
+3. With separate approval, decide whether to create actual `seedCompetitionSeasonMemberships.js`.
+4. If the actual seed script is created, start with default dry-run / no Firestore write behavior.
+5. Decide whether to change `seedable: true` only with separate approval.
+6. Keep Firestore write / non-dry seed as the final separately approved step.
+
+### Explicit Deferred Items
+
+- Firestore write
+- non-dry seed
+- API sync
+- deploy
+- serviceAccountKey work
+- API key work
+- `reilac_shiga` continuity approval
+- `football_j2_j3_2026_hyakunen` seed approval
+
 ## Review Fields
 
 - `status`: `review` means official membership evidence exists, but the row is not seedable.
