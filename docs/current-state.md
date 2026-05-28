@@ -1546,6 +1546,57 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - `reilac_shiga` / `Biwako Shiga` continuity approval は未完了
   - 2027 / 2028+ にも使える multi-year design、stable team master と season membership の分離、promotion / relegation 時の同一 `/teams/{id}` reuse、duplicate club docs を作らない方針を維持
   - Firestore write / non-dry seed / `--write` / API sync / deploy は引き続き deferred
+- J2 / J3 season membership seed preparation validation completed
+  - based on commit: `f688384 Update current state after season membership seed script`
+  - `node --check functions/scripts/data/competitionSeasonMemberships.js`: PASS
+  - `node --check functions/scripts/verifyCompetitionSeasonMemberships.js`: PASS
+  - `node --check functions/scripts/seedCompetitionSeasonMemberships.js`: PASS
+  - `node functions/scripts/verifyCompetitionSeasonMemberships.js --dry-run`: PASS
+    - checked seasons: 1
+    - checked groups: 4
+    - checked membership teamIds: 40
+    - confirmed team references: 15
+    - blocked/unconfirmed rows: 25
+    - `✅ Competition season membership checks PASSED.`
+  - `node functions/scripts/verifyCompetitionSeasonMemberships.js --dry-run --season football_j2_j3_2026_hyakunen`: PASS
+    - checked seasons: 1
+    - checked groups: 4
+    - checked membership teamIds: 40
+    - confirmed team references: 15
+    - blocked/unconfirmed rows: 25
+    - `✅ Competition season membership checks PASSED.`
+  - `node functions/scripts/seedCompetitionSeasonMemberships.js --dry-run`: PASS
+    - mode: dry-run
+    - checked seasons: 1
+    - seedable seasons: 0
+    - skipped non-seedable seasons: 1
+    - write candidates: 0
+    - written seasons: 0
+    - `Dry-run only. Firestore will not be written.`
+    - `✅ Competition season membership seed preparation PASSED.`
+  - `node functions/scripts/seedCompetitionSeasonMemberships.js --dry-run --season football_j2_j3_2026_hyakunen`: PASS
+    - mode: dry-run
+    - checked seasons: 1
+    - seedable seasons: 0
+    - skipped non-seedable seasons: 1
+    - write candidates: 0
+    - written seasons: 0
+    - `Dry-run only. Firestore will not be written.`
+    - `✅ Competition season membership seed preparation PASSED.`
+  - `npm --prefix functions run build`: PASS
+  - `flutter analyze --no-pub`: No issues found
+  - final `git status --short`: clean
+  - Firestore read/write: 0
+  - non-dry seed: 0
+  - `--write`: 0
+  - API sync: 0
+  - deploy: 0
+  - additional API call: 0
+  - local validation / seed preparation dry-run は PASS したが Firestore seed approval ではない
+  - `football_j2_j3_2026_hyakunen` は `status: review` / `seedable: false` のまま維持
+  - `reilac_shiga` / `Biwako Shiga` continuity approval は未完了
+  - 2027 / 2028+ にも使える multi-year design、stable team master と season membership の分離、promotion / relegation 時の同一 `/teams/{id}` reuse、duplicate club docs を作らない方針を維持
+  - Firestore write / non-dry seed / `--write` / API sync / deploy は引き続き deferred
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -1852,28 +1903,45 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - local validation は PASS 済みだが Firestore seed approval ではない
   - `football_j2_j3_2026_hyakunen` は `status: review` / `seedable: false` のまま維持
   - `reilac_shiga` / `Biwako Shiga` continuity approval は未完了
+- J2 / J3 season membership seed preparation validation は完了済み
+  - based on commit: `f688384 Update current state after season membership seed script`
+  - `node --check` data / verify script / seed preparation script: PASS
+  - `node functions/scripts/verifyCompetitionSeasonMemberships.js --dry-run`: PASS
+    - checked seasons: 1 / checked groups: 4 / checked membership teamIds: 40
+    - confirmed team references: 15 / blocked-unconfirmed rows: 25
+  - `node functions/scripts/verifyCompetitionSeasonMemberships.js --dry-run --season football_j2_j3_2026_hyakunen`: PASS
+    - checked seasons: 1 / checked groups: 4 / checked membership teamIds: 40
+    - confirmed team references: 15 / blocked-unconfirmed rows: 25
+  - `node functions/scripts/seedCompetitionSeasonMemberships.js --dry-run`: PASS
+    - mode: dry-run
+    - checked seasons: 1
+    - seedable seasons: 0
+    - skipped non-seedable seasons: 1
+    - write candidates: 0
+    - written seasons: 0
+  - `node functions/scripts/seedCompetitionSeasonMemberships.js --dry-run --season football_j2_j3_2026_hyakunen`: PASS
+    - mode: dry-run
+    - checked seasons: 1
+    - seedable seasons: 0
+    - skipped non-seedable seasons: 1
+    - write candidates: 0
+    - written seasons: 0
+  - `npm --prefix functions run build`: PASS
+  - `flutter analyze --no-pub`: No issues found
+  - final `git status --short`: clean
+  - Firestore read/write / non-dry seed / `--write` / API sync / deploy / additional API call: 0
+  - local validation / seed preparation dry-run は PASS したが Firestore seed approval ではない
 - Next task: 次の判断段階
-  - clean state で seed preparation validation を再実行する
-  - `node --check functions/scripts/data/competitionSeasonMemberships.js`
-  - `node --check functions/scripts/verifyCompetitionSeasonMemberships.js`
-  - `node --check functions/scripts/seedCompetitionSeasonMemberships.js`
-  - `node functions/scripts/verifyCompetitionSeasonMemberships.js --dry-run`
-  - `node functions/scripts/verifyCompetitionSeasonMemberships.js --dry-run --season football_j2_j3_2026_hyakunen`
-  - `node functions/scripts/seedCompetitionSeasonMemberships.js --dry-run`
-  - `node functions/scripts/seedCompetitionSeasonMemberships.js --dry-run --season football_j2_j3_2026_hyakunen`
-  - `npm --prefix functions run build`
-  - `flutter analyze --no-pub`
-  - Firestore write / non-dry seed / `--write` はまだ行わない
-  - `seedable: true` への変更は別承認
-  - `reilac_shiga` / `Biwako Shiga` continuity approval は未完了のまま維持
   - `football_j2_j3_2026_hyakunen` は `status: review` / `seedable: false` のまま維持
-  - validated local data module ではあるが Firestore seed approval ではない
+  - `seedable: true` への変更は別承認
+  - Firestore write / non-dry seed / `--write` はまだ行わない
+  - `reilac_shiga` / `Biwako Shiga` continuity approval は未完了のまま維持
+  - local validation / seed preparation dry-run は PASS したが Firestore seed approval ではない
 - 次の合理的な順序
-  1. `docs/current-state.md` に seed preparation script 実装結果を反映
-  2. clean state で seed preparation validation を再実行
-  3. validation 結果を `docs/current-state.md` に反映
-  4. `seedable: true` にする判断は別承認
-  5. Firestore write / non-dry seed / `--write` は最後に別承認
+  1. `docs/current-state.md` に seed preparation validation 結果を反映
+  2. `seedable: true` にするかどうかは別承認
+  3. `reilac_shiga` / `Biwako Shiga` continuity approval は別タスク
+  4. Firestore write / non-dry seed / `--write` は最後に別承認
 - まだ Firestore write / non-dry seed / `--write` には進まない
 - Do not use bulk approval for Batch 1 or future batches
 - Keep `reilac_shiga` / `Biwako Shiga` excluded from seedable / confirmed entry candidates until continuity approval is completed
