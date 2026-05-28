@@ -1241,6 +1241,67 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - 2027 / 2028+ にも使える multi-year design、stable team master と season membership の分離、promotion / relegation 時の同一 `/teams/{id}` reuse、duplicate club docs を作らない方針を維持
   - Firestore read/write、non-dry seed、API sync、deploy、追加 API call は実行していない
   - Firestore write / non-dry seed / API sync / deploy は引き続き deferred
+- J2 / J3 season membership verify script exact diff plan documented
+  - updated
+    - `docs/current-j2-j3-season-membership-review.md`
+    - `docs/current-state.md`
+  - `J2 / J3 Season Membership Verify Script Exact Diff Plan` section 追加済み
+  - docs-only exact diff plan であり、actual verify script / source code / seed data は作成・変更していない
+  - target future script: `functions/scripts/verifyCompetitionSeasonMemberships.js`
+  - target future data module: `functions/scripts/data/competitionSeasonMemberships.js`
+  - actual verify script added: 0
+  - actual data module entries added: 0
+  - Firestore reads: 0
+  - Firestore writes: 0
+  - non-dry seed: 0
+  - API calls: 0
+  - deploy: 0
+  - `reilac_shiga` seedable: false
+  - planned script responsibility を記録済み
+    - local data module only を検証する read-only script
+    - Firebase Admin SDK を初期化しない
+    - Firestore read/write をしない
+    - API call をしない
+    - `competitionSeasonMemberships.js` の structure / duplicates / seedability / team master reference を検証する
+    - validation passing は Firestore seed approval を意味しない
+  - planned CLI behavior を記録済み
+    - default: dry-run / read-only
+    - `--dry-run` supported
+    - `--season <competitionSeasonKey>` optional
+    - exit code 0 on pass / exit code 1 on validation failure
+  - planned validation checks を記録済み
+    - require `functions/scripts/data/competitionSeasonMemberships.js`
+    - module exports `competitionSeasonMemberships`
+    - `competitionSeasonMemberships` is an array
+    - required season profile fields / `competitionSeasonKey` uniqueness / enum checks / `seedable` boolean
+  - planned 2026 special season checks を記録済み
+    - `football_j2_j3_2026_hyakunen` has 4 groups
+    - required group keys: `east_a` / `east_b` / `west_a` / `west_b`
+    - each group has exactly 10 team IDs
+    - total team IDs: 40
+    - no duplicate team IDs within the same `competitionSeasonKey`
+    - group metadata remains season / tournament metadata, not team master data
+  - planned team master reference checks を記録済み
+    - local confirmed team master IDs are read from `j1Teams.js` / `j2Teams.js` / `j3Teams.js`
+    - `confirmed_team_master` rows must reference one confirmed team ID
+    - `candidate_not_confirmed` / `blocked_continuity` / `missing_team_master` rows must not be seedable
+    - `reilac_shiga` must remain `blocked_continuity` and `seedable: false`
+    - seedable rows must not reference unconfirmed or blocked team IDs
+  - planned output format を記録済み
+    - checked season count / group count / membership row count
+    - confirmed team reference count
+    - blocked / unconfirmed row count
+    - clear PASS / FAIL result
+    - failure reason with affected `competitionSeasonKey`, `groupKey`, `teamId`
+  - planned first validation commands を記録済み
+    - `node --check functions/scripts/data/competitionSeasonMemberships.js`
+    - `node --check functions/scripts/verifyCompetitionSeasonMemberships.js`
+    - `node functions/scripts/verifyCompetitionSeasonMemberships.js --dry-run`
+    - `npm --prefix functions run build`
+    - `flutter analyze --no-pub`
+  - 2027 / 2028+ にも使える multi-year design、stable team master と season membership の分離、promotion / relegation 時の同一 `/teams/{id}` reuse、duplicate club docs を作らない方針を維持
+  - Firestore read/write、non-dry seed、API sync、deploy、追加 API call は実行していない
+  - Firestore write / non-dry seed / API sync / deploy は引き続き deferred
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -1444,12 +1505,21 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - current confirmed team master coverage: `football_j2` 10 / `football_j3` 5
   - `reilac_shiga` は `blocked_continuity` / `seedable: false` のまま維持
   - validation passing does not mean Firestore seed approval
+- J2 / J3 season membership verify script exact diff plan は docs-only で追加済み
+  - target future script: `functions/scripts/verifyCompetitionSeasonMemberships.js`
+  - target future data module: `functions/scripts/data/competitionSeasonMemberships.js`
+  - actual verify script added: 0
+  - actual data module entries added: 0
+  - Firestore reads / writes: 0
+  - non-dry seed / API calls / deploy: 0
+  - planned CLI behavior / validation checks / 2026 special season checks / team master reference checks / output format / first validation commands は記録済み
+  - `reilac_shiga` seedable: false
 - Next task: 次の判断段階
   - `competitionSeasonMemberships.js` actual entries 追加の別承認判断
   - season membership verify script 追加または既存 verify 拡張の別承認判断
   - Firestore write / non-dry seed はまだ行わない
 - 次の合理的な順序
-  1. `docs/current-state.md` に今回の verification plan を反映
+  1. docs-only verify script exact diff plan を commit / push
   2. 別承認で `functions/scripts/data/competitionSeasonMemberships.js` actual entries を追加
   3. `node --check` と local season membership validation を実行
   4. 別承認で `functions/scripts/verifyCompetitionSeasonMemberships.js` を追加、または既存 verify を拡張

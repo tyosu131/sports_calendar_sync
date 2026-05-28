@@ -476,6 +476,123 @@ flutter analyze --no-pub
 - After that, add `functions/scripts/verifyCompetitionSeasonMemberships.js` or extend an existing verify flow.
 - Firestore write / non-dry seed remains the final separately approved step.
 
+## J2 / J3 Season Membership Verify Script Exact Diff Plan
+
+This section records a docs-only exact diff plan for a future J2 / J3 season membership verify script.
+
+It does not create the verify script, edit source code, create seed data, write Firestore documents, run a non-dry seed, call an API, run API sync, or deploy.
+
+### Verify Script Exact Diff Plan Summary
+
+- docs-only exact diff plan: yes
+- target future script: `functions/scripts/verifyCompetitionSeasonMemberships.js`
+- target future data module: `functions/scripts/data/competitionSeasonMemberships.js`
+- actual verify script added: 0
+- actual data module entries added: 0
+- Firestore reads: 0
+- Firestore writes: 0
+- non-dry seed: 0
+- API calls: 0
+- deploy: 0
+- `reilac_shiga` seedable: false
+
+### Planned Script Responsibility
+
+- Validate local data modules only.
+- Do not initialize Firebase Admin SDK.
+- Do not read or write Firestore.
+- Do not call external APIs.
+- Validate `competitionSeasonMemberships.js` structure, duplicates, seedability, and team master references.
+- Validation passing does not mean Firestore seed approval.
+
+### Planned File Path
+
+- `functions/scripts/verifyCompetitionSeasonMemberships.js`
+
+### Planned CLI Behavior
+
+- default: dry-run / read-only
+- `--dry-run` supported
+- `--season <competitionSeasonKey>` optional
+- no Firebase Admin SDK initialization
+- no Firestore read/write
+- exit code 0 on pass
+- exit code 1 on validation failure
+
+### Planned Validation Checks
+
+- require `functions/scripts/data/competitionSeasonMemberships.js`
+- module exports `competitionSeasonMemberships`
+- `competitionSeasonMemberships` is an array
+- each season profile has required fields:
+  - `competitionSeasonKey`
+  - `seasonYear`
+  - `competitionKey`
+  - `displayNameJa`
+  - `membershipType`
+  - `source`
+  - `status`
+  - `seedable`
+- `competitionSeasonKey` is unique
+- `seasonYear` is number
+- `membershipType` is one of:
+  - `league`
+  - `special_tournament`
+  - `cup`
+  - `playoff`
+- `status` is one of:
+  - `review`
+  - `approved`
+  - `seedable`
+  - `seeded`
+- `seedable` is boolean
+
+### Planned 2026 Special Season Checks
+
+- `football_j2_j3_2026_hyakunen` has 4 groups
+- required group keys:
+  - `east_a`
+  - `east_b`
+  - `west_a`
+  - `west_b`
+- each group has exactly 10 team IDs
+- total team IDs: 40
+- no duplicate team IDs within the same `competitionSeasonKey`
+- group metadata must remain season / tournament metadata, not team master data
+
+### Planned Team Master Reference Checks
+
+- read local confirmed team master IDs from:
+  - `functions/scripts/data/j1Teams.js`
+  - `functions/scripts/data/j2Teams.js`
+  - `functions/scripts/data/j3Teams.js`
+- `confirmed_team_master` rows must reference one of those confirmed team IDs
+- `candidate_not_confirmed` rows must not be seedable
+- `blocked_continuity` rows must not be seedable
+- `missing_team_master` rows must not be seedable
+- `reilac_shiga` must remain `blocked_continuity` and `seedable: false`
+- seedable rows must not reference unconfirmed or blocked team IDs
+
+### Planned Output Format
+
+- print checked season count
+- print checked group count
+- print checked membership row count
+- print confirmed team reference count
+- print blocked / unconfirmed row count
+- print clear PASS / FAIL result
+- on failure, print exact reason and affected `competitionSeasonKey`, `groupKey`, `teamId`
+
+### Planned First Validation Commands
+
+```bash
+node --check functions/scripts/data/competitionSeasonMemberships.js
+node --check functions/scripts/verifyCompetitionSeasonMemberships.js
+node functions/scripts/verifyCompetitionSeasonMemberships.js --dry-run
+npm --prefix functions run build
+flutter analyze --no-pub
+```
+
 ## Review Fields
 
 - `status`: `review` means official membership evidence exists, but the row is not seedable.
