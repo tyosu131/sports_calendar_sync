@@ -1708,6 +1708,40 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - actual `j2Teams.js` / `j3Teams.js` entries still require separate exact diff plan and approval
   - `teamIdStatuses` update requires actual confirmed team module entries and separate approval
   - Firestore write / non-dry seed / `--write` remains deferred
+- J2 / J3 Batch 4 actual module entry preparation review and exact diff plan documented
+  - same docs-only Batch 4 preparation and exact diff plan step
+  - updated
+    - `docs/current-j2-j3-season-membership-review.md`
+    - `docs/current-state.md`
+  - Batch 4 actual module entry preparation review documented: yes
+  - Batch 4 reviewed candidates: 5
+  - Batch 4 ready for separate module entry approval: 5
+  - Batch 4 exact diff plan documented: yes
+  - Planned `j2Teams.js` entries: 3
+    - `tokushima_vortis`
+    - `albirex_niigata`
+    - `ehime_fc`
+  - Planned `j3Teams.js` entries: 2
+    - `kochi_united`
+    - `nara_club`
+  - Actual module entries added: 0
+  - `j2Teams.js` entries added: 0
+  - `j3Teams.js` entries added: 0
+  - `teamIdStatuses` changed: 0
+  - Firestore writes: 0
+  - non-dry seed: 0
+  - `--write`: 0
+  - API calls: 0
+  - deploy: 0
+  - `seedable: true` changes: 0
+  - `reilac_shiga` included: no
+  - bulk approval: no
+  - all planned rows remain `planned-not-written`
+  - `football_j2_j3_2026_hyakunen` remains `status: review` / `seedable: false`
+  - All-Sports Season Rollover Policy remains unchanged
+  - actual `j2Teams.js` / `j3Teams.js` entries still require separate approval
+  - `teamIdStatuses` update requires actual confirmed team module entries and separate approval
+  - Firestore write / non-dry seed / `--write` remains deferred
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -2100,10 +2134,44 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - actual `j2Teams.js` / `j3Teams.js` entries still require separate exact diff plan and approval
   - `teamIdStatuses` update requires actual confirmed team module entries and separate approval
   - Firestore write / non-dry seed / `--write` remains deferred
+- J2 / J3 Batch 4 actual module entry preparation review and exact diff plan は docs-only で追加済み
+  - same docs-only Batch 4 preparation and exact diff plan step
+  - Batch 4 actual module entry preparation review documented: yes
+  - Batch 4 reviewed candidates: 5
+  - Batch 4 ready for separate module entry approval: 5
+  - Batch 4 exact diff plan documented: yes
+  - Planned `j2Teams.js` entries: 3
+    - `tokushima_vortis`
+    - `albirex_niigata`
+    - `ehime_fc`
+  - Planned `j3Teams.js` entries: 2
+    - `kochi_united`
+    - `nara_club`
+  - Actual module entries added: 0
+  - `j2Teams.js` entries added: 0
+  - `j3Teams.js` entries added: 0
+  - `teamIdStatuses` changed: 0
+  - Firestore writes: 0
+  - non-dry seed: 0
+  - `--write`: 0
+  - API calls: 0
+  - deploy: 0
+  - `seedable: true` changes: 0
+  - `reilac_shiga` included: no
+  - bulk approval: no
+  - all planned rows remain `planned-not-written`
+  - `football_j2_j3_2026_hyakunen` remains `status: review` / `seedable: false`
+  - All-Sports Season Rollover Policy remains unchanged
+  - actual `j2Teams.js` / `j3Teams.js` entries still require separate approval
+  - `teamIdStatuses` update requires actual confirmed team module entries and separate approval
+  - Firestore write / non-dry seed / `--write` remains deferred
 - Next task: 次の判断段階
-  - Batch 4 approval decision reviews を commit / push する
-  - 次に Batch 4 actual module entry preparation review を docs-only で作る
-  - その後 Batch 4 exact diff plan を別途作る
+  - Batch 4 preparation review + exact diff plan を commit / push する
+  - 次に Batch 4 actual `j2Teams.js` / `j3Teams.js` entries 追加を別承認で判断する
+  - actual entries を追加する場合は:
+    - `j2Teams.js` に3件
+    - `j3Teams.js` に2件
+  - actual entries 追加後に dry-run validation を行う
   - bulk approval はしない
   - `reilac_shiga` / `Biwako Shiga` continuity approval は別タスク
   - actual `j2Teams.js` / `j3Teams.js` entries は separate exact diff plan and approval 後のみ
@@ -2114,10 +2182,10 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - Firestore write / non-dry seed / `--write` はまだ行わない
   - local validation / seed preparation dry-run は PASS したが Firestore seed approval ではない
 - 次の合理的な順序
-  1. Batch 4 approval decision reviews を commit / push
-  2. Batch 4 actual module entry preparation review を docs-only で作る
-  3. Batch 4 exact diff plan を別途作る
-  4. separate exact diff plan and approval 後にのみ追加の `j2Teams.js` / `j3Teams.js` entries を作る
+  1. Batch 4 preparation review + exact diff plan を commit / push
+  2. Batch 4 actual `j2Teams.js` / `j3Teams.js` entries 追加を別承認で判断
+  3. actual entries を追加する場合は `j2Teams.js` に3件、`j3Teams.js` に2件を追加
+  4. actual entries 追加後に dry-run validation を行う
   5. actual confirmed team module entries 後に `teamIdStatuses` 更新を別承認で検討
   6. future next-season candidate generation script は別設計で検討
   7. all 40 rows が safe になった後に `seedable: true` を別承認で検討

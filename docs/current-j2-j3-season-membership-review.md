@@ -1746,6 +1746,120 @@ Batch 4 completion note:
 - Next step is Batch 4 actual module entry preparation review.
 - Do not create actual module entries from these reviews alone.
 
+## Batch 4 Actual Module Entry Preparation Review
+
+This section records a documentation-only actual module entry preparation review for the five Batch 4 entries that may later be added to `functions/scripts/data/j2Teams.js` or `functions/scripts/data/j3Teams.js`.
+
+It does not edit `j2Teams.js` or `j3Teams.js`, create actual module entries, create seed data, write Firestore documents, run API sync, deploy, or change any seedable status.
+
+Summary:
+
+- Batch 4 actual module entry preparation review documented: yes
+- Batch 4 reviewed candidates: 5
+- Batch 4 ready for separate module entry approval: 5
+- Actual module entries added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- `teamIdStatuses` changed: 0
+- Firestore writes: 0
+- non-dry seed: 0
+- `--write`: 0
+- API calls: 0
+- deploy: 0
+- `seedable: true` changes: 0
+- `reilac_shiga` included: no
+- bulk approval: no
+- docs-only preparation review: yes
+
+Preparation policy:
+
+- Target module candidates below are documentation-only candidates and are not actual file writes.
+- All five Batch 4 rows still require separate module entry approval before any `j2Teams.js` or `j3Teams.js` module entry is created.
+- Batch 4 has three `j2Teams.js` candidates:
+  - `tokushima_vortis`
+  - `albirex_niigata`
+  - `ehime_fc`
+- Batch 4 has two `j3Teams.js` candidates:
+  - `kochi_united`
+  - `nara_club`
+- Keep `seedable` as `no` until separate confirmed module entry approval and later seed approval are completed.
+- Keep season membership separate from stable team master data.
+- Lookup source league names are API evidence for stable club identity only.
+- Lookup source league names do not imply 2026 J2 / J3 special competition membership or permanent division membership.
+- `reilac_shiga` remains excluded until continuity approval is completed.
+- `football_j2_j3_2026_hyakunen` remains `status: review` / `seedable: false`.
+- All-Sports Season Rollover Policy remains unchanged.
+
+| candidate internal team id | club nameJa | API raw team name | externalTeamId | logoUrl | lookup source | per-club review status | module entry preparation status | target module candidate | notes |
+|---|---|---|---:|---|---|---|---|---|---|
+| `tokushima_vortis` | 徳島ヴォルティス | Tokushima Vortis | 299 | `https://media.api-sports.io/football/teams/299.png` | J2 2024 / 99 | approved-for-module-entry-candidate | ready-for-separate-module-entry-approval | `j2Teams.js` candidate | Documentation-only target; no file write yet |
+| `albirex_niigata` | アルビレックス新潟 | Albirex Niigata | 311 | `https://media.api-sports.io/football/teams/311.png` | J1 2024 / 98 | approved-for-module-entry-candidate | ready-for-separate-module-entry-approval | `j2Teams.js` candidate | J1 2024 lookup is stable identity evidence only, not permanent division membership; no file write yet |
+| `kochi_united` | 高知ユナイテッドＳＣ | Kochi United | 7129 | `https://media.api-sports.io/football/teams/7129.png` | JFL 2024 / 497 | approved-for-module-entry-candidate | ready-for-separate-module-entry-approval | `j3Teams.js` candidate | API raw name omits `SC`, but stable club identity is clear; JFL lookup is stable identity evidence only; no file write yet |
+| `ehime_fc` | 愛媛ＦＣ | Ehime FC | 318 | `https://media.api-sports.io/football/teams/318.png` | J2 2024 / 99 | approved-for-module-entry-candidate | ready-for-separate-module-entry-approval | `j2Teams.js` candidate | Documentation-only target; no file write yet |
+| `nara_club` | 奈良クラブ | Nara Club | 7135 | `https://media.api-sports.io/football/teams/7135.png` | J3 2024 / 100 | approved-for-module-entry-candidate | ready-for-separate-module-entry-approval | `j3Teams.js` candidate | Documentation-only target; no file write yet |
+
+## Batch 4 j2Teams.js / j3Teams.js Exact Diff Plan
+
+This section records a documentation-only exact diff plan for the five Batch 4 entries that may later be added to `functions/scripts/data/j2Teams.js` or `functions/scripts/data/j3Teams.js`.
+
+It does not edit `j2Teams.js` or `j3Teams.js`, create actual module entries, create seed data, write Firestore documents, run API sync, deploy, or change any seedable status.
+
+Summary:
+
+- Batch 4 exact diff plan documented: yes
+- Planned target files:
+  - `functions/scripts/data/j2Teams.js`
+  - `functions/scripts/data/j3Teams.js`
+- Planned `j2Teams.js` entries: 3
+- Planned `j3Teams.js` entries: 2
+- Actual module entries added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- `teamIdStatuses` changed: 0
+- Firestore writes: 0
+- non-dry seed: 0
+- `--write`: 0
+- API calls: 0
+- deploy: 0
+- `seedable: true` changes: 0
+- `reilac_shiga` included: no
+- implementation status: all rows `planned-not-written`
+
+Implementation policy:
+
+- `j2Teams.js` and `j3Teams.js` are stable team master data candidate storage, not direct 2026 J2 / J3 special competition membership data.
+- Season membership remains separate from stable team master data.
+- Do not represent 2026 J2 / J3 special competition membership directly in `j2Teams.js` or `j3Teams.js`.
+- Lookup source league names are API evidence for stable club identity only.
+- Lookup source league names do not imply 2026 J2 / J3 special competition membership or permanent division membership.
+- `tokushima_vortis`, `albirex_niigata`, and `ehime_fc` are the Batch 4 `j2Teams.js` planned entries.
+- `kochi_united` and `nara_club` are the Batch 4 `j3Teams.js` planned entries.
+- `reilac_shiga` remains excluded until continuity approval is completed.
+- Keep `seedable` as `no` until separate module entry approval and later seed approval are completed.
+- Do not run Firestore write or non-dry seed from this plan.
+
+Planned `j2Teams.js` entries:
+
+| target file | candidate internal team id | nameJa | nameEn | aliases | externalTeamId | logoUrl | competitionKey candidate | source evidence | implementation status | notes |
+|---|---|---|---|---|---:|---|---|---|---|---|
+| `functions/scripts/data/j2Teams.js` | `tokushima_vortis` | 徳島ヴォルティス | Tokushima Vortis | `['徳島', 'ヴォルティス', 'Tokushima Vortis']` | 299 | `https://media.api-sports.io/football/teams/299.png` | `football_j2` | API-SPORTS teams?league=99&season=2024 + Batch 4 j2Teams.js / j3Teams.js Exact Diff Plan | planned-not-written | Stable team master candidate only; no file write yet |
+| `functions/scripts/data/j2Teams.js` | `albirex_niigata` | アルビレックス新潟 | Albirex Niigata | `['新潟', 'アルビレックス', 'Albirex Niigata']` | 311 | `https://media.api-sports.io/football/teams/311.png` | `football_j2` | API-SPORTS teams?league=98&season=2024 + Batch 4 j2Teams.js / j3Teams.js Exact Diff Plan | planned-not-written | J1 2024 lookup is stable identity evidence only, not permanent division membership |
+| `functions/scripts/data/j2Teams.js` | `ehime_fc` | 愛媛ＦＣ | Ehime FC | `['愛媛', '愛媛FC', 'Ehime FC']` | 318 | `https://media.api-sports.io/football/teams/318.png` | `football_j2` | API-SPORTS teams?league=99&season=2024 + Batch 4 j2Teams.js / j3Teams.js Exact Diff Plan | planned-not-written | Stable team master candidate only; no file write yet |
+
+Planned `j3Teams.js` entries:
+
+| target file | candidate internal team id | nameJa | nameEn | aliases | externalTeamId | logoUrl | competitionKey candidate | source evidence | implementation status | notes |
+|---|---|---|---|---|---:|---|---|---|---|---|
+| `functions/scripts/data/j3Teams.js` | `kochi_united` | 高知ユナイテッドＳＣ | Kochi United | `['高知', '高知ユナイテッド', 'Kochi United']` | 7129 | `https://media.api-sports.io/football/teams/7129.png` | `football_j3` | API-SPORTS teams?league=497&season=2024 + Batch 4 j2Teams.js / j3Teams.js Exact Diff Plan | planned-not-written | API raw name omits `SC`, but stable club identity is clear; JFL lookup is stable identity evidence only |
+| `functions/scripts/data/j3Teams.js` | `nara_club` | 奈良クラブ | Nara Club | `['奈良', '奈良クラブ', 'Nara Club']` | 7135 | `https://media.api-sports.io/football/teams/7135.png` | `football_j3` | API-SPORTS teams?league=100&season=2024 + Batch 4 j2Teams.js / j3Teams.js Exact Diff Plan | planned-not-written | Stable team master candidate only; no file write yet |
+
+Next-step note:
+
+- After this docs-only preparation review and exact diff plan, the next step is separate approval for actual `j2Teams.js` / `j3Teams.js` entries.
+- Do not add actual entries from this docs-only plan alone.
+- Do not update `teamIdStatuses` from this docs-only plan alone.
+- Firestore write / non-dry seed / `--write` remains deferred.
+
 ## Per-Club Approval Decision Review - tochigi_city
 
 This section records a documentation-only approval decision review for one Batch 2 club row.
