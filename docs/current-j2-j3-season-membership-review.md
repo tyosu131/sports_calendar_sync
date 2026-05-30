@@ -2711,10 +2711,10 @@ Summary:
 | candidate internal team id | club nameJa | API raw team name | externalTeamId | logoUrl | lookup source | variance status | recommended approval state | approval decision | target module candidate | notes |
 |---|---|---|---|---|---|---|---|---|---|---|
 | `sc_sagamihara` | `ＳＣ相模原` | `Sagamihara` | `4324` | `https://media.api-sports.io/football/teams/4324.png` | `J3 2024 / 100` | `name-variance-reviewed` | `approval-ready-after-variance-review` | `not-approved-yet` | `j3Teams.js` candidate | API raw name omits SC; stable club identity should be reviewed in per-club decision before module entry |
-| `thespa_gunma` | `ザスパ群馬` | `Thespakusatsu Gunma` | `302` | `https://media.api-sports.io/football/teams/302.png` | `J2 2024 / 99` | `name-variance-reviewed` | `approval-ready-after-variance-review` | `not-approved-yet` | `j2Teams.js` candidate | API raw name uses older / variant form; stable club identity should be reviewed in per-club decision before module entry |
-| `iwaki_fc` | `いわきＦＣ` | `Iwaki` | `7017` | `https://media.api-sports.io/football/teams/7017.png` | `J2 2024 / 99` | `name-variance-reviewed` | `approval-ready-after-variance-review` | `not-approved-yet` | `j2Teams.js` candidate | API raw name omits `FC`; stable club identity should be reviewed in per-club decision before module entry |
-| `rb_omiya_ardija` | `ＲＢ大宮アルディージャ` | `Omiya Ardija` | `294` | `https://media.api-sports.io/football/teams/294.png` | `J3 2024 / 100` | `name-variance-reviewed` | `approval-ready-after-variance-review` | `not-approved-yet` | `j2Teams.js` candidate | Current official-facing name includes `RB`; API raw name is older / shorter evidence and requires per-club decision review before module entry |
-| `hokkaido_consadole_sapporo` | `北海道コンサドーレ札幌` | `Consadole Sapporo` | `289` | `https://media.api-sports.io/football/teams/289.png` | `J1 2024 / 98` | `name-variance-reviewed` | `approval-ready-after-variance-review` | `not-approved-yet` | `j2Teams.js` candidate | API raw name omits `Hokkaido`; J1 2024 lookup is stable identity evidence only, not permanent division membership |
+| `thespa_gunma` | `ザスパ群馬` | `Thespakusatsu Gunma` | `756` | `https://media.api-sports.io/football/teams/756.png` | `J2 2024 / 99` | `name-variance-reviewed` | `approval-ready-after-variance-review` | `not-approved-yet` | `j2Teams.js` candidate | API raw name uses older / variant form; stable club identity should be reviewed in per-club decision before module entry |
+| `iwaki_fc` | `いわきＦＣ` | `Iwaki` | `7127` | `https://media.api-sports.io/football/teams/7127.png` | `J2 2024 / 99` | `name-variance-reviewed` | `approval-ready-after-variance-review` | `not-approved-yet` | `j2Teams.js` candidate | API raw name omits `FC`; stable club identity should be reviewed in per-club decision before module entry |
+| `rb_omiya_ardija` | `ＲＢ大宮アルディージャ` | `Omiya Ardija` | `313` | `https://media.api-sports.io/football/teams/313.png` | `J3 2024 / 100` | `name-variance-reviewed` | `approval-ready-after-variance-review` | `not-approved-yet` | `j2Teams.js` candidate | Current official-facing name includes `RB`; API raw name is older / shorter evidence and requires per-club decision review before module entry |
+| `hokkaido_consadole_sapporo` | `北海道コンサドーレ札幌` | `Consadole Sapporo` | `279` | `https://media.api-sports.io/football/teams/279.png` | `J1 2024 / 98` | `name-variance-reviewed` | `approval-ready-after-variance-review` | `not-approved-yet` | `j2Teams.js` candidate | API raw name omits `Hokkaido`; J1 2024 lookup is stable identity evidence only, not permanent division membership |
 
 Correction note:
 
@@ -2728,6 +2728,25 @@ Correction note:
   - recommended approval state: `approval-ready-after-variance-review`
 - reason:
   - align Batch 5 candidate list with existing API-SPORTS Verification Tracker
+- actual module entries added: 0
+- `teamIdStatuses` changed: 0
+- `seedable: true` changes: 0
+- Firestore writes: 0
+- non-dry seed: 0
+- `--write`: 0
+- API calls: 0
+- deploy: 0
+
+Additional evidence correction note:
+
+- Batch 5 additional evidence correction documented: yes
+- corrected candidates:
+  - `thespa_gunma`
+  - `iwaki_fc`
+  - `rb_omiya_ardija`
+  - `hokkaido_consadole_sapporo`
+- reason:
+  - align Batch 5 candidate list and approval decision reviews with existing API-SPORTS Verification Tracker
 - actual module entries added: 0
 - `teamIdStatuses` changed: 0
 - `seedable: true` changes: 0
@@ -2752,6 +2771,219 @@ Next-step note:
 - Next step is Batch 5 per-club approval decision review.
 - The review can be done in one work item if each club receives a separate approval decision review section.
 - Actual module entries still require separate exact diff plan and approval.
+
+## Per-Club Approval Decision Review - sc_sagamihara
+
+Summary:
+
+- Approval decision review documented: yes
+- Reviewed club: `sc_sagamihara`
+- Review result: `approved-for-module-entry-candidate`
+- Actual module entry added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- `teamIdStatuses` changed: 0
+- Firestore writes: 0
+- non-dry seed: 0
+- `--write`: 0
+- API calls: 0
+- deploy: 0
+- Seedable rows changed: 0
+- Batch 5 table changed: no
+
+| check | review note | result |
+|---|---|---|
+| candidate internal team id | `sc_sagamihara` / `ＳＣ相模原` | pass |
+| API raw team name | `Sagamihara` from `J3 2024 / 100` lookup source | pass |
+| externalTeamId | `4324` | pass |
+| logoUrl | `https://media.api-sports.io/football/teams/4324.png` | pass |
+| name variance review | API raw name omits `SC`; keep as reviewed variance before module entry | pass |
+| existing confirmed team ID collision | No existing confirmed team ID collision identified for this candidate | pass |
+| season membership separation | API evidence supports stable club identity only, not season seed data | pass |
+| duplicate `/teams/{id}` policy | Use one stable `/teams/sc_sagamihara` document if later approved; do not duplicate by division or season | pass |
+| target module candidate | `j3Teams.js` | pass |
+
+Decision note:
+
+- `sc_sagamihara` may move forward as an `approved-for-module-entry-candidate` in documentation.
+- This is not an actual `approved-for-module-entry` file change.
+- Do not add `sc_sagamihara` to `j2Teams.js` or `j3Teams.js` from this review alone.
+- Keep `seedable` as `no` until a separate confirmed module entry approval and later seed approval are completed.
+
+## Per-Club Approval Decision Review - thespa_gunma
+
+Summary:
+
+- Approval decision review documented: yes
+- Reviewed club: `thespa_gunma`
+- Review result: `approved-for-module-entry-candidate`
+- Actual module entry added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- `teamIdStatuses` changed: 0
+- Firestore writes: 0
+- non-dry seed: 0
+- `--write`: 0
+- API calls: 0
+- deploy: 0
+- Seedable rows changed: 0
+- Batch 5 table changed: no
+
+| check | review note | result |
+|---|---|---|
+| candidate internal team id | `thespa_gunma` / `ザスパ群馬` | pass |
+| API raw team name | `Thespakusatsu Gunma` from `J2 2024 / 99` lookup source | pass |
+| externalTeamId | `756` | pass |
+| logoUrl | `https://media.api-sports.io/football/teams/756.png` | pass |
+| name variance review | API raw name uses older / longer form; keep as reviewed variance before module entry | pass |
+| existing confirmed team ID collision | No existing confirmed team ID collision identified for this candidate | pass |
+| season membership separation | API evidence supports stable club identity only, not season seed data | pass |
+| duplicate `/teams/{id}` policy | Use one stable `/teams/thespa_gunma` document if later approved; do not duplicate by division or season | pass |
+| target module candidate | `j2Teams.js` | pass |
+
+Decision note:
+
+- `thespa_gunma` may move forward as an `approved-for-module-entry-candidate` in documentation.
+- This is not an actual `approved-for-module-entry` file change.
+- Do not add `thespa_gunma` to `j2Teams.js` or `j3Teams.js` from this review alone.
+- Keep `seedable` as `no` until a separate confirmed module entry approval and later seed approval are completed.
+
+## Per-Club Approval Decision Review - iwaki_fc
+
+Summary:
+
+- Approval decision review documented: yes
+- Reviewed club: `iwaki_fc`
+- Review result: `approved-for-module-entry-candidate`
+- Actual module entry added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- `teamIdStatuses` changed: 0
+- Firestore writes: 0
+- non-dry seed: 0
+- `--write`: 0
+- API calls: 0
+- deploy: 0
+- Seedable rows changed: 0
+- Batch 5 table changed: no
+
+| check | review note | result |
+|---|---|---|
+| candidate internal team id | `iwaki_fc` / `いわきＦＣ` | pass |
+| API raw team name | `Iwaki` from `J2 2024 / 99` lookup source | pass |
+| externalTeamId | `7127` | pass |
+| logoUrl | `https://media.api-sports.io/football/teams/7127.png` | pass |
+| name variance review | API raw name omits `FC`; keep as reviewed variance before module entry | pass |
+| existing confirmed team ID collision | No existing confirmed team ID collision identified for this candidate | pass |
+| season membership separation | API evidence supports stable club identity only, not season seed data | pass |
+| duplicate `/teams/{id}` policy | Use one stable `/teams/iwaki_fc` document if later approved; do not duplicate by division or season | pass |
+| target module candidate | `j2Teams.js` | pass |
+
+Decision note:
+
+- `iwaki_fc` may move forward as an `approved-for-module-entry-candidate` in documentation.
+- This is not an actual `approved-for-module-entry` file change.
+- Do not add `iwaki_fc` to `j2Teams.js` or `j3Teams.js` from this review alone.
+- Keep `seedable` as `no` until a separate confirmed module entry approval and later seed approval are completed.
+
+## Per-Club Approval Decision Review - rb_omiya_ardija
+
+Summary:
+
+- Approval decision review documented: yes
+- Reviewed club: `rb_omiya_ardija`
+- Review result: `approved-for-module-entry-candidate`
+- Actual module entry added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- `teamIdStatuses` changed: 0
+- Firestore writes: 0
+- non-dry seed: 0
+- `--write`: 0
+- API calls: 0
+- deploy: 0
+- Seedable rows changed: 0
+- Batch 5 table changed: no
+
+| check | review note | result |
+|---|---|---|
+| candidate internal team id | `rb_omiya_ardija` / `ＲＢ大宮アルディージャ` | pass |
+| API raw team name | `Omiya Ardija` from `J3 2024 / 100` lookup source | pass |
+| externalTeamId | `313` | pass |
+| logoUrl | `https://media.api-sports.io/football/teams/313.png` | pass |
+| name variance review | API raw name omits current `RB` branding; keep as reviewed variance before module entry | pass |
+| existing confirmed team ID collision | No existing confirmed team ID collision identified for this candidate | pass |
+| season membership separation | API evidence supports stable club identity only, not season seed data | pass |
+| duplicate `/teams/{id}` policy | Use one stable `/teams/rb_omiya_ardija` document if later approved; do not duplicate by division or season | pass |
+| target module candidate | `j2Teams.js` | pass |
+
+Decision note:
+
+- `rb_omiya_ardija` may move forward as an `approved-for-module-entry-candidate` in documentation.
+- This is not an actual `approved-for-module-entry` file change.
+- Do not add `rb_omiya_ardija` to `j2Teams.js` or `j3Teams.js` from this review alone.
+- Keep `seedable` as `no` until a separate confirmed module entry approval and later seed approval are completed.
+- The `RB` branding variance must remain documented in the later exact diff plan and actual module entry source note.
+
+## Per-Club Approval Decision Review - hokkaido_consadole_sapporo
+
+Summary:
+
+- Approval decision review documented: yes
+- Reviewed club: `hokkaido_consadole_sapporo`
+- Review result: `approved-for-module-entry-candidate`
+- Actual module entry added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- `teamIdStatuses` changed: 0
+- Firestore writes: 0
+- non-dry seed: 0
+- `--write`: 0
+- API calls: 0
+- deploy: 0
+- Seedable rows changed: 0
+- Batch 5 table changed: no
+
+| check | review note | result |
+|---|---|---|
+| candidate internal team id | `hokkaido_consadole_sapporo` / `北海道コンサドーレ札幌` | pass |
+| API raw team name | `Consadole Sapporo` from `J1 2024 / 98` lookup source | pass |
+| externalTeamId | `279` | pass |
+| logoUrl | `https://media.api-sports.io/football/teams/279.png` | pass |
+| name variance review | API raw name omits `Hokkaido`; keep as reviewed variance before module entry | pass |
+| existing confirmed team ID collision | No existing confirmed team ID collision identified for this candidate | pass |
+| season membership separation | `J1 2024 / 98` lookup source is stable identity evidence only and does not imply permanent division membership | pass |
+| duplicate `/teams/{id}` policy | Use one stable `/teams/hokkaido_consadole_sapporo` document if later approved; do not duplicate by division or season | pass |
+| target module candidate | `j2Teams.js` | pass |
+
+Decision note:
+
+- `hokkaido_consadole_sapporo` may move forward as an `approved-for-module-entry-candidate` in documentation.
+- This is not an actual `approved-for-module-entry` file change.
+- Do not add `hokkaido_consadole_sapporo` to `j2Teams.js` or `j3Teams.js` from this review alone.
+- Keep `seedable` as `no` until a separate confirmed module entry approval and later seed approval are completed.
+- The `J1 2024 / 98` lookup source is stable identity evidence only and does not imply permanent division membership.
+
+## Batch 5 Completion Note
+
+- Batch 5 individual reviews completed: 5 / 5
+- Batch 5 approved-for-module-entry-candidate rows: 5
+- approved rows:
+  - `sc_sagamihara`
+  - `thespa_gunma`
+  - `iwaki_fc`
+  - `rb_omiya_ardija`
+  - `hokkaido_consadole_sapporo`
+- Actual module entries added: 0
+- `teamIdStatuses` changed: 0
+- `seedable: true` changes: 0
+- Firestore writes: 0
+- non-dry seed: 0
+- `--write`: 0
+- API calls: 0
+- deploy: 0
+- `reilac_shiga` included: no
+- next step: Batch 5 actual module entry preparation review / exact diff plan
 
 ### All-Sports Season Rollover Policy
 
