@@ -2323,6 +2323,28 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - API calls: 0
   - deploy: 0
   - `reilac_shiga` included: no
+- Batch 6 actual module entry preparation review documented
+  - Batch 6 exact diff plan documented
+  - same docs-only Batch 6 module preparation and exact diff plan step
+  - Batch 6 reviewed candidates: 5
+  - Batch 6 ready for separate module entry approval: 5
+  - planned target modules:
+    - `j3Teams.js`: `ac_nagano_parceiro`, `zweigen_kanazawa`, `fc_osaka`, `fc_imabari`, `kamatamare_sanuki`
+    - `j2Teams.js`: none
+  - planned `j3Teams.js` entries: 5
+  - planned `j2Teams.js` entries: 0
+  - actual module entries added: 0
+  - `j2Teams.js` entries added: 0
+  - `j3Teams.js` entries added: 0
+  - `teamIdStatuses` changed: 0
+  - `seedable: true` changes: 0
+  - Firestore writes: 0
+  - non-dry seed: 0
+  - `--write`: 0
+  - API calls: 0
+  - deploy: 0
+  - `reilac_shiga` included: no
+  - implementation status: all rows `planned-not-written`
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -3238,12 +3260,23 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - deploy: 0
   - `reilac_shiga` included: no
 - Next task: 次の判断段階
-  - Batch 6 approval decision reviews を commit / push する
-  - 次に Batch 6 actual module entry preparation review / exact diff plan を作る
-  - planned target modules:
-    - `j3Teams.js`: `ac_nagano_parceiro`, `zweigen_kanazawa`, `fc_osaka`, `fc_imabari`, `kamatamare_sanuki`
-    - `j2Teams.js`: none
-  - actual `j2Teams.js` / `j3Teams.js` entries は separate exact diff plan and approval 後のみ
+  - Batch 6 module preparation / exact diff plan を commit / push する
+  - 次に actual `j3Teams.js` entries 追加を別承認で判断する
+  - actual `j3Teams.js` update 対象は5件
+    - `ac_nagano_parceiro`
+    - `zweigen_kanazawa`
+    - `fc_osaka`
+    - `fc_imabari`
+    - `kamatamare_sanuki`
+  - `j2Teams.js` は変更しない
+  - actual entries 追加後も `teamIdStatuses` はまだ更新しない
+  - actual entries 追加後の期待値:
+    - `football_j3` confirmed teams: 8 -> 13
+    - season membership confirmed team references: 25 のまま
+    - blocked/unconfirmed rows: 15 のまま
+    - seedable seasons: 0
+    - write candidates: 0
+    - written seasons: 0
   - `teamIdStatuses` 更新は actual confirmed team module entries 後に別承認
   - `seedable: true` にはまだ進まない
   - Firestore write / non-dry seed / `--write` はまだ行わない
@@ -3252,17 +3285,19 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - all 40 rows が safe になった後に `seedable: true` を別承認で検討する
   - Firestore write / non-dry seed / `--write` は最後に別承認する
 - 次の合理的な順序
-  1. Batch 6 approval decision reviews を commit / push
-  2. Batch 6 actual module entry preparation review / exact diff plan を作る
-  3. planned target modules: `j3Teams.js` は `ac_nagano_parceiro` / `zweigen_kanazawa` / `fc_osaka` / `fc_imabari` / `kamatamare_sanuki`、`j2Teams.js` は none
-  4. actual `j2Teams.js` / `j3Teams.js` entries は separate exact diff plan and approval 後のみ
-  5. `teamIdStatuses` 更新は actual confirmed team module entries 後に別承認
-  6. `seedable: true` にはまだ進まない
-  7. Firestore write / non-dry seed / `--write` はまだ行わない
-  8. `reilac_shiga` / `Biwako Shiga` continuity approval は別タスク
-  9. future next-season candidate generation script は別設計で検討
-  10. all 40 rows が safe になった後に `seedable: true` を別承認で検討
-  11. Firestore write / non-dry seed / `--write` は最後に別承認
+  1. Batch 6 module preparation / exact diff plan を commit / push
+  2. actual `j3Teams.js` entries 追加を別承認で判断する
+  3. actual `j3Teams.js` update 対象は `ac_nagano_parceiro` / `zweigen_kanazawa` / `fc_osaka` / `fc_imabari` / `kamatamare_sanuki`
+  4. `j2Teams.js` は変更しない
+  5. actual entries 追加後も `teamIdStatuses` はまだ更新しない
+  6. actual entries 追加後の期待値: `football_j3` confirmed teams 8 -> 13、season membership confirmed team references 25 のまま、blocked/unconfirmed rows 15 のまま、seedable seasons 0、write candidates 0、written seasons 0
+  7. `teamIdStatuses` 更新は actual confirmed team module entries 後に別承認
+  8. `seedable: true` にはまだ進まない
+  9. Firestore write / non-dry seed / `--write` はまだ行わない
+  10. `reilac_shiga` / `Biwako Shiga` continuity approval は別タスク
+  11. future next-season candidate generation script は別設計で検討
+  12. all 40 rows が safe になった後に `seedable: true` を別承認で検討
+  13. Firestore write / non-dry seed / `--write` は最後に別承認
 - まだ Firestore write / non-dry seed / `--write` には進まない
 - Do not use bulk approval for Batch 1 or future batches
 - Keep `reilac_shiga` / `Biwako Shiga` excluded from seedable / confirmed entry candidates until continuity approval is completed

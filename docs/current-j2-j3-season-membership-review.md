@@ -3384,6 +3384,163 @@ Decision note:
 - `reilac_shiga` included: no
 - next step: Batch 6 actual module entry preparation review / exact diff plan
 
+## Batch 6 Actual Module Entry Preparation Review
+
+Summary:
+
+- Batch 6 actual module entry preparation review documented: yes
+- Batch 6 reviewed candidates: 5
+- Batch 6 ready for separate module entry approval: 5
+- Actual module entries added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- `teamIdStatuses` changed: 0
+- `seedable: true` changes: 0
+- Firestore writes: 0
+- non-dry seed: 0
+- `--write`: 0
+- API calls: 0
+- deploy: 0
+- `reilac_shiga` included: no
+- bulk approval: no
+- implementation status: docs-only preparation review
+
+| teamId | per-club review status | module entry preparation status | target module candidate | reason | implementation status |
+|---|---|---|---|---|---|
+| `ac_nagano_parceiro` | `approved-for-module-entry-candidate` | `ready-for-separate-module-entry-approval` | `j3Teams.js` | Batch 6 per-club review completed; stable identity evidence accepted for module-entry planning | `planned-not-written` |
+| `zweigen_kanazawa` | `approved-for-module-entry-candidate` | `ready-for-separate-module-entry-approval` | `j3Teams.js` | Batch 6 per-club review completed; stable identity evidence accepted for module-entry planning | `planned-not-written` |
+| `fc_osaka` | `approved-for-module-entry-candidate` | `ready-for-separate-module-entry-approval` | `j3Teams.js` | Batch 6 per-club review completed; stable identity evidence accepted for module-entry planning | `planned-not-written` |
+| `fc_imabari` | `approved-for-module-entry-candidate` | `ready-for-separate-module-entry-approval` | `j3Teams.js` | Batch 6 per-club review completed; stable identity evidence accepted for module-entry planning | `planned-not-written` |
+| `kamatamare_sanuki` | `approved-for-module-entry-candidate` | `ready-for-separate-module-entry-approval` | `j3Teams.js` | Batch 6 per-club review completed; stable identity evidence accepted for module-entry planning | `planned-not-written` |
+
+Policy note:
+
+- This is not an actual `approved-for-module-entry` file change.
+- Do not add entries to `j3Teams.js` in this step.
+- Do not update `teamIdStatuses` in this step.
+- `teamIdStatuses` update requires actual confirmed team module entries and separate approval.
+- `seedable: true` remains deferred.
+- Firestore write / non-dry seed / `--write` remains deferred.
+
+## Batch 6 j2Teams.js / j3Teams.js Exact Diff Plan
+
+Summary:
+
+- Batch 6 exact diff plan documented: yes
+- planned target files:
+  - `functions/scripts/data/j3Teams.js`
+- planned `j2Teams.js` entries: 0
+- planned `j3Teams.js` entries: 5
+- Actual module entries added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- `teamIdStatuses` changed: 0
+- `seedable: true` changes: 0
+- Firestore writes: 0
+- non-dry seed: 0
+- `--write`: 0
+- API calls: 0
+- deploy: 0
+- `reilac_shiga` included: no
+- implementation status: all rows `planned-not-written`
+
+Planned `j3Teams.js` entries:
+
+- `ac_nagano_parceiro`
+- `zweigen_kanazawa`
+- `fc_osaka`
+- `fc_imabari`
+- `kamatamare_sanuki`
+
+Planned `j2Teams.js` entries:
+
+- none
+
+Exact planned object values:
+
+```js
+{
+  id: 'ac_nagano_parceiro',
+  nameJa: 'ＡＣ長野パルセイロ',
+  nameEn: 'AC Nagano Parceiro',
+  aliases: ['長野', 'ＡＣ長野', 'AC長野', 'パルセイロ', 'AC Nagano Parceiro', 'Parceiro Nagano'],
+  externalTeamId: 4323,
+  logoUrl: 'https://media.api-sports.io/football/teams/4323.png',
+  source: 'API-SPORTS teams?league=100&season=2024 + Batch 6 j2Teams.js / j3Teams.js Exact Diff Plan',
+  status: 'confirmed',
+}
+```
+
+```js
+{
+  id: 'zweigen_kanazawa',
+  nameJa: 'ツエーゲン金沢',
+  nameEn: 'Zweigen Kanazawa',
+  aliases: ['金沢', 'ツエーゲン', 'ツエーゲン金沢', 'Zweigen Kanazawa', 'Kanazawa'],
+  externalTeamId: 300,
+  logoUrl: 'https://media.api-sports.io/football/teams/300.png',
+  source: 'API-SPORTS teams?league=100&season=2024 + Batch 6 j2Teams.js / j3Teams.js Exact Diff Plan',
+  status: 'confirmed',
+}
+```
+
+```js
+{
+  id: 'fc_osaka',
+  nameJa: 'ＦＣ大阪',
+  nameEn: 'FC Osaka',
+  aliases: ['大阪', 'FC大阪', 'ＦＣ大阪', 'FC Osaka', 'Osaka'],
+  externalTeamId: 7138,
+  logoUrl: 'https://media.api-sports.io/football/teams/7138.png',
+  source: 'API-SPORTS teams?league=100&season=2024 + Batch 6 j2Teams.js / j3Teams.js Exact Diff Plan',
+  status: 'confirmed',
+}
+```
+
+```js
+{
+  id: 'fc_imabari',
+  nameJa: 'ＦＣ今治',
+  nameEn: 'FC Imabari',
+  aliases: ['今治', 'FC今治', 'ＦＣ今治', 'FC Imabari', 'Imabari'],
+  externalTeamId: 10075,
+  logoUrl: 'https://media.api-sports.io/football/teams/10075.png',
+  source: 'API-SPORTS teams?league=100&season=2024 + Batch 6 j2Teams.js / j3Teams.js Exact Diff Plan',
+  status: 'confirmed',
+}
+```
+
+```js
+{
+  id: 'kamatamare_sanuki',
+  nameJa: 'カマタマーレ讃岐',
+  nameEn: 'Kamatamare Sanuki',
+  aliases: ['讃岐', 'カマタマーレ', 'カマタマーレ讃岐', 'Kamatamare Sanuki'],
+  externalTeamId: 317,
+  logoUrl: 'https://media.api-sports.io/football/teams/317.png',
+  source: 'API-SPORTS teams?league=100&season=2024 + Batch 6 j2Teams.js / j3Teams.js Exact Diff Plan',
+  status: 'confirmed',
+}
+```
+
+Validation expectation after future actual update:
+
+- `node --check functions/scripts/data/j3Teams.js`: PASS
+- `node functions/scripts/seedCompetitionTeams.js football_j3 --dry-run`: PASS
+  - expected confirmed teams: 13
+  - Firestore will not be written
+- `node functions/scripts/verifyCompetitionTeams.js football_j3 --dry-run`: PASS
+- `node functions/scripts/verifyCompetitionSeasonMemberships.js --dry-run`: PASS
+  - confirmed team references remains: 25
+  - blocked/unconfirmed rows remains: 15
+  - reason: `teamIdStatuses` will not be updated in actual module entry step
+- `node functions/scripts/seedCompetitionSeasonMemberships.js --dry-run`: PASS
+  - seedable seasons: 0
+  - write candidates: 0
+  - written seasons: 0
+- `npm --prefix functions run build`: PASS
+- `flutter analyze --no-pub`: No issues found
+
 ### All-Sports Season Rollover Policy
 
 - `competitionSeasonKey` is not specific to J2 / J3 2026; it is the season / tournament membership scope for all sports and all years.
