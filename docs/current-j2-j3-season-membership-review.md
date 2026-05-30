@@ -1179,66 +1179,6 @@ Season membership remains separate from stable team master data. Lookup source l
 | `fukushima_united` | 福島ユナイテッドＦＣ | Fukushima United | 4318 | `https://media.api-sports.io/football/teams/4318.png` | J3 2024 / 100 | direct-or-near-direct | approval-ready | not-approved-yet | `j3Teams.js` candidate | API raw name omits FC, but stable club identity is clear; no file write yet |
 | `kataller_toyama` | カターレ富山 | Kataller Toyama | 4322 | `https://media.api-sports.io/football/teams/4322.png` | J3 2024 / 100 | direct-or-near-direct | approval-ready | not-approved-yet | `j3Teams.js` candidate | Batch 3 candidate only; no file write yet |
 
-## Per-Club Approval Batch 4
-
-This section records the fourth documentation-only per-club approval candidate list.
-
-Batch 4 selects five remaining `candidate_not_confirmed` rows that are relatively easy to handle as direct / near-direct / stable-clear API evidence candidates. It is not final approval, and it does not create seed data, confirmed `/teams/{id}` documents, `j2Teams.js` entries, `j3Teams.js` entries, `teamIdStatuses` changes, Firestore writes, API sync, or deploy changes.
-
-Summary:
-
-- Per-club approval batch 4 documented: yes
-- Batch 4 candidates listed: 5
-- Batch 4 candidates approved for module entry: 0
-- Actual module entries added: 0
-- `j2Teams.js` entries added: 0
-- `j3Teams.js` entries added: 0
-- `teamIdStatuses` changed: 0
-- Firestore writes: 0
-- non-dry seed: 0
-- `--write`: 0
-- API calls: 0
-- deploy: 0
-- `seedable: true` changes: 0
-- `reilac_shiga` included: no
-- bulk approval: no
-
-Batch 4 policy:
-
-- Batch 4 is a docs-only candidate list.
-- This is not final approval.
-- No club in Batch 4 is approved for actual module entry yet.
-- Actual per-club approval decision review must be done one club at a time in later steps.
-- Actual `j2Teams.js` / `j3Teams.js` entries require separate exact diff plan and separate approval.
-- Season membership remains separate from stable team master data.
-- Lookup source league names are API evidence for stable club identity only.
-- Lookup source league names do not imply 2026 J2 / J3 special competition membership or permanent division membership.
-- `reilac_shiga` remains excluded until continuity approval is completed.
-- `football_j2_j3_2026_hyakunen` remains `status: review` / `seedable: false`.
-- All-Sports Season Rollover Policy remains unchanged.
-- New season candidates must start as `review` / `seedable: false`.
-- Human approval is required before `seedable: true` or Firestore write.
-
-| candidate internal team id | club nameJa | API raw team name | externalTeamId | logoUrl | lookup source | variance status | recommended approval state | approval decision | target module candidate | notes |
-|---|---|---|---:|---|---|---|---|---|---|---|
-| `tokushima_vortis` | 徳島ヴォルティス | Tokushima Vortis | 299 | `https://media.api-sports.io/football/teams/299.png` | J2 2024 / 99 | direct-or-near-direct | approval-ready | not-approved-yet | `j2Teams.js` candidate | API evidence is stable club identity evidence only; seedable remains no |
-| `albirex_niigata` | アルビレックス新潟 | Albirex Niigata | 311 | `https://media.api-sports.io/football/teams/311.png` | J1 2024 / 98 | direct-or-near-direct | approval-ready | not-approved-yet | `j2Teams.js` candidate | J1 lookup is stable identity evidence only, not permanent division membership; seedable remains no |
-| `kochi_united` | 高知ユナイテッドＳＣ | Kochi United | 7129 | `https://media.api-sports.io/football/teams/7129.png` | JFL 2024 / 497 | stable-clear-api-name-omits-sc | approval-ready | not-approved-yet | `j3Teams.js` candidate | API raw name omits `SC`, but stable club identity appears clear; JFL lookup is stable identity evidence only; seedable remains no |
-| `ehime_fc` | 愛媛ＦＣ | Ehime FC | 318 | `https://media.api-sports.io/football/teams/318.png` | J2 2024 / 99 | direct-or-near-direct | approval-ready | not-approved-yet | `j2Teams.js` candidate | API evidence is stable club identity evidence only; seedable remains no |
-| `nara_club` | 奈良クラブ | Nara Club | 7135 | `https://media.api-sports.io/football/teams/7135.png` | J3 2024 / 100 | direct-or-near-direct | approval-ready | not-approved-yet | `j3Teams.js` candidate | API evidence is stable club identity evidence only; seedable remains no |
-
-Batch 4 next-step note:
-
-- Next step after this docs-only batch list is one-club-at-a-time approval decision review.
-- Recommended order:
-  1. `tokushima_vortis`
-  2. `albirex_niigata`
-  3. `kochi_united`
-  4. `ehime_fc`
-  5. `nara_club`
-- Do not create actual module entries from this batch list alone.
-- Do not update `teamIdStatuses` from this batch list alone.
-
 ## Per-Club Approval Decision Review - fc_gifu
 
 This section records a documentation-only approval decision review for one Batch 3 club row.
@@ -1512,6 +1452,299 @@ Planned `j3Teams.js` entries:
 | `functions/scripts/data/j3Teams.js` | `matsumoto_yamaga` | 松本山雅ＦＣ | Matsumoto Yamaga | 304 | `https://media.api-sports.io/football/teams/304.png` | `football_j3` | API-SPORTS teams?league=100&season=2024 + Batch 3 j2Teams.js / j3Teams.js Exact Diff Plan | planned-not-written | API raw name omits FC, but stable club identity is clear; no file write yet |
 | `functions/scripts/data/j3Teams.js` | `fukushima_united` | 福島ユナイテッドＦＣ | Fukushima United | 4318 | `https://media.api-sports.io/football/teams/4318.png` | `football_j3` | API-SPORTS teams?league=100&season=2024 + Batch 3 j2Teams.js / j3Teams.js Exact Diff Plan | planned-not-written | API raw name omits FC, but stable club identity is clear; no file write yet |
 | `functions/scripts/data/j3Teams.js` | `kataller_toyama` | カターレ富山 | Kataller Toyama | 4322 | `https://media.api-sports.io/football/teams/4322.png` | `football_j3` | API-SPORTS teams?league=100&season=2024 + Batch 3 j2Teams.js / j3Teams.js Exact Diff Plan | planned-not-written | Stable team master candidate only; no file write yet |
+
+## Per-Club Approval Batch 4
+
+This section records the fourth documentation-only per-club approval candidate list.
+
+Batch 4 selects five remaining `candidate_not_confirmed` rows that are relatively easy to handle as direct / near-direct / stable-clear API evidence candidates. It is not final approval, and it does not create seed data, confirmed `/teams/{id}` documents, `j2Teams.js` entries, `j3Teams.js` entries, `teamIdStatuses` changes, Firestore writes, API sync, or deploy changes.
+
+Summary:
+
+- Per-club approval batch 4 documented: yes
+- Batch 4 candidates listed: 5
+- Batch 4 candidates approved for module entry: 0
+- Actual module entries added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- `teamIdStatuses` changed: 0
+- Firestore writes: 0
+- non-dry seed: 0
+- `--write`: 0
+- API calls: 0
+- deploy: 0
+- `seedable: true` changes: 0
+- `reilac_shiga` included: no
+- bulk approval: no
+
+Batch 4 policy:
+
+- Batch 4 is a docs-only candidate list.
+- This is not final approval.
+- No club in Batch 4 is approved for actual module entry yet.
+- Actual per-club approval decision review must be done one club at a time in later steps.
+- Actual `j2Teams.js` / `j3Teams.js` entries require separate exact diff plan and separate approval.
+- Season membership remains separate from stable team master data.
+- Lookup source league names are API evidence for stable club identity only.
+- Lookup source league names do not imply 2026 J2 / J3 special competition membership or permanent division membership.
+- `reilac_shiga` remains excluded until continuity approval is completed.
+- `football_j2_j3_2026_hyakunen` remains `status: review` / `seedable: false`.
+- All-Sports Season Rollover Policy remains unchanged.
+- New season candidates must start as `review` / `seedable: false`.
+- Human approval is required before `seedable: true` or Firestore write.
+
+| candidate internal team id | club nameJa | API raw team name | externalTeamId | logoUrl | lookup source | variance status | recommended approval state | approval decision | target module candidate | notes |
+|---|---|---|---:|---|---|---|---|---|---|---|
+| `tokushima_vortis` | 徳島ヴォルティス | Tokushima Vortis | 299 | `https://media.api-sports.io/football/teams/299.png` | J2 2024 / 99 | direct-or-near-direct | approval-ready | not-approved-yet | `j2Teams.js` candidate | API evidence is stable club identity evidence only; seedable remains no |
+| `albirex_niigata` | アルビレックス新潟 | Albirex Niigata | 311 | `https://media.api-sports.io/football/teams/311.png` | J1 2024 / 98 | direct-or-near-direct | approval-ready | not-approved-yet | `j2Teams.js` candidate | J1 lookup is stable identity evidence only, not permanent division membership; seedable remains no |
+| `kochi_united` | 高知ユナイテッドＳＣ | Kochi United | 7129 | `https://media.api-sports.io/football/teams/7129.png` | JFL 2024 / 497 | stable-clear-api-name-omits-sc | approval-ready | not-approved-yet | `j3Teams.js` candidate | API raw name omits `SC`, but stable club identity appears clear; JFL lookup is stable identity evidence only; seedable remains no |
+| `ehime_fc` | 愛媛ＦＣ | Ehime FC | 318 | `https://media.api-sports.io/football/teams/318.png` | J2 2024 / 99 | direct-or-near-direct | approval-ready | not-approved-yet | `j2Teams.js` candidate | API evidence is stable club identity evidence only; seedable remains no |
+| `nara_club` | 奈良クラブ | Nara Club | 7135 | `https://media.api-sports.io/football/teams/7135.png` | J3 2024 / 100 | direct-or-near-direct | approval-ready | not-approved-yet | `j3Teams.js` candidate | API evidence is stable club identity evidence only; seedable remains no |
+
+Batch 4 next-step note:
+
+- Next step after this docs-only batch list is one-club-at-a-time approval decision review.
+- Recommended order:
+  1. `tokushima_vortis`
+  2. `albirex_niigata`
+  3. `kochi_united`
+  4. `ehime_fc`
+  5. `nara_club`
+- Do not create actual module entries from this batch list alone.
+- Do not update `teamIdStatuses` from this batch list alone.
+
+## Per-Club Approval Decision Review - tokushima_vortis
+
+This section records a documentation-only approval decision review for one Batch 4 club row.
+
+It does not change the Batch 4 table, create a module entry, create seed data, write Firestore documents, run API sync, or deploy.
+
+Summary:
+
+- Approval decision review documented: yes
+- Reviewed club: `tokushima_vortis`
+- Review result: `approved-for-module-entry-candidate`
+- Actual module entry added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- `teamIdStatuses` changed: 0
+- Firestore writes: 0
+- non-dry seed: 0
+- `--write`: 0
+- API calls: 0
+- deploy: 0
+- Seedable rows changed: 0
+- Batch 4 table changed: no
+- Batch 4 individual reviews completed: 1 / 5
+
+| check | review note | result |
+|---|---|---|
+| candidate internal team id | `tokushima_vortis` is a stable club identity candidate for 徳島ヴォルティス and does not encode temporary J2 / J3 group membership | pass |
+| API raw team name | `Tokushima Vortis` is a direct / near-direct match for the current club identity | pass |
+| externalTeamId | `299` matches the API-SPORTS tracker evidence | pass |
+| logoUrl | `https://media.api-sports.io/football/teams/299.png` matches the API-SPORTS tracker evidence | pass |
+| name variance review | Not required for this direct / near-direct row | pass |
+| existing confirmed team ID collision | No existing confirmed team ID collision is recorded in this review document | pass |
+| season membership separation | The `J2 2024 / 99` lookup source is API evidence for stable club identity only, not 2026 J2 / J3 special competition membership or permanent division membership | pass |
+| duplicate `/teams/{id}` policy | Do not create a duplicate `/teams/{id}` document; only a later approved module entry may propose this stable ID | pass |
+| target module candidate | `tokushima_vortis` may later be proposed for `j2Teams.js` only after separate exact diff plan and approval | pass |
+
+Decision:
+
+- `tokushima_vortis` may move forward as an `approved-for-module-entry-candidate` in documentation.
+- This is not an actual `approved-for-module-entry` file change.
+- Do not add `tokushima_vortis` to `j2Teams.js` or `j3Teams.js` from this review alone.
+- Keep `seedable` as `no` until a separate confirmed module entry approval and later seed approval are completed.
+
+## Per-Club Approval Decision Review - albirex_niigata
+
+This section records a documentation-only approval decision review for one Batch 4 club row.
+
+It does not change the Batch 4 table, create a module entry, create seed data, write Firestore documents, run API sync, or deploy.
+
+Summary:
+
+- Approval decision review documented: yes
+- Reviewed club: `albirex_niigata`
+- Review result: `approved-for-module-entry-candidate`
+- Actual module entry added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- `teamIdStatuses` changed: 0
+- Firestore writes: 0
+- non-dry seed: 0
+- `--write`: 0
+- API calls: 0
+- deploy: 0
+- Seedable rows changed: 0
+- Batch 4 table changed: no
+- Batch 4 individual reviews completed: 2 / 5
+
+| check | review note | result |
+|---|---|---|
+| candidate internal team id | `albirex_niigata` is a stable club identity candidate for アルビレックス新潟 and does not encode temporary J2 / J3 group membership | pass |
+| API raw team name | `Albirex Niigata` is a direct / near-direct match for the current club identity | pass |
+| externalTeamId | `311` matches the API-SPORTS tracker evidence | pass |
+| logoUrl | `https://media.api-sports.io/football/teams/311.png` matches the API-SPORTS tracker evidence | pass |
+| name variance review | Not required for this direct / near-direct row | pass |
+| existing confirmed team ID collision | No existing confirmed team ID collision is recorded in this review document | pass |
+| season membership separation | The `J1 2024 / 98` lookup source is API evidence for stable club identity only, not 2026 J2 / J3 special competition membership or permanent division membership | pass |
+| duplicate `/teams/{id}` policy | Do not create a duplicate `/teams/{id}` document; only a later approved module entry may propose this stable ID | pass |
+| target module candidate | `albirex_niigata` may later be proposed for `j2Teams.js` only after separate exact diff plan and approval | pass |
+
+Decision:
+
+- `albirex_niigata` may move forward as an `approved-for-module-entry-candidate` in documentation.
+- This is not an actual `approved-for-module-entry` file change.
+- Do not add `albirex_niigata` to `j2Teams.js` or `j3Teams.js` from this review alone.
+- Keep `seedable` as `no` until a separate confirmed module entry approval and later seed approval are completed.
+
+## Per-Club Approval Decision Review - kochi_united
+
+This section records a documentation-only approval decision review for one Batch 4 club row.
+
+It does not change the Batch 4 table, create a module entry, create seed data, write Firestore documents, run API sync, or deploy.
+
+Summary:
+
+- Approval decision review documented: yes
+- Reviewed club: `kochi_united`
+- Review result: `approved-for-module-entry-candidate`
+- Actual module entry added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- `teamIdStatuses` changed: 0
+- Firestore writes: 0
+- non-dry seed: 0
+- `--write`: 0
+- API calls: 0
+- deploy: 0
+- Seedable rows changed: 0
+- Batch 4 table changed: no
+- Batch 4 individual reviews completed: 3 / 5
+
+| check | review note | result |
+|---|---|---|
+| candidate internal team id | `kochi_united` is a stable club identity candidate for 高知ユナイテッドＳＣ and does not encode temporary J2 / J3 group membership | pass |
+| API raw team name | `Kochi United` omits `SC`, but this is acceptable stable-clear API evidence for the current club identity | pass |
+| externalTeamId | `7129` matches the API-SPORTS tracker evidence | pass |
+| logoUrl | `https://media.api-sports.io/football/teams/7129.png` matches the API-SPORTS tracker evidence | pass |
+| name variance review | The API raw name omits `SC`, but the stable club identity appears clear enough for docs-only module entry candidate approval | pass |
+| existing confirmed team ID collision | No existing confirmed team ID collision is recorded in this review document | pass |
+| season membership separation | The `JFL 2024 / 497` lookup source is API evidence for stable club identity only, not 2026 J2 / J3 special competition membership or permanent division membership | pass |
+| duplicate `/teams/{id}` policy | Do not create a duplicate `/teams/{id}` document; only a later approved module entry may propose this stable ID | pass |
+| target module candidate | `kochi_united` may later be proposed for `j3Teams.js` only after separate exact diff plan and approval | pass |
+
+Decision:
+
+- `kochi_united` may move forward as an `approved-for-module-entry-candidate` in documentation.
+- This is not an actual `approved-for-module-entry` file change.
+- Do not add `kochi_united` to `j2Teams.js` or `j3Teams.js` from this review alone.
+- Keep `seedable` as `no` until a separate confirmed module entry approval and later seed approval are completed.
+
+## Per-Club Approval Decision Review - ehime_fc
+
+This section records a documentation-only approval decision review for one Batch 4 club row.
+
+It does not change the Batch 4 table, create a module entry, create seed data, write Firestore documents, run API sync, or deploy.
+
+Summary:
+
+- Approval decision review documented: yes
+- Reviewed club: `ehime_fc`
+- Review result: `approved-for-module-entry-candidate`
+- Actual module entry added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- `teamIdStatuses` changed: 0
+- Firestore writes: 0
+- non-dry seed: 0
+- `--write`: 0
+- API calls: 0
+- deploy: 0
+- Seedable rows changed: 0
+- Batch 4 table changed: no
+- Batch 4 individual reviews completed: 4 / 5
+
+| check | review note | result |
+|---|---|---|
+| candidate internal team id | `ehime_fc` is a stable club identity candidate for 愛媛ＦＣ and does not encode temporary J2 / J3 group membership | pass |
+| API raw team name | `Ehime FC` is a direct / near-direct match for the current club identity | pass |
+| externalTeamId | `318` matches the API-SPORTS tracker evidence | pass |
+| logoUrl | `https://media.api-sports.io/football/teams/318.png` matches the API-SPORTS tracker evidence | pass |
+| name variance review | Not required for this direct / near-direct row | pass |
+| existing confirmed team ID collision | No existing confirmed team ID collision is recorded in this review document | pass |
+| season membership separation | The `J2 2024 / 99` lookup source is API evidence for stable club identity only, not 2026 J2 / J3 special competition membership or permanent division membership | pass |
+| duplicate `/teams/{id}` policy | Do not create a duplicate `/teams/{id}` document; only a later approved module entry may propose this stable ID | pass |
+| target module candidate | `ehime_fc` may later be proposed for `j2Teams.js` only after separate exact diff plan and approval | pass |
+
+Decision:
+
+- `ehime_fc` may move forward as an `approved-for-module-entry-candidate` in documentation.
+- This is not an actual `approved-for-module-entry` file change.
+- Do not add `ehime_fc` to `j2Teams.js` or `j3Teams.js` from this review alone.
+- Keep `seedable` as `no` until a separate confirmed module entry approval and later seed approval are completed.
+
+## Per-Club Approval Decision Review - nara_club
+
+This section records a documentation-only approval decision review for one Batch 4 club row.
+
+It does not change the Batch 4 table, create a module entry, create seed data, write Firestore documents, run API sync, or deploy.
+
+Summary:
+
+- Approval decision review documented: yes
+- Reviewed club: `nara_club`
+- Review result: `approved-for-module-entry-candidate`
+- Actual module entry added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- `teamIdStatuses` changed: 0
+- Firestore writes: 0
+- non-dry seed: 0
+- `--write`: 0
+- API calls: 0
+- deploy: 0
+- Seedable rows changed: 0
+- Batch 4 table changed: no
+- Batch 4 individual reviews completed: 5 / 5
+
+| check | review note | result |
+|---|---|---|
+| candidate internal team id | `nara_club` is a stable club identity candidate for 奈良クラブ and does not encode temporary J2 / J3 group membership | pass |
+| API raw team name | `Nara Club` is a direct / near-direct match for the current club identity | pass |
+| externalTeamId | `7135` matches the API-SPORTS tracker evidence | pass |
+| logoUrl | `https://media.api-sports.io/football/teams/7135.png` matches the API-SPORTS tracker evidence | pass |
+| name variance review | Not required for this direct / near-direct row | pass |
+| existing confirmed team ID collision | No existing confirmed team ID collision is recorded in this review document | pass |
+| season membership separation | The `J3 2024 / 100` lookup source is API evidence for stable club identity only, not 2026 J2 / J3 special competition membership or permanent division membership | pass |
+| duplicate `/teams/{id}` policy | Do not create a duplicate `/teams/{id}` document; only a later approved module entry may propose this stable ID | pass |
+| target module candidate | `nara_club` may later be proposed for `j3Teams.js` only after separate exact diff plan and approval | pass |
+
+Decision:
+
+- `nara_club` may move forward as an `approved-for-module-entry-candidate` in documentation.
+- This is not an actual `approved-for-module-entry` file change.
+- Do not add `nara_club` to `j2Teams.js` or `j3Teams.js` from this review alone.
+- Keep `seedable` as `no` until a separate confirmed module entry approval and later seed approval are completed.
+
+Batch 4 completion note:
+
+- Batch 4 individual approval decision reviews completed: 5 / 5
+- Batch 4 docs-only approved-for-module-entry-candidate rows:
+  - `tokushima_vortis`
+  - `albirex_niigata`
+  - `kochi_united`
+  - `ehime_fc`
+  - `nara_club`
+- Actual module entries added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- `teamIdStatuses` changed: 0
+- `seedable: true` changes: 0
+- Firestore writes / non-dry seed / `--write` / API sync / deploy / additional API calls: 0
+- Next step is Batch 4 actual module entry preparation review.
+- Do not create actual module entries from these reviews alone.
 
 ## Per-Club Approval Decision Review - tochigi_city
 
