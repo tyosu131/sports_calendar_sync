@@ -2597,6 +2597,93 @@ Blocked continuity rows:
 10. Only after all 40 rows are safe, consider separate `seedable: true` approval
 11. Firestore write / non-dry seed / `--write` remains last and separately approved
 
+## Batch 4 teamIdStatuses Exact Diff Plan
+
+### Summary
+
+- Batch 4 `teamIdStatuses` exact diff plan documented: yes
+- target data module:
+  - `functions/scripts/data/competitionSeasonMemberships.js`
+- target competitionSeasonKey:
+  - `football_j2_j3_2026_hyakunen`
+- planned `teamIdStatuses` updates: 5
+- actual `teamIdStatuses` changed: 0
+- actual data module entries changed: 0
+- `seedable: true` changes: 0
+- Firestore writes: 0
+- non-dry seed: 0
+- `--write`: 0
+- API calls: 0
+- deploy: 0
+- `reilac_shiga` included: no
+- docs-only plan: yes
+
+### Planned Status Changes
+
+1. `tokushima_vortis`
+   - current status: `candidate_not_confirmed`
+   - planned status: `confirmed_team_master`
+   - reason: actual confirmed stable team master entry now exists in `functions/scripts/data/j2Teams.js`
+   - source commit: `b52516c Add J2 J3 batch 4 team entries`
+
+2. `albirex_niigata`
+   - current status: `candidate_not_confirmed`
+   - planned status: `confirmed_team_master`
+   - reason: actual confirmed stable team master entry now exists in `functions/scripts/data/j2Teams.js`
+   - source commit: `b52516c Add J2 J3 batch 4 team entries`
+
+3. `ehime_fc`
+   - current status: `candidate_not_confirmed`
+   - planned status: `confirmed_team_master`
+   - reason: actual confirmed stable team master entry now exists in `functions/scripts/data/j2Teams.js`
+   - source commit: `b52516c Add J2 J3 batch 4 team entries`
+
+4. `kochi_united`
+   - current status: `candidate_not_confirmed`
+   - planned status: `confirmed_team_master`
+   - reason: actual confirmed stable team master entry now exists in `functions/scripts/data/j3Teams.js`
+   - source commit: `b52516c Add J2 J3 batch 4 team entries`
+
+5. `nara_club`
+   - current status: `candidate_not_confirmed`
+   - planned status: `confirmed_team_master`
+   - reason: actual confirmed stable team master entry now exists in `functions/scripts/data/j3Teams.js`
+   - source commit: `b52516c Add J2 J3 batch 4 team entries`
+
+### Expected Validation After Actual Update
+
+- `node --check functions/scripts/data/competitionSeasonMemberships.js`: PASS
+- `node functions/scripts/verifyCompetitionSeasonMemberships.js --dry-run`: PASS
+  - checked seasons: 1
+  - checked groups: 4
+  - checked membership teamIds: 40
+  - confirmed team references: 20
+  - blocked/unconfirmed rows: 20
+- `node functions/scripts/seedCompetitionSeasonMemberships.js --dry-run`: PASS
+  - seedable seasons: 0
+  - skipped non-seedable seasons: 1
+  - write candidates: 0
+  - written seasons: 0
+- `football_j2_j3_2026_hyakunen` remains `status: review` / `seedable: false`
+- Firestore will not be written
+
+### Policy Notes
+
+- This plan only changes local season membership status metadata after actual stable team master entries exist.
+- This plan does not make the season seedable.
+- This plan does not approve Firestore writes.
+- `seedable: true` requires separate approval after all 40 rows are safe.
+- `reilac_shiga` remains `blocked_continuity`.
+- `reilac_shiga` / `Biwako Shiga` continuity approval remains a separate task.
+- Firestore write / non-dry seed / `--write` remains last and separately approved.
+- All-Sports Season Rollover Policy remains unchanged.
+
+### Next-Step Note
+
+- After this docs-only plan is committed, actual `competitionSeasonMemberships.js` `teamIdStatuses` update can be considered separately.
+- Do not update actual `teamIdStatuses` from this docs-only plan alone.
+- Do not change `seedable: false`.
+
 ### All-Sports Season Rollover Policy
 
 - `competitionSeasonKey` is not specific to J2 / J3 2026; it is the season / tournament membership scope for all sports and all years.
