@@ -99,6 +99,16 @@ const j3Teams = [
     source: 'API-SPORTS teams?league=100&season=2024 + Batch 4 j2Teams.js / j3Teams.js Exact Diff Plan',
     status: 'confirmed',
   },
+  {
+    id: 'sc_sagamihara',
+    nameJa: 'ＳＣ相模原',
+    nameEn: 'SC Sagamihara',
+    aliases: ['相模原', 'SC相模原', 'ＳＣ相模原', 'Sagamihara', 'SC Sagamihara'],
+    externalTeamId: 4324,
+    logoUrl: 'https://media.api-sports.io/football/teams/4324.png',
+    source: 'API-SPORTS teams?league=100&season=2024 + Batch 5 j2Teams.js / j3Teams.js Exact Diff Plan',
+    status: 'confirmed',
+  },
 ];
 
 /**
