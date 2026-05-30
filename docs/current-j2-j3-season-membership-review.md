@@ -3140,6 +3140,39 @@ Policy notes:
 - Firestore write / non-dry seed / `--write` remains deferred.
 - Actual `teamIdStatuses` update requires separate approval after this docs-only plan is committed.
 
+## Per-Club Approval Batch 6
+
+This is a docs-only candidate list. It is not bulk approval, not actual module entry creation, and not season membership seed approval.
+
+Summary:
+
+- Batch 6 candidate list documented: yes
+- Batch 6 candidates listed: 5
+- each candidate remains docs-only
+- approval decision: `not-approved-yet`
+- actual module entries added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- `teamIdStatuses` changed: 0
+- `seedable: true` changes: 0
+- Firestore writes: 0
+- non-dry seed: 0
+- `--write`: 0
+- API calls: 0
+- deploy: 0
+- `reilac_shiga` included: no
+- bulk approval: no
+- `football_j2_j3_2026_hyakunen` remains `status: review` / `seedable: false`
+- All-Sports Season Rollover Policy remains unchanged
+
+| candidate internal team id | club nameJa | API raw team name | externalTeamId | logoUrl | lookup source | variance status | recommended approval state | approval decision | target module candidate | notes |
+|---|---|---|---|---|---|---|---|---|---|---|
+| `ac_nagano_parceiro` | `ＡＣ長野パルセイロ` | `Parceiro Nagano` | `4323` | `https://media.api-sports.io/football/teams/4323.png` | `J3 2024 / 100` | `name-variance-reviewed` | `approval-ready-after-variance-review` | `not-approved-yet` | `j3Teams.js` candidate | API raw name differs in order and omits `AC`; stable club identity should be reviewed in per-club decision before module entry |
+| `zweigen_kanazawa` | `ツエーゲン金沢` | `Kanazawa` | `300` | `https://media.api-sports.io/football/teams/300.png` | `J3 2024 / 100` | `name-variance-reviewed` | `approval-ready-after-variance-review` | `not-approved-yet` | `j3Teams.js` candidate | API raw name is shortened; stable club identity should be reviewed in per-club decision before module entry |
+| `fc_osaka` | `ＦＣ大阪` | `Osaka` | `7138` | `https://media.api-sports.io/football/teams/7138.png` | `J3 2024 / 100` | `name-variance-reviewed` | `approval-ready-after-variance-review` | `not-approved-yet` | `j3Teams.js` candidate | API raw name omits `FC`; stable club identity should be reviewed in per-club decision before module entry |
+| `fc_imabari` | `ＦＣ今治` | `Imabari` | `10075` | `https://media.api-sports.io/football/teams/10075.png` | `J3 2024 / 100` | `name-variance-reviewed` | `approval-ready-after-variance-review` | `not-approved-yet` | `j3Teams.js` candidate | API raw name omits `FC`; stable club identity should be reviewed in per-club decision before module entry |
+| `kamatamare_sanuki` | `カマタマーレ讃岐` | `Kamatamare Sanuki` | `317` | `https://media.api-sports.io/football/teams/317.png` | `J3 2024 / 100` | `direct-or-near-direct` | `approval-ready` | `not-approved-yet` | `j3Teams.js` candidate | API evidence is stable club identity evidence only; seedable remains no |
+
 ### All-Sports Season Rollover Policy
 
 - `competitionSeasonKey` is not specific to J2 / J3 2026; it is the season / tournament membership scope for all sports and all years.
