@@ -2985,6 +2985,96 @@ Decision note:
 - `reilac_shiga` included: no
 - next step: Batch 5 actual module entry preparation review / exact diff plan
 
+## Batch 5 Actual Module Entry Preparation Review
+
+Summary:
+
+- Batch 5 actual module entry preparation review documented: yes
+- Batch 5 reviewed candidates: 5
+- Batch 5 ready for separate module entry approval: 5
+- Actual module entries added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- `teamIdStatuses` changed: 0
+- Firestore writes: 0
+- non-dry seed: 0
+- `--write`: 0
+- API calls: 0
+- deploy: 0
+- `seedable: true` changes: 0
+- `reilac_shiga` included: no
+- Batch 6 created: no
+
+Preparation policy:
+
+- This is docs-only preparation review.
+- Target module candidates below are documentation-only candidates and are not actual file writes.
+- All five Batch 5 rows still require separate exact diff plan and separate module entry approval before any `j2Teams.js` or `j3Teams.js` module entry is created.
+- `sc_sagamihara` is the only Batch 5 `j3Teams.js` candidate.
+- `thespa_gunma`, `iwaki_fc`, `rb_omiya_ardija`, and `hokkaido_consadole_sapporo` are Batch 5 `j2Teams.js` candidates.
+- Keep `seedable` as `no` until separate confirmed module entry approval and later seed approval are completed.
+- Keep season membership separate from stable team master data.
+- Lookup source league names are API evidence for stable club identity only. They do not imply 2026 J2 / J3 special competition membership or permanent division membership.
+- `reilac_shiga` remains excluded until continuity approval is completed.
+
+| candidate internal team id | club nameJa | API raw team name | externalTeamId | logoUrl | lookup source | per-club review status | module entry preparation status | target module candidate | notes |
+|---|---|---|---|---|---|---|---|---|---|
+| `sc_sagamihara` | `ＳＣ相模原` | `Sagamihara` | `4324` | `https://media.api-sports.io/football/teams/4324.png` | `J3 2024 / 100` | `approved-for-module-entry-candidate` | `ready-for-separate-module-entry-approval` | `j3Teams.js` candidate | API raw name omits `SC`; name variance reviewed; no file write yet |
+| `thespa_gunma` | `ザスパ群馬` | `Thespakusatsu Gunma` | `756` | `https://media.api-sports.io/football/teams/756.png` | `J2 2024 / 99` | `approved-for-module-entry-candidate` | `ready-for-separate-module-entry-approval` | `j2Teams.js` candidate | API raw name uses older / longer form; name variance reviewed; no file write yet |
+| `iwaki_fc` | `いわきＦＣ` | `Iwaki` | `7127` | `https://media.api-sports.io/football/teams/7127.png` | `J2 2024 / 99` | `approved-for-module-entry-candidate` | `ready-for-separate-module-entry-approval` | `j2Teams.js` candidate | API raw name omits `FC`; name variance reviewed; no file write yet |
+| `rb_omiya_ardija` | `ＲＢ大宮アルディージャ` | `Omiya Ardija` | `313` | `https://media.api-sports.io/football/teams/313.png` | `J3 2024 / 100` | `approved-for-module-entry-candidate` | `ready-for-separate-module-entry-approval` | `j2Teams.js` candidate | API raw name omits current `RB` branding; keep branding variance documented in later actual module entry source note; no file write yet |
+| `hokkaido_consadole_sapporo` | `北海道コンサドーレ札幌` | `Consadole Sapporo` | `279` | `https://media.api-sports.io/football/teams/279.png` | `J1 2024 / 98` | `approved-for-module-entry-candidate` | `ready-for-separate-module-entry-approval` | `j2Teams.js` candidate | API raw name omits `Hokkaido`; J1 lookup is stable identity evidence only; no file write yet |
+
+## Batch 5 j2Teams.js / j3Teams.js Exact Diff Plan
+
+Summary:
+
+- Batch 5 exact diff plan documented: yes
+- Planned target files:
+  - `functions/scripts/data/j2Teams.js`
+  - `functions/scripts/data/j3Teams.js`
+- Planned `j2Teams.js` entries: 4
+- Planned `j3Teams.js` entries: 1
+- Actual module entries added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- `teamIdStatuses` changed: 0
+- Firestore writes: 0
+- non-dry seed: 0
+- `--write`: 0
+- API calls: 0
+- deploy: 0
+- `seedable: true` changes: 0
+- `reilac_shiga` included: no
+- implementation status: all rows `planned-not-written`
+
+Implementation policy:
+
+- `j2Teams.js` and `j3Teams.js` are stable team master data modules, not direct 2026 J2 / J3 special competition membership data.
+- Season membership remains separate from stable team master data.
+- Do not represent 2026 J2 / J3 special competition membership directly in `j2Teams.js` or `j3Teams.js`.
+- Lookup source league names are API evidence for stable club identity only.
+- `sc_sagamihara` is the only Batch 5 `j3Teams.js` planned entry.
+- The other four Batch 5 planned entries go to `j2Teams.js`.
+- `reilac_shiga` remains excluded until continuity approval is completed.
+- Keep `seedable` as `no` until separate module entry approval and later seed approval are completed.
+- Do not run Firestore write or non-dry seed from this plan.
+
+Planned `j3Teams.js` entries:
+
+| target file | candidate internal team id | nameJa | nameEn | aliases | externalTeamId | logoUrl | competitionKey candidate | source evidence | implementation status | notes |
+|---|---|---|---|---|---|---|---|---|---|---|
+| `functions/scripts/data/j3Teams.js` | `sc_sagamihara` | `ＳＣ相模原` | `SC Sagamihara` | `['相模原', 'SC相模原', 'ＳＣ相模原', 'Sagamihara', 'SC Sagamihara']` | `4324` | `https://media.api-sports.io/football/teams/4324.png` | `football_j3` | `API-SPORTS teams?league=100&season=2024 + Batch 5 j2Teams.js / j3Teams.js Exact Diff Plan` | `planned-not-written` | API raw name omits `SC`; stable club identity reviewed; no file write yet |
+
+Planned `j2Teams.js` entries:
+
+| target file | candidate internal team id | nameJa | nameEn | aliases | externalTeamId | logoUrl | competitionKey candidate | source evidence | implementation status | notes |
+|---|---|---|---|---|---|---|---|---|---|---|
+| `functions/scripts/data/j2Teams.js` | `thespa_gunma` | `ザスパ群馬` | `Thespa Gunma` | `['群馬', 'ザスパ', 'ザスパ群馬', 'Thespa Gunma', 'Thespakusatsu Gunma']` | `756` | `https://media.api-sports.io/football/teams/756.png` | `football_j2` | `API-SPORTS teams?league=99&season=2024 + Batch 5 j2Teams.js / j3Teams.js Exact Diff Plan` | `planned-not-written` | API raw name uses older / longer form; stable club identity reviewed; no file write yet |
+| `functions/scripts/data/j2Teams.js` | `iwaki_fc` | `いわきＦＣ` | `Iwaki FC` | `['いわき', 'いわきFC', 'Iwaki', 'Iwaki FC']` | `7127` | `https://media.api-sports.io/football/teams/7127.png` | `football_j2` | `API-SPORTS teams?league=99&season=2024 + Batch 5 j2Teams.js / j3Teams.js Exact Diff Plan` | `planned-not-written` | API raw name omits `FC`; stable club identity reviewed; no file write yet |
+| `functions/scripts/data/j2Teams.js` | `rb_omiya_ardija` | `ＲＢ大宮アルディージャ` | `RB Omiya Ardija` | `['大宮', '大宮アルディージャ', 'RB大宮', 'RB Omiya Ardija', 'Omiya Ardija']` | `313` | `https://media.api-sports.io/football/teams/313.png` | `football_j2` | `API-SPORTS teams?league=100&season=2024 + Batch 5 j2Teams.js / j3Teams.js Exact Diff Plan` | `planned-not-written` | API raw name omits current `RB` branding; keep branding variance in actual module entry source note; no file write yet |
+| `functions/scripts/data/j2Teams.js` | `hokkaido_consadole_sapporo` | `北海道コンサドーレ札幌` | `Hokkaido Consadole Sapporo` | `['札幌', 'コンサドーレ', '北海道コンサドーレ札幌', 'Consadole Sapporo', 'Hokkaido Consadole Sapporo']` | `279` | `https://media.api-sports.io/football/teams/279.png` | `football_j2` | `API-SPORTS teams?league=98&season=2024 + Batch 5 j2Teams.js / j3Teams.js Exact Diff Plan` | `planned-not-written` | J1 2024 lookup is stable identity evidence only, not permanent division membership; no file write yet |
+
 ### All-Sports Season Rollover Policy
 
 - `competitionSeasonKey` is not specific to J2 / J3 2026; it is the season / tournament membership scope for all sports and all years.

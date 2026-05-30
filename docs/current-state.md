@@ -2032,6 +2032,27 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - `--write`: 0
   - API calls: 0
   - deploy: 0
+- Batch 5 module preparation and exact diff plan documented
+  - same docs-only Batch 5 module preparation and exact diff plan step
+  - Batch 5 actual module entry preparation review documented
+  - Batch 5 exact diff plan documented
+  - planned target modules:
+    - `j3Teams.js`: `sc_sagamihara`
+    - `j2Teams.js`: `thespa_gunma`, `iwaki_fc`, `rb_omiya_ardija`, `hokkaido_consadole_sapporo`
+  - planned `j2Teams.js` entries: 4
+  - planned `j3Teams.js` entries: 1
+  - actual module entries added: 0
+  - `j2Teams.js` entries added: 0
+  - `j3Teams.js` entries added: 0
+  - `teamIdStatuses` changed: 0
+  - `seedable: true` changes: 0
+  - Firestore writes: 0
+  - non-dry seed: 0
+  - `--write`: 0
+  - API calls: 0
+  - deploy: 0
+  - `reilac_shiga` included: no
+  - all rows implementation status: `planned-not-written`
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -2681,13 +2702,34 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - `--write`: 0
   - API calls: 0
   - deploy: 0
-- Next task: 次の判断段階
-  - Batch 5 approval decision reviews を commit / push する
-  - 次に Batch 5 actual module entry preparation review / exact diff plan を作る
+- Batch 5 module preparation and exact diff plan は docs-only で追加済み
+  - same docs-only Batch 5 module preparation and exact diff plan step
+  - Batch 5 actual module entry preparation review documented
+  - Batch 5 exact diff plan documented
   - planned target modules:
     - `j3Teams.js`: `sc_sagamihara`
     - `j2Teams.js`: `thespa_gunma`, `iwaki_fc`, `rb_omiya_ardija`, `hokkaido_consadole_sapporo`
-  - actual `j2Teams.js` / `j3Teams.js` entries は separate exact diff plan and approval 後のみ
+  - planned `j2Teams.js` entries: 4
+  - planned `j3Teams.js` entries: 1
+  - actual module entries added: 0
+  - `j2Teams.js` entries added: 0
+  - `j3Teams.js` entries added: 0
+  - `teamIdStatuses` changed: 0
+  - `seedable: true` changes: 0
+  - Firestore writes: 0
+  - non-dry seed: 0
+  - `--write`: 0
+  - API calls: 0
+  - deploy: 0
+  - `reilac_shiga` included: no
+  - all rows implementation status: `planned-not-written`
+- Next task: 次の判断段階
+  - Batch 5 module preparation / exact diff plan を commit / push する
+  - 次に actual `j2Teams.js` / `j3Teams.js` entries 追加を別承認で判断する
+  - actual 追加する場合:
+    - `j3Teams.js`: `sc_sagamihara`
+    - `j2Teams.js`: `thespa_gunma`, `iwaki_fc`, `rb_omiya_ardija`, `hokkaido_consadole_sapporo`
+  - actual entry 追加後に team master dry-run validation を行う
   - `teamIdStatuses` 更新は actual confirmed team module entries 後に別承認
   - `seedable: true` にはまだ進まない
   - Firestore write / non-dry seed / `--write` はまだ行わない
@@ -2696,12 +2738,12 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - all 40 rows が safe になった後に `seedable: true` を別承認で検討する
   - Firestore write / non-dry seed / `--write` は最後に別承認する
 - 次の合理的な順序
-  1. Batch 5 approval decision reviews を commit / push
-  2. Batch 5 actual module entry preparation review / exact diff plan を作る
-  3. planned target modules を維持する
+  1. Batch 5 module preparation / exact diff plan を commit / push
+  2. actual `j2Teams.js` / `j3Teams.js` entries 追加を別承認で判断する
+  3. actual 追加する場合は planned target modules を維持する
      - `j3Teams.js`: `sc_sagamihara`
      - `j2Teams.js`: `thespa_gunma`, `iwaki_fc`, `rb_omiya_ardija`, `hokkaido_consadole_sapporo`
-  4. actual `j2Teams.js` / `j3Teams.js` entries は separate exact diff plan and approval 後のみ
+  4. actual entry 追加後に team master dry-run validation を行う
   5. `teamIdStatuses` 更新は actual confirmed team module entries 後に別承認
   6. `seedable: true` にはまだ進まない
   7. Firestore write / non-dry seed / `--write` はまだ行わない
