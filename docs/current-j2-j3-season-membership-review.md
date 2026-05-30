@@ -3075,6 +3075,71 @@ Planned `j2Teams.js` entries:
 | `functions/scripts/data/j2Teams.js` | `rb_omiya_ardija` | `ＲＢ大宮アルディージャ` | `RB Omiya Ardija` | `['大宮', '大宮アルディージャ', 'RB大宮', 'RB Omiya Ardija', 'Omiya Ardija']` | `313` | `https://media.api-sports.io/football/teams/313.png` | `football_j2` | `API-SPORTS teams?league=100&season=2024 + Batch 5 j2Teams.js / j3Teams.js Exact Diff Plan` | `planned-not-written` | API raw name omits current `RB` branding; keep branding variance in actual module entry source note; no file write yet |
 | `functions/scripts/data/j2Teams.js` | `hokkaido_consadole_sapporo` | `北海道コンサドーレ札幌` | `Hokkaido Consadole Sapporo` | `['札幌', 'コンサドーレ', '北海道コンサドーレ札幌', 'Consadole Sapporo', 'Hokkaido Consadole Sapporo']` | `279` | `https://media.api-sports.io/football/teams/279.png` | `football_j2` | `API-SPORTS teams?league=98&season=2024 + Batch 5 j2Teams.js / j3Teams.js Exact Diff Plan` | `planned-not-written` | J1 2024 lookup is stable identity evidence only, not permanent division membership; no file write yet |
 
+### Batch 5 teamIdStatuses Exact Diff Plan
+
+Summary:
+
+- Batch 5 `teamIdStatuses` exact diff plan documented: yes
+- target data module:
+  - `functions/scripts/data/competitionSeasonMemberships.js`
+- target competitionSeasonKey:
+  - `football_j2_j3_2026_hyakunen`
+- planned `teamIdStatuses` updates: 5
+- actual `teamIdStatuses` changed: 0
+- actual data module entries changed: 0
+- `seedable: true` changes: 0
+- Firestore writes: 0
+- non-dry seed: 0
+- `--write`: 0
+- API calls: 0
+- deploy: 0
+- `reilac_shiga` included: no
+- implementation status: all rows `planned-not-written`
+- expected confirmed team references after actual update: 25
+- expected blocked/unconfirmed rows after actual update: 15
+- `football_j2_j3_2026_hyakunen` remains `status: review` / `seedable: false`
+- All-Sports Season Rollover Policy remains unchanged
+
+Planned status changes:
+
+| teamId | current status | planned status | reason | required precondition | implementation status |
+|---|---|---|---|---|---|
+| `sc_sagamihara` | `candidate_not_confirmed` | `confirmed_team_master` | Batch 5 actual `j3Teams.js` confirmed module entry exists | `sc_sagamihara` exists in `functions/scripts/data/j3Teams.js` with `status: 'confirmed'` | `planned-not-written` |
+| `thespa_gunma` | `candidate_not_confirmed` | `confirmed_team_master` | Batch 5 actual `j2Teams.js` confirmed module entry exists | `thespa_gunma` exists in `functions/scripts/data/j2Teams.js` with `status: 'confirmed'` | `planned-not-written` |
+| `iwaki_fc` | `candidate_not_confirmed` | `confirmed_team_master` | Batch 5 actual `j2Teams.js` confirmed module entry exists | `iwaki_fc` exists in `functions/scripts/data/j2Teams.js` with `status: 'confirmed'` | `planned-not-written` |
+| `rb_omiya_ardija` | `candidate_not_confirmed` | `confirmed_team_master` | Batch 5 actual `j2Teams.js` confirmed module entry exists | `rb_omiya_ardija` exists in `functions/scripts/data/j2Teams.js` with `status: 'confirmed'` | `planned-not-written` |
+| `hokkaido_consadole_sapporo` | `candidate_not_confirmed` | `confirmed_team_master` | Batch 5 actual `j2Teams.js` confirmed module entry exists | `hokkaido_consadole_sapporo` exists in `functions/scripts/data/j2Teams.js` with `status: 'confirmed'` | `planned-not-written` |
+
+Validation expectation after future actual update:
+
+- `node --check functions/scripts/data/competitionSeasonMemberships.js`: PASS
+- `node functions/scripts/verifyCompetitionSeasonMemberships.js --dry-run`: PASS
+  - checked seasons: 1
+  - checked groups: 4
+  - checked membership teamIds: 40
+  - confirmed team references: 25
+  - blocked/unconfirmed rows: 15
+- `node functions/scripts/verifyCompetitionSeasonMemberships.js --dry-run --season football_j2_j3_2026_hyakunen`: PASS
+  - same expected values
+- `node functions/scripts/seedCompetitionSeasonMemberships.js --dry-run`: PASS
+  - seedable seasons: 0
+  - skipped non-seedable seasons: 1
+  - write candidates: 0
+  - written seasons: 0
+- `node functions/scripts/seedCompetitionSeasonMemberships.js --dry-run --season football_j2_j3_2026_hyakunen`: PASS
+  - same expected values
+- `npm --prefix functions run build`: PASS
+- `flutter analyze --no-pub`: No issues found
+
+Policy notes:
+
+- This plan does not make the season seedable.
+- `football_j2_j3_2026_hyakunen` must remain `status: review` / `seedable: false`.
+- `reilac_shiga` remains `blocked_continuity`.
+- Remaining unconfirmed / blocked rows still prevent seedability.
+- Firestore write / non-dry seed / `--write` remains deferred.
+- Actual `teamIdStatuses` update requires separate approval after this docs-only plan is committed.
+
 ### All-Sports Season Rollover Policy
 
 - `competitionSeasonKey` is not specific to J2 / J3 2026; it is the season / tournament membership scope for all sports and all years.
