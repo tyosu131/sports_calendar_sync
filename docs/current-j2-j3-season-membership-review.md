@@ -3173,6 +3173,217 @@ Summary:
 | `fc_imabari` | `ＦＣ今治` | `Imabari` | `10075` | `https://media.api-sports.io/football/teams/10075.png` | `J3 2024 / 100` | `name-variance-reviewed` | `approval-ready-after-variance-review` | `not-approved-yet` | `j3Teams.js` candidate | API raw name omits `FC`; stable club identity should be reviewed in per-club decision before module entry |
 | `kamatamare_sanuki` | `カマタマーレ讃岐` | `Kamatamare Sanuki` | `317` | `https://media.api-sports.io/football/teams/317.png` | `J3 2024 / 100` | `direct-or-near-direct` | `approval-ready` | `not-approved-yet` | `j3Teams.js` candidate | API evidence is stable club identity evidence only; seedable remains no |
 
+## Per-Club Approval Decision Review - ac_nagano_parceiro
+
+Summary:
+
+- Approval decision review documented: yes
+- Reviewed club: `ac_nagano_parceiro`
+- Review result: `approved-for-module-entry-candidate`
+- Actual module entry added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- `teamIdStatuses` changed: 0
+- Firestore writes: 0
+- non-dry seed: 0
+- `--write`: 0
+- API calls: 0
+- deploy: 0
+- Seedable rows changed: 0
+- Batch 6 table changed: no
+
+| check | review note | result |
+|---|---|---|
+| candidate internal team id | `ac_nagano_parceiro` matches the Batch 6 candidate row for `ＡＣ長野パルセイロ`. | pass |
+| API raw team name | `Parceiro Nagano` from `J3 2024 / 100` evidence. | pass |
+| externalTeamId | `4323` | pass |
+| logoUrl | `https://media.api-sports.io/football/teams/4323.png` | pass |
+| name variance review | API raw name differs in order and omits `AC`. | pass |
+| existing confirmed team ID collision | No existing confirmed J1 / J2 / J3 stable team ID collision is documented for this candidate. | pass |
+| season membership separation | API lookup evidence is stable club identity evidence only, not 2026 J2 / J3 special membership or permanent division membership approval. | pass |
+| duplicate `/teams/{id}` policy | Use the stable `/teams/{id}` only after separate actual module entry approval; do not duplicate club docs by division or season. | pass |
+| target module candidate | `j3Teams.js` | pass |
+
+Decision note:
+
+- `ac_nagano_parceiro` may move forward as an `approved-for-module-entry-candidate` in documentation.
+- This is not an actual `approved-for-module-entry` file change.
+- Do not add `ac_nagano_parceiro` to `j2Teams.js` or `j3Teams.js` from this review alone.
+- Keep `seedable` as `no` until a separate confirmed module entry approval and later seed approval are completed.
+
+## Per-Club Approval Decision Review - zweigen_kanazawa
+
+Summary:
+
+- Approval decision review documented: yes
+- Reviewed club: `zweigen_kanazawa`
+- Review result: `approved-for-module-entry-candidate`
+- Actual module entry added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- `teamIdStatuses` changed: 0
+- Firestore writes: 0
+- non-dry seed: 0
+- `--write`: 0
+- API calls: 0
+- deploy: 0
+- Seedable rows changed: 0
+- Batch 6 table changed: no
+
+| check | review note | result |
+|---|---|---|
+| candidate internal team id | `zweigen_kanazawa` matches the Batch 6 candidate row for `ツエーゲン金沢`. | pass |
+| API raw team name | `Kanazawa` from `J3 2024 / 100` evidence. | pass |
+| externalTeamId | `300` | pass |
+| logoUrl | `https://media.api-sports.io/football/teams/300.png` | pass |
+| name variance review | API raw name is shortened. | pass |
+| existing confirmed team ID collision | No existing confirmed J1 / J2 / J3 stable team ID collision is documented for this candidate. | pass |
+| season membership separation | API lookup evidence is stable club identity evidence only, not 2026 J2 / J3 special membership or permanent division membership approval. | pass |
+| duplicate `/teams/{id}` policy | Use the stable `/teams/{id}` only after separate actual module entry approval; do not duplicate club docs by division or season. | pass |
+| target module candidate | `j3Teams.js` | pass |
+
+Decision note:
+
+- `zweigen_kanazawa` may move forward as an `approved-for-module-entry-candidate` in documentation.
+- This is not an actual `approved-for-module-entry` file change.
+- Do not add `zweigen_kanazawa` to `j2Teams.js` or `j3Teams.js` from this review alone.
+- Keep `seedable` as `no` until a separate confirmed module entry approval and later seed approval are completed.
+
+## Per-Club Approval Decision Review - fc_osaka
+
+Summary:
+
+- Approval decision review documented: yes
+- Reviewed club: `fc_osaka`
+- Review result: `approved-for-module-entry-candidate`
+- Actual module entry added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- `teamIdStatuses` changed: 0
+- Firestore writes: 0
+- non-dry seed: 0
+- `--write`: 0
+- API calls: 0
+- deploy: 0
+- Seedable rows changed: 0
+- Batch 6 table changed: no
+
+| check | review note | result |
+|---|---|---|
+| candidate internal team id | `fc_osaka` matches the Batch 6 candidate row for `ＦＣ大阪`. | pass |
+| API raw team name | `Osaka` from `J3 2024 / 100` evidence. | pass |
+| externalTeamId | `7138` | pass |
+| logoUrl | `https://media.api-sports.io/football/teams/7138.png` | pass |
+| name variance review | API raw name omits `FC`. | pass |
+| existing confirmed team ID collision | No existing confirmed J1 / J2 / J3 stable team ID collision is documented for this candidate. | pass |
+| season membership separation | API lookup evidence is stable club identity evidence only, not 2026 J2 / J3 special membership or permanent division membership approval. | pass |
+| duplicate `/teams/{id}` policy | Use the stable `/teams/{id}` only after separate actual module entry approval; do not duplicate club docs by division or season. | pass |
+| target module candidate | `j3Teams.js` | pass |
+
+Decision note:
+
+- `fc_osaka` may move forward as an `approved-for-module-entry-candidate` in documentation.
+- This is not an actual `approved-for-module-entry` file change.
+- Do not add `fc_osaka` to `j2Teams.js` or `j3Teams.js` from this review alone.
+- Keep `seedable` as `no` until a separate confirmed module entry approval and later seed approval are completed.
+
+## Per-Club Approval Decision Review - fc_imabari
+
+Summary:
+
+- Approval decision review documented: yes
+- Reviewed club: `fc_imabari`
+- Review result: `approved-for-module-entry-candidate`
+- Actual module entry added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- `teamIdStatuses` changed: 0
+- Firestore writes: 0
+- non-dry seed: 0
+- `--write`: 0
+- API calls: 0
+- deploy: 0
+- Seedable rows changed: 0
+- Batch 6 table changed: no
+
+| check | review note | result |
+|---|---|---|
+| candidate internal team id | `fc_imabari` matches the Batch 6 candidate row for `ＦＣ今治`. | pass |
+| API raw team name | `Imabari` from `J3 2024 / 100` evidence. | pass |
+| externalTeamId | `10075` | pass |
+| logoUrl | `https://media.api-sports.io/football/teams/10075.png` | pass |
+| name variance review | API raw name omits `FC`. | pass |
+| existing confirmed team ID collision | No existing confirmed J1 / J2 / J3 stable team ID collision is documented for this candidate. | pass |
+| season membership separation | API lookup evidence is stable club identity evidence only, not 2026 J2 / J3 special membership or permanent division membership approval. | pass |
+| duplicate `/teams/{id}` policy | Use the stable `/teams/{id}` only after separate actual module entry approval; do not duplicate club docs by division or season. | pass |
+| target module candidate | `j3Teams.js` | pass |
+
+Decision note:
+
+- `fc_imabari` may move forward as an `approved-for-module-entry-candidate` in documentation.
+- This is not an actual `approved-for-module-entry` file change.
+- Do not add `fc_imabari` to `j2Teams.js` or `j3Teams.js` from this review alone.
+- Keep `seedable` as `no` until a separate confirmed module entry approval and later seed approval are completed.
+
+## Per-Club Approval Decision Review - kamatamare_sanuki
+
+Summary:
+
+- Approval decision review documented: yes
+- Reviewed club: `kamatamare_sanuki`
+- Review result: `approved-for-module-entry-candidate`
+- Actual module entry added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- `teamIdStatuses` changed: 0
+- Firestore writes: 0
+- non-dry seed: 0
+- `--write`: 0
+- API calls: 0
+- deploy: 0
+- Seedable rows changed: 0
+- Batch 6 table changed: no
+
+| check | review note | result |
+|---|---|---|
+| candidate internal team id | `kamatamare_sanuki` matches the Batch 6 candidate row for `カマタマーレ讃岐`. | pass |
+| API raw team name | `Kamatamare Sanuki` from `J3 2024 / 100` evidence. | pass |
+| externalTeamId | `317` | pass |
+| logoUrl | `https://media.api-sports.io/football/teams/317.png` | pass |
+| name variance review | none / direct-or-near-direct. | pass |
+| existing confirmed team ID collision | No existing confirmed J1 / J2 / J3 stable team ID collision is documented for this candidate. | pass |
+| season membership separation | API lookup evidence is stable club identity evidence only, not 2026 J2 / J3 special membership or permanent division membership approval. | pass |
+| duplicate `/teams/{id}` policy | Use the stable `/teams/{id}` only after separate actual module entry approval; do not duplicate club docs by division or season. | pass |
+| target module candidate | `j3Teams.js` | pass |
+
+Decision note:
+
+- `kamatamare_sanuki` may move forward as an `approved-for-module-entry-candidate` in documentation.
+- This is not an actual `approved-for-module-entry` file change.
+- Do not add `kamatamare_sanuki` to `j2Teams.js` or `j3Teams.js` from this review alone.
+- Keep `seedable` as `no` until a separate confirmed module entry approval and later seed approval are completed.
+
+### Batch 6 Completion Note
+
+- Batch 6 individual reviews completed: 5 / 5
+- Batch 6 approved-for-module-entry-candidate rows: 5
+- approved rows:
+  - `ac_nagano_parceiro`
+  - `zweigen_kanazawa`
+  - `fc_osaka`
+  - `fc_imabari`
+  - `kamatamare_sanuki`
+- Actual module entries added: 0
+- `teamIdStatuses` changed: 0
+- `seedable: true` changes: 0
+- Firestore writes: 0
+- non-dry seed: 0
+- `--write`: 0
+- API calls: 0
+- deploy: 0
+- `reilac_shiga` included: no
+- next step: Batch 6 actual module entry preparation review / exact diff plan
+
 ### All-Sports Season Rollover Policy
 
 - `competitionSeasonKey` is not specific to J2 / J3 2026; it is the season / tournament membership scope for all sports and all years.
