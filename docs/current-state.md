@@ -1862,6 +1862,53 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - expected blocked/unconfirmed rows after actual update: 20
   - `football_j2_j3_2026_hyakunen` remains `status: review` / `seedable: false`
   - All-Sports Season Rollover Policy remains unchanged
+- J2 / J3 Batch 4 teamIdStatuses actual update completed
+  - commit: `7793529 Update J2 J3 batch 4 teamIdStatuses`
+  - updated
+    - `functions/scripts/data/competitionSeasonMemberships.js`
+  - actual `teamIdStatuses` changed: 5
+  - changed rows:
+    - `tokushima_vortis`: `candidate_not_confirmed` -> `confirmed_team_master`
+    - `albirex_niigata`: `candidate_not_confirmed` -> `confirmed_team_master`
+    - `kochi_united`: `candidate_not_confirmed` -> `confirmed_team_master`
+    - `ehime_fc`: `candidate_not_confirmed` -> `confirmed_team_master`
+    - `nara_club`: `candidate_not_confirmed` -> `confirmed_team_master`
+  - confirmed team references after update: 20
+  - blocked/unconfirmed rows after update: 20
+  - `football_j2_j3_2026_hyakunen` status: `review`
+  - `football_j2_j3_2026_hyakunen` seedable: false
+  - `reilac_shiga`: `blocked_continuity`
+  - `seedable: true` changes: 0
+  - Firestore writes: 0
+  - non-dry seed: 0
+  - `--write`: 0
+  - API calls: 0
+  - API sync: 0
+  - deploy: 0
+  - additional API call: 0
+  - validation
+    - `node --check functions/scripts/data/competitionSeasonMemberships.js`: PASS
+    - `node functions/scripts/verifyCompetitionSeasonMemberships.js --dry-run`: PASS
+      - checked seasons: 1
+      - checked groups: 4
+      - checked membership teamIds: 40
+      - confirmed team references: 20
+      - blocked/unconfirmed rows: 20
+    - `node functions/scripts/verifyCompetitionSeasonMemberships.js --dry-run --season football_j2_j3_2026_hyakunen`: PASS
+      - same expected values
+    - `node functions/scripts/seedCompetitionSeasonMemberships.js --dry-run`: PASS
+      - mode: dry-run
+      - checked seasons: 1
+      - seedable seasons: 0
+      - skipped non-seedable seasons: 1
+      - write candidates: 0
+      - written seasons: 0
+      - Firestore will not be written
+    - `node functions/scripts/seedCompetitionSeasonMemberships.js --dry-run --season football_j2_j3_2026_hyakunen`: PASS
+      - same expected values
+    - `npm --prefix functions run build`: PASS
+    - `flutter analyze --no-pub`: No issues found
+    - forbidden file scan output: none
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -2376,34 +2423,60 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - expected blocked/unconfirmed rows after actual update: 20
   - `football_j2_j3_2026_hyakunen` remains `status: review` / `seedable: false`
   - All-Sports Season Rollover Policy remains unchanged
+- J2 / J3 Batch 4 teamIdStatuses actual update は完了済み
+  - commit: `7793529 Update J2 J3 batch 4 teamIdStatuses`
+  - updated: `functions/scripts/data/competitionSeasonMemberships.js`
+  - actual `teamIdStatuses` changed: 5
+  - changed rows:
+    - `tokushima_vortis`: `candidate_not_confirmed` -> `confirmed_team_master`
+    - `albirex_niigata`: `candidate_not_confirmed` -> `confirmed_team_master`
+    - `kochi_united`: `candidate_not_confirmed` -> `confirmed_team_master`
+    - `ehime_fc`: `candidate_not_confirmed` -> `confirmed_team_master`
+    - `nara_club`: `candidate_not_confirmed` -> `confirmed_team_master`
+  - confirmed team references after update: 20
+  - blocked/unconfirmed rows after update: 20
+  - `football_j2_j3_2026_hyakunen` status: `review`
+  - `football_j2_j3_2026_hyakunen` seedable: false
+  - `reilac_shiga`: `blocked_continuity`
+  - `seedable: true` changes: 0
+  - Firestore writes / non-dry seed / `--write` / API calls / API sync / deploy / additional API call: 0
+  - validation
+    - `node --check functions/scripts/data/competitionSeasonMemberships.js`: PASS
+    - season membership verify dry-run: PASS
+      - checked seasons: 1
+      - checked groups: 4
+      - checked membership teamIds: 40
+      - confirmed team references: 20
+      - blocked/unconfirmed rows: 20
+    - season membership seed preparation dry-run: PASS
+      - seedable seasons: 0
+      - write candidates: 0
+      - written seasons: 0
+    - `npm --prefix functions run build`: PASS
+    - `flutter analyze --no-pub`: No issues found
+    - forbidden file scan output: none
 - Next task: 次の判断段階
-  - Batch 4 `teamIdStatuses` exact diff plan を commit / push する
-  - 次に actual `competitionSeasonMemberships.js` `teamIdStatuses` update を別承認で判断する
-  - actual update する場合は Batch 4 の5件を `confirmed_team_master` にする
-    - `tokushima_vortis`
-    - `albirex_niigata`
-    - `ehime_fc`
-    - `kochi_united`
-    - `nara_club`
-  - actual update 後に dry-run validation を行う
+  - Batch 4 `teamIdStatuses` actual update の current-state 反映を commit / push する
+  - 次に clean state で post-update validation を再実行する
+  - その後、remaining `candidate_not_confirmed` rows の次 batch を検討する
   - `seedable: true` にはまだ進まない
   - Firestore write / non-dry seed / `--write` はまだ行わない
   - `reilac_shiga` / `Biwako Shiga` continuity approval は別タスク
   - future next-season candidate generation script は別設計で検討する
   - `football_j2_j3_2026_hyakunen` は `status: review` / `seedable: false` のまま維持
   - All-Sports Season Rollover Policy remains unchanged
-  - local validation / seed preparation dry-run は PASS したが Firestore seed approval ではない
+  - all 40 rows が safe になった後に `seedable: true` を別承認で検討する
+  - Firestore write / non-dry seed / `--write` は最後に別承認する
 - 次の合理的な順序
-  1. Batch 4 `teamIdStatuses` exact diff plan を commit / push
-  2. actual `competitionSeasonMemberships.js` `teamIdStatuses` update を別承認で判断
-  3. actual update する場合は Batch 4 の5件を `confirmed_team_master` にする
-  4. actual update 後に dry-run validation を行う
-  5. `seedable: true` にはまだ進まない
-  6. Firestore write / non-dry seed / `--write` はまだ行わない
-  7. `reilac_shiga` / `Biwako Shiga` continuity approval は別タスク
-  8. future next-season candidate generation script は別設計で検討
-  9. all 40 rows が safe になった後に `seedable: true` を別承認で検討
-  10. Firestore write / non-dry seed / `--write` は最後に別承認
+  1. Batch 4 `teamIdStatuses` actual update の current-state 反映を commit / push
+  2. clean state で post-update validation を再実行
+  3. remaining `candidate_not_confirmed` rows の次 batch を検討
+  4. `seedable: true` にはまだ進まない
+  5. Firestore write / non-dry seed / `--write` はまだ行わない
+  6. `reilac_shiga` / `Biwako Shiga` continuity approval は別タスク
+  7. future next-season candidate generation script は別設計で検討
+  8. all 40 rows が safe になった後に `seedable: true` を別承認で検討
+  9. Firestore write / non-dry seed / `--write` は最後に別承認
 - まだ Firestore write / non-dry seed / `--write` には進まない
 - Do not use bulk approval for Batch 1 or future batches
 - Keep `reilac_shiga` / `Biwako Shiga` excluded from seedable / confirmed entry candidates until continuity approval is completed
