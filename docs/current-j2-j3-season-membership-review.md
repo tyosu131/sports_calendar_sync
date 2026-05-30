@@ -2710,11 +2710,32 @@ Summary:
 
 | candidate internal team id | club nameJa | API raw team name | externalTeamId | logoUrl | lookup source | variance status | recommended approval state | approval decision | target module candidate | notes |
 |---|---|---|---|---|---|---|---|---|---|---|
-| `sc_sagamihara` | `ＳＣ相模原` | `SC Sagamihara` | `4320` | `https://media.api-sports.io/football/teams/4320.png` | `J3 2024 / 100` | `direct-or-near-direct` | `approval-ready` | `not-approved-yet` | `j3Teams.js` candidate | Stable club identity candidate only; not season seed data |
+| `sc_sagamihara` | `ＳＣ相模原` | `Sagamihara` | `4324` | `https://media.api-sports.io/football/teams/4324.png` | `J3 2024 / 100` | `name-variance-reviewed` | `approval-ready-after-variance-review` | `not-approved-yet` | `j3Teams.js` candidate | API raw name omits SC; stable club identity should be reviewed in per-club decision before module entry |
 | `thespa_gunma` | `ザスパ群馬` | `Thespakusatsu Gunma` | `302` | `https://media.api-sports.io/football/teams/302.png` | `J2 2024 / 99` | `name-variance-reviewed` | `approval-ready-after-variance-review` | `not-approved-yet` | `j2Teams.js` candidate | API raw name uses older / variant form; stable club identity should be reviewed in per-club decision before module entry |
 | `iwaki_fc` | `いわきＦＣ` | `Iwaki` | `7017` | `https://media.api-sports.io/football/teams/7017.png` | `J2 2024 / 99` | `name-variance-reviewed` | `approval-ready-after-variance-review` | `not-approved-yet` | `j2Teams.js` candidate | API raw name omits `FC`; stable club identity should be reviewed in per-club decision before module entry |
 | `rb_omiya_ardija` | `ＲＢ大宮アルディージャ` | `Omiya Ardija` | `294` | `https://media.api-sports.io/football/teams/294.png` | `J3 2024 / 100` | `name-variance-reviewed` | `approval-ready-after-variance-review` | `not-approved-yet` | `j2Teams.js` candidate | Current official-facing name includes `RB`; API raw name is older / shorter evidence and requires per-club decision review before module entry |
 | `hokkaido_consadole_sapporo` | `北海道コンサドーレ札幌` | `Consadole Sapporo` | `289` | `https://media.api-sports.io/football/teams/289.png` | `J1 2024 / 98` | `name-variance-reviewed` | `approval-ready-after-variance-review` | `not-approved-yet` | `j2Teams.js` candidate | API raw name omits `Hokkaido`; J1 2024 lookup is stable identity evidence only, not permanent division membership |
+
+Correction note:
+
+- Batch 5 correction documented: yes
+- corrected candidate: `sc_sagamihara`
+- corrected field values:
+  - API raw team name: `Sagamihara`
+  - externalTeamId: `4324`
+  - logoUrl: `https://media.api-sports.io/football/teams/4324.png`
+  - variance status: `name-variance-reviewed`
+  - recommended approval state: `approval-ready-after-variance-review`
+- reason:
+  - align Batch 5 candidate list with existing API-SPORTS Verification Tracker
+- actual module entries added: 0
+- `teamIdStatuses` changed: 0
+- `seedable: true` changes: 0
+- Firestore writes: 0
+- non-dry seed: 0
+- `--write`: 0
+- API calls: 0
+- deploy: 0
 
 Policy notes:
 

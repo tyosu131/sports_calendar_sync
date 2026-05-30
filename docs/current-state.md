@@ -1981,6 +1981,20 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - bulk approval: no
   - `football_j2_j3_2026_hyakunen` remains `status: review` / `seedable: false`
   - All-Sports Season Rollover Policy remains unchanged
+- Batch 5 `sc_sagamihara` candidate evidence correction documented
+  - corrected from temporary incorrect Batch 5 row values to existing API-SPORTS Verification Tracker values
+  - corrected externalTeamId: `4324`
+  - corrected logoUrl: `https://media.api-sports.io/football/teams/4324.png`
+  - corrected API raw team name: `Sagamihara`
+  - `sc_sagamihara` is treated as a name variance reviewed row
+  - actual module entries added: 0
+  - `teamIdStatuses` changed: 0
+  - `seedable: true` changes: 0
+  - Firestore writes: 0
+  - non-dry seed: 0
+  - `--write`: 0
+  - API calls: 0
+  - deploy: 0
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -2579,9 +2593,24 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - bulk approval: no
   - `football_j2_j3_2026_hyakunen` remains `status: review` / `seedable: false`
   - All-Sports Season Rollover Policy remains unchanged
+- Batch 5 `sc_sagamihara` candidate evidence correction は docs-only で追加済み
+  - corrected from temporary incorrect Batch 5 row values to existing API-SPORTS Verification Tracker values
+  - corrected externalTeamId: `4324`
+  - corrected logoUrl: `https://media.api-sports.io/football/teams/4324.png`
+  - corrected API raw team name: `Sagamihara`
+  - `sc_sagamihara` is treated as a name variance reviewed row
+  - actual module entries added: 0
+  - `teamIdStatuses` changed: 0
+  - `seedable: true` changes: 0
+  - Firestore writes: 0
+  - non-dry seed: 0
+  - `--write`: 0
+  - API calls: 0
+  - deploy: 0
 - Next task: 次の判断段階
   - Batch 5 candidate list を commit / push する
   - 次に Batch 5 per-club approval decision review を行う
+  - `sc_sagamihara` は name variance reviewed row として扱う
   - 速度を上げる場合でも、各クラブごとに separate approval decision review section を作る
   - actual `j2Teams.js` / `j3Teams.js` entries は separate exact diff plan and approval 後のみ
   - `teamIdStatuses` 更新は actual confirmed team module entries 後に別承認
@@ -2594,15 +2623,16 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 - 次の合理的な順序
   1. Batch 5 candidate list を commit / push
   2. Batch 5 per-club approval decision review を行う
-  3. 速度を上げる場合でも、各クラブごとに separate approval decision review section を作る
-  4. actual `j2Teams.js` / `j3Teams.js` entries は separate exact diff plan and approval 後のみ
-  5. `teamIdStatuses` 更新は actual confirmed team module entries 後に別承認
-  6. `seedable: true` にはまだ進まない
-  7. Firestore write / non-dry seed / `--write` はまだ行わない
-  8. `reilac_shiga` / `Biwako Shiga` continuity approval は別タスク
-  9. future next-season candidate generation script は別設計で検討
-  10. all 40 rows が safe になった後に `seedable: true` を別承認で検討
-  11. Firestore write / non-dry seed / `--write` は最後に別承認
+  3. `sc_sagamihara` は name variance reviewed row として扱う
+  4. 速度を上げる場合でも、各クラブごとに separate approval decision review section を作る
+  5. actual `j2Teams.js` / `j3Teams.js` entries は separate exact diff plan and approval 後のみ
+  6. `teamIdStatuses` 更新は actual confirmed team module entries 後に別承認
+  7. `seedable: true` にはまだ進まない
+  8. Firestore write / non-dry seed / `--write` はまだ行わない
+  9. `reilac_shiga` / `Biwako Shiga` continuity approval は別タスク
+  10. future next-season candidate generation script は別設計で検討
+  11. all 40 rows が safe になった後に `seedable: true` を別承認で検討
+  12. Firestore write / non-dry seed / `--write` は最後に別承認
 - まだ Firestore write / non-dry seed / `--write` には進まない
 - Do not use bulk approval for Batch 1 or future batches
 - Keep `reilac_shiga` / `Biwako Shiga` excluded from seedable / confirmed entry candidates until continuity approval is completed
