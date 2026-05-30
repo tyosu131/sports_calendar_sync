@@ -79,6 +79,26 @@ const j3Teams = [
     source: 'API-SPORTS teams?league=100&season=2024 + Batch 3 j2Teams.js / j3Teams.js Exact Diff Plan',
     status: 'confirmed',
   },
+  {
+    id: 'kochi_united',
+    nameJa: '高知ユナイテッドＳＣ',
+    nameEn: 'Kochi United',
+    aliases: ['高知', '高知ユナイテッド', 'Kochi United'],
+    externalTeamId: 7129,
+    logoUrl: 'https://media.api-sports.io/football/teams/7129.png',
+    source: 'API-SPORTS teams?league=497&season=2024 + Batch 4 j2Teams.js / j3Teams.js Exact Diff Plan',
+    status: 'confirmed',
+  },
+  {
+    id: 'nara_club',
+    nameJa: '奈良クラブ',
+    nameEn: 'Nara Club',
+    aliases: ['奈良', '奈良クラブ', 'Nara Club'],
+    externalTeamId: 7135,
+    logoUrl: 'https://media.api-sports.io/football/teams/7135.png',
+    source: 'API-SPORTS teams?league=100&season=2024 + Batch 4 j2Teams.js / j3Teams.js Exact Diff Plan',
+    status: 'confirmed',
+  },
 ];
 
 /**

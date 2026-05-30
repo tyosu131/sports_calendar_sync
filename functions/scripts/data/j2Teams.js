@@ -129,6 +129,36 @@ const j2Teams = [
     source: 'API-SPORTS teams?league=98&season=2024 + Batch 3 j2Teams.js / j3Teams.js Exact Diff Plan',
     status: 'confirmed',
   },
+  {
+    id: 'tokushima_vortis',
+    nameJa: '徳島ヴォルティス',
+    nameEn: 'Tokushima Vortis',
+    aliases: ['徳島', 'ヴォルティス', 'Tokushima Vortis'],
+    externalTeamId: 299,
+    logoUrl: 'https://media.api-sports.io/football/teams/299.png',
+    source: 'API-SPORTS teams?league=99&season=2024 + Batch 4 j2Teams.js / j3Teams.js Exact Diff Plan',
+    status: 'confirmed',
+  },
+  {
+    id: 'albirex_niigata',
+    nameJa: 'アルビレックス新潟',
+    nameEn: 'Albirex Niigata',
+    aliases: ['新潟', 'アルビレックス', 'Albirex Niigata'],
+    externalTeamId: 311,
+    logoUrl: 'https://media.api-sports.io/football/teams/311.png',
+    source: 'API-SPORTS teams?league=98&season=2024 + Batch 4 j2Teams.js / j3Teams.js Exact Diff Plan',
+    status: 'confirmed',
+  },
+  {
+    id: 'ehime_fc',
+    nameJa: '愛媛ＦＣ',
+    nameEn: 'Ehime FC',
+    aliases: ['愛媛', '愛媛FC', 'Ehime FC'],
+    externalTeamId: 318,
+    logoUrl: 'https://media.api-sports.io/football/teams/318.png',
+    source: 'API-SPORTS teams?league=99&season=2024 + Batch 4 j2Teams.js / j3Teams.js Exact Diff Plan',
+    status: 'confirmed',
+  },
 ];
 
 /**
