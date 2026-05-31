@@ -2556,6 +2556,36 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - current blocked/unconfirmed rows remains: 10
   - `football_j2_j3_2026_hyakunen` remains `status: review` / `seedable: false`
   - All-Sports Season Rollover Policy remains unchanged
+- Batch 7 approval decision reviews completed
+  - Batch 7 individual reviews completed: 5 / 5
+  - all five results: `approved-for-module-entry-candidate`
+  - reviewed clubs:
+    - `tegevajaro_miyazaki`
+    - `sagan_tosu`
+    - `kagoshima_united`
+    - `renofa_yamaguchi`
+    - `roasso_kumamoto`
+  - actual module entries added: 0
+  - `teamIdStatuses` changed: 0
+  - `seedable: true` changes: 0
+  - Firestore writes: 0
+  - current confirmed team references remains: 30
+  - current blocked/unconfirmed rows remains: 10
+- Batch 7 actual module entry preparation review documented
+  - Batch 7 exact diff plan documented
+  - planned `j2Teams.js` entries: 4
+    - `sagan_tosu`
+    - `kagoshima_united`
+    - `renofa_yamaguchi`
+    - `roasso_kumamoto`
+  - planned `j3Teams.js` entries: 1
+    - `tegevajaro_miyazaki`
+  - actual module entries added: 0
+  - `teamIdStatuses` changed: 0
+  - `seedable: true` changes: 0
+  - Firestore writes: 0
+  - current confirmed team references remains: 30
+  - current blocked/unconfirmed rows remains: 10
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -3471,25 +3501,30 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - deploy: 0
   - `reilac_shiga` included: no
 - Next task: 次の判断段階
-  - Batch 7 candidate list を commit / push する
-  - 次に Batch 7 per-club approval decision review を docs-only で行う
-  - bulk approval はしない
-  - actual module entries はまだ追加しない
-  - `teamIdStatuses` はまだ変更しない
+  - Batch 7 preparation / exact diff plan を commit / push する
+  - 次に actual `j2Teams.js` / `j3Teams.js` entries 追加を別承認で判断する
+  - planned actual additions:
+    - `j2Teams.js`: 4
+    - `j3Teams.js`: 1
+  - actual module entries 追加後の期待値:
+    - `football_j2` confirmed teams: 17 -> 21
+    - `football_j3` confirmed teams: 13 -> 14
+    - season membership confirmed team references: 30 のまま
+    - blocked/unconfirmed rows: 10 のまま
+  - `teamIdStatuses` は actual module entries 追加後に別 plan / approval で変更する
   - `seedable: true` にはまだ進まない
   - Firestore write / non-dry seed / `--write` はまだ行わない
   - `reilac_shiga` / `Biwako Shiga` continuity approval は別タスク
-  - remaining candidate rows は Batch 7 後に別 batch で扱う
 - 次の合理的な順序
-  1. Batch 7 candidate list を commit / push
-  2. Batch 7 per-club approval decision review を docs-only で行う
-  3. bulk approval はしない
-  4. actual module entries はまだ追加しない
-  5. `teamIdStatuses` はまだ変更しない
-  6. `seedable: true` にはまだ進まない
-  7. Firestore write / non-dry seed / `--write` はまだ行わない
-  8. `reilac_shiga` / `Biwako Shiga` continuity approval は別タスク
-  9. remaining candidate rows は Batch 7 後に別 batch で扱う
+  1. Batch 7 preparation / exact diff plan を commit / push
+  2. actual `j2Teams.js` / `j3Teams.js` entries 追加を別承認で判断する
+  3. planned actual additions は `j2Teams.js`: 4 / `j3Teams.js`: 1
+  4. actual module entries 追加後の期待値は `football_j2` confirmed teams 21、`football_j3` confirmed teams 14
+  5. season membership confirmed team references は30、blocked/unconfirmed rows は10のまま
+  6. `teamIdStatuses` は actual module entries 追加後に別 plan / approval で変更する
+  7. `seedable: true` にはまだ進まない
+  8. Firestore write / non-dry seed / `--write` はまだ行わない
+  9. `reilac_shiga` / `Biwako Shiga` continuity approval は別タスク
 - まだ Firestore write / non-dry seed / `--write` には進まない
 - Do not use bulk approval for Batch 1 or future batches
 - Keep `reilac_shiga` / `Biwako Shiga` excluded from seedable / confirmed entry candidates until continuity approval is completed
