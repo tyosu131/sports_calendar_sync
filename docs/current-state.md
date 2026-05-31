@@ -2487,6 +2487,49 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - expected written seasons after actual update: 0
   - `football_j2_j3_2026_hyakunen` remains `status: review` / `seedable: false`
   - All-Sports Season Rollover Policy remains unchanged
+- Batch 6 `teamIdStatuses` actual update completed
+  - commit: `7dc8c85 Update J2 J3 batch 6 teamIdStatuses`
+  - updated file:
+    - `functions/scripts/data/competitionSeasonMemberships.js`
+  - changed `teamIdStatuses`: 5
+  - changed rows:
+    - `ac_nagano_parceiro`: `candidate_not_confirmed` -> `confirmed_team_master`
+    - `zweigen_kanazawa`: `candidate_not_confirmed` -> `confirmed_team_master`
+    - `fc_osaka`: `candidate_not_confirmed` -> `confirmed_team_master`
+    - `fc_imabari`: `candidate_not_confirmed` -> `confirmed_team_master`
+    - `kamatamare_sanuki`: `candidate_not_confirmed` -> `confirmed_team_master`
+  - current confirmed team references: 30
+  - current blocked/unconfirmed rows: 10
+  - seedable seasons: 0
+  - write candidates: 0
+  - written seasons: 0
+  - `football_j2_j3_2026_hyakunen` remains `status: review` / `seedable: false`
+  - `reilac_shiga` remains `blocked_continuity`
+  - Firestore writes: 0
+  - non-dry seed: 0
+  - `--write`: 0
+  - API sync: 0
+  - deploy: 0
+  - additional API call: 0
+  - validation
+    - `node --check functions/scripts/data/competitionSeasonMemberships.js`: PASS
+    - `node functions/scripts/verifyCompetitionSeasonMemberships.js --dry-run`: PASS
+      - confirmed team references: 30
+      - blocked/unconfirmed rows: 10
+    - `node functions/scripts/verifyCompetitionSeasonMemberships.js --dry-run --season football_j2_j3_2026_hyakunen`: PASS
+      - confirmed team references: 30
+      - blocked/unconfirmed rows: 10
+    - `node functions/scripts/seedCompetitionSeasonMemberships.js --dry-run`: PASS
+      - seedable seasons: 0
+      - write candidates: 0
+      - written seasons: 0
+    - `node functions/scripts/seedCompetitionSeasonMemberships.js --dry-run --season football_j2_j3_2026_hyakunen`: PASS
+      - seedable seasons: 0
+      - write candidates: 0
+      - written seasons: 0
+    - `npm --prefix functions run build`: PASS
+    - `flutter analyze --no-pub`: No issues found
+    - final `git status --short`: clean
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -3402,37 +3445,25 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - deploy: 0
   - `reilac_shiga` included: no
 - Next task: 次の判断段階
-  - Batch 6 `teamIdStatuses` exact diff plan を commit / push する
-  - 次に actual `teamIdStatuses` update を別承認で判断する
-  - actual update 対象は5件
-    - `ac_nagano_parceiro`
-    - `zweigen_kanazawa`
-    - `fc_osaka`
-    - `fc_imabari`
-    - `kamatamare_sanuki`
-  - actual update 後の期待値:
-    - confirmed team references: 30
-    - blocked/unconfirmed rows: 10
-    - seedable seasons: 0
-    - write candidates: 0
-    - written seasons: 0
-  - `teamIdStatuses` 更新後も `seedable: true` にはまだ進まない
+  - Batch 6 `teamIdStatuses` actual update 結果の current-state 反映を commit / push する
+  - 次に clean state validation を必要なら再確認する
+  - 次の候補 batch は remaining `candidate_not_confirmed` rows から検討する
+  - 現在 remaining blocked/unconfirmed rows は10
   - Firestore write / non-dry seed / `--write` はまだ行わない
   - `reilac_shiga` / `Biwako Shiga` continuity approval は別タスク
-  - future next-season candidate generation script は別設計で検討する
+  - `seedable: true` にはまだ進まない
   - all 40 rows が safe になった後に `seedable: true` を別承認で検討する
   - Firestore write / non-dry seed / `--write` は最後に別承認する
 - 次の合理的な順序
-  1. Batch 6 `teamIdStatuses` exact diff plan を commit / push
-  2. actual `teamIdStatuses` update を別承認で判断する
-  3. actual update 対象は `ac_nagano_parceiro` / `zweigen_kanazawa` / `fc_osaka` / `fc_imabari` / `kamatamare_sanuki`
-  4. actual update 後の期待値: confirmed team references 30、blocked/unconfirmed rows 10、seedable seasons 0、write candidates 0、written seasons 0
-  5. `teamIdStatuses` 更新後も `seedable: true` にはまだ進まない
-  6. Firestore write / non-dry seed / `--write` はまだ行わない
-  7. `reilac_shiga` / `Biwako Shiga` continuity approval は別タスク
-  8. future next-season candidate generation script は別設計で検討
-  9. all 40 rows が safe になった後に `seedable: true` を別承認で検討
-  10. Firestore write / non-dry seed / `--write` は最後に別承認
+  1. Batch 6 `teamIdStatuses` actual update 結果の current-state 反映を commit / push
+  2. clean state validation を必要なら再確認する
+  3. 次の候補 batch は remaining `candidate_not_confirmed` rows から検討する
+  4. 現在 remaining blocked/unconfirmed rows は10
+  5. `reilac_shiga` / `Biwako Shiga` continuity approval は別タスク
+  6. `seedable: true` にはまだ進まない
+  7. Firestore write / non-dry seed / `--write` はまだ行わない
+  8. all 40 rows が safe になった後に `seedable: true` を別承認で検討
+  9. Firestore write / non-dry seed / `--write` は最後に別承認
 - まだ Firestore write / non-dry seed / `--write` には進まない
 - Do not use bulk approval for Batch 1 or future batches
 - Keep `reilac_shiga` / `Biwako Shiga` excluded from seedable / confirmed entry candidates until continuity approval is completed
