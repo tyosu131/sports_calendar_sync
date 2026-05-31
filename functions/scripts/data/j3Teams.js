@@ -159,6 +159,16 @@ const j3Teams = [
     source: 'API-SPORTS teams?league=100&season=2024 + Batch 6 j2Teams.js / j3Teams.js Exact Diff Plan',
     status: 'confirmed',
   },
+  {
+    id: 'tegevajaro_miyazaki',
+    nameJa: 'テゲバジャーロ宮崎',
+    nameEn: 'Tegevajaro Miyazaki',
+    aliases: ['宮崎', 'テゲバジャーロ', 'テゲバジャーロ宮崎', 'Tegevajaro Miyazaki'],
+    externalTeamId: 10409,
+    logoUrl: 'https://media.api-sports.io/football/teams/10409.png',
+    source: 'API-SPORTS teams?league=100&season=2024 + Batch 7 j2Teams.js / j3Teams.js Exact Diff Plan',
+    status: 'confirmed',
+  },
 ];
 
 /**
