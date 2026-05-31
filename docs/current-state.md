@@ -2586,6 +2586,68 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - Firestore writes: 0
   - current confirmed team references remains: 30
   - current blocked/unconfirmed rows remains: 10
+- Batch 7 actual team entries merged into main
+  - merge commit: `6b9f4b1 Merge pull request #1 from tyosu131/feature/batch-7-team-entries`
+  - feature commit: `2a5421a Add J2 J3 batch 7 team entries`
+  - merged branch: `feature/batch-7-team-entries`
+  - updated files:
+    - `functions/scripts/data/j2Teams.js`
+    - `functions/scripts/data/j3Teams.js`
+  - actual `j2Teams.js` entries added: 4
+    - `sagan_tosu`
+    - `kagoshima_united`
+    - `renofa_yamaguchi`
+    - `roasso_kumamoto`
+  - actual `j3Teams.js` entries added: 1
+    - `tegevajaro_miyazaki`
+  - current `football_j2` confirmed teams: 21
+  - current `football_j3` confirmed teams: 14
+  - current season membership confirmed team references: 30
+  - current blocked/unconfirmed rows: 10
+  - seedable seasons: 0
+  - write candidates: 0
+  - written seasons: 0
+  - `football_j2_j3_2026_hyakunen` remains `status: review` / `seedable: false`
+  - `reilac_shiga` remains `blocked_continuity`
+  - `teamIdStatuses` changed: 0
+  - `seedable: true` changes: 0
+  - Firestore writes: 0
+  - non-dry seed: 0
+  - `--write`: 0
+  - API sync: 0
+  - deploy: 0
+  - additional API call: 0
+  - validation results on main
+    - `node --check functions/scripts/data/j2Teams.js`: PASS
+    - `node --check functions/scripts/data/j3Teams.js`: PASS
+    - `node --check functions/scripts/data/competitionSeasonMemberships.js`: PASS
+    - `node functions/scripts/seedCompetitionTeams.js football_j2 --dry-run`: PASS
+      - confirmed teams: 21
+      - Firestore will not be written
+    - `node functions/scripts/verifyCompetitionTeams.js football_j2 --dry-run`: PASS
+      - confirmed teams: 21
+      - In-memory team master checks PASSED
+    - `node functions/scripts/seedCompetitionTeams.js football_j3 --dry-run`: PASS
+      - confirmed teams: 14
+      - Firestore will not be written
+    - `node functions/scripts/verifyCompetitionTeams.js football_j3 --dry-run`: PASS
+      - confirmed teams: 14
+      - In-memory team master checks PASSED
+    - `node functions/scripts/verifyCompetitionSeasonMemberships.js --dry-run`: PASS
+      - checked seasons: 1
+      - checked groups: 4
+      - checked membership teamIds: 40
+      - confirmed team references: 30
+      - blocked/unconfirmed rows: 10
+    - `node functions/scripts/seedCompetitionSeasonMemberships.js --dry-run`: PASS
+      - checked seasons: 1
+      - seedable seasons: 0
+      - skipped non-seedable seasons: 1
+      - write candidates: 0
+      - written seasons: 0
+      - Firestore will not be written
+    - `npm --prefix functions run build`: PASS
+    - `flutter analyze --no-pub`: No issues found
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -3501,30 +3563,36 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - deploy: 0
   - `reilac_shiga` included: no
 - Next task: 次の判断段階
-  - Batch 7 preparation / exact diff plan を commit / push する
-  - 次に actual `j2Teams.js` / `j3Teams.js` entries 追加を別承認で判断する
-  - planned actual additions:
-    - `j2Teams.js`: 4
-    - `j3Teams.js`: 1
-  - actual module entries 追加後の期待値:
-    - `football_j2` confirmed teams: 17 -> 21
-    - `football_j3` confirmed teams: 13 -> 14
-    - season membership confirmed team references: 30 のまま
-    - blocked/unconfirmed rows: 10 のまま
-  - `teamIdStatuses` は actual module entries 追加後に別 plan / approval で変更する
+  - Batch 7 actual entries merge result の current-state 反映を commit / push する
+  - 次に Batch 7 `teamIdStatuses` exact diff plan を docs-only で作る
+  - Batch 7 `teamIdStatuses` planned update 対象:
+    - `tegevajaro_miyazaki`
+    - `sagan_tosu`
+    - `kagoshima_united`
+    - `renofa_yamaguchi`
+    - `roasso_kumamoto`
+  - expected values after actual `teamIdStatuses` update:
+    - confirmed team references: 35
+    - blocked/unconfirmed rows: 5
+    - seedable seasons: 0
+    - write candidates: 0
+    - written seasons: 0
+  - `teamIdStatuses` actual update は exact diff plan commit 後に別承認で判断する
   - `seedable: true` にはまだ進まない
   - Firestore write / non-dry seed / `--write` はまだ行わない
   - `reilac_shiga` / `Biwako Shiga` continuity approval は別タスク
+  - remaining candidate rows は Batch 8 または continuity task で扱う
 - 次の合理的な順序
-  1. Batch 7 preparation / exact diff plan を commit / push
-  2. actual `j2Teams.js` / `j3Teams.js` entries 追加を別承認で判断する
-  3. planned actual additions は `j2Teams.js`: 4 / `j3Teams.js`: 1
-  4. actual module entries 追加後の期待値は `football_j2` confirmed teams 21、`football_j3` confirmed teams 14
-  5. season membership confirmed team references は30、blocked/unconfirmed rows は10のまま
-  6. `teamIdStatuses` は actual module entries 追加後に別 plan / approval で変更する
+  1. Batch 7 actual entries merge result の current-state 反映を commit / push
+  2. Batch 7 `teamIdStatuses` exact diff plan を docs-only で作る
+  3. planned update 対象は `tegevajaro_miyazaki` / `sagan_tosu` / `kagoshima_united` / `renofa_yamaguchi` / `roasso_kumamoto`
+  4. actual `teamIdStatuses` update 後の期待値は confirmed team references 35、blocked/unconfirmed rows 5
+  5. seedable seasons 0、write candidates 0、written seasons 0 のまま
+  6. `teamIdStatuses` actual update は exact diff plan commit 後に別承認で判断する
   7. `seedable: true` にはまだ進まない
   8. Firestore write / non-dry seed / `--write` はまだ行わない
   9. `reilac_shiga` / `Biwako Shiga` continuity approval は別タスク
+  10. remaining candidate rows は Batch 8 または continuity task で扱う
 - まだ Firestore write / non-dry seed / `--write` には進まない
 - Do not use bulk approval for Batch 1 or future batches
 - Keep `reilac_shiga` / `Biwako Shiga` excluded from seedable / confirmed entry candidates until continuity approval is completed
