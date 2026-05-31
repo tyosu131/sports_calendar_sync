@@ -2648,6 +2648,23 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
       - Firestore will not be written
     - `npm --prefix functions run build`: PASS
     - `flutter analyze --no-pub`: No issues found
+- Batch 7 `teamIdStatuses` exact diff plan documented
+  - planned `teamIdStatuses` updates: 5
+  - planned status changes:
+    - `tegevajaro_miyazaki`: `candidate_not_confirmed` -> `confirmed_team_master`
+    - `sagan_tosu`: `candidate_not_confirmed` -> `confirmed_team_master`
+    - `kagoshima_united`: `candidate_not_confirmed` -> `confirmed_team_master`
+    - `renofa_yamaguchi`: `candidate_not_confirmed` -> `confirmed_team_master`
+    - `roasso_kumamoto`: `candidate_not_confirmed` -> `confirmed_team_master`
+  - actual `teamIdStatuses` changed: 0
+  - actual data module entries changed: 0
+  - `seedable: true` changes: 0
+  - Firestore writes: 0
+  - expected confirmed team references after actual update: 35
+  - expected blocked/unconfirmed rows after actual update: 5
+  - expected seedable seasons after actual update: 0
+  - expected write candidates after actual update: 0
+  - expected written seasons after actual update: 0
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -3563,15 +3580,15 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - deploy: 0
   - `reilac_shiga` included: no
 - Next task: 次の判断段階
-  - Batch 7 actual entries merge result の current-state 反映を commit / push する
-  - 次に Batch 7 `teamIdStatuses` exact diff plan を docs-only で作る
-  - Batch 7 `teamIdStatuses` planned update 対象:
+  - Batch 7 `teamIdStatuses` exact diff plan を commit / push する
+  - 次に actual `teamIdStatuses` update を別承認で判断する
+  - actual update 対象は5件:
     - `tegevajaro_miyazaki`
     - `sagan_tosu`
     - `kagoshima_united`
     - `renofa_yamaguchi`
     - `roasso_kumamoto`
-  - expected values after actual `teamIdStatuses` update:
+  - actual update 後の期待値:
     - confirmed team references: 35
     - blocked/unconfirmed rows: 5
     - seedable seasons: 0
@@ -3583,16 +3600,15 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - `reilac_shiga` / `Biwako Shiga` continuity approval は別タスク
   - remaining candidate rows は Batch 8 または continuity task で扱う
 - 次の合理的な順序
-  1. Batch 7 actual entries merge result の current-state 反映を commit / push
-  2. Batch 7 `teamIdStatuses` exact diff plan を docs-only で作る
-  3. planned update 対象は `tegevajaro_miyazaki` / `sagan_tosu` / `kagoshima_united` / `renofa_yamaguchi` / `roasso_kumamoto`
-  4. actual `teamIdStatuses` update 後の期待値は confirmed team references 35、blocked/unconfirmed rows 5
+  1. Batch 7 `teamIdStatuses` exact diff plan を commit / push
+  2. actual `teamIdStatuses` update を別承認で判断する
+  3. actual update 対象は `tegevajaro_miyazaki` / `sagan_tosu` / `kagoshima_united` / `renofa_yamaguchi` / `roasso_kumamoto`
+  4. actual update 後の期待値は confirmed team references 35、blocked/unconfirmed rows 5
   5. seedable seasons 0、write candidates 0、written seasons 0 のまま
-  6. `teamIdStatuses` actual update は exact diff plan commit 後に別承認で判断する
-  7. `seedable: true` にはまだ進まない
-  8. Firestore write / non-dry seed / `--write` はまだ行わない
-  9. `reilac_shiga` / `Biwako Shiga` continuity approval は別タスク
-  10. remaining candidate rows は Batch 8 または continuity task で扱う
+  6. `teamIdStatuses` 更新後も `seedable: true` にはまだ進まない
+  7. Firestore write / non-dry seed / `--write` はまだ行わない
+  8. `reilac_shiga` / `Biwako Shiga` continuity approval は別タスク
+  9. remaining candidate rows は Batch 8 または continuity task で扱う
 - まだ Firestore write / non-dry seed / `--write` には進まない
 - Do not use bulk approval for Batch 1 or future batches
 - Keep `reilac_shiga` / `Biwako Shiga` excluded from seedable / confirmed entry candidates until continuity approval is completed
