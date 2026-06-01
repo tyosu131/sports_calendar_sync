@@ -4059,6 +4059,214 @@ Policy note:
 - Firestore write / non-dry seed / `--write` remains deferred.
 - `reilac_shiga` remains excluded until continuity approval is completed.
 
+## Per-Club Approval Decision Review - oita_trinita
+
+Summary:
+
+- Approval decision review documented: yes
+- Reviewed club: `oita_trinita`
+- Review result: `approved-for-module-entry-candidate`
+- Actual module entry added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- `teamIdStatuses` changed: 0
+- Firestore writes: 0
+- non-dry seed: 0
+- `--write`: 0
+- API calls: 0
+- deploy: 0
+- Seedable rows changed: 0
+- Batch 8 table changed: no
+- season membership separation: pass
+- duplicate `/teams/{id}` policy: pass
+- this is not an actual file change
+- do not add actual module entries from this review alone
+
+Review detail:
+
+- club nameJa: `大分トリニータ`
+- API raw team name: `Oita Trinita`
+- externalTeamId: `298`
+- logoUrl: `https://media.api-sports.io/football/teams/298.png`
+- lookup source: `J2 2024 / 99`
+- variance status: `direct-or-near-direct`
+- target module candidate: `j2Teams.js`
+- decision: `oita_trinita` advances docs-only to `approved-for-module-entry-candidate`.
+
+| check | review note | result |
+|---|---|---|
+| candidate internal team id | `oita_trinita` is the reviewed stable ID candidate. | pass |
+| API raw team name | `Oita Trinita` matches the candidate club identity. | pass |
+| externalTeamId | `298` is recorded as API evidence. | pass |
+| logoUrl | API logo URL for team `298` is recorded. | pass |
+| name variance review | Direct / near-direct variance is acceptable for docs-only approval candidate status. | pass |
+| existing confirmed team ID collision | No existing confirmed team ID collision is documented for this candidate. | pass |
+| season membership separation | Season membership remains separate from stable team master data. | pass |
+| duplicate `/teams/{id}` policy | No duplicate `/teams/{id}` document is created by this review. | pass |
+| target module candidate | Target module candidate is `j2Teams.js`. | pass |
+
+## Per-Club Approval Decision Review - gainare_tottori
+
+Summary:
+
+- Approval decision review documented: yes
+- Reviewed club: `gainare_tottori`
+- Review result: `approved-for-module-entry-candidate`
+- Actual module entry added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- `teamIdStatuses` changed: 0
+- Firestore writes: 0
+- non-dry seed: 0
+- `--write`: 0
+- API calls: 0
+- deploy: 0
+- Seedable rows changed: 0
+- Batch 8 table changed: no
+- season membership separation: pass
+- duplicate `/teams/{id}` policy: pass
+- this is not an actual file change
+- do not add actual module entries from this review alone
+
+Review detail:
+
+- club nameJa: `ガイナーレ鳥取`
+- API raw team name: `Gainare Tottori`
+- externalTeamId: `4319`
+- logoUrl: `https://media.api-sports.io/football/teams/4319.png`
+- lookup source: `J3 2024 / 100`
+- variance status: `direct-or-near-direct`
+- target module candidate: `j3Teams.js`
+- decision: `gainare_tottori` advances docs-only to `approved-for-module-entry-candidate`.
+
+| check | review note | result |
+|---|---|---|
+| candidate internal team id | `gainare_tottori` is the reviewed stable ID candidate. | pass |
+| API raw team name | `Gainare Tottori` matches the candidate club identity. | pass |
+| externalTeamId | `4319` is recorded as API evidence. | pass |
+| logoUrl | API logo URL for team `4319` is recorded. | pass |
+| name variance review | Direct / near-direct variance is acceptable for docs-only approval candidate status. | pass |
+| existing confirmed team ID collision | No existing confirmed team ID collision is documented for this candidate. | pass |
+| season membership separation | Season membership remains separate from stable team master data. | pass |
+| duplicate `/teams/{id}` policy | No duplicate `/teams/{id}` document is created by this review. | pass |
+| target module candidate | Target module candidate is `j3Teams.js`. | pass |
+
+## Per-Club Approval Decision Review - giravanz_kitakyushu
+
+Summary:
+
+- Approval decision review documented: yes
+- Reviewed club: `giravanz_kitakyushu`
+- Review result: `approved-for-module-entry-candidate`
+- Actual module entry added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- `teamIdStatuses` changed: 0
+- Firestore writes: 0
+- non-dry seed: 0
+- `--write`: 0
+- API calls: 0
+- deploy: 0
+- Seedable rows changed: 0
+- Batch 8 table changed: no
+- season membership separation: pass
+- duplicate `/teams/{id}` policy: pass
+- this is not an actual file change
+- do not add actual module entries from this review alone
+
+Review detail:
+
+- club nameJa: `ギラヴァンツ北九州`
+- API raw team name: `Kitakyushu`
+- externalTeamId: `805`
+- logoUrl: `https://media.api-sports.io/football/teams/805.png`
+- lookup source: `J3 2024 / 100`
+- variance status: `name-variance-reviewed`
+- variance note:
+  - API raw name is shortened to `Kitakyushu`.
+  - This variance has already been tracked as a name variance row.
+  - Treat it as acceptable stable identity evidence for docs-only module entry candidate approval.
+- target module candidate: `j3Teams.js`
+- decision: `giravanz_kitakyushu` advances docs-only to `approved-for-module-entry-candidate`.
+
+| check | review note | result |
+|---|---|---|
+| candidate internal team id | `giravanz_kitakyushu` is the reviewed stable ID candidate. | pass |
+| API raw team name | `Kitakyushu` is a shortened API raw name already handled as name variance evidence. | pass |
+| externalTeamId | `805` is recorded as API evidence. | pass |
+| logoUrl | API logo URL for team `805` is recorded. | pass |
+| name variance review | Shortened API raw name is acceptable for docs-only approval candidate status. | pass |
+| existing confirmed team ID collision | No existing confirmed team ID collision is documented for this candidate. | pass |
+| season membership separation | Season membership remains separate from stable team master data. | pass |
+| duplicate `/teams/{id}` policy | No duplicate `/teams/{id}` document is created by this review. | pass |
+| target module candidate | Target module candidate is `j3Teams.js`. | pass |
+
+## Per-Club Approval Decision Review - fc_ryukyu
+
+Summary:
+
+- Approval decision review documented: yes
+- Reviewed club: `fc_ryukyu`
+- Review result: `approved-for-module-entry-candidate`
+- Actual module entry added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- `teamIdStatuses` changed: 0
+- Firestore writes: 0
+- non-dry seed: 0
+- `--write`: 0
+- API calls: 0
+- deploy: 0
+- Seedable rows changed: 0
+- Batch 8 table changed: no
+- season membership separation: pass
+- duplicate `/teams/{id}` policy: pass
+- this is not an actual file change
+- do not add actual module entries from this review alone
+
+Review detail:
+
+- club nameJa: `ＦＣ琉球`
+- API raw team name: `FC Ryukyu`
+- externalTeamId: `2235`
+- logoUrl: `https://media.api-sports.io/football/teams/2235.png`
+- lookup source: `J3 2024 / 100`
+- variance status: `direct-or-near-direct`
+- target module candidate: `j3Teams.js`
+- decision: `fc_ryukyu` advances docs-only to `approved-for-module-entry-candidate`.
+
+| check | review note | result |
+|---|---|---|
+| candidate internal team id | `fc_ryukyu` is the reviewed stable ID candidate. | pass |
+| API raw team name | `FC Ryukyu` matches the candidate club identity. | pass |
+| externalTeamId | `2235` is recorded as API evidence. | pass |
+| logoUrl | API logo URL for team `2235` is recorded. | pass |
+| name variance review | Direct / near-direct variance is acceptable for docs-only approval candidate status. | pass |
+| existing confirmed team ID collision | No existing confirmed team ID collision is documented for this candidate. | pass |
+| season membership separation | Season membership remains separate from stable team master data. | pass |
+| duplicate `/teams/{id}` policy | No duplicate `/teams/{id}` document is created by this review. | pass |
+| target module candidate | Target module candidate is `j3Teams.js`. | pass |
+
+## Batch 8 Approval Decision Review Completion Note
+
+- Batch 8 individual reviews completed: 4 / 4
+- Batch 8 results:
+  - `oita_trinita`: `approved-for-module-entry-candidate`
+  - `gainare_tottori`: `approved-for-module-entry-candidate`
+  - `giravanz_kitakyushu`: `approved-for-module-entry-candidate`
+  - `fc_ryukyu`: `approved-for-module-entry-candidate`
+- Actual module entries added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- `teamIdStatuses` changed: 0
+- `seedable: true` changes: 0
+- Firestore writes: 0
+- current confirmed team references remains: 35
+- current blocked/unconfirmed rows remains: 5
+- `football_j2_j3_2026_hyakunen` remains `status: review` / `seedable: false`
+- `reilac_shiga` remains `blocked_continuity`
+- next step: Batch 8 actual module entry preparation review / exact diff plan
+
 ### All-Sports Season Rollover Policy
 
 - `competitionSeasonKey` is not specific to J2 / J3 2026; it is the season / tournament membership scope for all sports and all years.

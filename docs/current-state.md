@@ -2727,6 +2727,24 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - `football_j2_j3_2026_hyakunen` remains `status: review` / `seedable: false`
   - `reilac_shiga` remains `blocked_continuity`
   - `reilac_shiga` included: no
+- Batch 8 approval decision reviews completed
+  - Batch 8 individual reviews completed: 4 / 4
+  - all four results: `approved-for-module-entry-candidate`
+  - reviewed candidates:
+    - `oita_trinita`
+    - `gainare_tottori`
+    - `giravanz_kitakyushu`
+    - `fc_ryukyu`
+  - actual module entries added: 0
+  - `j2Teams.js` entries added: 0
+  - `j3Teams.js` entries added: 0
+  - `teamIdStatuses` changed: 0
+  - `seedable: true` changes: 0
+  - Firestore writes: 0
+  - current confirmed team references remains: 35
+  - current blocked/unconfirmed rows remains: 5
+  - `football_j2_j3_2026_hyakunen` remains `status: review` / `seedable: false`
+  - `reilac_shiga` remains `blocked_continuity`
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -3642,18 +3660,22 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - deploy: 0
   - `reilac_shiga` included: no
 - Next task: 次の判断段階
-  - Batch 8 candidate list を commit / push する
-  - 次に Batch 8 per-club approval decision review を docs-only で行う
-  - Batch 8 の4件は bulk approval しない
+  - Batch 8 approval decision reviews を commit / push する
+  - 次に Batch 8 actual module entry preparation review / exact diff plan を docs-only で作る
+  - planned target module candidate:
+    - `oita_trinita`: `j2Teams.js`
+    - `gainare_tottori`: `j3Teams.js`
+    - `giravanz_kitakyushu`: `j3Teams.js`
+    - `fc_ryukyu`: `j3Teams.js`
   - actual module entries はまだ追加しない
   - `teamIdStatuses` はまだ変更しない
   - `seedable: true` にはまだ進まない
   - Firestore write / non-dry seed / `--write` はまだ行わない
   - `reilac_shiga` / `Biwako Shiga` continuity approval は別タスクとして最後に扱う
 - 次の合理的な順序
-  1. Batch 8 candidate list を commit / push
-  2. Batch 8 per-club approval decision review を docs-only で行う
-  3. Batch 8 の4件は bulk approval しない
+  1. Batch 8 approval decision reviews を commit / push
+  2. Batch 8 actual module entry preparation review / exact diff plan を docs-only で作る
+  3. planned target module candidate は `oita_trinita`: `j2Teams.js` / `gainare_tottori`: `j3Teams.js` / `giravanz_kitakyushu`: `j3Teams.js` / `fc_ryukyu`: `j3Teams.js`
   4. actual module entries はまだ追加しない
   5. `teamIdStatuses` はまだ変更しない
   6. `seedable: true` にはまだ進まない
