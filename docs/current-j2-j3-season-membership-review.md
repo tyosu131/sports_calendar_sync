@@ -4015,6 +4015,50 @@ Policy note:
 - Firestore write / non-dry seed / `--write` remains deferred.
 - `reilac_shiga` remains excluded until continuity approval is completed.
 
+## Per-Club Approval Batch 8
+
+- Batch 8 candidates listed: 4
+- candidates:
+  - `oita_trinita`
+  - `gainare_tottori`
+  - `giravanz_kitakyushu`
+  - `fc_ryukyu`
+- Batch 8 candidates approved for module entry: 0
+- actual module entries added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- `teamIdStatuses` changed: 0
+- `seedable: true` changes: 0
+- Firestore writes: 0
+- non-dry seed: 0
+- `--write`: 0
+- API calls: 0
+- deploy: 0
+- `reilac_shiga` included: no
+- bulk approval: no
+- current confirmed team references remains: 35
+- current blocked/unconfirmed rows remains: 5
+- `football_j2_j3_2026_hyakunen` remains `status: review` / `seedable: false`
+- All-Sports Season Rollover Policy remains unchanged
+
+| candidate internal team id | approval decision | current teamIdStatus | recommended next action | notes |
+|---|---|---|---|---|
+| `oita_trinita` | `not-approved-yet` | `candidate_not_confirmed` | `per-club approval decision review` | remaining normal candidate row |
+| `gainare_tottori` | `not-approved-yet` | `candidate_not_confirmed` | `per-club approval decision review` | remaining normal candidate row |
+| `giravanz_kitakyushu` | `not-approved-yet` | `candidate_not_confirmed` | `per-club approval decision review` | remaining normal candidate row |
+| `fc_ryukyu` | `not-approved-yet` | `candidate_not_confirmed` | `per-club approval decision review` | remaining normal candidate row |
+
+Policy note:
+
+- This is a docs-only candidate list.
+- Do not approve all candidates in bulk.
+- Each candidate requires independent per-club approval decision review.
+- Actual `j2Teams.js` / `j3Teams.js` entries require separate preparation review / exact diff plan / approval.
+- `teamIdStatuses` update requires actual confirmed team module entries and separate approval.
+- `seedable: true` remains deferred.
+- Firestore write / non-dry seed / `--write` remains deferred.
+- `reilac_shiga` remains excluded until continuity approval is completed.
+
 ### All-Sports Season Rollover Policy
 
 - `competitionSeasonKey` is not specific to J2 / J3 2026; it is the season / tournament membership scope for all sports and all years.

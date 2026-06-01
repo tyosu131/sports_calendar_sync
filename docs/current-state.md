@@ -2709,6 +2709,24 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
     - `npm --prefix functions run build`: PASS
     - `flutter analyze --no-pub`: No issues found
     - final `git status --short`: clean
+- J2 / J3 Per-Club Approval Batch 8 documented
+  - same docs-only Batch 8 candidate list step
+  - Batch 8 candidates listed: 4
+  - candidates:
+    - `oita_trinita`
+    - `gainare_tottori`
+    - `giravanz_kitakyushu`
+    - `fc_ryukyu`
+  - Batch 8 candidates approved for module entry: 0
+  - actual module entries added: 0
+  - `teamIdStatuses` changed: 0
+  - `seedable: true` changes: 0
+  - Firestore writes: 0
+  - current confirmed team references remains: 35
+  - current blocked/unconfirmed rows remains: 5
+  - `football_j2_j3_2026_hyakunen` remains `status: review` / `seedable: false`
+  - `reilac_shiga` remains `blocked_continuity`
+  - `reilac_shiga` included: no
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -3624,25 +3642,23 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - deploy: 0
   - `reilac_shiga` included: no
 - Next task: 次の判断段階
-  - Batch 7 `teamIdStatuses` actual update merge result の current-state 反映を commit / push する
-  - 次に remaining candidate rows の扱いを決める
-  - remaining `candidate_not_confirmed` rows:
-    - `oita_trinita`
-    - `gainare_tottori`
-    - `giravanz_kitakyushu`
-    - `fc_ryukyu`
-  - `reilac_shiga` / `Biwako Shiga` continuity approval は別タスク
+  - Batch 8 candidate list を commit / push する
+  - 次に Batch 8 per-club approval decision review を docs-only で行う
+  - Batch 8 の4件は bulk approval しない
+  - actual module entries はまだ追加しない
+  - `teamIdStatuses` はまだ変更しない
   - `seedable: true` にはまだ進まない
   - Firestore write / non-dry seed / `--write` はまだ行わない
-  - 次は Batch 8 candidate list、または `reilac_shiga` continuity task のどちらに進むか判断する
+  - `reilac_shiga` / `Biwako Shiga` continuity approval は別タスクとして最後に扱う
 - 次の合理的な順序
-  1. Batch 7 `teamIdStatuses` actual update merge result の current-state 反映を commit / push
-  2. remaining candidate rows の扱いを決める
-  3. remaining `candidate_not_confirmed` rows は `oita_trinita` / `gainare_tottori` / `giravanz_kitakyushu` / `fc_ryukyu`
-  4. `reilac_shiga` / `Biwako Shiga` continuity approval は別タスク
-  5. `seedable: true` にはまだ進まない
-  6. Firestore write / non-dry seed / `--write` はまだ行わない
-  7. 次は Batch 8 candidate list、または `reilac_shiga` continuity task のどちらに進むか判断する
+  1. Batch 8 candidate list を commit / push
+  2. Batch 8 per-club approval decision review を docs-only で行う
+  3. Batch 8 の4件は bulk approval しない
+  4. actual module entries はまだ追加しない
+  5. `teamIdStatuses` はまだ変更しない
+  6. `seedable: true` にはまだ進まない
+  7. Firestore write / non-dry seed / `--write` はまだ行わない
+  8. `reilac_shiga` / `Biwako Shiga` continuity approval は別タスクとして最後に扱う
 - まだ Firestore write / non-dry seed / `--write` には進まない
 - Do not use bulk approval for Batch 1 or future batches
 - Keep `reilac_shiga` / `Biwako Shiga` excluded from seedable / confirmed entry candidates until continuity approval is completed
