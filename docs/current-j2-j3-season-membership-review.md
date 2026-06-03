@@ -4267,6 +4267,131 @@ Review detail:
 - `reilac_shiga` remains `blocked_continuity`
 - next step: Batch 8 actual module entry preparation review / exact diff plan
 
+## Batch 8 Actual Module Entry Preparation Review
+
+- Batch 8 actual module entry preparation review documented: yes
+- Batch 8 reviewed candidates: 4
+- Batch 8 ready for separate module entry approval: 4
+- per-club review status: all `approved-for-module-entry-candidate`
+- module entry preparation status: all `ready-for-separate-module-entry-approval`
+- actual module entries added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- `teamIdStatuses` changed: 0
+- `seedable: true` changes: 0
+- Firestore writes: 0
+- non-dry seed: 0
+- `--write`: 0
+- API calls: 0
+- deploy: 0
+- `reilac_shiga` included: no
+- current confirmed team references remains: 35
+- current blocked/unconfirmed rows remains: 5
+- `football_j2_j3_2026_hyakunen` remains `status: review` / `seedable: false`
+
+| candidate internal team id | club nameJa | API raw team name | externalTeamId | logoUrl | lookup source | per-club review status | module entry preparation status | target module candidate | notes |
+|---|---|---|---|---|---|---|---|---|---|
+| `oita_trinita` | `大分トリニータ` | `Oita Trinita` | `298` | `https://media.api-sports.io/football/teams/298.png` | `J2 2024 / 99` | `approved-for-module-entry-candidate` | `ready-for-separate-module-entry-approval` | `j2Teams.js` | direct-or-near-direct evidence |
+| `gainare_tottori` | `ガイナーレ鳥取` | `Gainare Tottori` | `4319` | `https://media.api-sports.io/football/teams/4319.png` | `J3 2024 / 100` | `approved-for-module-entry-candidate` | `ready-for-separate-module-entry-approval` | `j3Teams.js` | direct-or-near-direct evidence |
+| `giravanz_kitakyushu` | `ギラヴァンツ北九州` | `Kitakyushu` | `805` | `https://media.api-sports.io/football/teams/805.png` | `J3 2024 / 100` | `approved-for-module-entry-candidate` | `ready-for-separate-module-entry-approval` | `j3Teams.js` | name variance reviewed; API raw name shortened |
+| `fc_ryukyu` | `ＦＣ琉球` | `FC Ryukyu` | `2235` | `https://media.api-sports.io/football/teams/2235.png` | `J3 2024 / 100` | `approved-for-module-entry-candidate` | `ready-for-separate-module-entry-approval` | `j3Teams.js` | direct-or-near-direct evidence |
+
+## Batch 8 j2Teams.js / j3Teams.js Exact Diff Plan
+
+- Batch 8 exact diff plan documented: yes
+- Planned target files:
+  - `functions/scripts/data/j2Teams.js`
+  - `functions/scripts/data/j3Teams.js`
+- Planned `j2Teams.js` entries: 1
+  - `oita_trinita`
+- Planned `j3Teams.js` entries: 3
+  - `gainare_tottori`
+  - `giravanz_kitakyushu`
+  - `fc_ryukyu`
+- implementation status: all `planned-not-written`
+- Actual module entries added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- `teamIdStatuses` changed: 0
+- `seedable: true` changes: 0
+- Firestore writes: 0
+- `reilac_shiga` included: no
+
+Planned `j2Teams.js` entry:
+
+```js
+{
+  id: 'oita_trinita',
+  nameJa: '大分トリニータ',
+  nameEn: 'Oita Trinita',
+  aliases: ['大分', '大分トリニータ', 'Oita Trinita'],
+  externalTeamId: 298,
+  logoUrl: 'https://media.api-sports.io/football/teams/298.png',
+  source: 'API-SPORTS teams?league=99&season=2024 + Batch 8 j2Teams.js / j3Teams.js Exact Diff Plan',
+  status: 'confirmed',
+}
+```
+
+Planned `j3Teams.js` entries:
+
+```js
+{
+  id: 'gainare_tottori',
+  nameJa: 'ガイナーレ鳥取',
+  nameEn: 'Gainare Tottori',
+  aliases: ['鳥取', 'ガイナーレ', 'ガイナーレ鳥取', 'Gainare Tottori'],
+  externalTeamId: 4319,
+  logoUrl: 'https://media.api-sports.io/football/teams/4319.png',
+  source: 'API-SPORTS teams?league=100&season=2024 + Batch 8 j2Teams.js / j3Teams.js Exact Diff Plan',
+  status: 'confirmed',
+}
+```
+
+```js
+{
+  id: 'giravanz_kitakyushu',
+  nameJa: 'ギラヴァンツ北九州',
+  nameEn: 'Giravanz Kitakyushu',
+  aliases: ['北九州', 'ギラヴァンツ', 'ギラヴァンツ北九州', 'Kitakyushu', 'Giravanz Kitakyushu'],
+  externalTeamId: 805,
+  logoUrl: 'https://media.api-sports.io/football/teams/805.png',
+  source: 'API-SPORTS teams?league=100&season=2024 + Batch 8 j2Teams.js / j3Teams.js Exact Diff Plan',
+  status: 'confirmed',
+}
+```
+
+```js
+{
+  id: 'fc_ryukyu',
+  nameJa: 'ＦＣ琉球',
+  nameEn: 'FC Ryukyu',
+  aliases: ['琉球', 'FC琉球', 'ＦＣ琉球', 'FC Ryukyu', 'Ryukyu'],
+  externalTeamId: 2235,
+  logoUrl: 'https://media.api-sports.io/football/teams/2235.png',
+  source: 'API-SPORTS teams?league=100&season=2024 + Batch 8 j2Teams.js / j3Teams.js Exact Diff Plan',
+  status: 'confirmed',
+}
+```
+
+Expected values after later actual module entry add:
+
+- `football_j2` confirmed teams: 21 -> 22
+- `football_j3` confirmed teams: 14 -> 17
+- season membership confirmed team references: 35 のまま
+- blocked/unconfirmed rows: 5 のまま
+- seedable seasons: 0 のまま
+- write candidates: 0 のまま
+- written seasons: 0 のまま
+
+Policy note:
+
+- This is not an actual `j2Teams.js` / `j3Teams.js` update.
+- Actual module entries require separate approval after this exact diff plan is committed.
+- `teamIdStatuses` update requires actual confirmed team module entries and separate approval.
+- `seedable: true` remains deferred.
+- Firestore write / non-dry seed / `--write` remains deferred.
+- `reilac_shiga` remains excluded until continuity approval is completed.
+
 ### All-Sports Season Rollover Policy
 
 - `competitionSeasonKey` is not specific to J2 / J3 2026; it is the season / tournament membership scope for all sports and all years.
