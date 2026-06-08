@@ -169,6 +169,36 @@ const j3Teams = [
     source: 'API-SPORTS teams?league=100&season=2024 + Batch 7 j2Teams.js / j3Teams.js Exact Diff Plan',
     status: 'confirmed',
   },
+  {
+    id: 'gainare_tottori',
+    nameJa: 'ガイナーレ鳥取',
+    nameEn: 'Gainare Tottori',
+    aliases: ['鳥取', 'ガイナーレ', 'ガイナーレ鳥取', 'Gainare Tottori'],
+    externalTeamId: 4319,
+    logoUrl: 'https://media.api-sports.io/football/teams/4319.png',
+    source: 'API-SPORTS teams?league=100&season=2024 + Batch 8 j2Teams.js / j3Teams.js Exact Diff Plan',
+    status: 'confirmed',
+  },
+  {
+    id: 'giravanz_kitakyushu',
+    nameJa: 'ギラヴァンツ北九州',
+    nameEn: 'Giravanz Kitakyushu',
+    aliases: ['北九州', 'ギラヴァンツ', 'ギラヴァンツ北九州', 'Kitakyushu', 'Giravanz Kitakyushu'],
+    externalTeamId: 805,
+    logoUrl: 'https://media.api-sports.io/football/teams/805.png',
+    source: 'API-SPORTS teams?league=100&season=2024 + Batch 8 j2Teams.js / j3Teams.js Exact Diff Plan',
+    status: 'confirmed',
+  },
+  {
+    id: 'fc_ryukyu',
+    nameJa: 'ＦＣ琉球',
+    nameEn: 'FC Ryukyu',
+    aliases: ['琉球', 'FC琉球', 'ＦＣ琉球', 'FC Ryukyu', 'Ryukyu'],
+    externalTeamId: 2235,
+    logoUrl: 'https://media.api-sports.io/football/teams/2235.png',
+    source: 'API-SPORTS teams?league=100&season=2024 + Batch 8 j2Teams.js / j3Teams.js Exact Diff Plan',
+    status: 'confirmed',
+  },
 ];
 
 /**
