@@ -4392,6 +4392,53 @@ Policy note:
 - Firestore write / non-dry seed / `--write` remains deferred.
 - `reilac_shiga` remains excluded until continuity approval is completed.
 
+## Batch 8 teamIdStatuses Exact Diff Plan
+
+- Batch 8 `teamIdStatuses` exact diff plan documented: yes
+- target data module:
+  - `functions/scripts/data/competitionSeasonMemberships.js`
+- target competitionSeasonKey:
+  - `football_j2_j3_2026_hyakunen`
+- planned `teamIdStatuses` updates: 4
+- planned status changes:
+  - `oita_trinita`: `candidate_not_confirmed` -> `confirmed_team_master`
+  - `gainare_tottori`: `candidate_not_confirmed` -> `confirmed_team_master`
+  - `giravanz_kitakyushu`: `candidate_not_confirmed` -> `confirmed_team_master`
+  - `fc_ryukyu`: `candidate_not_confirmed` -> `confirmed_team_master`
+- actual `teamIdStatuses` changed: 0
+- actual data module entries changed: 0
+- `seedable: true` changes: 0
+- Firestore writes: 0
+- non-dry seed: 0
+- `--write`: 0
+- API calls: 0
+- deploy: 0
+- `reilac_shiga` included: no
+- expected confirmed team references after actual update: 39
+- expected blocked/unconfirmed rows after actual update: 1
+- expected seedable seasons after actual update: 0
+- expected write candidates after actual update: 0
+- expected written seasons after actual update: 0
+- `football_j2_j3_2026_hyakunen` remains `status: review` / `seedable: false`
+- `reilac_shiga` remains `blocked_continuity`
+- All-Sports Season Rollover Policy remains unchanged
+
+| team id | current status | planned status | implementation status | reason |
+|---|---|---|---|---|
+| `oita_trinita` | `candidate_not_confirmed` | `confirmed_team_master` | `planned-not-written` | actual `j2Teams.js` confirmed entry exists |
+| `gainare_tottori` | `candidate_not_confirmed` | `confirmed_team_master` | `planned-not-written` | actual `j3Teams.js` confirmed entry exists |
+| `giravanz_kitakyushu` | `candidate_not_confirmed` | `confirmed_team_master` | `planned-not-written` | actual `j3Teams.js` confirmed entry exists |
+| `fc_ryukyu` | `candidate_not_confirmed` | `confirmed_team_master` | `planned-not-written` | actual `j3Teams.js` confirmed entry exists |
+
+Policy note:
+
+- This is a docs-only exact diff plan.
+- Do not update `competitionSeasonMemberships.js` in this step.
+- Actual `teamIdStatuses` update requires separate approval after this plan is committed.
+- `seedable: true` remains deferred even after this future update.
+- Firestore write / non-dry seed / `--write` remains deferred.
+- `reilac_shiga` remains `blocked_continuity` until continuity approval is completed.
+
 ### All-Sports Season Rollover Policy
 
 - `competitionSeasonKey` is not specific to J2 / J3 2026; it is the season / tournament membership scope for all sports and all years.
