@@ -239,6 +239,16 @@ const j2Teams = [
     source: 'API-SPORTS teams?league=99&season=2024 + Batch 7 j2Teams.js / j3Teams.js Exact Diff Plan',
     status: 'confirmed',
   },
+  {
+    id: 'oita_trinita',
+    nameJa: '大分トリニータ',
+    nameEn: 'Oita Trinita',
+    aliases: ['大分', '大分トリニータ', 'Oita Trinita'],
+    externalTeamId: 298,
+    logoUrl: 'https://media.api-sports.io/football/teams/298.png',
+    source: 'API-SPORTS teams?league=99&season=2024 + Batch 8 j2Teams.js / j3Teams.js Exact Diff Plan',
+    status: 'confirmed',
+  },
 ];
 
 /**
