@@ -70,11 +70,11 @@ const FOOTBALL_J2_J3_2026_HYAKUNEN_TEAM_ID_STATUSES = {
   kagoshima_united: 'confirmed_team_master',
   renofa_yamaguchi: 'confirmed_team_master',
   roasso_kumamoto: 'confirmed_team_master',
-  oita_trinita: 'candidate_not_confirmed',
-  gainare_tottori: 'candidate_not_confirmed',
-  giravanz_kitakyushu: 'candidate_not_confirmed',
+  oita_trinita: 'confirmed_team_master',
+  gainare_tottori: 'confirmed_team_master',
+  giravanz_kitakyushu: 'confirmed_team_master',
   reilac_shiga: 'blocked_continuity',
-  fc_ryukyu: 'candidate_not_confirmed',
+  fc_ryukyu: 'confirmed_team_master',
 };
 
 const competitionSeasonMemberships = [
