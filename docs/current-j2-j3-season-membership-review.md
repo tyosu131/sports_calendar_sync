@@ -4439,6 +4439,66 @@ Policy note:
 - Firestore write / non-dry seed / `--write` remains deferred.
 - `reilac_shiga` remains `blocked_continuity` until continuity approval is completed.
 
+## Reilac Shiga / Biwako Shiga Continuity Approval Review
+
+- Continuity approval review documented: yes
+- target candidate:
+  - `reilac_shiga`
+- current `teamIdStatus`:
+  - `blocked_continuity`
+- API raw team name:
+  - `Biwako Shiga`
+- current official-facing candidate name:
+  - `Reilac Shiga FC`
+- nameJa candidate:
+  - `レイラック滋賀FC`
+- externalTeamId:
+  - `7117`
+- logoUrl:
+  - `https://media.api-sports.io/football/teams/7117.png`
+- lookup source:
+  - `JFL 2024 / 497`
+- continuity issue:
+  - API-SPORTS raw name uses older / alternate `Biwako Shiga`
+  - internal stable ID candidate is `reilac_shiga`
+  - continuity must be reviewed separately before confirmed module entry / teamIdStatus update / seedability
+- actual module entries added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- `teamIdStatuses` changed: 0
+- `seedable: true` changes: 0
+- Firestore writes: 0
+- non-dry seed: 0
+- `--write`: 0
+- API calls: 0
+- deploy: 0
+- current confirmed team references remains: 39
+- current blocked/unconfirmed rows remains: 1
+- `football_j2_j3_2026_hyakunen` remains `status: review` / `seedable: false`
+
+Continuity check table:
+
+| check | review note | result |
+|---|---|---|
+| internal stable team id | `reilac_shiga` is the reviewed stable ID candidate | review-required |
+| API raw team name | `Biwako Shiga` differs from current `Reilac Shiga FC` naming | variance |
+| current official-facing name | `Reilac Shiga FC` | review-required |
+| externalTeamId | `7117` | evidence-present |
+| logoUrl | `https://media.api-sports.io/football/teams/7117.png` | evidence-present |
+| continuity evidence | older or alternate API name must be tied to current club identity | review-required |
+| duplicate `/teams/{id}` policy | do not create separate `biwako_shiga` and `reilac_shiga` docs if continuity is accepted | pass |
+| season membership separation | this review does not make the season seedable | pass |
+| actual module entry | not added in this step | pass |
+| teamIdStatus update | not changed in this step | pass |
+
+Decision:
+
+- Do not change `reilac_shiga` to `confirmed_team_master` in this step.
+- Do not add actual `j2Teams.js` / `j3Teams.js` entry in this step.
+- Do not set `seedable: true` in this step.
+- This task documents the continuity approval review only.
+- Next step, if this review is accepted, is a separate actual module entry preparation review / exact diff plan for `reilac_shiga`.
+
 ### All-Sports Season Rollover Policy
 
 - `competitionSeasonKey` is not specific to J2 / J3 2026; it is the season / tournament membership scope for all sports and all years.

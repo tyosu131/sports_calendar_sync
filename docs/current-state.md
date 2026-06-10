@@ -2899,6 +2899,26 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
     - `npm --prefix functions run build`: PASS
     - `flutter analyze --no-pub`: No issues found
     - final `git status --short`: clean
+- `reilac_shiga` / `Biwako Shiga` continuity approval review documented
+  - target candidate:
+    - `reilac_shiga`
+  - current `teamIdStatus`:
+    - `blocked_continuity`
+  - API raw team name:
+    - `Biwako Shiga`
+  - current official-facing candidate name:
+    - `Reilac Shiga FC`
+  - externalTeamId:
+    - `7117`
+  - logoUrl:
+    - `https://media.api-sports.io/football/teams/7117.png`
+  - actual module entries added: 0
+  - `teamIdStatuses` changed: 0
+  - `seedable: true` changes: 0
+  - Firestore writes: 0
+  - current confirmed team references remains: 39
+  - current blocked/unconfirmed rows remains: 1
+  - `football_j2_j3_2026_hyakunen` remains `status: review` / `seedable: false`
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -3814,22 +3834,24 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - deploy: 0
   - `reilac_shiga` included: no
 - Next task: 次の判断段階
-  - Batch 8 `teamIdStatuses` actual update merge result の current-state 反映を commit / push する
-  - 次に `reilac_shiga` / `Biwako Shiga` continuity approval task を docs-only で行う
+  - `reilac_shiga` / `Biwako Shiga` continuity approval review を commit / push する
+  - 次に `reilac_shiga` actual module entry preparation review / exact diff plan を docs-only で作るか判断する
   - remaining blocked/unconfirmed row:
     - `reilac_shiga`: `blocked_continuity`
   - `reilac_shiga` は bulk approval しない
-  - `reilac_shiga` の continuity approval が終わるまで `confirmed_team_master` に変更しない
+  - actual module entries はまだ追加しない
+  - `teamIdStatuses` はまだ変更しない
   - `seedable: true` にはまだ進まない
   - Firestore write / non-dry seed / `--write` はまだ行わない
 - 次の合理的な順序
-  1. Batch 8 `teamIdStatuses` actual update merge result の current-state 反映を commit / push
-  2. `reilac_shiga` / `Biwako Shiga` continuity approval task を docs-only で行う
+  1. `reilac_shiga` / `Biwako Shiga` continuity approval review を commit / push
+  2. `reilac_shiga` actual module entry preparation review / exact diff plan を docs-only で作るか判断する
   3. remaining blocked/unconfirmed row は `reilac_shiga`: `blocked_continuity`
   4. `reilac_shiga` は bulk approval しない
-  5. continuity approval が終わるまで `reilac_shiga` を `confirmed_team_master` に変更しない
-  6. `seedable: true` にはまだ進まない
-  7. Firestore write / non-dry seed / `--write` はまだ行わない
+  5. actual module entries はまだ追加しない
+  6. `teamIdStatuses` はまだ変更しない
+  7. `seedable: true` にはまだ進まない
+  8. Firestore write / non-dry seed / `--write` はまだ行わない
 - まだ Firestore write / non-dry seed / `--write` には進まない
 - Do not use bulk approval for Batch 1 or future batches
 - Keep `reilac_shiga` / `Biwako Shiga` excluded from seedable / confirmed entry candidates until continuity approval is completed
