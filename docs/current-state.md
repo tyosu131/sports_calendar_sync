@@ -2935,6 +2935,72 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - current confirmed team references remains: 39
   - current blocked/unconfirmed rows remains: 1
   - `football_j2_j3_2026_hyakunen` remains `status: review` / `seedable: false`
+- `reilac_shiga` actual `j3Teams.js` entry merged into main
+  - PR title:
+    - `Add Reilac Shiga team entry`
+  - merge commit:
+    - `23cc7c1 Merge pull request #5 from tyosu131/feature/reilac-shiga-team-entry`
+  - feature commit:
+    - `ae222cc Add Reilac Shiga team entry`
+  - merged branch:
+    - `feature/reilac-shiga-team-entry`
+  - updated file:
+    - `functions/scripts/data/j3Teams.js`
+  - actual `j3Teams.js` entries added: 1
+    - `reilac_shiga`
+  - current `football_j3` confirmed teams: 18
+  - current season membership confirmed team references: 39
+  - current blocked/unconfirmed rows: 1
+  - seedable seasons: 0
+  - write candidates: 0
+  - written seasons: 0
+  - `football_j2_j3_2026_hyakunen` remains `status: review` / `seedable: false`
+  - `reilac_shiga` still remains blocked at season membership level because `teamIdStatuses` has not been updated yet
+  - `teamIdStatuses` changed: 0
+  - `seedable: true` changes: 0
+  - Firestore writes: 0
+  - non-dry seed: 0
+  - `--write`: 0
+  - API sync: 0
+  - deploy: 0
+  - additional API call: 0
+  - validation results on main
+    - `node --check functions/scripts/data/j3Teams.js`: PASS
+    - `node functions/scripts/seedCompetitionTeams.js football_j3 --dry-run`: PASS
+      - confirmed teams: 18
+      - Firestore will not be written
+    - `node functions/scripts/verifyCompetitionTeams.js football_j3 --dry-run`: PASS
+      - confirmed teams: 18
+      - `reilac_shiga`: shape valid
+    - `node functions/scripts/verifyCompetitionSeasonMemberships.js --dry-run`: PASS
+      - checked seasons: 1
+      - checked groups: 4
+      - checked membership teamIds: 40
+      - confirmed team references: 39
+      - blocked/unconfirmed rows: 1
+    - `node functions/scripts/verifyCompetitionSeasonMemberships.js --dry-run --season football_j2_j3_2026_hyakunen`: PASS
+      - checked seasons: 1
+      - checked groups: 4
+      - checked membership teamIds: 40
+      - confirmed team references: 39
+      - blocked/unconfirmed rows: 1
+    - `node functions/scripts/seedCompetitionSeasonMemberships.js --dry-run`: PASS
+      - checked seasons: 1
+      - seedable seasons: 0
+      - skipped non-seedable seasons: 1
+      - write candidates: 0
+      - written seasons: 0
+      - Firestore will not be written
+    - `node functions/scripts/seedCompetitionSeasonMemberships.js --dry-run --season football_j2_j3_2026_hyakunen`: PASS
+      - checked seasons: 1
+      - seedable seasons: 0
+      - skipped non-seedable seasons: 1
+      - write candidates: 0
+      - written seasons: 0
+      - Firestore will not be written
+    - `npm --prefix functions run build`: PASS
+    - `flutter analyze --no-pub`: No issues found
+    - final `git status --short`: clean
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -3850,25 +3916,29 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - deploy: 0
   - `reilac_shiga` included: no
 - Next task: 次の判断段階
-  - `reilac_shiga` preparation / exact diff plan を commit / push する
-  - 次に actual `j3Teams.js` entry 追加を別承認で判断する
-  - actual module entry update 対象:
-    - `reilac_shiga`: `j3Teams.js`
+  - `reilac_shiga` actual `j3Teams.js` entry merge result の current-state 反映を commit / push する
+  - 次に `reilac_shiga` `teamIdStatuses` exact diff plan を docs-only で作る
+  - actual `teamIdStatuses` update 対象:
+    - `reilac_shiga`: `blocked_continuity` -> `confirmed_team_master`
   - remaining blocked/unconfirmed row:
     - `reilac_shiga`: `blocked_continuity`
   - `reilac_shiga` は bulk approval しない
-  - actual module entry 追加後も `teamIdStatuses` はまだ変更しない
-  - `seedable: true` にはまだ進まない
+  - actual update 後の期待値:
+    - confirmed team references: 40
+    - blocked/unconfirmed rows: 0
+    - seedable seasons: 0
+    - write candidates: 0
+    - written seasons: 0
+  - actual update 後も `seedable: true` にはまだ進まない
   - Firestore write / non-dry seed / `--write` はまだ行わない
 - 次の合理的な順序
-  1. `reilac_shiga` preparation / exact diff plan を commit / push
-  2. actual `j3Teams.js` entry 追加を別承認で判断する
-  3. actual module entry update 対象は `reilac_shiga`: `j3Teams.js`
-  4. actual module entry 追加後も `teamIdStatuses` はまだ変更しない
-  5. remaining blocked/unconfirmed row は `reilac_shiga`: `blocked_continuity`
-  6. `reilac_shiga` は bulk approval しない
-  7. `seedable: true` にはまだ進まない
-  8. Firestore write / non-dry seed / `--write` はまだ行わない
+  1. `reilac_shiga` actual `j3Teams.js` entry merge result の current-state 反映を commit / push
+  2. `reilac_shiga` `teamIdStatuses` exact diff plan を docs-only で作る
+  3. actual `teamIdStatuses` update 対象は `reilac_shiga`: `blocked_continuity` -> `confirmed_team_master`
+  4. actual update 後の期待値は confirmed team references: 40 / blocked-unconfirmed rows: 0
+  5. actual update 後も seedable seasons: 0 / write candidates: 0 / written seasons: 0
+  6. actual update 後も `seedable: true` にはまだ進まない
+  7. Firestore write / non-dry seed / `--write` はまだ行わない
 - まだ Firestore write / non-dry seed / `--write` には進まない
 - Do not use bulk approval for Batch 1 or future batches
 - Keep `reilac_shiga` / `Biwako Shiga` excluded from seedable / confirmed entry candidates until continuity approval is completed
