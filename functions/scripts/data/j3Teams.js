@@ -199,6 +199,16 @@ const j3Teams = [
     source: 'API-SPORTS teams?league=100&season=2024 + Batch 8 j2Teams.js / j3Teams.js Exact Diff Plan',
     status: 'confirmed',
   },
+  {
+    id: 'reilac_shiga',
+    nameJa: 'レイラック滋賀FC',
+    nameEn: 'Reilac Shiga FC',
+    aliases: ['滋賀', 'レイラック滋賀', 'レイラック滋賀FC', 'Reilac Shiga', 'Reilac Shiga FC', 'Biwako Shiga'],
+    externalTeamId: 7117,
+    logoUrl: 'https://media.api-sports.io/football/teams/7117.png',
+    source: 'API-SPORTS teams?league=497&season=2024 + Reilac Shiga / Biwako Shiga Continuity Approval Review + Reilac Shiga j3Teams.js Exact Diff Plan',
+    status: 'confirmed',
+  },
 ];
 
 /**
