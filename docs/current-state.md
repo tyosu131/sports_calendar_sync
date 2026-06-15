@@ -3001,6 +3001,21 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
     - `npm --prefix functions run build`: PASS
     - `flutter analyze --no-pub`: No issues found
     - final `git status --short`: clean
+- `reilac_shiga` `teamIdStatuses` exact diff plan documented
+  - planned `teamIdStatuses` updates: 1
+  - planned status changes:
+    - `reilac_shiga`: `blocked_continuity` -> `confirmed_team_master`
+  - actual `teamIdStatuses` changed: 0
+  - actual data module entries changed: 0
+  - actual `j3Teams.js` entries changed: 0
+  - `seedable: true` changes: 0
+  - Firestore writes: 0
+  - expected confirmed team references after actual update: 40
+  - expected blocked/unconfirmed rows after actual update: 0
+  - expected seedable seasons after actual update: 0
+  - expected write candidates after actual update: 0
+  - expected written seasons after actual update: 0
+  - `football_j2_j3_2026_hyakunen` remains `status: review` / `seedable: false`
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -3916,9 +3931,9 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - deploy: 0
   - `reilac_shiga` included: no
 - Next task: 次の判断段階
-  - `reilac_shiga` actual `j3Teams.js` entry merge result の current-state 反映を commit / push する
-  - 次に `reilac_shiga` `teamIdStatuses` exact diff plan を docs-only で作る
-  - actual `teamIdStatuses` update 対象:
+  - `reilac_shiga` `teamIdStatuses` exact diff plan を commit / push する
+  - 次に actual `teamIdStatuses` update を feature branch 上で別承認により実施する
+  - actual update 対象:
     - `reilac_shiga`: `blocked_continuity` -> `confirmed_team_master`
   - remaining blocked/unconfirmed row:
     - `reilac_shiga`: `blocked_continuity`
@@ -3931,14 +3946,16 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
     - written seasons: 0
   - actual update 後も `seedable: true` にはまだ進まない
   - Firestore write / non-dry seed / `--write` はまだ行わない
+  - その後に seedability readiness review を別途行う
 - 次の合理的な順序
-  1. `reilac_shiga` actual `j3Teams.js` entry merge result の current-state 反映を commit / push
-  2. `reilac_shiga` `teamIdStatuses` exact diff plan を docs-only で作る
-  3. actual `teamIdStatuses` update 対象は `reilac_shiga`: `blocked_continuity` -> `confirmed_team_master`
+  1. `reilac_shiga` `teamIdStatuses` exact diff plan を commit / push
+  2. actual `teamIdStatuses` update を feature branch 上で別承認により実施
+  3. actual update 対象は `reilac_shiga`: `blocked_continuity` -> `confirmed_team_master`
   4. actual update 後の期待値は confirmed team references: 40 / blocked-unconfirmed rows: 0
   5. actual update 後も seedable seasons: 0 / write candidates: 0 / written seasons: 0
   6. actual update 後も `seedable: true` にはまだ進まない
   7. Firestore write / non-dry seed / `--write` はまだ行わない
+  8. その後に seedability readiness review を別途行う
 - まだ Firestore write / non-dry seed / `--write` には進まない
 - Do not use bulk approval for Batch 1 or future batches
 - Keep `reilac_shiga` / `Biwako Shiga` excluded from seedable / confirmed entry candidates until continuity approval is completed

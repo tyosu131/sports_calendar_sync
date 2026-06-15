@@ -4596,6 +4596,49 @@ Policy note:
 - `seedable: true` remains deferred.
 - Firestore write / non-dry seed / `--write` remains deferred.
 
+## Reilac Shiga teamIdStatuses Exact Diff Plan
+
+- `reilac_shiga` `teamIdStatuses` exact diff plan documented: yes
+- target data module:
+  - `functions/scripts/data/competitionSeasonMemberships.js`
+- target competitionSeasonKey:
+  - `football_j2_j3_2026_hyakunen`
+- planned `teamIdStatuses` updates: 1
+- planned status changes:
+  - `reilac_shiga`: `blocked_continuity` -> `confirmed_team_master`
+- actual `teamIdStatuses` changed: 0
+- actual data module entries changed: 0
+- actual `j3Teams.js` entries changed: 0
+- `seedable: true` changes: 0
+- Firestore writes: 0
+- non-dry seed: 0
+- `--write`: 0
+- API calls: 0
+- deploy: 0
+- expected confirmed team references after actual update: 40
+- expected blocked/unconfirmed rows after actual update: 0
+- expected seedable seasons after actual update: 0
+- expected write candidates after actual update: 0
+- expected written seasons after actual update: 0
+- `football_j2_j3_2026_hyakunen` remains `status: review` / `seedable: false`
+- `seedable: true` remains deferred even after this future update
+- Firestore write / non-dry seed / `--write` remains deferred
+
+Planned status change table:
+
+| team id | current status | planned status | implementation status | reason |
+|---|---|---|---|---|
+| `reilac_shiga` | `blocked_continuity` | `confirmed_team_master` | `planned-not-written` | actual `j3Teams.js` confirmed entry exists and continuity review has been documented |
+
+Policy note:
+
+- This is a docs-only exact diff plan.
+- Do not update `competitionSeasonMemberships.js` in this step.
+- Actual `teamIdStatuses` update requires separate approval after this plan is committed.
+- `seedable: true` remains deferred even after the future `teamIdStatuses` update.
+- Firestore write / non-dry seed / `--write` remains deferred.
+- After the future actual update, all 40 membership team IDs may be confirmed, but the season profile must still remain `status: review` / `seedable: false` until a separate seedability review is approved.
+
 ### All-Sports Season Rollover Policy
 
 - `competitionSeasonKey` is not specific to J2 / J3 2026; it is the season / tournament membership scope for all sports and all years.
