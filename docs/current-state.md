@@ -2919,6 +2919,22 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - current confirmed team references remains: 39
   - current blocked/unconfirmed rows remains: 1
   - `football_j2_j3_2026_hyakunen` remains `status: review` / `seedable: false`
+- `reilac_shiga` actual module entry preparation review documented
+- `reilac_shiga` j3Teams.js exact diff plan documented
+  - target candidate:
+    - `reilac_shiga`
+  - target module candidate:
+    - `j3Teams.js`
+  - planned `j3Teams.js` entries: 1
+    - `reilac_shiga`
+  - actual module entries added: 0
+  - `teamIdStatuses` changed: 0
+  - `seedable: true` changes: 0
+  - Firestore writes: 0
+  - expected football_j3 confirmed teams after actual module entry add: 18
+  - current confirmed team references remains: 39
+  - current blocked/unconfirmed rows remains: 1
+  - `football_j2_j3_2026_hyakunen` remains `status: review` / `seedable: false`
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -3834,22 +3850,23 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - deploy: 0
   - `reilac_shiga` included: no
 - Next task: 次の判断段階
-  - `reilac_shiga` / `Biwako Shiga` continuity approval review を commit / push する
-  - 次に `reilac_shiga` actual module entry preparation review / exact diff plan を docs-only で作るか判断する
+  - `reilac_shiga` preparation / exact diff plan を commit / push する
+  - 次に actual `j3Teams.js` entry 追加を別承認で判断する
+  - actual module entry update 対象:
+    - `reilac_shiga`: `j3Teams.js`
   - remaining blocked/unconfirmed row:
     - `reilac_shiga`: `blocked_continuity`
   - `reilac_shiga` は bulk approval しない
-  - actual module entries はまだ追加しない
-  - `teamIdStatuses` はまだ変更しない
+  - actual module entry 追加後も `teamIdStatuses` はまだ変更しない
   - `seedable: true` にはまだ進まない
   - Firestore write / non-dry seed / `--write` はまだ行わない
 - 次の合理的な順序
-  1. `reilac_shiga` / `Biwako Shiga` continuity approval review を commit / push
-  2. `reilac_shiga` actual module entry preparation review / exact diff plan を docs-only で作るか判断する
-  3. remaining blocked/unconfirmed row は `reilac_shiga`: `blocked_continuity`
-  4. `reilac_shiga` は bulk approval しない
-  5. actual module entries はまだ追加しない
-  6. `teamIdStatuses` はまだ変更しない
+  1. `reilac_shiga` preparation / exact diff plan を commit / push
+  2. actual `j3Teams.js` entry 追加を別承認で判断する
+  3. actual module entry update 対象は `reilac_shiga`: `j3Teams.js`
+  4. actual module entry 追加後も `teamIdStatuses` はまだ変更しない
+  5. remaining blocked/unconfirmed row は `reilac_shiga`: `blocked_continuity`
+  6. `reilac_shiga` は bulk approval しない
   7. `seedable: true` にはまだ進まない
   8. Firestore write / non-dry seed / `--write` はまだ行わない
 - まだ Firestore write / non-dry seed / `--write` には進まない

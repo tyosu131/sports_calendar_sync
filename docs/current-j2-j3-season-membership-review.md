@@ -4499,6 +4499,103 @@ Decision:
 - This task documents the continuity approval review only.
 - Next step, if this review is accepted, is a separate actual module entry preparation review / exact diff plan for `reilac_shiga`.
 
+## Reilac Shiga Actual Module Entry Preparation Review
+
+- actual module entry preparation review documented: yes
+- target candidate:
+  - `reilac_shiga`
+- continuity review status:
+  - `review-documented`
+- current `teamIdStatus`:
+  - `blocked_continuity`
+- ready for separate module entry approval:
+  - yes, docs-only
+- target module candidate:
+  - `j3Teams.js`
+- API raw team name:
+  - `Biwako Shiga`
+- current official-facing candidate name:
+  - `Reilac Shiga FC`
+- nameJa candidate:
+  - `レイラック滋賀FC`
+- externalTeamId:
+  - `7117`
+- logoUrl:
+  - `https://media.api-sports.io/football/teams/7117.png`
+- lookup source:
+  - `JFL 2024 / 497`
+- continuity note:
+  - API raw name `Biwako Shiga` is treated as older / alternate API evidence for the stable `reilac_shiga` identity only after continuity review documentation.
+  - Do not create a separate `biwako_shiga` team ID.
+  - Use `reilac_shiga` as the stable internal team ID candidate.
+- actual module entries added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- `teamIdStatuses` changed: 0
+- `seedable: true` changes: 0
+- Firestore writes: 0
+- non-dry seed: 0
+- `--write`: 0
+- API calls: 0
+- deploy: 0
+- current confirmed team references remains: 39
+- current blocked/unconfirmed rows remains: 1
+- `football_j2_j3_2026_hyakunen` remains `status: review` / `seedable: false`
+
+Preparation table:
+
+| candidate internal team id | nameJa | nameEn | API raw team name | externalTeamId | logoUrl | lookup source | continuity review status | target module candidate | implementation status | notes |
+|---|---|---|---|---|---|---|---|---|---|---|
+| `reilac_shiga` | `レイラック滋賀FC` | `Reilac Shiga FC` | `Biwako Shiga` | `7117` | `https://media.api-sports.io/football/teams/7117.png` | `JFL 2024 / 497` | `review-documented` | `j3Teams.js` | `planned-not-written` | older or alternate API name; stable ID remains `reilac_shiga` |
+
+## Reilac Shiga j3Teams.js Exact Diff Plan
+
+- exact diff plan documented: yes
+- Planned target file:
+  - `functions/scripts/data/j3Teams.js`
+- Planned `j3Teams.js` entries: 1
+  - `reilac_shiga`
+- implementation status:
+  - `planned-not-written`
+- Actual module entries added: 0
+- `j2Teams.js` entries added: 0
+- `j3Teams.js` entries added: 0
+- `teamIdStatuses` changed: 0
+- `seedable: true` changes: 0
+- Firestore writes: 0
+
+Planned `j3Teams.js` entry:
+
+```js
+{
+  id: 'reilac_shiga',
+  nameJa: 'レイラック滋賀FC',
+  nameEn: 'Reilac Shiga FC',
+  aliases: ['滋賀', 'レイラック滋賀', 'レイラック滋賀FC', 'Reilac Shiga', 'Reilac Shiga FC', 'Biwako Shiga'],
+  externalTeamId: 7117,
+  logoUrl: 'https://media.api-sports.io/football/teams/7117.png',
+  source: 'API-SPORTS teams?league=497&season=2024 + Reilac Shiga / Biwako Shiga Continuity Approval Review + Reilac Shiga j3Teams.js Exact Diff Plan',
+  status: 'confirmed',
+}
+```
+
+Expected values after later actual module entry add:
+
+- football_j3 confirmed teams: 17 -> 18
+- season membership confirmed team references: 39 のまま
+- blocked/unconfirmed rows: 1 のまま
+- seedable seasons: 0 のまま
+- write candidates: 0 のまま
+- written seasons: 0 のまま
+
+Policy note:
+
+- This is not an actual `j3Teams.js` update.
+- Actual module entry requires separate approval after this exact diff plan is committed.
+- `teamIdStatuses` update requires actual confirmed team module entry and separate approval.
+- `seedable: true` remains deferred.
+- Firestore write / non-dry seed / `--write` remains deferred.
+
 ### All-Sports Season Rollover Policy
 
 - `competitionSeasonKey` is not specific to J2 / J3 2026; it is the season / tournament membership scope for all sports and all years.
