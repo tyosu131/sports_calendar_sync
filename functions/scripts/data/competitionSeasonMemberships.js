@@ -73,7 +73,7 @@ const FOOTBALL_J2_J3_2026_HYAKUNEN_TEAM_ID_STATUSES = {
   oita_trinita: 'confirmed_team_master',
   gainare_tottori: 'confirmed_team_master',
   giravanz_kitakyushu: 'confirmed_team_master',
-  reilac_shiga: 'blocked_continuity',
+  reilac_shiga: 'confirmed_team_master',
   fc_ryukyu: 'confirmed_team_master',
 };
 
