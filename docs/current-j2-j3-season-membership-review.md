@@ -4639,6 +4639,80 @@ Policy note:
 - Firestore write / non-dry seed / `--write` remains deferred.
 - After the future actual update, all 40 membership team IDs may be confirmed, but the season profile must still remain `status: review` / `seedable: false` until a separate seedability review is approved.
 
+## J2 / J3 2026 Seedability Readiness Review - All Team References Confirmed
+
+- seedability readiness review documented: yes
+- target competitionSeasonKey:
+  - `football_j2_j3_2026_hyakunen`
+- current status:
+  - `review`
+- current seedable:
+  - `false`
+- total membership teamIds:
+  - 40
+- confirmed team references:
+  - 40
+- blocked/unconfirmed rows:
+  - 0
+- `candidate_not_confirmed` rows:
+  - 0
+- `blocked_continuity` rows:
+  - 0
+- `missing_team_master` rows:
+  - 0
+- `reilac_shiga` continuity status:
+  - completed enough for team master confirmation
+- old Reilac invariant removed:
+  - `reilac_shiga must remain blocked_continuity`
+- retained deferred seedability invariant:
+  - `football_j2_j3_2026_hyakunen` must remain `seedable: false` until separate seedability review / approval
+- current seedable seasons:
+  - 0
+- current write candidates:
+  - 0
+- current written seasons:
+  - 0
+- Firestore writes:
+  - 0
+- non-dry seed:
+  - 0
+- `--write`:
+  - 0
+- API sync:
+  - 0
+- deploy:
+  - 0
+- additional API call:
+  - 0
+- this review is not Firestore seed approval
+- this review does not set `seedable: true`
+- this review does not authorize non-dry seed / `--write`
+
+Readiness check table:
+
+| check | current value | result | note |
+|---|---|---|---|
+| total membership teamIds | 40 | pass | expected 4 groups x 10 teams |
+| confirmed team references | 40 | pass | all membership team IDs now reference confirmed team master entries |
+| blocked/unconfirmed rows | 0 | pass | no remaining `candidate_not_confirmed`, `blocked_continuity`, or `missing_team_master` |
+| `reilac_shiga` continuity | confirmed | pass | continuity review and actual team entry are complete |
+| season status | `review` | intentional-deferred | status is not promoted in this step |
+| season seedable | `false` | intentional-deferred | seedable flag is not promoted in this step |
+| seed dry-run | seedable seasons 0 | pass | no write candidate while seedable remains false |
+| Firestore write | 0 | pass | no non-dry seed or `--write` |
+| CI workflow | not yet configured | separate-task | GitHub Actions CI remains separate |
+| npm audit vulnerabilities | 44 reported locally | separate-task | do not fix in this step |
+
+Decision:
+
+- Readiness result:
+  - `ready-for-seedability-approval-review`
+- Do not set `seedable: true` in this step.
+- Do not change `status` in this step.
+- Do not run non-dry seed or `--write` in this step.
+- Next step, if accepted, is a separate docs-only `seedable: true` exact diff plan.
+- Firestore write / non-dry seed remains a separate approval after seedable exact diff plan and actual seedability update.
+
 ### All-Sports Season Rollover Policy
 
 - `competitionSeasonKey` is not specific to J2 / J3 2026; it is the season / tournament membership scope for all sports and all years.

@@ -3085,6 +3085,32 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
     - `npm --prefix functions run build`: PASS
     - `flutter analyze --no-pub`: No issues found
     - final `git status --short`: clean
+- J2 / J3 2026 seedability readiness review documented
+  - target competitionSeasonKey:
+    - `football_j2_j3_2026_hyakunen`
+  - current confirmed team references:
+    - 40
+  - current blocked/unconfirmed rows:
+    - 0
+  - current seedable seasons:
+    - 0
+  - current write candidates:
+    - 0
+  - current written seasons:
+    - 0
+  - readiness result:
+    - `ready-for-seedability-approval-review`
+  - `football_j2_j3_2026_hyakunen` remains `status: review` / `seedable: false`
+  - `seedable: true` changes:
+    - 0
+  - Firestore writes:
+    - 0
+  - non-dry seed:
+    - 0
+  - `--write`:
+    - 0
+  - GitHub Actions CI workflow addition remains separate task
+  - npm audit vulnerabilities remain separate task
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -4000,20 +4026,19 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - deploy: 0
   - `reilac_shiga` included: no
 - Next task: 次の判断段階
-  - `reilac_shiga` actual `teamIdStatuses` update merge result の current-state 反映を commit / push する
-  - 次に seedability readiness review を docs-only で行う
-  - seedability readiness review では、40件すべてが confirmed team master になったことを確認する
-  - `seedable: true` にはまだ変更しない
+  - seedability readiness review を commit / push する
+  - 次に `football_j2_j3_2026_hyakunen` `seedable: true` exact diff plan を docs-only で作るか判断する
+  - actual `seedable: true` update はまだ行わない
+  - `status` update はまだ行わない
   - Firestore write / non-dry seed / `--write` はまだ行わない
   - GitHub Actions CI workflow 追加は別タスク候補として残す
-  - npm audit vulnerabilities は別タスク候補として残す
+  - npm audit vulnerabilities 対応は別タスク候補として残す
 - 次の合理的な順序
-  1. `reilac_shiga` actual `teamIdStatuses` update merge result の current-state 反映を commit / push
-  2. seedability readiness review を docs-only で行う
-  3. confirmed team references: 40 / blocked-unconfirmed rows: 0 を確認する
-  4. `seedable: true` にはまだ変更しない
-  5. Firestore write / non-dry seed / `--write` はまだ行わない
-  6. GitHub Actions CI workflow 追加と npm audit vulnerabilities 対応は別タスクとして扱う
+  1. seedability readiness review を commit / push
+  2. `football_j2_j3_2026_hyakunen` `seedable: true` exact diff plan を docs-only で作るか判断
+  3. actual `seedable: true` update と `status` update はまだ行わない
+  4. Firestore write / non-dry seed / `--write` はまだ行わない
+  5. GitHub Actions CI workflow 追加と npm audit vulnerabilities 対応は別タスクとして扱う
 - まだ Firestore write / non-dry seed / `--write` には進まない
 - Do not use bulk approval for Batch 1 or future batches
 - Keep `football_j2_j3_2026_hyakunen` at `status: review` / `seedable: false` until a separate seedability review is approved
