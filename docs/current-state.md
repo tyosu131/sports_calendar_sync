@@ -3148,6 +3148,86 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
     - 0
   - exact diff plan result:
     - `ready-for-actual-seedability-update-approval`
+- J2 / J3 2026 actual seedability update merged into main
+  - PR title:
+    - `Enable J2 J3 season membership seedability`
+  - merge commit:
+    - `a2545b9 Merge pull request #7 from tyosu131/feature/j2-j3-2026-seedability`
+  - feature commit:
+    - `fe336ca Enable J2 J3 season membership seedability`
+  - merged branch:
+    - `feature/j2-j3-2026-seedability`
+  - updated files:
+    - `functions/scripts/data/competitionSeasonMemberships.js`
+    - `functions/scripts/verifyCompetitionSeasonMemberships.js`
+    - `functions/scripts/seedCompetitionSeasonMemberships.js`
+  - changed season profile:
+    - `status: 'review'` -> `status: 'seedable'`
+    - `seedable: false` -> `seedable: true`
+  - validation logic update:
+    - special 2026 deferred invariant was replaced with approved seedable state validation
+    - verifier accepts `status: 'seedable'` / `seedable: true` when all 40 team references are confirmed and no blocked rows remain
+    - seed preparation produces one dry-run write candidate while still not writing Firestore in dry-run
+  - current confirmed team references:
+    - 40
+  - current blocked/unconfirmed rows:
+    - 0
+  - current seedable seasons:
+    - 1
+  - current skipped non-seedable seasons:
+    - 0
+  - current write candidates:
+    - 1
+  - current written seasons:
+    - 0
+  - Firestore writes:
+    - 0
+  - non-dry seed:
+    - 0
+  - `--write`:
+    - 0
+  - API sync:
+    - 0
+  - deploy:
+    - 0
+  - additional API call:
+    - 0
+  - validation results on main
+    - `node --check functions/scripts/data/competitionSeasonMemberships.js`: PASS
+    - `node --check functions/scripts/verifyCompetitionSeasonMemberships.js`: PASS
+    - `node --check functions/scripts/seedCompetitionSeasonMemberships.js`: PASS
+    - `node functions/scripts/verifyCompetitionSeasonMemberships.js --dry-run`: PASS
+      - checked seasons: 1
+      - checked groups: 4
+      - checked membership teamIds: 40
+      - confirmed team references: 40
+      - blocked/unconfirmed rows: 0
+    - `node functions/scripts/verifyCompetitionSeasonMemberships.js --dry-run --season football_j2_j3_2026_hyakunen`: PASS
+      - checked seasons: 1
+      - checked groups: 4
+      - checked membership teamIds: 40
+      - confirmed team references: 40
+      - blocked/unconfirmed rows: 0
+    - `node functions/scripts/seedCompetitionSeasonMemberships.js --dry-run`: PASS
+      - checked seasons: 1
+      - seedable seasons: 1
+      - skipped non-seedable seasons: 0
+      - write candidates: 1
+      - written seasons: 0
+      - Firestore will not be written
+    - `node functions/scripts/seedCompetitionSeasonMemberships.js --dry-run --season football_j2_j3_2026_hyakunen`: PASS
+      - checked seasons: 1
+      - seedable seasons: 1
+      - skipped non-seedable seasons: 0
+      - write candidates: 1
+      - written seasons: 0
+      - Firestore will not be written
+    - `npm --prefix functions ci`: PASS
+      - warning: local Node is v25.8.0 while package requires Node 20
+      - npm audit output reported 45 vulnerabilities; do not fix in this step
+    - `npm --prefix functions run build`: PASS
+    - `flutter analyze --no-pub`: No issues found
+    - final `git status --short`: clean
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -4063,37 +4143,20 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - deploy: 0
   - `reilac_shiga` included: no
 - Next task: 次の判断段階
-  - `seedable: true` exact diff plan を commit / push する
-  - 次に actual seedability update を feature branch 上で別承認により実施する
-  - actual update 対象:
-    - `functions/scripts/data/competitionSeasonMemberships.js`
-    - `functions/scripts/verifyCompetitionSeasonMemberships.js`
-    - `functions/scripts/seedCompetitionSeasonMemberships.js`
-  - actual data update:
-    - `status: 'review'` -> `status: 'seedable'`
-    - `seedable: false` -> `seedable: true`
-  - actual update 後の期待値:
-    - confirmed team references: 40
-    - blocked/unconfirmed rows: 0
-    - seedable seasons: 1
-    - write candidates: 1
-    - written seasons: 0 in dry-run
+  - actual seedability update merge result の current-state 反映を commit / push する
+  - 次に Firestore write / non-dry seed exact plan を docs-only で作るか判断する
   - Firestore write / non-dry seed / `--write` はまだ行わない
-  - actual seedability update merge 後に main validation と current-state 反映を行う
-  - その後に Firestore write / non-dry seed exact plan を別途判断する
+  - actual Firestore write はさらに別承認とする
   - GitHub Actions CI workflow 追加は別タスク候補として残す
   - npm audit vulnerabilities 対応は別タスク候補として残す
 - 次の合理的な順序
-  1. `seedable: true` exact diff plan を commit / push
-  2. actual seedability update を feature branch 上で別承認により実施
-  3. data / verifier / seed preparation の3ファイルを exact diff plan どおり更新
-  4. actual update 後の dry-run で confirmed references: 40 / blocked rows: 0 / seedable seasons: 1 / write candidates: 1 / written seasons: 0 を確認
-  5. actual seedability update merge 後に main validation と current-state 反映
-  6. Firestore write / non-dry seed / `--write` は別 exact plan / approval まで行わない
-  7. GitHub Actions CI workflow 追加と npm audit vulnerabilities 対応は別タスクとして扱う
+  1. actual seedability update merge result の current-state 反映を commit / push
+  2. Firestore write / non-dry seed exact plan を docs-only で作るか判断
+  3. actual Firestore write / non-dry seed / `--write` は別承認まで行わない
+  4. GitHub Actions CI workflow 追加と npm audit vulnerabilities 対応は別タスクとして扱う
 - まだ Firestore write / non-dry seed / `--write` には進まない
 - Do not use bulk approval for Batch 1 or future batches
-- Keep `football_j2_j3_2026_hyakunen` at `status: review` / `seedable: false` until a separate seedability review is approved
+- Keep Firestore write / non-dry seed / `--write` deferred until a separate exact plan and approval
 - Do not add more confirmed entries while preparing future per-club approval decisions
 - Keep candidate internal team IDs as documentation-only review candidates until stable identity + API evidence + logo evidence are approved together
 - Do not create confirmed `/teams/{id}` documents or add additional `j2Teams.js` / `j3Teams.js` entries yet
