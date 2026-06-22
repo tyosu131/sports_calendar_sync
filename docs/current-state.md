@@ -3016,6 +3016,75 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - expected write candidates after actual update: 0
   - expected written seasons after actual update: 0
   - `football_j2_j3_2026_hyakunen` remains `status: review` / `seedable: false`
+- `reilac_shiga` actual `teamIdStatuses` update merged into main
+  - PR title:
+    - `Update Reilac Shiga teamIdStatus`
+  - merge commit:
+    - `ddd4e82 Merge pull request #6 from tyosu131/feature/reilac-shiga-teamIdStatuses`
+  - feature commit:
+    - `390bf68 Update Reilac Shiga teamIdStatus`
+  - merged branch:
+    - `feature/reilac-shiga-teamIdStatuses`
+  - updated files:
+    - `functions/scripts/data/competitionSeasonMemberships.js`
+    - `functions/scripts/verifyCompetitionSeasonMemberships.js`
+    - `functions/scripts/seedCompetitionSeasonMemberships.js`
+  - changed `teamIdStatuses`: 1
+  - changed row:
+    - `reilac_shiga`: `blocked_continuity` -> `confirmed_team_master`
+  - removed old verifier / seed-preparation invariant:
+    - `reilac_shiga must remain blocked_continuity`
+  - retained deferred seedability invariant:
+    - `football_j2_j3_2026_hyakunen` must remain `seedable: false` until separate seedability review
+  - current confirmed team references: 40
+  - current blocked/unconfirmed rows: 0
+  - seedable seasons: 0
+  - write candidates: 0
+  - written seasons: 0
+  - `football_j2_j3_2026_hyakunen` remains `status: review` / `seedable: false`
+  - `seedable: true` changes: 0
+  - Firestore writes: 0
+  - non-dry seed: 0
+  - `--write`: 0
+  - API sync: 0
+  - deploy: 0
+  - additional API call: 0
+  - validation results on main
+    - `node --check functions/scripts/data/competitionSeasonMemberships.js`: PASS
+    - `node --check functions/scripts/verifyCompetitionSeasonMemberships.js`: PASS
+    - `node --check functions/scripts/seedCompetitionSeasonMemberships.js`: PASS
+    - `node functions/scripts/verifyCompetitionSeasonMemberships.js --dry-run`: PASS
+      - checked seasons: 1
+      - checked groups: 4
+      - checked membership teamIds: 40
+      - confirmed team references: 40
+      - blocked/unconfirmed rows: 0
+    - `node functions/scripts/verifyCompetitionSeasonMemberships.js --dry-run --season football_j2_j3_2026_hyakunen`: PASS
+      - checked seasons: 1
+      - checked groups: 4
+      - checked membership teamIds: 40
+      - confirmed team references: 40
+      - blocked/unconfirmed rows: 0
+    - `node functions/scripts/seedCompetitionSeasonMemberships.js --dry-run`: PASS
+      - checked seasons: 1
+      - seedable seasons: 0
+      - skipped non-seedable seasons: 1
+      - write candidates: 0
+      - written seasons: 0
+      - Firestore will not be written
+    - `node functions/scripts/seedCompetitionSeasonMemberships.js --dry-run --season football_j2_j3_2026_hyakunen`: PASS
+      - checked seasons: 1
+      - seedable seasons: 0
+      - skipped non-seedable seasons: 1
+      - write candidates: 0
+      - written seasons: 0
+      - Firestore will not be written
+    - `npm --prefix functions ci`: PASS
+      - warning: local Node is v25.8.0 while package requires Node 20
+      - npm audit output reported 44 vulnerabilities; do not fix in this step
+    - `npm --prefix functions run build`: PASS
+    - `flutter analyze --no-pub`: No issues found
+    - final `git status --short`: clean
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -3931,34 +4000,23 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - deploy: 0
   - `reilac_shiga` included: no
 - Next task: 次の判断段階
-  - `reilac_shiga` `teamIdStatuses` exact diff plan を commit / push する
-  - 次に actual `teamIdStatuses` update を feature branch 上で別承認により実施する
-  - actual update 対象:
-    - `reilac_shiga`: `blocked_continuity` -> `confirmed_team_master`
-  - remaining blocked/unconfirmed row:
-    - `reilac_shiga`: `blocked_continuity`
-  - `reilac_shiga` は bulk approval しない
-  - actual update 後の期待値:
-    - confirmed team references: 40
-    - blocked/unconfirmed rows: 0
-    - seedable seasons: 0
-    - write candidates: 0
-    - written seasons: 0
-  - actual update 後も `seedable: true` にはまだ進まない
+  - `reilac_shiga` actual `teamIdStatuses` update merge result の current-state 反映を commit / push する
+  - 次に seedability readiness review を docs-only で行う
+  - seedability readiness review では、40件すべてが confirmed team master になったことを確認する
+  - `seedable: true` にはまだ変更しない
   - Firestore write / non-dry seed / `--write` はまだ行わない
-  - その後に seedability readiness review を別途行う
+  - GitHub Actions CI workflow 追加は別タスク候補として残す
+  - npm audit vulnerabilities は別タスク候補として残す
 - 次の合理的な順序
-  1. `reilac_shiga` `teamIdStatuses` exact diff plan を commit / push
-  2. actual `teamIdStatuses` update を feature branch 上で別承認により実施
-  3. actual update 対象は `reilac_shiga`: `blocked_continuity` -> `confirmed_team_master`
-  4. actual update 後の期待値は confirmed team references: 40 / blocked-unconfirmed rows: 0
-  5. actual update 後も seedable seasons: 0 / write candidates: 0 / written seasons: 0
-  6. actual update 後も `seedable: true` にはまだ進まない
-  7. Firestore write / non-dry seed / `--write` はまだ行わない
-  8. その後に seedability readiness review を別途行う
+  1. `reilac_shiga` actual `teamIdStatuses` update merge result の current-state 反映を commit / push
+  2. seedability readiness review を docs-only で行う
+  3. confirmed team references: 40 / blocked-unconfirmed rows: 0 を確認する
+  4. `seedable: true` にはまだ変更しない
+  5. Firestore write / non-dry seed / `--write` はまだ行わない
+  6. GitHub Actions CI workflow 追加と npm audit vulnerabilities 対応は別タスクとして扱う
 - まだ Firestore write / non-dry seed / `--write` には進まない
 - Do not use bulk approval for Batch 1 or future batches
-- Keep `reilac_shiga` / `Biwako Shiga` excluded from seedable / confirmed entry candidates until continuity approval is completed
+- Keep `football_j2_j3_2026_hyakunen` at `status: review` / `seedable: false` until a separate seedability review is approved
 - Do not add more confirmed entries while preparing future per-club approval decisions
 - Keep candidate internal team IDs as documentation-only review candidates until stable identity + API evidence + logo evidence are approved together
 - Do not create confirmed `/teams/{id}` documents or add additional `j2Teams.js` / `j3Teams.js` entries yet
