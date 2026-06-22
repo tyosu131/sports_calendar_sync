@@ -158,8 +158,8 @@ const competitionSeasonMemberships = [
       },
     ],
     teamIdStatuses: FOOTBALL_J2_J3_2026_HYAKUNEN_TEAM_ID_STATUSES,
-    status: 'review',
-    seedable: false,
+    status: 'seedable',
+    seedable: true,
   },
 ];
 

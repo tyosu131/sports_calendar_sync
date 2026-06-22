@@ -443,15 +443,23 @@ function validateTeamIdStatuses(
   return result;
 }
 
-function validateSpecial2026SeedabilityDeferred(season, failures) {
+function validateSpecial2026SeedabilityApproved(season, failures) {
   if (season.competitionSeasonKey !== SPECIAL_2026_COMPETITION_SEASON_KEY) {
     return;
   }
 
-  if (season.seedable !== false) {
+  if (season.status !== 'seedable') {
     addFailure(
       failures,
-      'football_j2_j3_2026_hyakunen must remain seedable false until separate seedability review.',
+      'football_j2_j3_2026_hyakunen must have status seedable after seedability approval.',
+      { competitionSeasonKey: season.competitionSeasonKey }
+    );
+  }
+
+  if (season.seedable !== true) {
+    addFailure(
+      failures,
+      'football_j2_j3_2026_hyakunen must be seedable true after seedability approval.',
       { competitionSeasonKey: season.competitionSeasonKey }
     );
   }
@@ -485,7 +493,7 @@ function validateSeasons({ seasonKey }) {
       confirmedTeamIds,
       failures
     );
-    validateSpecial2026SeedabilityDeferred(season, failures);
+    validateSpecial2026SeedabilityApproved(season, failures);
 
     if (
       season.seedable === true &&
