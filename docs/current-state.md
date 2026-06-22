@@ -3111,6 +3111,43 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
     - 0
   - GitHub Actions CI workflow addition remains separate task
   - npm audit vulnerabilities remain separate task
+- J2 / J3 2026 `seedable: true` exact diff plan documented
+  - target competitionSeasonKey:
+    - `football_j2_j3_2026_hyakunen`
+  - current profile:
+    - `status: 'review'`
+    - `seedable: false`
+  - planned future profile:
+    - `status: 'seedable'`
+    - `seedable: true`
+  - planned future changed files:
+    - `functions/scripts/data/competitionSeasonMemberships.js`
+    - `functions/scripts/verifyCompetitionSeasonMemberships.js`
+    - `functions/scripts/seedCompetitionSeasonMemberships.js`
+  - planned future data changes:
+    - `status: 'review'` -> `status: 'seedable'`
+    - `seedable: false` -> `seedable: true`
+  - planned future validation logic changes:
+    - remove / replace special 2026 `seedable: false` deferred invariant
+    - allow approved seedable state only when all 40 team references are confirmed and no blocked/unconfirmed rows remain
+  - current confirmed team references:
+    - 40
+  - current blocked/unconfirmed rows:
+    - 0
+  - expected seedable seasons after actual update:
+    - 1
+  - expected write candidates after actual update dry-run:
+    - 1
+  - expected written seasons after actual update dry-run:
+    - 0
+  - Firestore writes:
+    - 0
+  - non-dry seed:
+    - 0
+  - `--write`:
+    - 0
+  - exact diff plan result:
+    - `ready-for-actual-seedability-update-approval`
 - minimal `competitionSeasonKey` / tournament profile foundation 実装済み
   - commit: `32e7c99 Add J1 competition season foundation`
   - `functions/scripts/data/competitionSeasons.js` 追加済み
@@ -4026,19 +4063,34 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - deploy: 0
   - `reilac_shiga` included: no
 - Next task: 次の判断段階
-  - seedability readiness review を commit / push する
-  - 次に `football_j2_j3_2026_hyakunen` `seedable: true` exact diff plan を docs-only で作るか判断する
-  - actual `seedable: true` update はまだ行わない
-  - `status` update はまだ行わない
+  - `seedable: true` exact diff plan を commit / push する
+  - 次に actual seedability update を feature branch 上で別承認により実施する
+  - actual update 対象:
+    - `functions/scripts/data/competitionSeasonMemberships.js`
+    - `functions/scripts/verifyCompetitionSeasonMemberships.js`
+    - `functions/scripts/seedCompetitionSeasonMemberships.js`
+  - actual data update:
+    - `status: 'review'` -> `status: 'seedable'`
+    - `seedable: false` -> `seedable: true`
+  - actual update 後の期待値:
+    - confirmed team references: 40
+    - blocked/unconfirmed rows: 0
+    - seedable seasons: 1
+    - write candidates: 1
+    - written seasons: 0 in dry-run
   - Firestore write / non-dry seed / `--write` はまだ行わない
+  - actual seedability update merge 後に main validation と current-state 反映を行う
+  - その後に Firestore write / non-dry seed exact plan を別途判断する
   - GitHub Actions CI workflow 追加は別タスク候補として残す
   - npm audit vulnerabilities 対応は別タスク候補として残す
 - 次の合理的な順序
-  1. seedability readiness review を commit / push
-  2. `football_j2_j3_2026_hyakunen` `seedable: true` exact diff plan を docs-only で作るか判断
-  3. actual `seedable: true` update と `status` update はまだ行わない
-  4. Firestore write / non-dry seed / `--write` はまだ行わない
-  5. GitHub Actions CI workflow 追加と npm audit vulnerabilities 対応は別タスクとして扱う
+  1. `seedable: true` exact diff plan を commit / push
+  2. actual seedability update を feature branch 上で別承認により実施
+  3. data / verifier / seed preparation の3ファイルを exact diff plan どおり更新
+  4. actual update 後の dry-run で confirmed references: 40 / blocked rows: 0 / seedable seasons: 1 / write candidates: 1 / written seasons: 0 を確認
+  5. actual seedability update merge 後に main validation と current-state 反映
+  6. Firestore write / non-dry seed / `--write` は別 exact plan / approval まで行わない
+  7. GitHub Actions CI workflow 追加と npm audit vulnerabilities 対応は別タスクとして扱う
 - まだ Firestore write / non-dry seed / `--write` には進まない
 - Do not use bulk approval for Batch 1 or future batches
 - Keep `football_j2_j3_2026_hyakunen` at `status: review` / `seedable: false` until a separate seedability review is approved

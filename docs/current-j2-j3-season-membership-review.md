@@ -4713,6 +4713,99 @@ Decision:
 - Next step, if accepted, is a separate docs-only `seedable: true` exact diff plan.
 - Firestore write / non-dry seed remains a separate approval after seedable exact diff plan and actual seedability update.
 
+## J2 / J3 2026 seedable true Exact Diff Plan
+
+- seedable true exact diff plan documented: yes
+- target competitionSeasonKey:
+  - `football_j2_j3_2026_hyakunen`
+- current profile:
+  - `status: 'review'`
+  - `seedable: false`
+- planned future profile:
+  - `status: 'seedable'`
+  - `seedable: true`
+- current confirmed team references:
+  - 40
+- current blocked/unconfirmed rows:
+  - 0
+- current seedable seasons:
+  - 0
+- current write candidates:
+  - 0
+- current written seasons:
+  - 0
+- future expected dry-run values after actual update:
+  - confirmed team references: 40
+  - blocked/unconfirmed rows: 0
+  - seedable seasons: 1
+  - skipped non-seedable seasons: 0
+  - write candidates: 1
+  - written seasons: 0
+  - Firestore will not be written
+- future Firestore writes in this exact diff plan:
+  - 0
+- future non-dry seed in this exact diff plan:
+  - 0
+- future `--write` in this exact diff plan:
+  - 0
+- this plan does not authorize Firestore write
+- this plan does not run non-dry seed
+- this plan does not use `--write`
+
+Planned future changed files:
+
+- `functions/scripts/data/competitionSeasonMemberships.js`
+- `functions/scripts/verifyCompetitionSeasonMemberships.js`
+- `functions/scripts/seedCompetitionSeasonMemberships.js`
+
+Planned data diff:
+
+```diff
+-    status: 'review',
+-    seedable: false,
++    status: 'seedable',
++    seedable: true,
+```
+
+Planned verifier / seed preparation logic update:
+
+- Replace or remove the old deferred invariant:
+  - `football_j2_j3_2026_hyakunen must remain seedable false until separate seedability review.`
+- Replace it with seedability-approved validation appropriate for the approved state.
+- The updated validation should allow `football_j2_j3_2026_hyakunen` when:
+  - `status: 'seedable'`
+  - `seedable: true`
+  - all 40 team IDs are `confirmed_team_master`
+  - all 40 team IDs exist in local confirmed team master data
+  - blocked/unconfirmed rows are 0
+- The updated validation should still fail if:
+  - `seedable: true` but any row is `candidate_not_confirmed`
+  - `seedable: true` but any row is `blocked_continuity`
+  - `seedable: true` but any row is `missing_team_master`
+  - `seedable: true` but a confirmed team master ID does not exist locally
+  - `seedable: true` but status is not seed-allowed
+- Do not weaken general seedability validation.
+
+Planning table:
+
+| target file | planned change | implementation status | reason |
+|---|---|---|---|
+| `functions/scripts/data/competitionSeasonMemberships.js` | `status: 'review'` -> `status: 'seedable'`, `seedable: false` -> `seedable: true` | `planned-not-written` | all 40 team references are confirmed and readiness review is complete |
+| `functions/scripts/verifyCompetitionSeasonMemberships.js` | update special 2026 seedability validation from deferred to approved state | `planned-not-written` | verifier must allow the approved seedable profile while keeping seedability safety checks |
+| `functions/scripts/seedCompetitionSeasonMemberships.js` | update special 2026 seedability validation from deferred to approved state | `planned-not-written` | seed dry-run should produce one write candidate without Firestore write |
+
+Decision:
+
+- Exact diff plan result:
+  - `ready-for-actual-seedability-update-approval`
+- This is not an actual `seedable: true` update.
+- This is not an actual status update.
+- This is not Firestore seed approval.
+- Actual `seedable: true` update requires separate approval and should be done on a feature branch.
+- Firestore write / non-dry seed / `--write` requires a later separate exact diff plan and approval after actual seedability update is merged and validated.
+- GitHub Actions CI workflow remains a separate task.
+- npm audit vulnerabilities remain a separate task.
+
 ### All-Sports Season Rollover Policy
 
 - `competitionSeasonKey` is not specific to J2 / J3 2026; it is the season / tournament membership scope for all sports and all years.
