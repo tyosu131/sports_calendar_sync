@@ -4142,18 +4142,46 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - API calls: 0
   - deploy: 0
   - `reilac_shiga` included: no
+- J2 / J3 2026 Firestore write exact plan documented
+  - target competitionSeasonKey:
+    - `football_j2_j3_2026_hyakunen`
+  - target script:
+    - `functions/scripts/seedCompetitionSeasonMemberships.js`
+  - target Firestore document candidate:
+    - `competitionSeasonMemberships/football_j2_j3_2026_hyakunen`
+  - planned write command:
+    - `node functions/scripts/seedCompetitionSeasonMemberships.js --season football_j2_j3_2026_hyakunen --write`
+  - current seedable seasons:
+    - 1
+  - current write candidates:
+    - 1
+  - current written seasons:
+    - 0
+  - planned Firestore writes:
+    - 1
+  - actual Firestore writes:
+    - 0
+  - non-dry seed:
+    - 0
+  - `--write` executed:
+    - 0
+  - exact plan result:
+    - `ready-for-firestore-write-approval`
 - Next task: 次の判断段階
-  - actual seedability update merge result の current-state 反映を commit / push する
-  - 次に Firestore write / non-dry seed exact plan を docs-only で作るか判断する
-  - Firestore write / non-dry seed / `--write` はまだ行わない
-  - actual Firestore write はさらに別承認とする
+  - Firestore write / non-dry seed exact plan を commit / push する
+  - 次に actual Firestore write を実行するか別承認で判断する
+  - actual write は clean `main` から、`--season football_j2_j3_2026_hyakunen` 指定付きで実行する
+  - `--season` なしの broad seed はしない
+  - API sync はしない
+  - deploy はしない
   - GitHub Actions CI workflow 追加は別タスク候補として残す
   - npm audit vulnerabilities 対応は別タスク候補として残す
 - 次の合理的な順序
-  1. actual seedability update merge result の current-state 反映を commit / push
-  2. Firestore write / non-dry seed exact plan を docs-only で作るか判断
-  3. actual Firestore write / non-dry seed / `--write` は別承認まで行わない
-  4. GitHub Actions CI workflow 追加と npm audit vulnerabilities 対応は別タスクとして扱う
+  1. Firestore write / non-dry seed exact plan を commit / push
+  2. actual Firestore write を実行するか別承認で判断
+  3. 承認された場合のみ clean `main` から season 指定付きで actual write を実行
+  4. broad seed / API sync / deploy は行わない
+  5. GitHub Actions CI workflow 追加と npm audit vulnerabilities 対応は別タスクとして扱う
 - まだ Firestore write / non-dry seed / `--write` には進まない
 - Do not use bulk approval for Batch 1 or future batches
 - Keep Firestore write / non-dry seed / `--write` deferred until a separate exact plan and approval

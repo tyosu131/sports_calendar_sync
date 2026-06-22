@@ -4806,6 +4806,95 @@ Decision:
 - GitHub Actions CI workflow remains a separate task.
 - npm audit vulnerabilities remain a separate task.
 
+## J2 / J3 2026 Firestore Write Exact Plan
+
+- Firestore write exact plan documented: yes
+- target competitionSeasonKey:
+  - `football_j2_j3_2026_hyakunen`
+- target script:
+  - `functions/scripts/seedCompetitionSeasonMemberships.js`
+- target Firestore document candidate:
+  - `competitionSeasonMemberships/football_j2_j3_2026_hyakunen`
+- current season profile:
+  - `status: 'seedable'`
+  - `seedable: true`
+- confirmed team references:
+  - 40
+- blocked/unconfirmed rows:
+  - 0
+- seedable seasons:
+  - 1
+- write candidates:
+  - 1
+- written seasons:
+  - 0
+- current dry-run status:
+  - PASS
+- planned write command:
+  - `node functions/scripts/seedCompetitionSeasonMemberships.js --season football_j2_j3_2026_hyakunen --write`
+- planned validation before write:
+  - `git status --short`
+  - `git branch --show-current`
+  - `git rev-parse --short HEAD`
+  - `node --check functions/scripts/data/competitionSeasonMemberships.js`
+  - `node --check functions/scripts/verifyCompetitionSeasonMemberships.js`
+  - `node --check functions/scripts/seedCompetitionSeasonMemberships.js`
+  - `node functions/scripts/verifyCompetitionSeasonMemberships.js --dry-run --season football_j2_j3_2026_hyakunen`
+  - `node functions/scripts/seedCompetitionSeasonMemberships.js --dry-run --season football_j2_j3_2026_hyakunen`
+  - `npm --prefix functions ci`
+  - `npm --prefix functions run build`
+  - `flutter analyze --no-pub`
+- planned validation after write:
+  - `node functions/scripts/seedCompetitionSeasonMemberships.js --dry-run --season football_j2_j3_2026_hyakunen`
+  - if available, run a read/verify command against Firestore only if such command exists; do not invent a command
+  - `git status --short`
+- expected pre-write dry-run values:
+  - seedable seasons: 1
+  - skipped non-seedable seasons: 0
+  - write candidates: 1
+  - written seasons: 0
+  - Firestore will not be written
+- expected actual write values:
+  - checked seasons: 1
+  - seedable seasons: 1
+  - write candidates: 1
+  - written seasons: 1
+- Firestore write approval status:
+  - `planned-not-executed`
+- non-dry seed:
+  - 0
+- `--write`:
+  - 0
+- API sync:
+  - 0
+- deploy:
+  - 0
+- additional API call:
+  - 0
+
+Risk / safety notes:
+
+- This plan authorizes no write by itself.
+- Actual Firestore write requires separate explicit approval.
+- Actual write should be done only from clean `main`.
+- Actual write should target only `football_j2_j3_2026_hyakunen`.
+- Do not run broad seed without `--season`.
+- Do not run API sync.
+- Do not deploy.
+- Do not modify `/teams/{id}` documents.
+- This write should create or update only the season membership document candidate.
+- GitHub Actions CI workflow is still absent and remains a separate task.
+- npm audit vulnerabilities remain separate task.
+
+Decision:
+
+- Exact plan result:
+  - `ready-for-firestore-write-approval`
+- This is not the actual Firestore write.
+- This is not deploy approval.
+- This is not API sync approval.
+- Next step, if accepted, is a separate explicit approval to run the planned `--write` command.
+
 ### All-Sports Season Rollover Policy
 
 - `competitionSeasonKey` is not specific to J2 / J3 2026; it is the season / tournament membership scope for all sports and all years.
