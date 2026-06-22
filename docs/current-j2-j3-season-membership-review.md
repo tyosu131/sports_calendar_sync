@@ -4895,6 +4895,56 @@ Decision:
 - This is not API sync approval.
 - Next step, if accepted, is a separate explicit approval to run the planned `--write` command.
 
+## J2 / J3 2026 Firestore Write Execution Result
+
+- Firestore write executed: yes
+- target competitionSeasonKey:
+  - `football_j2_j3_2026_hyakunen`
+- target Firestore document:
+  - `competitionSeasonMemberships/football_j2_j3_2026_hyakunen`
+- executed command:
+  - `node functions/scripts/seedCompetitionSeasonMemberships.js --season football_j2_j3_2026_hyakunen --write`
+- broad seed:
+  - 0
+- checked seasons:
+  - 1
+- seedable seasons:
+  - 1
+- write candidates:
+  - 1
+- written seasons:
+  - 1
+- result:
+  - PASS
+- API sync:
+  - 0
+- deploy:
+  - 0
+- additional API call:
+  - 0
+- `/teams/{id}` documents modified:
+  - 0
+- source files changed:
+  - 0
+- git working tree after write:
+  - clean
+
+Post-write note:
+
+- post-write dry-run still reports `write candidates: 1` and `written seasons: 0` because dry-run does not read/verify existing Firestore write state and does not write Firestore.
+- Do not interpret post-write dry-run `written seasons: 0` as write failure.
+- Actual write success is represented by the actual `--write` result: `written seasons: 1`.
+
+Decision:
+
+- Firestore write result:
+  - `completed`
+- Do not re-run `--write` without separate approval.
+- Next step is docs commit / push.
+- API sync and deploy remain separate tasks.
+- GitHub Actions CI workflow remains separate task.
+- npm audit vulnerabilities remain separate task.
+
 ### All-Sports Season Rollover Policy
 
 - `competitionSeasonKey` is not specific to J2 / J3 2026; it is the season / tournament membership scope for all sports and all years.

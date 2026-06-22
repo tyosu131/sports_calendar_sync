@@ -4167,22 +4167,50 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
     - 0
   - exact plan result:
     - `ready-for-firestore-write-approval`
+- J2 / J3 2026 actual Firestore write completed
+  - target competitionSeasonKey:
+    - `football_j2_j3_2026_hyakunen`
+  - target Firestore document:
+    - `competitionSeasonMemberships/football_j2_j3_2026_hyakunen`
+  - executed command:
+    - `node functions/scripts/seedCompetitionSeasonMemberships.js --season football_j2_j3_2026_hyakunen --write`
+  - checked seasons:
+    - 1
+  - seedable seasons:
+    - 1
+  - write candidates:
+    - 1
+  - written seasons:
+    - 1
+  - Firestore writes:
+    - 1
+  - broad seed:
+    - 0
+  - API sync:
+    - 0
+  - deploy:
+    - 0
+  - additional API call:
+    - 0
+  - git status after write:
+    - clean
+  - result:
+    - `completed`
 - Next task: 次の判断段階
-  - Firestore write / non-dry seed exact plan を commit / push する
-  - 次に actual Firestore write を実行するか別承認で判断する
-  - actual write は clean `main` から、`--season football_j2_j3_2026_hyakunen` 指定付きで実行する
-  - `--season` なしの broad seed はしない
-  - API sync はしない
-  - deploy はしない
+  - actual Firestore write result を docs-only で commit / push する
+  - `--write` は再実行しない
+  - 次に必要なら Firestore read/verify command の有無を確認する
+  - API sync はまだ行わない
+  - deploy はまだ行わない
   - GitHub Actions CI workflow 追加は別タスク候補として残す
   - npm audit vulnerabilities 対応は別タスク候補として残す
 - 次の合理的な順序
-  1. Firestore write / non-dry seed exact plan を commit / push
-  2. actual Firestore write を実行するか別承認で判断
-  3. 承認された場合のみ clean `main` から season 指定付きで actual write を実行
-  4. broad seed / API sync / deploy は行わない
+  1. actual Firestore write result を docs-only で commit / push
+  2. 必要なら既存の Firestore read/verify command の有無を確認
+  3. `--write` は別承認なしに再実行しない
+  4. API sync / deploy は行わない
   5. GitHub Actions CI workflow 追加と npm audit vulnerabilities 対応は別タスクとして扱う
-- まだ Firestore write / non-dry seed / `--write` には進まない
+- actual Firestore write は完了済み。`--write` の再実行には別承認が必要
 - Do not use bulk approval for Batch 1 or future batches
 - Keep Firestore write / non-dry seed / `--write` deferred until a separate exact plan and approval
 - Do not add more confirmed entries while preparing future per-club approval decisions
