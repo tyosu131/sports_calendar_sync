@@ -4481,9 +4481,88 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
     - secrets / API key / serviceAccountKey value printed or changed: 0
   - expected decision:
     - exact plan result: `ready-for-apisports-runtime-config-existence-check-approval`
+- apisports.key runtime config existence check CLI result recorded
+  - project:
+    - `sports-calendar-sync-a4564`
+  - raw config output / raw stderr / secret value exposure:
+    - 0
+  - API sync / deploy / Firestore write / `--write`:
+    - 0
+  - First existence-only check
+    - method:
+      - `firebase functions:config:get apisports --project sports-calendar-sync-a4564 | parser`
+    - sanitized output:
+      - `project: sports-calendar-sync-a4564`
+      - `apisports config object exists: false`
+      - `apisports.key exists: false`
+      - `apisports.key value printed: no`
+    - exit code:
+      - `1`
+    - interpretation:
+      - parser fallback / inconclusive
+      - do not conclude `apisports.key` is missing
+  - Robust all-config check
+    - method:
+      - `firebase functions:config:get --project sports-calendar-sync-a4564` with temp files and parser
+    - sanitized output:
+      - `firebase command exit code: 0`
+      - `raw stdout printed: no`
+      - `raw stderr printed: no`
+      - `stderr exists: true`
+      - `config JSON parse ok: false`
+      - `apisports config object exists: false`
+      - `apisports.key exists: false`
+      - `apisports.key value printed: no`
+      - `result: INCONCLUSIVE_PARSE_FAILURE`
+    - interpretation:
+      - Firebase command succeeded but stdout was not safely parseable as expected JSON
+      - do not conclude `apisports.key` is missing
+  - Path-specific check
+    - method:
+      - `firebase functions:config:get apisports.key --project sports-calendar-sync-a4564` with parser
+    - sanitized output:
+      - `firebase command exit code: 1`
+      - `raw stdout printed: no`
+      - `raw stderr printed: no`
+      - `stdout non-empty: true`
+      - `stderr exists: false`
+      - `missing-like output detected: true`
+      - `apisports.key exists: false`
+      - `apisports.key value printed: no`
+      - `result: INCONCLUSIVE_COMMAND_FAILED`
+    - interpretation:
+      - command itself returned exit code 1
+      - do not conclude `apisports.key` is missing
+      - CLI/auth/project/current Firebase CLI behavior may be involved
+  - Overall decision
+    - `apisports.key` runtime config existence:
+      - `inconclusive-via-cli`
+    - secret value exposure:
+      - 0
+    - raw config output exposure:
+      - 0
+    - API sync:
+      - 0
+    - deploy:
+      - 0
+    - Firestore write:
+      - 0
+    - `--write`:
+      - 0
+  - Next recommendation
+    - Stop trying additional CLI parser variants for now.
+    - Confirm in Firebase Console whether `apisports.key` or equivalent runtime config / secret exists.
+    - Do not paste the secret value into docs or chat.
+    - Record only one of:
+      - `exists`
+      - `missing`
+      - `location-not-found`
+    - If missing, create a separate exact plan for setting it without printing the value.
+    - If exists, proceed to `.firebaserc` / `--project` decision and Firebase plan / Functions deploy capability confirmation.
 - Next task: 次の判断段階
-  - `apisports.key` runtime config existence check exact plan を commit / push する
-  - 次に approved existence-only config check を実行するか判断する
+  - CLI判定不能結果を current-state に反映して commit / push する
+  - 次に Firebase Console で `apisports.key` runtime config / secret の存在を手動確認する
+  - secret値は表示・記録しない
   - API sync はまだ実行しない
   - deploy はまだ実行しない
   - `.firebaserc` / `--project` decision remains separate
@@ -4492,15 +4571,16 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - npm audit vulnerabilities は別タスク候補として残す
   - 今後の PR は GitHub Actions CI の結果を確認してから merge する
 - 次の合理的な順序
-  1. `apisports.key` runtime config existence check exact plan を commit / push
-  2. approved existence-only config check を実行するか判断
-  3. API sync はまだ実行しない
-  4. deploy はまだ実行しない
-  5. `.firebaserc` / `--project` decision は別タスクとして扱う
-  6. Firebase Console plan check は別タスクとして扱う
-  7. Firestore write / `--write` は再実行しない
-  8. npm audit vulnerabilities は別タスク候補として扱う
-  9. 今後の PR は GitHub Actions CI の結果を確認してから merge
+  1. CLI判定不能結果を current-state に反映して commit / push
+  2. Firebase Console で `apisports.key` runtime config / secret の存在を手動確認
+  3. 確認結果は `exists` / `missing` / `location-not-found` のいずれかだけを記録し、secret値は記録しない
+  4. API sync はまだ実行しない
+  5. deploy はまだ実行しない
+  6. `.firebaserc` / `--project` decision は別タスクとして扱う
+  7. Firebase Console plan check は別タスクとして扱う
+  8. Firestore write / `--write` は再実行しない
+  9. npm audit vulnerabilities は別タスク候補として扱う
+  10. 今後の PR は GitHub Actions CI の結果を確認してから merge
 - actual Firestore write は完了済み。`--write` の再実行には別承認が必要
 - Do not use bulk approval for Batch 1 or future batches
 - Do not run additional Firestore write / non-dry seed / `--write` without a separate exact plan and approval
