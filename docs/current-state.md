@@ -4243,25 +4243,58 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
     - 0
   - branch cleanup:
     - `feature/github-actions-ci` local / remote deleted
+- J2 / J3 2026 Firestore read verification command exact plan documented
+  - target competitionSeasonKey:
+    - `football_j2_j3_2026_hyakunen`
+  - target Firestore document:
+    - `competitionSeasonMemberships/football_j2_j3_2026_hyakunen`
+  - planned script:
+    - `functions/scripts/verifyCompetitionSeasonMembershipFirestore.js`
+  - planned command:
+    - `node functions/scripts/verifyCompetitionSeasonMembershipFirestore.js --season football_j2_j3_2026_hyakunen`
+  - planned behavior:
+    - read-only Firestore verification
+    - compare Firestore document against local `competitionSeasonMemberships.js`
+    - verify `status: 'seedable'` / `seedable: true`
+    - verify groups: 4
+    - verify membership teamIds: 40
+    - verify confirmed references: 40
+    - verify blocked/unconfirmed rows: 0
+  - Firestore writes:
+    - 0
+  - non-dry seed:
+    - 0
+  - `--write`:
+    - 0
+  - API sync:
+    - 0
+  - deploy:
+    - 0
+  - exact plan result:
+    - `ready-for-firestore-read-verification-script-approval`
 - Next task: 次の判断段階
-  - GitHub Actions CI workflow 追加結果を current-state に反映して commit / push する
-  - 次に npm audit vulnerabilities 対応を別タスクとして判断する
-  - actual Firestore write は完了済みのため、`--write` は再実行しない
-  - API sync / deploy はまだ別判断とし、この段階では実行しない
+  - Firestore read verification command exact plan を commit / push する
+  - 次に read-only Firestore verification script を feature branch 上で実装するか判断する
+  - `--write` は再実行しない
+  - Firestore write はしない
+  - API sync / deploy はまだ行わない
+  - npm audit vulnerabilities 対応は別タスク候補として残す
   - 今後の PR は GitHub Actions CI の結果を確認してから merge する
 - 次の合理的な順序
-  1. GitHub Actions CI workflow 追加結果を current-state に反映して commit / push
-  2. npm audit vulnerabilities 対応を別タスクとして判断
+  1. Firestore read verification command exact plan を commit / push
+  2. read-only Firestore verification script を feature branch 上で実装するか判断
   3. `--write` は再実行しない
-  4. API sync / deploy は別判断まで行わない
-  5. 今後の PR は GitHub Actions CI の結果を確認してから merge
+  4. Firestore write はしない
+  5. API sync / deploy は別判断まで行わない
+  6. npm audit vulnerabilities 対応を別タスクとして判断
+  7. 今後の PR は GitHub Actions CI の結果を確認してから merge
 - actual Firestore write は完了済み。`--write` の再実行には別承認が必要
 - Do not use bulk approval for Batch 1 or future batches
-- Keep Firestore write / non-dry seed / `--write` deferred until a separate exact plan and approval
+- Do not run additional Firestore write / non-dry seed / `--write` without a separate exact plan and approval
 - Do not add more confirmed entries while preparing future per-club approval decisions
 - Keep candidate internal team IDs as documentation-only review candidates until stable identity + API evidence + logo evidence are approved together
 - Do not create confirmed `/teams/{id}` documents or add additional `j2Teams.js` / `j3Teams.js` entries yet
-- Keep Firestore write / non-dry seed / API sync / deploy deferred
+- Keep additional Firestore write / non-dry seed / API sync / deploy deferred
 
 後回し:
 
