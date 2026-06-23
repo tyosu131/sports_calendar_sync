@@ -10,12 +10,13 @@
  *    - Fetches football fixtures from RapidAPI
  *    - Normalizes timezone, applies translation map, upserts to Firestore
  *
- * Environment variables:
- *   firebase functions:config:set apisports.key=YOUR_KEY
+ * Secrets:
+ *   API_SPORTS_KEY (Firebase Functions secret / Secret Manager)
  */
 
 import * as admin from "firebase-admin";
 import * as functions from "firebase-functions/v1";
+import { defineSecret } from "firebase-functions/params";
 
 // Initialize Firebase Admin SDK (singleton)
 admin.initializeApp();
@@ -28,16 +29,25 @@ export { getCalendar } from "./functions/getCalendar";
 
 import { syncFootballFixtures } from "./pipelines/syncFootball";
 
+const API_SPORTS_KEY = defineSecret("API_SPORTS_KEY");
+
+function getApiSportsKey(): string | undefined {
+  const value = API_SPORTS_KEY.value();
+  const trimmed = typeof value === "string" ? value.trim() : "";
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
 /** Sync football fixtures every 6 hours. */
 export const scheduledSyncFootball = functions
+  .runWith({ secrets: [API_SPORTS_KEY] })
   .region("asia-northeast1")
   .pubsub.schedule("every 6 hours")
   .timeZone("Asia/Tokyo")
   .onRun(async (_context: unknown) => {
-    const apiSportsKey = functions.config().apisports?.key as string | undefined;
+    const apiSportsKey = getApiSportsKey();
     if (!apiSportsKey) {
       console.error(
-        "API_SPORTS_KEY not configured. Run: firebase functions:config:set apisports.key=YOUR_KEY"
+        "API_SPORTS_KEY secret is not configured for scheduledSyncFootball."
       );
       return;
     }
@@ -46,6 +56,7 @@ export const scheduledSyncFootball = functions
 
 /** Manual trigger for football sync (HTTPS callable — for testing/admin use). */
 export const triggerFootballSync = functions
+  .runWith({ secrets: [API_SPORTS_KEY] })
   .region("asia-northeast1")
   .https.onCall(
     async (_data: unknown, context: functions.https.CallableContext) => {
@@ -56,9 +67,7 @@ export const triggerFootballSync = functions
         );
       }
 
-      const apiSportsKey = functions.config().apisports?.key as
-        | string
-        | undefined;
+      const apiSportsKey = getApiSportsKey();
       if (!apiSportsKey) {
         throw new functions.https.HttpsError(
           "failed-precondition",
