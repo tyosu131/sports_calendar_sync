@@ -4196,20 +4196,65 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
     - clean
   - result:
     - `completed`
+- GitHub Actions CI workflow added
+  - PR title:
+    - `Add GitHub Actions CI workflow`
+  - merge commit:
+    - `6e4b721 Merge pull request #8 from tyosu131/feature/github-actions-ci`
+  - feature commit:
+    - `1116e33 Add GitHub Actions CI workflow`
+  - merged branch:
+    - `feature/github-actions-ci`
+  - updated file:
+    - `.github/workflows/ci.yml`
+  - changed files:
+    - 1
+  - additions:
+    - 44
+  - deletions:
+    - 0
+  - trigger:
+    - `pull_request`
+    - `push` to `main`
+  - CI validates:
+    - Functions install: `npm --prefix functions ci`
+    - Functions build: `npm --prefix functions run build`
+    - Flutter dependencies: `flutter pub get`
+    - Flutter analyze: `flutter analyze --no-pub`
+  - Firestore reads:
+    - 0
+  - Firestore writes:
+    - 0
+  - non-dry seed:
+    - 0
+  - `--write`:
+    - 0
+  - API sync:
+    - 0
+  - deploy:
+    - 0
+  - additional API call:
+    - 0
+  - secrets added:
+    - 0
+  - API key / serviceAccountKey added:
+    - 0
+  - npm audit vulnerabilities fixed in this PR:
+    - 0
+  - branch cleanup:
+    - `feature/github-actions-ci` local / remote deleted
 - Next task: 次の判断段階
-  - actual Firestore write result を docs-only で commit / push する
-  - `--write` は再実行しない
-  - 次に必要なら Firestore read/verify command の有無を確認する
-  - API sync はまだ行わない
-  - deploy はまだ行わない
-  - GitHub Actions CI workflow 追加は別タスク候補として残す
-  - npm audit vulnerabilities 対応は別タスク候補として残す
+  - GitHub Actions CI workflow 追加結果を current-state に反映して commit / push する
+  - 次に npm audit vulnerabilities 対応を別タスクとして判断する
+  - actual Firestore write は完了済みのため、`--write` は再実行しない
+  - API sync / deploy はまだ別判断とし、この段階では実行しない
+  - 今後の PR は GitHub Actions CI の結果を確認してから merge する
 - 次の合理的な順序
-  1. actual Firestore write result を docs-only で commit / push
-  2. 必要なら既存の Firestore read/verify command の有無を確認
-  3. `--write` は別承認なしに再実行しない
-  4. API sync / deploy は行わない
-  5. GitHub Actions CI workflow 追加と npm audit vulnerabilities 対応は別タスクとして扱う
+  1. GitHub Actions CI workflow 追加結果を current-state に反映して commit / push
+  2. npm audit vulnerabilities 対応を別タスクとして判断
+  3. `--write` は再実行しない
+  4. API sync / deploy は別判断まで行わない
+  5. 今後の PR は GitHub Actions CI の結果を確認してから merge
 - actual Firestore write は完了済み。`--write` の再実行には別承認が必要
 - Do not use bulk approval for Batch 1 or future batches
 - Keep Firestore write / non-dry seed / `--write` deferred until a separate exact plan and approval
