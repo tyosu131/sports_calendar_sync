@@ -4323,18 +4323,85 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
     - 0
   - branch cleanup:
     - `feature/season-membership-firestore-verify` local / remote deleted
+- API Sync / Deploy Readiness Review
+  - Current completed foundations
+    - J2 / J3 2026 season membership Firestore write:
+      - completed
+    - Firestore readback verification:
+      - PASS
+    - GitHub Actions CI workflow:
+      - added
+    - local validation / CI baseline:
+      - available
+    - stable team master / season membership separation:
+      - maintained
+    - duplicate `/teams/{id}` documents:
+      - not created
+  - Current known blockers / risks
+    - Firebase Functions deploy status:
+      - not verified / not completed
+    - Firebase plan:
+      - Spark plan may block Functions deploy; Blaze plan may be required
+    - API-SPORTS key:
+      - local inspection has worked before
+      - Functions config / deployed runtime config must be verified separately
+    - API sync:
+      - do not run until config / season profile / target competition are confirmed
+    - deploy:
+      - do not deploy until readiness exact plan is approved
+    - API sync and deploy are separate approvals
+    - npm audit vulnerabilities:
+      - remain separate task
+    - `--write`:
+      - do not re-run
+
+  | area | current status | readiness | blocker / note | next action |
+  |---|---|---|---|---|
+  | Firestore season membership document | `competitionSeasonMemberships/football_j2_j3_2026_hyakunen` written | ready | write completed; do not re-run `--write` | use existing document as verified foundation |
+  | Firestore readback verification | PASS | ready | readback matched local profile | keep verification result as baseline |
+  | GitHub Actions CI | workflow added for PR / main push | ready | CI should be checked before future merges | require CI result review on PRs |
+  | API-SPORTS key / Functions config | local inspection worked before; deployed config not verified | not ready | Functions runtime config / secret state unknown | decide whether to inspect config / secret setup |
+  | Firebase plan / Functions deploy | deploy not verified / not completed | not ready | Spark may block Functions deploy; Blaze may be required | confirm plan and deploy capability before exact deploy plan |
+  | `syncFootball` season profile usage | explicit season profile support implemented | partially ready | target competition / API accessibility must be confirmed | review target `competitionKey` / `competitionSeasonKey` before sync |
+  | target competition / competitionSeasonKey | J2 / J3 membership verified; J1 sync path still separate | not ready | execution target not selected for API sync | create exact plan for target competition and scope |
+  | deploy command | not selected | not ready | deploy command and functions scope need approval | create deploy exact command plan before execution |
+  | rollback / verification after deploy | not planned | not ready | post-deploy curl/log checks and rollback criteria undefined | include verification / rollback in deploy exact plan |
+  | npm audit vulnerabilities | known outstanding task | separate | not part of sync/deploy readiness execution | handle as separate task |
+
+  - Decision
+    - API sync readiness:
+      - `not-ready-for-execution`
+    - deploy readiness:
+      - `not-ready-for-execution`
+    - exact plan needed before execution:
+      - yes
+    - next step:
+      - create docs-only API sync exact plan or deploy exact plan after confirming blocker status
+  - Recommended next order
+    - Do not run API sync now.
+    - Do not deploy now.
+    - Do not re-run Firestore write.
+    - First decide whether to inspect Firebase Functions config / plan status.
+    - Then create an exact plan for either:
+      - API sync dry-run / limited sync readiness
+      - Functions deploy readiness
+    - npm audit vulnerabilities remain separate.
 - Next task: 次の判断段階
-  - read-only Firestore verification script 追加結果を current-state に反映して commit / push する
-  - 次に API sync / deploy へ進むか、npm audit vulnerabilities 対応へ進むか判断する
+  - API sync / deploy readiness review を commit / push する
+  - 次に Firebase Functions config / plan / deploy blocker を確認するか判断する
+  - API sync はまだ実行しない
+  - deploy はまだ実行しない
   - `--write` は再実行しない
-  - 追加 Firestore write はしない
+  - npm audit vulnerabilities は別タスク候補として残す
   - 今後の PR は GitHub Actions CI の結果を確認してから merge する
 - 次の合理的な順序
-  1. read-only Firestore verification script 追加結果を current-state に反映して commit / push
-  2. API sync / deploy へ進むか、npm audit vulnerabilities 対応へ進むか判断
-  3. `--write` は再実行しない
-  4. 追加 Firestore write はしない
-  5. 今後の PR は GitHub Actions CI の結果を確認してから merge
+  1. API sync / deploy readiness review を commit / push
+  2. Firebase Functions config / plan / deploy blocker を確認するか判断
+  3. API sync はまだ実行しない
+  4. deploy はまだ実行しない
+  5. `--write` は再実行しない
+  6. npm audit vulnerabilities は別タスク候補として扱う
+  7. 今後の PR は GitHub Actions CI の結果を確認してから merge
 - actual Firestore write は完了済み。`--write` の再実行には別承認が必要
 - Do not use bulk approval for Batch 1 or future batches
 - Do not run additional Firestore write / non-dry seed / `--write` without a separate exact plan and approval
