@@ -4732,9 +4732,62 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
       - `not-ready-for-execution`
     - API sync readiness:
       - `not-ready-for-execution`
+- API-SPORTS secret code migration merged into main
+  - PR title:
+    - `Use API Sports secret param in Functions`
+  - merge commit:
+    - `b4373d3 Merge pull request #10 from tyosu131/feature/api-sports-define-secret`
+  - feature commit:
+    - `dc979ec Use API Sports secret param in functions`
+  - merged branch:
+    - `feature/api-sports-define-secret`
+  - branch cleanup:
+    - `feature/api-sports-define-secret` local / remote deleted
+  - updated files:
+    - `functions/src/index.ts`
+    - `functions/lib/index.js`
+    - `functions/lib/index.js.map`
+  - changed behavior:
+    - `functions.config().apisports?.key` removed from Functions runtime source / generated output
+    - `defineSecret("API_SPORTS_KEY")` added
+    - scheduled sync and callable trigger bind the secret with `.runWith({ secrets: [...] })`
+    - handlers read the key through `API_SPORTS_KEY.value()`
+    - scheduled sync keeps safe skip behavior when key is missing
+    - callable trigger keeps `failed-precondition` behavior when key is missing
+  - unchanged:
+    - `syncFootballFixtures` behavior unchanged
+    - local scripts still use local `API_SPORTS_KEY` env var separately
+    - API sync executed: 0
+    - deploy executed: 0
+    - Firebase CLI secret command executed: 0
+    - secret value displayed or committed: 0
+    - Firestore write / `--write`: 0
+  - validation results on main
+    - current branch: `main`
+    - HEAD: `b4373d3`
+    - initial `git status --short`: clean
+    - `npm --prefix functions ci`: PASS
+      - warning: local Node is v25.8.0 while package requires Node 20
+    - `npm --prefix functions run build`: PASS
+    - `flutter analyze --no-pub`: No issues found
+    - `grep -R "functions.config().apisports" functions/src functions/lib || true`: no output
+    - `grep -R "functions.config" functions/src functions/lib || true`: no output
+    - `grep -RF "apisports.key" functions/src functions/lib || true`: no output
+    - `grep -R "defineSecret(\"API_SPORTS_KEY\")" functions/src functions/lib || true`: found in `functions/src/index.ts`
+    - forbidden diff-name scan output: none
+    - final `git status --short`: clean
+  - Decision
+    - secret code migration:
+      - completed
+    - secret value setup:
+      - not-started
+    - deploy readiness:
+      - `not-ready-for-execution`
+    - API sync readiness:
+      - `not-ready-for-execution`
 - Next task: 次の判断段階
-  - secret config actual code migration exact diff plan を commit / push する
-  - 次に feature branch で actual code migration を実装するか判断する
+  - API-SPORTS secret code migration merge result を current-state に反映して commit / push する
+  - 次に `API_SPORTS_KEY` secret value setup exact plan を作るか判断する
   - API sync はまだ実行しない
   - deploy はまだ実行しない
   - secret値は表示・記録しない
@@ -4743,16 +4796,15 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - npm audit vulnerabilities は別タスク候補として残す
   - 今後の PR は GitHub Actions CI の結果を確認してから merge する
 - 次の合理的な順序
-  1. secret config actual code migration exact diff plan を commit / push
-  2. feature branch で actual code migration を実装するか判断
-  3. Secret Manager / params / env の採用方針は Firebase Functions params / `defineSecret` 第一候補で進める
+  1. API-SPORTS secret code migration merge result を current-state に反映して commit / push
+  2. `API_SPORTS_KEY` secret value setup exact plan を作るか判断
+  3. secret値は表示・記録しない
   4. API sync はまだ実行しない
   5. deploy はまだ実行しない
-  6. secret値は表示・記録しない
-  7. Firestore write / `--write` は再実行しない
-  8. Spark / Blaze plan と Functions deploy capability 確認は別タスクとして残す
-  9. npm audit vulnerabilities は別タスク候補として扱う
-  10. 今後の PR は GitHub Actions CI の結果を確認してから merge
+  6. Firestore write / `--write` は再実行しない
+  7. Spark / Blaze plan と Functions deploy capability 確認は別タスクとして残す
+  8. npm audit vulnerabilities は別タスク候補として扱う
+  9. 今後の PR は GitHub Actions CI の結果を確認してから merge
 - actual Firestore write は完了済み。`--write` の再実行には別承認が必要
 - Do not use bulk approval for Batch 1 or future batches
 - Do not run additional Firestore write / non-dry seed / `--write` without a separate exact plan and approval
