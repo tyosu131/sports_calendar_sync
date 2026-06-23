@@ -4272,22 +4272,69 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
     - 0
   - exact plan result:
     - `ready-for-firestore-read-verification-script-approval`
+- J2 / J3 2026 Firestore read verification script added
+  - PR title:
+    - `Add season membership Firestore verification script`
+  - merge commit:
+    - `b5a2324 Merge pull request #9 from tyosu131/feature/season-membership-firestore-verify`
+  - feature commit:
+    - `3f699b2 Add season membership Firestore verification script`
+  - merged branch:
+    - `feature/season-membership-firestore-verify`
+  - updated file:
+    - `functions/scripts/verifyCompetitionSeasonMembershipFirestore.js`
+  - changed files:
+    - 1
+  - additions:
+    - 578
+  - deletions:
+    - 0
+  - script behavior:
+    - requires `--season <competitionSeasonKey>`
+    - reads exactly one Firestore document
+    - compares Firestore document against local `competitionSeasonMemberships.js`
+    - verifies scalar fields, `source`, `groups`, ordered `teamIds`, `teamIdStatuses`, `createdAt` / `updatedAt` existence
+    - does not compare exact timestamp values
+    - does not verify all seasons by default
+  - Firestore read verification result:
+    - command: `node functions/scripts/verifyCompetitionSeasonMembershipFirestore.js --season football_j2_j3_2026_hyakunen`
+    - mode: `firestore-read`
+    - checked documents: 1
+    - target document exists: yes
+    - groups: 4
+    - membership teamIds: 40
+    - confirmed team references: 40
+    - blocked/unconfirmed rows: 0
+    - field checks: PASS
+    - group checks: PASS
+    - teamIdStatuses checks: PASS
+    - result: PASS
+  - Firestore writes:
+    - 0
+  - non-dry seed:
+    - 0
+  - `--write`:
+    - 0
+  - API sync:
+    - 0
+  - deploy:
+    - 0
+  - additional API call:
+    - 0
+  - branch cleanup:
+    - `feature/season-membership-firestore-verify` local / remote deleted
 - Next task: 次の判断段階
-  - Firestore read verification command exact plan を commit / push する
-  - 次に read-only Firestore verification script を feature branch 上で実装するか判断する
+  - read-only Firestore verification script 追加結果を current-state に反映して commit / push する
+  - 次に API sync / deploy へ進むか、npm audit vulnerabilities 対応へ進むか判断する
   - `--write` は再実行しない
-  - Firestore write はしない
-  - API sync / deploy はまだ行わない
-  - npm audit vulnerabilities 対応は別タスク候補として残す
+  - 追加 Firestore write はしない
   - 今後の PR は GitHub Actions CI の結果を確認してから merge する
 - 次の合理的な順序
-  1. Firestore read verification command exact plan を commit / push
-  2. read-only Firestore verification script を feature branch 上で実装するか判断
+  1. read-only Firestore verification script 追加結果を current-state に反映して commit / push
+  2. API sync / deploy へ進むか、npm audit vulnerabilities 対応へ進むか判断
   3. `--write` は再実行しない
-  4. Firestore write はしない
-  5. API sync / deploy は別判断まで行わない
-  6. npm audit vulnerabilities 対応を別タスクとして判断
-  7. 今後の PR は GitHub Actions CI の結果を確認してから merge
+  4. 追加 Firestore write はしない
+  5. 今後の PR は GitHub Actions CI の結果を確認してから merge
 - actual Firestore write は完了済み。`--write` の再実行には別承認が必要
 - Do not use bulk approval for Batch 1 or future batches
 - Do not run additional Firestore write / non-dry seed / `--write` without a separate exact plan and approval
