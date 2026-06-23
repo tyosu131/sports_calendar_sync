@@ -4587,26 +4587,73 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
     - Next step should be a deploy readiness decision:
       - either confirm Blaze / Functions deploy capability
       - or create a migration plan away from `functions.config().apisports?.key` toward a supported secret/env approach before deploy
+- API-SPORTS Secret Configuration Migration Plan
+  - Current problem
+    - current code uses `functions.config().apisports?.key`
+    - CLI existence checks were inconclusive
+    - Functions Console did not show a useful runtime config / secret location
+    - Functions are not deployed yet
+    - Firebase plan / Blaze capability is still unresolved
+  - Why migration is needed
+    - `functions.config()` should not be treated as deploy-ready
+    - supported approach should be selected before first Functions deploy
+    - avoid depending on legacy runtime config for new deploy
+  - Candidate approaches
+    - Firebase Functions params / `defineSecret`
+    - environment variables via `.env` / `process.env`
+    - Google Cloud Secret Manager integrated with Functions
+    - do not commit `.env` or secret values
+    - do not print secret values in logs, docs, PRs, or chat
+  - Recommended direction
+    - prefer Secret Manager / Firebase Functions params for `API_SPORTS_KEY`
+    - keep local scripts using local `API_SPORTS_KEY` env var separately
+    - Functions runtime should read from a deploy-supported secret mechanism
+    - migration should be implemented in a feature branch with CI
+  - Planned implementation scope, not yet executed
+    - inspect current `functions/src/index.ts` usages of `functions.config().apisports?.key`
+    - replace runtime API key access with selected secret/params approach
+    - update build validation
+    - avoid changing sync behavior in the same step
+    - do not run API sync
+    - do not deploy
+    - do not set or print secret value
+  - Safety rules
+    - secret value display: 0
+    - secret value commit: 0
+    - API sync: 0
+    - deploy: 0
+    - Firestore write: 0
+    - `--write`: 0
+    - raw config output display: 0
+  - Decision
+    - migration readiness:
+      - `ready-for-secret-config-migration-exact-diff-plan`
+    - deploy readiness:
+      - `not-ready-for-execution`
+    - API sync readiness:
+      - `not-ready-for-execution`
 - Next task: 次の判断段階
-  - Firebase Console manual check result を current-state に反映して commit / push
-  - 次に Spark / Blaze plan と Functions deploy capability を確認する
-  - 次に `functions.config().apisports?.key` を使い続けるか、Secret Manager / env / params 方式へ移行するか判断する
-  - secret値は表示・記録しない
+  - secret configuration migration plan を commit / push する
+  - 次に actual code migration の exact diff plan を作る
+  - Secret Manager / params / env のどれを採用するか決める
   - API sync はまだ実行しない
   - deploy はまだ実行しない
+  - secret値は表示・記録しない
   - Firestore write / `--write` は再実行しない
+  - Spark / Blaze plan と Functions deploy capability 確認は別タスクとして残す
   - npm audit vulnerabilities は別タスク候補として残す
   - 今後の PR は GitHub Actions CI の結果を確認してから merge する
 - 次の合理的な順序
-  1. Firebase Console manual check result を current-state に反映して commit / push
-  2. Spark / Blaze plan と Functions deploy capability を確認する
-  3. `functions.config().apisports?.key` を使い続けるか、Secret Manager / env / params 方式へ移行するか判断する
+  1. secret configuration migration plan を commit / push
+  2. actual code migration の exact diff plan を作る
+  3. Secret Manager / params / env のどれを採用するか決める
   4. API sync はまだ実行しない
   5. deploy はまだ実行しない
-  6. Firestore write / `--write` は再実行しない
-  7. secret値は表示・記録しない
-  8. npm audit vulnerabilities は別タスク候補として扱う
-  9. 今後の PR は GitHub Actions CI の結果を確認してから merge
+  6. secret値は表示・記録しない
+  7. Firestore write / `--write` は再実行しない
+  8. Spark / Blaze plan と Functions deploy capability 確認は別タスクとして残す
+  9. npm audit vulnerabilities は別タスク候補として扱う
+  10. 今後の PR は GitHub Actions CI の結果を確認してから merge
 - actual Firestore write は完了済み。`--write` の再実行には別承認が必要
 - Do not use bulk approval for Batch 1 or future batches
 - Do not run additional Firestore write / non-dry seed / `--write` without a separate exact plan and approval
