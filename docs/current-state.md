@@ -4450,23 +4450,54 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
     - `apisports.key` Functions runtime config / secret setup unknown
     - `syncFootball` is a Firestore write pipeline; execution needs separate exact plan
     - deploy and API sync remain separate approvals
+- `apisports.key` Functions runtime config existence check exact plan documented
+  - planned purpose:
+    - verify whether `functions.config().apisports?.key` exists without printing the secret value
+  - planned project:
+    - `sports-calendar-sync-a4564`
+  - planned safe command approach:
+    - raw `firebase functions:config:get` output must not be printed directly
+    - output should be piped into a small parser that prints only boolean / status fields
+    - expected printed fields should be limited to:
+      - `project: sports-calendar-sync-a4564`
+      - `apisports config object exists: true/false`
+      - `apisports.key exists: true/false`
+      - `apisports.key value printed: no`
+  - planned command candidate:
+    - `firebase functions:config:get apisports --project sports-calendar-sync-a4564 | node -e "<parse stdin JSON and print only existence booleans>"`
+  - explicit safety notes:
+    - do not run `firebase functions:config:get` directly without a parser because it may print the secret value
+    - do not paste raw config output into docs or chat
+    - this is not API sync approval
+    - this is not deploy approval
+    - this is not a secret change
+  - execution status:
+    - Firebase config read command executed: 0
+    - Firestore read/write: 0
+    - API sync / API call: 0
+    - deploy: 0
+    - non-dry seed: 0
+    - `--write`: 0
+    - secrets / API key / serviceAccountKey value printed or changed: 0
+  - expected decision:
+    - exact plan result: `ready-for-apisports-runtime-config-existence-check-approval`
 - Next task: 次の判断段階
-  - Firebase Functions config / plan / deploy blocker 確認結果を current-state に反映して commit / push する
-  - 次に `.firebaserc` を追加するか、deploy commandで `--project sports-calendar-sync-a4564` を明示するか判断する
-  - 次に `apisports.key` runtime config の存在確認方法を、値を表示しない形で exact plan 化する
-  - Firebase Console で Spark / Blaze plan と Functions deploy capability を確認する
+  - `apisports.key` runtime config existence check exact plan を commit / push する
+  - 次に approved existence-only config check を実行するか判断する
   - API sync はまだ実行しない
   - deploy はまだ実行しない
+  - `.firebaserc` / `--project` decision remains separate
+  - Firebase Console plan check remains separate
   - Firestore write / `--write` は再実行しない
   - npm audit vulnerabilities は別タスク候補として残す
   - 今後の PR は GitHub Actions CI の結果を確認してから merge する
 - 次の合理的な順序
-  1. Firebase Functions config / plan / deploy blocker 確認結果を current-state に反映して commit / push
-  2. `apisports.key` runtime config の存在確認方法を、値を表示しない形で exact plan 化
-  3. `.firebaserc` を追加するか、deploy commandで `--project sports-calendar-sync-a4564` を明示するか判断
-  4. Firebase Console で Spark / Blaze plan と Functions deploy capability を確認
-  5. API sync はまだ実行しない
-  6. deploy はまだ実行しない
+  1. `apisports.key` runtime config existence check exact plan を commit / push
+  2. approved existence-only config check を実行するか判断
+  3. API sync はまだ実行しない
+  4. deploy はまだ実行しない
+  5. `.firebaserc` / `--project` decision は別タスクとして扱う
+  6. Firebase Console plan check は別タスクとして扱う
   7. Firestore write / `--write` は再実行しない
   8. npm audit vulnerabilities は別タスク候補として扱う
   9. 今後の PR は GitHub Actions CI の結果を確認してから merge
