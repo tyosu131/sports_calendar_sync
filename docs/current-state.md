@@ -4559,28 +4559,54 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
       - `location-not-found`
     - If missing, create a separate exact plan for setting it without printing the value.
     - If exists, proceed to `.firebaserc` / `--project` decision and Firebase plan / Functions deploy capability confirmation.
+- Firebase Console manual check result recorded
+  - Firebase Console Functions page:
+    - opened
+  - dashboard message:
+    - `最初のデプロイを待機しています`
+  - deployed functions:
+    - none
+  - deployed functions status:
+    - `no-functions-deployed`
+  - usage page:
+    - no data
+  - project plan:
+    - Spark / free plan visible
+  - `apisports.key` runtime config / secret location:
+    - not found from this Functions Console view
+  - no Firebase settings were changed
+  - no API key / secret value was displayed
+  - no deploy was executed
+  - no API sync was executed
+  - no Firestore write / `--write` was executed
+  - Overall interpretation:
+    - Functions deploy has not been performed yet.
+    - API sync / deploy remains not ready for execution.
+    - Firebase plan / Blaze requirement remains a blocker to confirm.
+    - `apisports.key` runtime config existence remains unresolved from CLI and Console.
+    - Next step should be a deploy readiness decision:
+      - either confirm Blaze / Functions deploy capability
+      - or create a migration plan away from `functions.config().apisports?.key` toward a supported secret/env approach before deploy
 - Next task: 次の判断段階
-  - CLI判定不能結果を current-state に反映して commit / push する
-  - 次に Firebase Console で `apisports.key` runtime config / secret の存在を手動確認する
+  - Firebase Console manual check result を current-state に反映して commit / push
+  - 次に Spark / Blaze plan と Functions deploy capability を確認する
+  - 次に `functions.config().apisports?.key` を使い続けるか、Secret Manager / env / params 方式へ移行するか判断する
   - secret値は表示・記録しない
   - API sync はまだ実行しない
   - deploy はまだ実行しない
-  - `.firebaserc` / `--project` decision remains separate
-  - Firebase Console plan check remains separate
   - Firestore write / `--write` は再実行しない
   - npm audit vulnerabilities は別タスク候補として残す
   - 今後の PR は GitHub Actions CI の結果を確認してから merge する
 - 次の合理的な順序
-  1. CLI判定不能結果を current-state に反映して commit / push
-  2. Firebase Console で `apisports.key` runtime config / secret の存在を手動確認
-  3. 確認結果は `exists` / `missing` / `location-not-found` のいずれかだけを記録し、secret値は記録しない
+  1. Firebase Console manual check result を current-state に反映して commit / push
+  2. Spark / Blaze plan と Functions deploy capability を確認する
+  3. `functions.config().apisports?.key` を使い続けるか、Secret Manager / env / params 方式へ移行するか判断する
   4. API sync はまだ実行しない
   5. deploy はまだ実行しない
-  6. `.firebaserc` / `--project` decision は別タスクとして扱う
-  7. Firebase Console plan check は別タスクとして扱う
-  8. Firestore write / `--write` は再実行しない
-  9. npm audit vulnerabilities は別タスク候補として扱う
-  10. 今後の PR は GitHub Actions CI の結果を確認してから merge
+  6. Firestore write / `--write` は再実行しない
+  7. secret値は表示・記録しない
+  8. npm audit vulnerabilities は別タスク候補として扱う
+  9. 今後の PR は GitHub Actions CI の結果を確認してから merge
 - actual Firestore write は完了済み。`--write` の再実行には別承認が必要
 - Do not use bulk approval for Batch 1 or future batches
 - Do not run additional Firestore write / non-dry seed / `--write` without a separate exact plan and approval
