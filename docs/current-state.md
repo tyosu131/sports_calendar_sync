@@ -4632,10 +4632,109 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
       - `not-ready-for-execution`
     - API sync readiness:
       - `not-ready-for-execution`
+- API-SPORTS Secret Config Actual Code Migration Exact Diff Plan
+  - inspection results
+    - `functions/package.json`
+      - `firebase-functions`: `^6.0.0`
+      - `firebase-admin`: `^12.0.0`
+      - Functions runtime: Node 20
+      - build script: `tsc`
+    - `functions/src/index.ts`
+      - imports `firebase-functions/v1`
+      - current scheduled sync and callable trigger use `functions.config().apisports?.key`
+      - current missing-key behavior:
+        - scheduled sync logs and returns
+        - callable trigger throws `failed-precondition`
+    - `functions/src/pipelines/syncFootball.ts`
+      - receives API key as `rapidApiKey` argument
+      - uses key only as `x-apisports-key` request header
+      - contains Firestore write path and must not be executed during migration
+    - `functions/src/config/competitionSeasons.ts`
+      - no API key access
+      - season profile logic remains separate from secret migration
+    - `firebase.json`
+      - Functions source: `functions`
+      - runtime: `nodejs20`
+      - ignores `serviceAccountKey.json`
+    - `.gitignore`
+      - ignores `functions/serviceAccountKey.json` and `functions/node_modules/`
+      - no committed secret value should be added
+    - API key access search
+      - `functions.config().apisports?.key` found only in `functions/src/index.ts`
+      - `defineSecret` / params not currently used in `functions/src`
+      - `process.env.API_SPORTS_KEY` usage exists only in local inspection scripts
+    - Functions style
+      - current Functions are v1 style
+      - `firebase-functions` v6 type definitions expose params / `defineSecret`
+      - v1 runtime options include `secrets?: (string | SecretParam)[]`, so `defineSecret` appears adoptable without a full v2 migration
+  - selected recommended approach
+    - use Firebase Functions params / `defineSecret` for runtime secret `API_SPORTS_KEY`
+    - keep existing v1 Functions style for this migration to minimize scope
+    - keep local scripts using local `API_SPORTS_KEY` env var separately
+    - do not migrate sync behavior, scheduler shape, callable auth behavior, or game write logic in the same step
+  - planned changed files
+    - `functions/src/index.ts`
+    - possibly `functions/package.json` only if dependency/version change is actually needed
+    - possibly docs after implementation result
+  - planned non-changed files
+    - no `functions/scripts/*` changes unless strictly necessary
+    - no `functions/src/pipelines/syncFootball.ts` behavior change unless required by key injection
+    - no `functions/scripts/data/competitionSeasonMemberships.js` change
+    - no Firestore data module change
+    - no `.env` or secret value file committed
+  - exact planned code changes
+    - replace direct `functions.config().apisports?.key` access in Functions runtime
+    - import `defineSecret` from `firebase-functions/params`
+    - declare a module-level secret param candidate:
+      - `const apiSportsKeySecret = defineSecret("API_SPORTS_KEY");`
+    - attach the secret to functions that need it:
+      - scheduled sync: add `.runWith({ secrets: [apiSportsKeySecret] })` before region / schedule chain if supported by the current v1 builder
+      - callable trigger: add `.runWith({ secrets: [apiSportsKeySecret] })` before region / https chain if supported by the current v1 builder
+    - introduce a small helper if useful:
+      - read `apiSportsKeySecret.value()`
+      - trim / validate non-empty string
+      - return `undefined` when missing
+    - keep behavior equivalent:
+      - if key is missing, scheduled sync returns / skips safely
+      - if key is missing, callable trigger fails safely with `failed-precondition`
+    - update error message to avoid `functions:config:set apisports.key` guidance and refer generically to missing `API_SPORTS_KEY` secret
+    - do not log or return the secret value
+    - do not run API sync
+    - do not deploy
+    - do not set or print secret value
+  - expected validation commands after future implementation
+    - `npm --prefix functions ci`
+    - `npm --prefix functions run build`
+    - `flutter analyze --no-pub`
+    - grep scan to confirm `functions.config().apisports?.key` is removed from `functions/src`
+    - grep scan to confirm no secret value was committed
+    - GitHub Actions CI on PR
+  - risks / blockers
+    - actual deploy still needs Spark / Blaze plan and Functions deploy capability confirmation
+    - first deploy may require setting / binding `API_SPORTS_KEY` secret through Firebase / Google Cloud supported flow
+    - `.firebaserc` / explicit `--project sports-calendar-sync-a4564` decision remains separate
+    - v1 `runWith({ secrets })` should be confirmed by TypeScript build during implementation
+    - if v1 secret binding is not accepted by build/deploy, fallback is a smaller v2 migration for scheduled/callable sync entry points or a supported env/params pattern
+    - do not use `.env` unless `.gitignore` / deployment behavior is explicitly reviewed first
+  - safety rules
+    - secret value display: 0
+    - secret value commit: 0
+    - raw Firebase config output: 0
+    - API sync: 0
+    - deploy: 0
+    - Firestore write: 0
+    - `--write`: 0
+    - serviceAccountKey change: 0
+  - Decision
+    - exact diff plan result:
+      - `ready-for-secret-config-code-migration-approval`
+    - deploy readiness:
+      - `not-ready-for-execution`
+    - API sync readiness:
+      - `not-ready-for-execution`
 - Next task: 次の判断段階
-  - secret configuration migration plan を commit / push する
-  - 次に actual code migration の exact diff plan を作る
-  - Secret Manager / params / env のどれを採用するか決める
+  - secret config actual code migration exact diff plan を commit / push する
+  - 次に feature branch で actual code migration を実装するか判断する
   - API sync はまだ実行しない
   - deploy はまだ実行しない
   - secret値は表示・記録しない
@@ -4644,9 +4743,9 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - npm audit vulnerabilities は別タスク候補として残す
   - 今後の PR は GitHub Actions CI の結果を確認してから merge する
 - 次の合理的な順序
-  1. secret configuration migration plan を commit / push
-  2. actual code migration の exact diff plan を作る
-  3. Secret Manager / params / env のどれを採用するか決める
+  1. secret config actual code migration exact diff plan を commit / push
+  2. feature branch で actual code migration を実装するか判断
+  3. Secret Manager / params / env の採用方針は Firebase Functions params / `defineSecret` 第一候補で進める
   4. API sync はまだ実行しない
   5. deploy はまだ実行しない
   6. secret値は表示・記録しない
