@@ -4847,9 +4847,38 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
       - `not-ready-for-execution`
     - API sync readiness:
       - `not-ready-for-execution`
+- API_SPORTS_KEY Secret Setup Attempt Blocked by Blaze Plan
+  - Attempted command
+    - `firebase functions:secrets:set API_SPORTS_KEY --project sports-calendar-sync-a4564`
+  - Result
+    - `blocked-by-blaze-plan`
+  - Error summary
+    - Firebase project must be upgraded to Blaze pay-as-you-go plan
+    - required API `secretmanager.googleapis.com` cannot be enabled until upgrade is complete
+    - `API_SPORTS_KEY` secret setup was not completed
+  - Safety result
+    - secret value printed: no
+    - secret value changed: no
+    - secret value committed: no
+    - deploy executed: 0
+    - API sync executed: 0
+    - Firestore write: 0
+    - `--write`: 0
+    - source files changed: 0
+  - Current blocker
+    - Firebase plan / billing upgrade is now confirmed blocker for secret setup and likely Functions deploy
+    - do not retry `functions:secrets:set` until Blaze / billing decision is made
+  - Decision
+    - secret value setup:
+      - `blocked-by-blaze-plan`
+    - deploy readiness:
+      - `not-ready-for-execution`
+    - API sync readiness:
+      - `not-ready-for-execution`
 - Next task: 次の判断段階
-  - `API_SPORTS_KEY` secret value setup exact plan を commit / push する
-  - 次に actual `firebase functions:secrets:set API_SPORTS_KEY --project sports-calendar-sync-a4564` を実行するか判断する
+  - secret setup blocked-by-Blaze result を current-state に反映して commit / push する
+  - 次に Firebase project を Blaze plan に上げるか判断する
+  - Blaze に上げる場合のみ、改めて `API_SPORTS_KEY` secret setup を実行する
   - API sync はまだ実行しない
   - deploy はまだ実行しない
   - secret値は表示・記録しない
@@ -4858,13 +4887,13 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - npm audit vulnerabilities は別タスク候補として残す
   - 今後の PR は GitHub Actions CI の結果を確認してから merge する
 - 次の合理的な順序
-  1. `API_SPORTS_KEY` secret value setup exact plan を commit / push
-  2. actual `firebase functions:secrets:set API_SPORTS_KEY --project sports-calendar-sync-a4564` を実行するか判断
-  3. secret値は表示・記録しない
-  4. API sync はまだ実行しない
-  5. deploy はまだ実行しない
-  6. Firestore write / `--write` は再実行しない
-  7. Spark / Blaze plan と Functions deploy capability 確認は別タスクとして残す
+  1. secret setup blocked-by-Blaze result を current-state に反映して commit / push
+  2. Firebase project を Blaze plan に上げるか判断
+  3. Blaze に上げる場合のみ、改めて `API_SPORTS_KEY` secret setup を実行
+  4. secret値は表示・記録しない
+  5. API sync はまだ実行しない
+  6. deploy はまだ実行しない
+  7. Firestore write / `--write` は再実行しない
   8. npm audit vulnerabilities は別タスク候補として扱う
   9. 今後の PR は GitHub Actions CI の結果を確認してから merge
 - actual Firestore write は完了済み。`--write` の再実行には別承認が必要
