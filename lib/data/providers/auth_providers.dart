@@ -2,12 +2,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/models/user_profile.dart';
+import '../repositories/user_repository.dart';
 import 'repository_providers.dart';
 
 // ── Auth state ────────────────────────────────────────────────────────────────
 
 /// Stream of Firebase auth state (User? — null means signed out)
 final authStateProvider = StreamProvider<User?>((ref) {
+  if (useSampleData) return Stream<User?>.value(null);
   return ref.watch(userRepositoryProvider).authStateChanges;
 });
 
@@ -21,6 +23,12 @@ final currentUserProvider = Provider<User?>((ref) {
 /// Stream of the current user's Firestore profile.
 /// Returns null if not signed in or profile not yet created.
 final userProfileProvider = StreamProvider<UserProfile?>((ref) {
+  if (useSampleData) {
+    return ref
+        .watch(userRepositoryProvider)
+        .watchProfile(SampleUserRepository.sampleUid);
+  }
+
   final user = ref.watch(currentUserProvider);
   if (user == null) return Stream.value(null);
   return ref.watch(userRepositoryProvider).watchProfile(user.uid);

@@ -68,8 +68,10 @@ class _TeamSearchScreenState extends ConsumerState<TeamSearchScreen>
             children: [
               // Search bar
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: SearchBar(
                   controller: _searchController,
                   hintText: 'チーム名で検索...',
@@ -95,9 +97,7 @@ class _TeamSearchScreenState extends ConsumerState<TeamSearchScreen>
                 isScrollable: true,
                 tabs: [
                   const Tab(text: 'すべて'),
-                  ..._competitions.map(
-                    (s) => Tab(text: s.displayNameJa),
-                  ),
+                  ..._competitions.map((s) => Tab(text: s.displayNameJa)),
                 ],
               ),
             ],
@@ -116,6 +116,8 @@ class _SearchResults extends ConsumerWidget {
     final resultsAsync = ref.watch(teamSearchResultsProvider);
     final followedIds = ref.watch(followedTeamIdsProvider);
     final user = ref.watch(currentUserProvider);
+    final profile = ref.watch(userProfileProvider).valueOrNull;
+    final userId = user?.uid ?? profile?.uid;
 
     return resultsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -134,20 +136,20 @@ class _SearchResults extends ConsumerWidget {
               isFollowing: isFollowing,
               onTap: () => context.push('/team/${team.id}'),
               onFollowToggle: () async {
-                if (user == null) {
+                if (userId == null) {
                   context.push('/signin');
                   return;
                 }
                 final repo = ref.read(userRepositoryProvider);
                 if (isFollowing) {
                   await repo.unfollowTeam(
-                    user.uid,
+                    userId,
                     team.id,
                     competitionKey: team.competitionKey,
                   );
                 } else {
                   await repo.followTeam(
-                    user.uid,
+                    userId,
                     team.id,
                     competitionKey: team.competitionKey,
                   );
