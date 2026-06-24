@@ -4888,12 +4888,14 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
     - keep Firebase Functions / Secret Manager path as deploy-ready but deferred
   - Free MVP direction
     - prioritize app-visible value without paid cloud resources
-    - complete in-app calendar using sample / static data
-    - complete favorite team filtering
-    - add local script for team-level ICS generation
-    - document iOS / Google Calendar subscription workflow
+    - sample / static data mode is now available via `USE_SAMPLE_DATA=true`
+    - team search / team detail / upcoming game lists are visible without Firestore reads
+    - favorite team follow / unfollow works with in-memory state in sample mode
+    - sample mode hides undeployed Cloud Functions calendar sync actions
+    - next free-MVP focus is in-app calendar UI using sample / static data
+    - team-level ICS local generation remains a later step
+    - README / architecture docs / cost-control note remain documentation follow-ups
     - consider GitHub Pages / Cloudflare Pages for static ICS later
-    - improve README / architecture docs / cost-control note
     - add AWS / Terraform design docs or skeleton later without creating paid resources
   - Portfolio framing
     - production deploy is intentionally deferred for cost-control
@@ -4902,13 +4904,45 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
     - Free MVP should still be usable by the user and friends
   - Immediate implementation priority
     - first implementation target:
-      - app calendar with sample / static data
+      - sample / static data mode for app-visible team search / team detail / match list
+      - status: completed in commit `992bcb4 Add sample data mode for free MVP`
+      - `USE_SAMPLE_DATA=true` enables sample / static data mode
+      - Team / Game / User repository abstractions added
+      - Firestore implementations retained:
+        - `FirestoreTeamRepository`
+        - `FirestoreGameRepository`
+        - `FirestoreUserRepository`
+      - sample / in-memory implementations added:
+        - `SampleTeamRepository`
+        - `SampleGameRepository`
+        - `SampleUserRepository`
+      - sample mode does not read / write Firestore
+      - sample mode follow / unfollow uses in-memory state
+      - sample teams include a minimal J1 / J2 / J3 set
+      - sample games are generated with `Timestamp.fromDate(DateTime.utc(...))`
+      - TeamDetail sample mode hides calendar sync IconButton
+      - TeamDetail sample mode does not call `IcsUrlBuilder.buildForTeam(...)` or `IcsShareSheet.show(...)`
+    - validation:
+      - `flutter pub get`: PASS
+      - `flutter analyze`: No issues found
+      - `flutter test`: All tests passed
+    - manual UI check:
+      - Chrome run with `flutter run --dart-define=USE_SAMPLE_DATA=true`
+      - team search display: OK
+      - follow / unfollow: OK
+      - Home followed teams / games: OK
+      - empty state after unfollow: OK
+      - team detail game list: OK
+      - calendar sync icon hidden in sample mode: OK
+      - Firebase / Auth / Firestore screen errors: none observed
     - second:
-      - favorite team filter
+      - decide whether to hide unused competition tabs in sample mode
     - third:
-      - team ICS generation local script
+      - sample / static data in-app calendar UI exact plan
     - fourth:
-      - README instructions for iOS / Google Calendar subscription
+      - team-level ICS local generation
+    - fifth:
+      - README / architecture docs / cost-control note
   - Decision
     - cost-control mode:
       - `enabled`
@@ -4919,11 +4953,13 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
     - API sync:
       - `deferred-by-cost-control`
     - Free MVP:
-      - `next-priority`
+      - `sample-data-first-implementation-completed`
 - Next task: 次の判断段階
-  - Free MVP / cost-control direction を current-state に反映して commit / push する
-  - 次に Flutter app の calendar / favorite team / sample data 実装状況を調査する
-  - 次に sample / static data による in-app calendar exact plan を作る
+  - Free MVP sample data mode 実装結果を current-state に反映して commit / push する
+  - 次に sample mode では不要な競技タブを非表示にするか検討する
+  - 次に sample / static data による in-app calendar UI exact plan を作る
+  - team-level ICS local generation は次以降に扱う
+  - README / architecture docs / cost-control note を更新する
   - Blaze upgrade は今はしない
   - secret setup は再実行しない
   - API sync はまだ実行しない
@@ -4934,16 +4970,18 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - npm audit vulnerabilities は別タスク候補として残す
   - 今後の PR は GitHub Actions CI の結果を確認してから merge する
 - 次の合理的な順序
-  1. Free MVP / cost-control direction を current-state に反映して commit / push
-  2. Flutter app の calendar / favorite team / sample data 実装状況を調査
-  3. sample / static data による in-app calendar exact plan を作る
-  4. Blaze upgrade は今はしない
-  5. secret setup は再実行しない
-  6. API sync はまだ実行しない
-  7. deploy はまだ実行しない
-  8. Firestore write / `--write` は再実行しない
-  9. npm audit vulnerabilities は別タスク候補として扱う
-  10. 今後の PR は GitHub Actions CI の結果を確認してから merge
+  1. Free MVP sample data mode 実装結果を current-state に反映して commit / push
+  2. sample mode では不要な競技タブを非表示にするか検討
+  3. sample / static data による in-app calendar UI exact plan を作る
+  4. team-level ICS local generation は次以降に扱う
+  5. README / architecture docs / cost-control note を更新
+  6. Blaze upgrade は今はしない
+  7. secret setup は再実行しない
+  8. API sync はまだ実行しない
+  9. deploy はまだ実行しない
+  10. Firestore write / `--write` は再実行しない
+  11. npm audit vulnerabilities は別タスク候補として扱う
+  12. 今後の PR は GitHub Actions CI の結果を確認してから merge
 - actual Firestore write は完了済み。`--write` の再実行には別承認が必要
 - Do not use bulk approval for Batch 1 or future batches
 - Do not run additional Firestore write / non-dry seed / `--write` without a separate exact plan and approval
