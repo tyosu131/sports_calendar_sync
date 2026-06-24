@@ -4785,9 +4785,71 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
       - `not-ready-for-execution`
     - API sync readiness:
       - `not-ready-for-execution`
+- API_SPORTS_KEY Secret Value Setup Exact Plan
+  - Current state
+    - API-SPORTS runtime code migration is completed
+    - `functions.config().apisports?.key` is removed
+    - `defineSecret("API_SPORTS_KEY")` is used
+    - secret value is not set / not verified yet
+    - Functions deploy has not been executed
+    - API sync has not been executed
+  - Setup goal
+    - configure `API_SPORTS_KEY` through Firebase / Secret Manager supported secret flow
+    - do not print the secret value
+    - do not commit the secret value
+    - do not store the secret value in docs, PR body, chat, shell history notes, or source files
+    - only record boolean / status results
+  - Planned command shape
+    - candidate command:
+      - `firebase functions:secrets:set API_SPORTS_KEY --project sports-calendar-sync-a4564`
+    - this command is interactive and should accept the secret value via prompt
+    - the actual value must be pasted only into the secure CLI prompt, not into docs / chat / log output
+    - do not use `firebase functions:config:set apisports.key=...`
+  - Preconditions before actual setup
+    - working tree clean
+    - branch: `main`
+    - HEAD expected:
+      - `dcf0c48`
+    - Firebase project confirmed:
+      - `sports-calendar-sync-a4564`
+    - user has API-SPORTS key available locally
+    - do not expose the value
+    - decide whether Firebase plan / Blaze requirement blocks secret setup or only deploy
+  - Verification after future setup
+    - do not print secret value
+    - prefer existence-only confirmation if available
+    - acceptable recorded result:
+      - `API_SPORTS_KEY secret setup: completed`
+      - `secret value printed: no`
+      - `deploy executed: 0`
+      - `API sync executed: 0`
+  - Explicit non-goals
+    - no deploy in this step
+    - no API sync in this step
+    - no Firestore read/write in this step
+    - no `--write`
+    - no source file changes
+    - no `.env` commit
+    - no serviceAccountKey change
+  - Safety rules
+    - secret value display: 0
+    - secret value commit: 0
+    - raw secret output: 0
+    - API sync: 0
+    - deploy: 0
+    - Firestore write: 0
+    - `--write`: 0
+    - serviceAccountKey change: 0
+  - Decision
+    - secret value setup plan:
+      - `ready-for-secret-value-setup-approval`
+    - deploy readiness:
+      - `not-ready-for-execution`
+    - API sync readiness:
+      - `not-ready-for-execution`
 - Next task: 次の判断段階
-  - API-SPORTS secret code migration merge result を current-state に反映して commit / push する
-  - 次に `API_SPORTS_KEY` secret value setup exact plan を作るか判断する
+  - `API_SPORTS_KEY` secret value setup exact plan を commit / push する
+  - 次に actual `firebase functions:secrets:set API_SPORTS_KEY --project sports-calendar-sync-a4564` を実行するか判断する
   - API sync はまだ実行しない
   - deploy はまだ実行しない
   - secret値は表示・記録しない
@@ -4796,8 +4858,8 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - npm audit vulnerabilities は別タスク候補として残す
   - 今後の PR は GitHub Actions CI の結果を確認してから merge する
 - 次の合理的な順序
-  1. API-SPORTS secret code migration merge result を current-state に反映して commit / push
-  2. `API_SPORTS_KEY` secret value setup exact plan を作るか判断
+  1. `API_SPORTS_KEY` secret value setup exact plan を commit / push
+  2. actual `firebase functions:secrets:set API_SPORTS_KEY --project sports-calendar-sync-a4564` を実行するか判断
   3. secret値は表示・記録しない
   4. API sync はまだ実行しない
   5. deploy はまだ実行しない
