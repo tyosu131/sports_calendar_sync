@@ -4875,10 +4875,57 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
       - `not-ready-for-execution`
     - API sync readiness:
       - `not-ready-for-execution`
+- Free MVP Direction - Cost-Control First
+  - User strategy
+    - goal is overseas BigTech / high-return SES / side work / future service potential
+    - `sports_calendar_sync` should work as a portfolio project and as a possible service foundation
+    - avoid unnecessary paid cloud usage at the current stage
+  - Current decision
+    - do not upgrade to Blaze now
+    - do not retry `firebase functions:secrets:set`
+    - do not deploy Functions now
+    - do not run API sync now
+    - keep Firebase Functions / Secret Manager path as deploy-ready but deferred
+  - Free MVP direction
+    - prioritize app-visible value without paid cloud resources
+    - complete in-app calendar using sample / static data
+    - complete favorite team filtering
+    - add local script for team-level ICS generation
+    - document iOS / Google Calendar subscription workflow
+    - consider GitHub Pages / Cloudflare Pages for static ICS later
+    - improve README / architecture docs / cost-control note
+    - add AWS / Terraform design docs or skeleton later without creating paid resources
+  - Portfolio framing
+    - production deploy is intentionally deferred for cost-control
+    - secret handling and deploy path are implemented or planned
+    - app should remain explainable as deploy-ready pending billing decision
+    - Free MVP should still be usable by the user and friends
+  - Immediate implementation priority
+    - first implementation target:
+      - app calendar with sample / static data
+    - second:
+      - favorite team filter
+    - third:
+      - team ICS generation local script
+    - fourth:
+      - README instructions for iOS / Google Calendar subscription
+  - Decision
+    - cost-control mode:
+      - `enabled`
+    - Blaze upgrade:
+      - `deferred`
+    - Functions deploy:
+      - `deferred-by-cost-control`
+    - API sync:
+      - `deferred-by-cost-control`
+    - Free MVP:
+      - `next-priority`
 - Next task: 次の判断段階
-  - secret setup blocked-by-Blaze result を current-state に反映して commit / push する
-  - 次に Firebase project を Blaze plan に上げるか判断する
-  - Blaze に上げる場合のみ、改めて `API_SPORTS_KEY` secret setup を実行する
+  - Free MVP / cost-control direction を current-state に反映して commit / push する
+  - 次に Flutter app の calendar / favorite team / sample data 実装状況を調査する
+  - 次に sample / static data による in-app calendar exact plan を作る
+  - Blaze upgrade は今はしない
+  - secret setup は再実行しない
   - API sync はまだ実行しない
   - deploy はまだ実行しない
   - secret値は表示・記録しない
@@ -4887,15 +4934,16 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - npm audit vulnerabilities は別タスク候補として残す
   - 今後の PR は GitHub Actions CI の結果を確認してから merge する
 - 次の合理的な順序
-  1. secret setup blocked-by-Blaze result を current-state に反映して commit / push
-  2. Firebase project を Blaze plan に上げるか判断
-  3. Blaze に上げる場合のみ、改めて `API_SPORTS_KEY` secret setup を実行
-  4. secret値は表示・記録しない
-  5. API sync はまだ実行しない
-  6. deploy はまだ実行しない
-  7. Firestore write / `--write` は再実行しない
-  8. npm audit vulnerabilities は別タスク候補として扱う
-  9. 今後の PR は GitHub Actions CI の結果を確認してから merge
+  1. Free MVP / cost-control direction を current-state に反映して commit / push
+  2. Flutter app の calendar / favorite team / sample data 実装状況を調査
+  3. sample / static data による in-app calendar exact plan を作る
+  4. Blaze upgrade は今はしない
+  5. secret setup は再実行しない
+  6. API sync はまだ実行しない
+  7. deploy はまだ実行しない
+  8. Firestore write / `--write` は再実行しない
+  9. npm audit vulnerabilities は別タスク候補として扱う
+  10. 今後の PR は GitHub Actions CI の結果を確認してから merge
 - actual Firestore write は完了済み。`--write` の再実行には別承認が必要
 - Do not use bulk approval for Batch 1 or future batches
 - Do not run additional Firestore write / non-dry seed / `--write` without a separate exact plan and approval
