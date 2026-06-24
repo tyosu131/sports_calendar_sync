@@ -21,6 +21,8 @@ class TeamDetailScreen extends ConsumerWidget {
     final gamesAsync = ref.watch(upcomingGamesForTeamProvider(teamId));
     final followedIds = ref.watch(followedTeamIdsProvider);
     final user = ref.watch(currentUserProvider);
+    final profile = ref.watch(userProfileProvider).valueOrNull;
+    final userId = user?.uid ?? profile?.uid;
 
     final isFollowing = followedIds.contains(teamId);
 
@@ -41,14 +43,9 @@ class TeamDetailScreen extends ConsumerWidget {
                 flexibleSpace: FlexibleSpaceBar(
                   title: Text(team.nameJa),
                   background: team.logoUrl != null
-                      ? Image.network(
-                          team.logoUrl!,
-                          fit: BoxFit.contain,
-                        )
+                      ? Image.network(team.logoUrl!, fit: BoxFit.contain)
                       : Container(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .primaryContainer,
+                          color: Theme.of(context).colorScheme.primaryContainer,
                           child: Center(
                             child: Text(
                               team.nameJa[0],
@@ -69,20 +66,20 @@ class TeamDetailScreen extends ConsumerWidget {
                     ),
                     tooltip: isFollowing ? 'フォロー解除' : 'フォローする',
                     onPressed: () async {
-                      if (user == null) return;
+                      if (userId == null) return;
                       final repo = ref.read(userRepositoryProvider);
                       // Pass competitionKey when available so per-competition
                       // state is updated; legacy followedTeamIds is always
                       // kept in sync inside the repository.
                       if (isFollowing) {
                         await repo.unfollowTeam(
-                          user.uid,
+                          userId,
                           teamId,
                           competitionKey: team.competitionKey,
                         );
                       } else {
                         await repo.followTeam(
-                          user.uid,
+                          userId,
                           teamId,
                           competitionKey: team.competitionKey,
                         );
@@ -90,13 +87,12 @@ class TeamDetailScreen extends ConsumerWidget {
                     },
                   ),
                   // Calendar sync
-                  if (user != null)
+                  if (!useSampleData && userId != null)
                     IconButton(
                       icon: const Icon(Icons.calendar_month),
                       tooltip: 'カレンダーに同期',
                       onPressed: () {
-                        final url =
-                            IcsUrlBuilder.buildForTeam(user.uid, teamId);
+                        final url = IcsUrlBuilder.buildForTeam(userId, teamId);
                         IcsShareSheet.show(context, url);
                       },
                     ),
@@ -109,8 +105,8 @@ class TeamDetailScreen extends ConsumerWidget {
                   child: Text(
                     '直近の試合',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
@@ -118,9 +114,8 @@ class TeamDetailScreen extends ConsumerWidget {
                 loading: () => const SliverToBoxAdapter(
                   child: Center(child: CircularProgressIndicator()),
                 ),
-                error: (e, _) => SliverToBoxAdapter(
-                  child: Center(child: Text('エラー: $e')),
-                ),
+                error: (e, _) =>
+                    SliverToBoxAdapter(child: Center(child: Text('エラー: $e'))),
                 data: (games) {
                   if (games.isEmpty) {
                     return const SliverToBoxAdapter(

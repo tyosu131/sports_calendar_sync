@@ -6,14 +6,16 @@ import '../repositories/user_repository.dart';
 
 // ── Repository providers ──────────────────────────────────────────────────────
 
+const useSampleData = bool.fromEnvironment('USE_SAMPLE_DATA');
+
 final userRepositoryProvider = Provider<UserRepository>((ref) {
-  return UserRepository();
+  return useSampleData ? SampleUserRepository() : FirestoreUserRepository();
 });
 
 final teamRepositoryProvider = Provider<TeamRepository>((ref) {
-  return TeamRepository();
+  return useSampleData ? SampleTeamRepository() : FirestoreTeamRepository();
 });
 
 final gameRepositoryProvider = Provider<GameRepository>((ref) {
-  return GameRepository();
+  return useSampleData ? SampleGameRepository() : FirestoreGameRepository();
 });
