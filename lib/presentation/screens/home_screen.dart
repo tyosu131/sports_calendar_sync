@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/utils/ics_url_builder.dart';
 import '../../data/providers/auth_providers.dart';
 import '../../data/providers/game_providers.dart';
+import '../../data/providers/repository_providers.dart';
 import '../../data/providers/team_providers.dart';
 import '../../domain/models/team.dart';
 import '../widgets/game_card.dart';
@@ -24,19 +25,31 @@ class HomeScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('スポーツカレンダー'),
         actions: [
+          // In-app calendar view (not iCalendar sync).
+          userAsync.whenOrNull(
+                data: (profile) => profile != null
+                    ? IconButton(
+                        icon: const Icon(Icons.event_note_outlined),
+                        tooltip: 'スケジュールを表示',
+                        onPressed: () => context.push('/schedule'),
+                      )
+                    : null,
+              ) ??
+              const SizedBox.shrink(),
           // Calendar sync button
           userAsync.whenOrNull(
-            data: (profile) => profile != null
-                ? IconButton(
-                    icon: const Icon(Icons.calendar_month),
-                    tooltip: 'カレンダーに同期',
-                    onPressed: () {
-                      final url = IcsUrlBuilder.buildForUser(profile.uid);
-                      IcsShareSheet.show(context, url);
-                    },
-                  )
-                : null,
-          ) ?? const SizedBox.shrink(),
+                data: (profile) => !useSampleData && profile != null
+                    ? IconButton(
+                        icon: const Icon(Icons.calendar_month),
+                        tooltip: 'カレンダーに同期',
+                        onPressed: () {
+                          final url = IcsUrlBuilder.buildForUser(profile.uid);
+                          IcsShareSheet.show(context, url);
+                        },
+                      )
+                    : null,
+              ) ??
+              const SizedBox.shrink(),
           // Settings
           IconButton(
             icon: const Icon(Icons.settings_outlined),
@@ -141,10 +154,7 @@ class _FollowedTeamsSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'フォロー中のチーム',
-            style: theme.textTheme.titleMedium,
-          ),
+          Text('フォロー中のチーム', style: theme.textTheme.titleMedium),
           const SizedBox(height: 8),
           SizedBox(
             height: 76,
@@ -158,6 +168,7 @@ class _FollowedTeamsSection extends StatelessWidget {
                   team: team,
                   backgroundColor: colorScheme.surfaceContainerHighest,
                   borderColor: colorScheme.outlineVariant,
+                  onTap: () => context.push('/team/${team.id}'),
                 );
               },
             ),
@@ -173,70 +184,81 @@ class _FollowedTeamCard extends StatelessWidget {
     required this.team,
     required this.backgroundColor,
     required this.borderColor,
+    required this.onTap,
   });
 
   final Team team;
   final Color backgroundColor;
   final Color borderColor;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final logoUrl = team.logoUrl;
 
-    return Container(
+    return SizedBox(
       width: 180,
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
+      child: Material(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: borderColor),
-      ),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 22,
-            backgroundColor: Theme.of(context).colorScheme.surface,
-            child: logoUrl == null || logoUrl.isEmpty
-                ? const Icon(Icons.shield_outlined, size: 22)
-                : ClipOval(
-                    child: Image.network(
-                      logoUrl,
-                      width: 32,
-                      height: 32,
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) =>
-                          const Icon(Icons.shield_outlined, size: 22),
-                    ),
-                  ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(8),
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: borderColor),
+            ),
+            child: Row(
               children: [
-                Text(
-                  team.nameJa,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                CircleAvatar(
+                  radius: 22,
+                  backgroundColor: Theme.of(context).colorScheme.surface,
+                  child: logoUrl == null || logoUrl.isEmpty
+                      ? const Icon(Icons.shield_outlined, size: 22)
+                      : ClipOval(
+                          child: Image.network(
+                            logoUrl,
+                            width: 32,
+                            height: 32,
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) =>
+                                const Icon(Icons.shield_outlined, size: 22),
+                          ),
+                        ),
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  team.nameEn,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        team.nameJa,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        team.nameEn,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -268,8 +290,8 @@ class _EmptyFollowedTeams extends StatelessWidget {
             Text(
               '「チームを追加」からお気に入りのチームを登録してください。',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
@@ -302,10 +324,7 @@ class _SignInPrompt extends StatelessWidget {
               color: Theme.of(context).colorScheme.outlineVariant,
             ),
             const SizedBox(height: 16),
-            Text(
-              'サインインが必要です',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+            Text('サインインが必要です', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 24),
             FilledButton(
               onPressed: () => context.push('/signin'),

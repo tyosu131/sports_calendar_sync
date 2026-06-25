@@ -4892,7 +4892,7 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
     - team search / team detail / upcoming game lists are visible without Firestore reads
     - favorite team follow / unfollow works with in-memory state in sample mode
     - sample mode hides undeployed Cloud Functions calendar sync actions
-    - next free-MVP focus is in-app calendar UI using sample / static data
+    - in-app calendar UI first implementation is completed as `ScheduleScreen`
     - team-level ICS local generation remains a later step
     - README / architecture docs / cost-control note remain documentation follow-ups
     - consider GitHub Pages / Cloudflare Pages for static ICS later
@@ -4936,13 +4936,58 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
       - calendar sync icon hidden in sample mode: OK
       - Firebase / Auth / Firestore screen errors: none observed
     - second:
-      - decide whether to hide unused competition tabs in sample mode
+      - in-app schedule / calendar view
+      - status: completed in commit `79d0763 Add schedule view for free MVP`
+      - Free MVP in-app calendar UI is implemented as `ScheduleScreen`
+      - `/schedule` route added
+      - Home AppBar can navigate to Schedule
+      - Home followed team cards can navigate to TeamDetail
+      - `CalendarScreen` was not kept; the feature is implemented as `ScheduleScreen`
+      - `scheduleGamesForFollowedTeamsProvider` added
+      - Schedule implementation is competition-agnostic
+      - sample mode can show both past and future games
+      - monthly calendar-style UI added
+      - date cells show game summaries directly:
+        - scheduled: icon vs icon + kickoff time
+        - finished: icon vs icon + score + `終了`
+        - live: score + `LIVE`
+        - postponed / cancelled: `延期` / `中止`
+        - multiple games on the same date: `+1` / `+2`
+      - initial Schedule display does not show detail cards
+      - selected date details appear below the calendar only after a date is tapped
+      - Home / TeamDetail sample mode iCalendar sync icons remain hidden
+      - Firestore write / seed / `--write`: 0
+      - API sync: 0
+      - deploy: 0
+      - Blaze upgrade: 0
+      - Secret Manager / `API_SPORTS_KEY` changes: 0
+    - Schedule validation:
+      - `dart format`: PASS
+      - `flutter analyze`: PASS
+      - `flutter test`: PASS
+      - `git diff --check`: PASS
+      - `.DS_Store`: none
+    - Schedule manual UI check:
+      - `flutter run --dart-define=USE_SAMPLE_DATA=true`
+      - Home to Schedule navigation: OK
+      - monthly calendar display: OK
+      - game summaries inside date cells: OK
+      - future / scheduled game display: OK
+      - past / finished score display: OK
+      - selected date details after date tap: OK
+      - overflow: none observed
+      - Home followed team card to TeamDetail navigation: OK
+      - Home / TeamDetail sample mode iCalendar sync icons hidden: OK
     - third:
-      - sample / static data in-app calendar UI exact plan
+      - decide whether to hide unused competition tabs in sample mode
     - fourth:
-      - team-level ICS local generation
+      - add sample data for other sports
     - fifth:
+      - Schedule UI polish
+    - sixth:
       - README / architecture docs / cost-control note
+    - seventh:
+      - team-level ICS local generation
   - Decision
     - cost-control mode:
       - `enabled`
@@ -4953,33 +4998,33 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
     - API sync:
       - `deferred-by-cost-control`
     - Free MVP:
-      - `sample-data-first-implementation-completed`
+      - `schedule-first-implementation-completed`
 - Next task: 次の判断段階
-  - Free MVP sample data mode 実装結果を current-state に反映して commit / push する
-  - 次に sample mode では不要な競技タブを非表示にするか検討する
-  - 次に sample / static data による in-app calendar UI exact plan を作る
-  - team-level ICS local generation は次以降に扱う
+  - Free MVP Schedule first implementation result を current-state に反映して commit / push する
+  - 次に他競技 sample data を追加するか判断する
+  - 次に Schedule UI polish を行うか判断する
   - README / architecture docs / cost-control note を更新する
+  - team-level ICS local generation は次以降に扱う
   - Blaze upgrade は今はしない
   - secret setup は再実行しない
   - API sync はまだ実行しない
   - deploy はまだ実行しない
   - secret値は表示・記録しない
-  - Firestore write / `--write` は再実行しない
+  - Firestore write / seed / `--write` は再実行しない
   - Spark / Blaze plan と Functions deploy capability 確認は別タスクとして残す
   - npm audit vulnerabilities は別タスク候補として残す
   - 今後の PR は GitHub Actions CI の結果を確認してから merge する
 - 次の合理的な順序
-  1. Free MVP sample data mode 実装結果を current-state に反映して commit / push
-  2. sample mode では不要な競技タブを非表示にするか検討
-  3. sample / static data による in-app calendar UI exact plan を作る
-  4. team-level ICS local generation は次以降に扱う
-  5. README / architecture docs / cost-control note を更新
+  1. Free MVP Schedule first implementation result を current-state に反映して commit / push
+  2. 他競技 sample data を追加するか判断
+  3. Schedule UI polish を行うか判断
+  4. README / architecture docs / cost-control note を更新
+  5. team-level ICS local generation は次以降に扱う
   6. Blaze upgrade は今はしない
   7. secret setup は再実行しない
   8. API sync はまだ実行しない
   9. deploy はまだ実行しない
-  10. Firestore write / `--write` は再実行しない
+  10. Firestore write / seed / `--write` は再実行しない
   11. npm audit vulnerabilities は別タスク候補として扱う
   12. 今後の PR は GitHub Actions CI の結果を確認してから merge
 - actual Firestore write は完了済み。`--write` の再実行には別承認が必要
@@ -5219,10 +5264,11 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 - competition ごとの data module を `competitionRegistry.js` に追加する
 - league-specific な season / tournament membership は team master と分離して扱う
 
-### Task 4: in-app followed-team calendar idea
-- followed teams の試合だけを表示する in-app calendar view を検討する
-- external `.ics` delivery とは別の Flutter UI task として扱う
-- Home と同じ followed-team game query behavior を再利用する
+### Task 4: Free MVP Schedule / in-app calendar follow-up
+- followed teams の試合を表示する in-app calendar UI は `ScheduleScreen` として第一実装済み
+- external `.ics` delivery とは別の Flutter UI task として維持する
+- Home と同じ followed-team game query behavior を Schedule 用 provider として再利用する
+- 次の候補は他競技 sample data 追加、Schedule UI polish、README / architecture docs / cost-control note 更新、team-level ICS local generation
 
 ### Task 5: Flutter UI polish / regression check / deferred backend work
 - J1 team search / follow / unfollow / home sample-game behavior / My Teams summary は確認済み
