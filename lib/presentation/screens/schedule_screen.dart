@@ -301,8 +301,8 @@ class _DateCell extends StatelessWidget {
             color: isSelected || isToday
                 ? colorScheme.primary
                 : hasGame
-                    ? colorScheme.outlineVariant.withValues(alpha: 0.55)
-                    : colorScheme.outlineVariant.withValues(alpha: 0.28),
+                ? colorScheme.outlineVariant.withValues(alpha: 0.55)
+                : colorScheme.outlineVariant.withValues(alpha: 0.28),
             width: isSelected || isToday ? 1.2 : 0.8,
           ),
         ),
