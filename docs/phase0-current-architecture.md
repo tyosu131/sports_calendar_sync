@@ -204,6 +204,49 @@ Cloud Functions
 
 ---
 
+## Free MVP / Cost-Control Mode
+
+2026-06 時点では、Blaze upgrade / Firebase Functions deploy / API sync を意図的に deferred し、無料範囲で画面価値を確認できる Free MVP mode を優先している。
+
+### 起動方法
+
+```bash
+flutter run --dart-define=USE_SAMPLE_DATA=true
+```
+
+### Repository 切り替え
+
+`repository_providers.dart` は `const bool.fromEnvironment('USE_SAMPLE_DATA')` を使って repository 実装を切り替える。
+
+| mode | Team | Game | User |
+|---|---|---|---|
+| normal | `FirestoreTeamRepository` | `FirestoreGameRepository` | `FirestoreUserRepository` |
+| sample | `SampleTeamRepository` | `SampleGameRepository` | `SampleUserRepository` |
+
+sample mode では Firestore read/write を行わず、follow / unfollow は in-memory state で処理する。
+
+### Sample data scope
+
+- football sample teams / games
+- NPB sample teams / games
+- NBA sample teams / games
+- past finished games with score
+- future scheduled games
+
+### ScheduleScreen
+
+`ScheduleScreen` は `/schedule` route で表示される競技非依存の in-app schedule UI。
+
+- Home AppBar から遷移できる
+- followed teams の games を JST 日付単位で月間表示する
+- date cell 内に試合概要を表示する
+- 日付押下時のみ selected date details を表示する
+- external `.ics` delivery とは別の Flutter UI として扱う
+
+sample mode では Home / TeamDetail の iCalendar sync icon を非表示にし、未デプロイの Cloud Functions URL をユーザーに見せない。
+
+---
+
 ## 参照: 既存 docs
 
 - `docs/current-state.md` — 機能ステータス一覧

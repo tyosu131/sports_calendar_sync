@@ -4895,7 +4895,7 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
     - in-app calendar UI first implementation is completed as `ScheduleScreen`
     - sample / static data now includes football / NPB / NBA sample teams and games
     - team-level ICS local generation remains a later step
-    - README / architecture docs / cost-control note remain documentation follow-ups
+    - README / architecture docs / cost-control note have been updated for Free MVP positioning
     - consider GitHub Pages / Cloudflare Pages for static ICS later
     - add AWS / Terraform design docs or skeleton later without creating paid resources
   - Portfolio framing
@@ -5025,11 +5025,35 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
       - NBA finished game shows `112 - 108 終了`: OK
       - Home / TeamDetail sample mode iCalendar sync icons hidden: OK
     - fourth:
-      - Schedule UI polish
-    - fifth:
-      - sample mode competition tabs / labels cleanup
-    - sixth:
       - README / architecture docs / cost-control note
+      - status: updated on branch `docs/free-mvp-cost-control-readme`
+      - `README.md` rewritten in English as the external project overview
+      - README documents:
+        - project overview
+        - current Free MVP status
+        - cost-control policy
+        - sample mode run command
+        - validation commands
+        - architecture summary
+        - current limitations / deferred work
+        - safety notes
+      - `docs/phase0-current-architecture.md` updated with Free MVP / Cost-Control Mode section
+      - `docs/e2e-minimum-setup.md` updated with sample mode as the recommended first check
+      - code changes: 0
+      - Blaze upgrade: 0
+      - deploy: 0
+      - API sync: 0
+      - Firestore write / seed / `--write`: 0
+      - Secret Manager / `API_SPORTS_KEY` changes: 0
+      - external API calls: 0
+    - documentation validation:
+      - `git diff --check`: PASS
+      - forbidden file scan: PASS
+      - `.DS_Store`: none
+    - fifth:
+      - Schedule UI polish
+    - sixth:
+      - sample mode competition tabs / labels cleanup
     - seventh:
       - team-level ICS local generation
   - Decision
@@ -5042,10 +5066,9 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
     - API sync:
       - `deferred-by-cost-control`
     - Free MVP:
-      - `other-sports-sample-data-completed`
+      - `readme-cost-control-docs-updated`
 - Next task: 次の判断段階
-  - Free MVP other sports sample data result を current-state に反映して commit / push する
-  - 次に README / architecture docs / cost-control note を更新する
+  - README / architecture docs / cost-control note 更新結果を current-state に反映して commit / push する
   - 次に Schedule UI polish を行うか判断する
   - 次に sample mode competition tabs / labels を整理するか判断する
   - team-level ICS local generation は次以降に扱う
@@ -5059,18 +5082,17 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - npm audit vulnerabilities は別タスク候補として残す
   - 今後の PR は GitHub Actions CI の結果を確認してから merge する
 - 次の合理的な順序
-  1. Free MVP other sports sample data result を current-state に反映して commit / push
-  2. README / architecture docs / cost-control note を更新
-  3. Schedule UI polish を行うか判断
-  4. sample mode competition tabs / labels を整理するか判断
-  5. team-level ICS local generation は次以降に扱う
-  6. Blaze upgrade は今はしない
-  7. secret setup は再実行しない
-  8. API sync はまだ実行しない
-  9. deploy はまだ実行しない
-  10. Firestore write / seed / `--write` は再実行しない
-  11. npm audit vulnerabilities は別タスク候補として扱う
-  12. 今後の PR は GitHub Actions CI の結果を確認してから merge
+  1. README / architecture docs / cost-control note 更新結果を current-state に反映して commit / push
+  2. Schedule UI polish を行うか判断
+  3. sample mode competition tabs / labels を整理するか判断
+  4. team-level ICS local generation は次以降に扱う
+  5. Blaze upgrade は今はしない
+  6. secret setup は再実行しない
+  7. API sync はまだ実行しない
+  8. deploy はまだ実行しない
+  9. Firestore write / seed / `--write` は再実行しない
+  10. npm audit vulnerabilities は別タスク候補として扱う
+  11. 今後の PR は GitHub Actions CI の結果を確認してから merge
 - actual Firestore write は完了済み。`--write` の再実行には別承認が必要
 - Do not use bulk approval for Batch 1 or future batches
 - Do not run additional Firestore write / non-dry seed / `--write` without a separate exact plan and approval
@@ -5313,7 +5335,8 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 - external `.ics` delivery とは別の Flutter UI task として維持する
 - Home と同じ followed-team game query behavior を Schedule 用 provider として再利用する
 - football / NPB / NBA sample data は Schedule に混在表示できる状態まで追加済み
-- 次の候補は README / architecture docs / cost-control note 更新、Schedule UI polish、sample mode competition tabs / labels 整理、team-level ICS local generation
+- README / architecture docs / cost-control note は Free MVP / cost-control 方針として更新済み
+- 次の候補は Schedule UI polish、sample mode competition tabs / labels 整理、team-level ICS local generation
 
 ### Task 5: Flutter UI polish / regression check / deferred backend work
 - J1 team search / follow / unfollow / home sample-game behavior / My Teams summary は確認済み
