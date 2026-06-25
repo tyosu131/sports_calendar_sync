@@ -25,6 +25,31 @@
 
 ---
 
+## Free MVP sample mode（推奨の最初の確認）
+
+Blaze upgrade / Firebase Functions deploy / API sync / Firestore seed を行う前に、無料範囲で画面価値を確認する場合は sample mode を使う。
+
+```bash
+flutter pub get
+flutter run --dart-define=USE_SAMPLE_DATA=true
+```
+
+sample mode では以下を確認できる。
+
+- Team Search
+- Home followed-team summary
+- TeamDetail
+- Schedule (`/schedule`)
+- follow / unfollow in memory
+- football / NPB / NBA sample games
+- finished game score display
+
+sample mode では Firestore read/write、Cloud Functions、API-SPORTS sync、Secret Manager / `API_SPORTS_KEY` を使わない。Home / TeamDetail の iCalendar sync actions も非表示にする。
+
+この E2E guide の以降の Firebase / Cloud Functions 手順は、paid deployment path のための deferred work として扱う。
+
+---
+
 ## Step 0: 前提条件の確認
 
 ```bash
