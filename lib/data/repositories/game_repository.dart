@@ -16,6 +16,11 @@ abstract class GameRepository {
     DateTime? from,
   });
 
+  Future<List<Game>> fetchScheduleGamesForTeams(
+    List<String> teamIds, {
+    int limit = 120,
+  });
+
   Stream<List<Game>> watchUpcomingGamesForTeam(String teamId);
 
   Future<Game?> fetchGame(String gameId);
@@ -118,6 +123,51 @@ class FirestoreGameRepository implements GameRepository {
     return allGames.where((g) => seen.add(g.id)).take(limit).toList();
   }
 
+  /// Fetch schedule games for multiple teams without filtering to future only.
+  @override
+  Future<List<Game>> fetchScheduleGamesForTeams(
+    List<String> teamIds, {
+    int limit = 120,
+  }) async {
+    if (teamIds.isEmpty) return [];
+
+    // Read-only schedule query. Unlike the home feed, this intentionally does
+    // not filter to future/scheduled games so a schedule view can show past
+    // results and scores as well.
+    final chunks = <List<String>>[];
+    for (var i = 0; i < teamIds.length; i += 10) {
+      chunks.add(
+        teamIds.sublist(i, i + 10 > teamIds.length ? teamIds.length : i + 10),
+      );
+    }
+
+    final allGames = <Game>[];
+    for (final chunk in chunks) {
+      final homeSnap = await _games
+          .where('homeTeamId', whereIn: chunk)
+          .orderBy('startTimeUTC')
+          .limit(limit)
+          .get();
+
+      final awaySnap = await _games
+          .where('awayTeamId', whereIn: chunk)
+          .orderBy('startTimeUTC')
+          .limit(limit)
+          .get();
+
+      allGames.addAll(
+        homeSnap.docs.map((d) => Game.fromFirestore(d.data(), d.id)),
+      );
+      allGames.addAll(
+        awaySnap.docs.map((d) => Game.fromFirestore(d.data(), d.id)),
+      );
+    }
+
+    allGames.sort((a, b) => a.startTimeUtc.compareTo(b.startTimeUtc));
+    final seen = <String>{};
+    return allGames.where((g) => seen.add(g.id)).take(limit).toList();
+  }
+
   /// Stream of upcoming games for a team (real-time updates).
   @override
   Stream<List<Game>> watchUpcomingGamesForTeam(String teamId) {
@@ -194,6 +244,25 @@ class SampleGameRepository implements GameRepository {
   }
 
   @override
+  Future<List<Game>> fetchScheduleGamesForTeams(
+    List<String> teamIds, {
+    int limit = 120,
+  }) async {
+    if (teamIds.isEmpty) return [];
+    final ids = teamIds.toSet();
+    final games =
+        _sampleGames()
+            .where(
+              (game) =>
+                  ids.contains(game.homeTeamId) ||
+                  ids.contains(game.awayTeamId),
+            )
+            .toList()
+          ..sort((a, b) => a.startTimeUtc.compareTo(b.startTimeUtc));
+    return games.take(limit).toList();
+  }
+
+  @override
   Future<Game?> fetchGame(String gameId) async {
     for (final game in _sampleGames()) {
       if (game.id == gameId) return game;
@@ -217,6 +286,23 @@ class SampleGameRepository implements GameRepository {
 
   List<Game> _sampleGames() {
     return [
+      _game(
+        id: 'sample_finished_kashima_gamba_001',
+        daysFromNow: -7,
+        utcHour: 10,
+        leagueId: 'sample_j1_league',
+        competitionKey: 'football_j1',
+        homeTeamId: 'kashima_antlers',
+        homeTeamNameJa: '鹿島アントラーズ',
+        homeTeamNameEn: 'Kashima Antlers',
+        awayTeamId: 'gamba_osaka',
+        awayTeamNameJa: 'ガンバ大阪',
+        awayTeamNameEn: 'Gamba Osaka',
+        venue: '県立カシマサッカースタジアム',
+        status: GameStatus.finished,
+        homeScore: 2,
+        awayScore: 1,
+      ),
       _game(
         id: 'sample_kashima_urawa_001',
         daysFromNow: 7,
@@ -310,6 +396,9 @@ class SampleGameRepository implements GameRepository {
     required String awayTeamNameEn,
     required String venue,
     List<BroadcastInfo> broadcastPlatforms = const [],
+    GameStatus status = GameStatus.scheduled,
+    int? homeScore,
+    int? awayScore,
   }) {
     final startUtc = _futureUtc(daysFromNow, utcHour);
     return Game(
@@ -326,8 +415,10 @@ class SampleGameRepository implements GameRepository {
       startTimeUtc: Timestamp.fromDate(startUtc),
       startTimeJst: _formatJst(startUtc),
       timezone: 'Asia/Tokyo',
-      status: GameStatus.scheduled,
+      status: status,
       venue: venue,
+      homeScore: homeScore,
+      awayScore: awayScore,
       broadcastPlatforms: broadcastPlatforms,
     );
   }
