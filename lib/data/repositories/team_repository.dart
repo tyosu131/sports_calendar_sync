@@ -322,6 +322,20 @@ class SampleTeamRepository implements TeamRepository {
       country: 'Japan',
       externalLeagueId: 100,
     ),
+    League(
+      id: 'sample_npb_league',
+      nameEn: 'NPB',
+      nameJa: 'NPB',
+      competitionKey: 'baseball_npb',
+      country: 'Japan',
+    ),
+    League(
+      id: 'sample_nba_league',
+      nameEn: 'NBA',
+      nameJa: 'NBA',
+      competitionKey: 'basketball_nba',
+      country: 'USA',
+    ),
   ];
 
   static const _teams = [
@@ -396,6 +410,38 @@ class SampleTeamRepository implements TeamRepository {
       competitionKey: 'football_j3',
       country: 'Japan',
       externalTeamId: 7117,
+    ),
+    Team(
+      id: 'yomiuri_giants',
+      nameEn: 'Yomiuri Giants',
+      nameJa: '読売ジャイアンツ',
+      leagueId: 'sample_npb_league',
+      competitionKey: 'baseball_npb',
+      country: 'Japan',
+    ),
+    Team(
+      id: 'hanshin_tigers',
+      nameEn: 'Hanshin Tigers',
+      nameJa: '阪神タイガース',
+      leagueId: 'sample_npb_league',
+      competitionKey: 'baseball_npb',
+      country: 'Japan',
+    ),
+    Team(
+      id: 'los_angeles_lakers',
+      nameEn: 'Los Angeles Lakers',
+      nameJa: 'ロサンゼルス・レイカーズ',
+      leagueId: 'sample_nba_league',
+      competitionKey: 'basketball_nba',
+      country: 'USA',
+    ),
+    Team(
+      id: 'golden_state_warriors',
+      nameEn: 'Golden State Warriors',
+      nameJa: 'ゴールデンステイト・ウォリアーズ',
+      leagueId: 'sample_nba_league',
+      competitionKey: 'basketball_nba',
+      country: 'USA',
     ),
   ];
 
@@ -478,6 +524,10 @@ class SampleTeamRepository implements TeamRepository {
       if (team.id == 'jubilo_iwata') '磐田',
       if (team.id == 'fc_gifu') '岐阜',
       if (team.id == 'reilac_shiga') ...['滋賀', 'Biwako Shiga'],
+      if (team.id == 'yomiuri_giants') ...['巨人', 'ジャイアンツ'],
+      if (team.id == 'hanshin_tigers') ...['阪神', 'タイガース'],
+      if (team.id == 'los_angeles_lakers') ...['レイカーズ', 'Lakers'],
+      if (team.id == 'golden_state_warriors') ...['ウォリアーズ', 'Warriors', 'GSW'],
     ];
     return aliases.map(_normalize).join(' ');
   }

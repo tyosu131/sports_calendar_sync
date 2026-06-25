@@ -4893,6 +4893,7 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
     - favorite team follow / unfollow works with in-memory state in sample mode
     - sample mode hides undeployed Cloud Functions calendar sync actions
     - in-app calendar UI first implementation is completed as `ScheduleScreen`
+    - sample / static data now includes football / NPB / NBA sample teams and games
     - team-level ICS local generation remains a later step
     - README / architecture docs / cost-control note remain documentation follow-ups
     - consider GitHub Pages / Cloudflare Pages for static ICS later
@@ -4979,11 +4980,54 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
       - Home followed team card to TeamDetail navigation: OK
       - Home / TeamDetail sample mode iCalendar sync icons hidden: OK
     - third:
-      - decide whether to hide unused competition tabs in sample mode
+      - other sports sample data
+      - status: completed in commit `023fc2f Add other sports sample data for free MVP`
+      - Free MVP sample / static data now includes non-football sample data
+      - `SampleTeamRepository` added NPB / NBA sample league and team entries
+      - NPB sample teams:
+        - `yomiuri_giants`
+        - `hanshin_tigers`
+      - NBA sample teams:
+        - `los_angeles_lakers`
+        - `golden_state_warriors`
+      - `SampleGameRepository` added NPB / NBA sample games
+      - NPB sample games:
+        - scheduled game
+        - finished game with `4 - 3`
+      - NBA sample games:
+        - scheduled game
+        - finished game with `112 - 108`
+      - `ScheduleScreen` remains competition-agnostic
+      - no soccer-specific condition was added to Schedule
+      - Team Search / Home / TeamDetail / Schedule can display other-sports sample data
+      - Home / TeamDetail sample mode iCalendar sync icons remain hidden
+      - Firestore write / seed / `--write`: 0
+      - API sync: 0
+      - deploy: 0
+      - Blaze upgrade: 0
+      - Secret Manager / `API_SPORTS_KEY` changes: 0
+      - external API calls: 0
+    - other sports sample data validation:
+      - `dart format`: PASS
+      - `flutter analyze`: PASS
+      - `flutter test`: PASS
+      - `git diff --check`: PASS
+      - `.DS_Store`: none
+    - other sports sample data manual UI check:
+      - `flutter run --dart-define=USE_SAMPLE_DATA=true`
+      - Team Search shows NPB / NBA teams: OK
+      - NPB / NBA follow / unfollow: OK
+      - Home shows other-sports followed teams: OK
+      - Home shows other-sports upcoming games: OK
+      - TeamDetail shows NBA team games: OK
+      - Schedule shows football / NPB / NBA games together: OK
+      - NPB finished game shows `4 - 3 終了`: OK
+      - NBA finished game shows `112 - 108 終了`: OK
+      - Home / TeamDetail sample mode iCalendar sync icons hidden: OK
     - fourth:
-      - add sample data for other sports
-    - fifth:
       - Schedule UI polish
+    - fifth:
+      - sample mode competition tabs / labels cleanup
     - sixth:
       - README / architecture docs / cost-control note
     - seventh:
@@ -4998,12 +5042,12 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
     - API sync:
       - `deferred-by-cost-control`
     - Free MVP:
-      - `schedule-first-implementation-completed`
+      - `other-sports-sample-data-completed`
 - Next task: 次の判断段階
-  - Free MVP Schedule first implementation result を current-state に反映して commit / push する
-  - 次に他競技 sample data を追加するか判断する
+  - Free MVP other sports sample data result を current-state に反映して commit / push する
+  - 次に README / architecture docs / cost-control note を更新する
   - 次に Schedule UI polish を行うか判断する
-  - README / architecture docs / cost-control note を更新する
+  - 次に sample mode competition tabs / labels を整理するか判断する
   - team-level ICS local generation は次以降に扱う
   - Blaze upgrade は今はしない
   - secret setup は再実行しない
@@ -5015,10 +5059,10 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - npm audit vulnerabilities は別タスク候補として残す
   - 今後の PR は GitHub Actions CI の結果を確認してから merge する
 - 次の合理的な順序
-  1. Free MVP Schedule first implementation result を current-state に反映して commit / push
-  2. 他競技 sample data を追加するか判断
+  1. Free MVP other sports sample data result を current-state に反映して commit / push
+  2. README / architecture docs / cost-control note を更新
   3. Schedule UI polish を行うか判断
-  4. README / architecture docs / cost-control note を更新
+  4. sample mode competition tabs / labels を整理するか判断
   5. team-level ICS local generation は次以降に扱う
   6. Blaze upgrade は今はしない
   7. secret setup は再実行しない
@@ -5268,7 +5312,8 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 - followed teams の試合を表示する in-app calendar UI は `ScheduleScreen` として第一実装済み
 - external `.ics` delivery とは別の Flutter UI task として維持する
 - Home と同じ followed-team game query behavior を Schedule 用 provider として再利用する
-- 次の候補は他競技 sample data 追加、Schedule UI polish、README / architecture docs / cost-control note 更新、team-level ICS local generation
+- football / NPB / NBA sample data は Schedule に混在表示できる状態まで追加済み
+- 次の候補は README / architecture docs / cost-control note 更新、Schedule UI polish、sample mode competition tabs / labels 整理、team-level ICS local generation
 
 ### Task 5: Flutter UI polish / regression check / deferred backend work
 - J1 team search / follow / unfollow / home sample-game behavior / My Teams summary は確認済み
