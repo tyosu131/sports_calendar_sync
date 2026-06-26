@@ -99,7 +99,7 @@ class _HomeContent extends ConsumerWidget {
         }
         return gamesAsync.when(
           loading: () => ListView(
-            padding: const EdgeInsets.only(top: 8, bottom: 100),
+            padding: const EdgeInsets.only(top: 12, bottom: 100),
             children: [
               _FollowedTeamsSection(teams: teams),
               const SizedBox(height: 80),
@@ -114,19 +114,11 @@ class _HomeContent extends ConsumerWidget {
                 ref.invalidate(upcomingGamesForFollowedTeamsProvider);
               },
               child: ListView(
-                padding: const EdgeInsets.only(top: 8, bottom: 100),
+                padding: const EdgeInsets.only(top: 12, bottom: 100),
                 children: [
                   _FollowedTeamsSection(teams: teams),
                   if (games.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 72),
-                      child: Center(
-                        child: Text(
-                          '直近の試合はありません',
-                          style: TextStyle(fontSize: 16),
-                        ),
-                      ),
-                    )
+                    const _NoUpcomingGames()
                   else
                     ...games.map((game) => GameCard(game: game)),
                 ],
@@ -150,14 +142,25 @@ class _FollowedTeamsSection extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('フォロー中のチーム', style: theme.textTheme.titleMedium),
-          const SizedBox(height: 8),
+          Row(
+            children: [
+              Icon(Icons.favorite, size: 18, color: colorScheme.primary),
+              const SizedBox(width: 8),
+              Text(
+                'フォロー中のチーム',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
           SizedBox(
-            height: 76,
+            height: 84,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: teams.length,
@@ -166,7 +169,7 @@ class _FollowedTeamsSection extends StatelessWidget {
                 final team = teams[index];
                 return _FollowedTeamCard(
                   team: team,
-                  backgroundColor: colorScheme.surfaceContainerHighest,
+                  backgroundColor: colorScheme.surface,
                   borderColor: colorScheme.outlineVariant,
                   onTap: () => context.push('/team/${team.id}'),
                 );
@@ -198,17 +201,17 @@ class _FollowedTeamCard extends StatelessWidget {
     final logoUrl = team.logoUrl;
 
     return SizedBox(
-      width: 180,
+      width: 196,
       child: Material(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(18),
         child: InkWell(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(18),
           onTap: onTap,
           child: Container(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(18),
               border: Border.all(color: borderColor),
             ),
             child: Row(
@@ -219,13 +222,17 @@ class _FollowedTeamCard extends StatelessWidget {
                   child: logoUrl == null || logoUrl.isEmpty
                       ? const Icon(Icons.shield_outlined, size: 24)
                       : ClipOval(
-                          child: Image.network(
-                            logoUrl,
+                          child: SizedBox(
                             width: 38,
                             height: 38,
-                            fit: BoxFit.contain,
-                            errorBuilder: (context, error, stackTrace) =>
-                                const Icon(Icons.shield_outlined, size: 24),
+                            child: Image.network(
+                              logoUrl,
+                              fit: BoxFit.contain,
+                              gaplessPlayback: true,
+                              filterQuality: FilterQuality.high,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  const Icon(Icons.shield_outlined, size: 24),
+                            ),
                           ),
                         ),
                 ),
@@ -264,43 +271,94 @@ class _FollowedTeamCard extends StatelessWidget {
   }
 }
 
+class _NoUpcomingGames extends StatelessWidget {
+  const _NoUpcomingGames();
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 32, 16, 24),
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.42),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          children: [
+            Icon(
+              Icons.event_busy_outlined,
+              size: 48,
+              color: colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              '直近の試合はありません',
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'フォロー中チームの試合が追加されると、ここに表示されます。',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _EmptyFollowedTeams extends StatelessWidget {
   const _EmptyFollowedTeams();
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.sports,
-              size: 80,
-              color: Theme.of(context).colorScheme.outlineVariant,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'フォローしているチームがありません',
-              style: Theme.of(context).textTheme.titleMedium,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '「チームを追加」からお気に入りのチームを登録してください。',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+        child: Container(
+          padding: const EdgeInsets.all(28),
+          decoration: BoxDecoration(
+            color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.42),
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.sports, size: 72, color: colorScheme.outline),
+              const SizedBox(height: 16),
+              Text(
+                'フォローしているチームがありません',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            FilledButton.icon(
-              onPressed: () => context.push('/search'),
-              icon: const Icon(Icons.search),
-              label: const Text('チームを探す'),
-            ),
-          ],
+              const SizedBox(height: 8),
+              Text(
+                '「チームを追加」からお気に入りのチームを登録してください。',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              FilledButton.icon(
+                onPressed: () => context.push('/search'),
+                icon: const Icon(Icons.search),
+                label: const Text('チームを探す'),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -312,25 +370,35 @@ class _SignInPrompt extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.lock_outline,
-              size: 80,
-              color: Theme.of(context).colorScheme.outlineVariant,
-            ),
-            const SizedBox(height: 16),
-            Text('サインインが必要です', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 24),
-            FilledButton(
-              onPressed: () => context.push('/signin'),
-              child: const Text('サインイン'),
-            ),
-          ],
+        child: Container(
+          padding: const EdgeInsets.all(28),
+          decoration: BoxDecoration(
+            color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.42),
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.lock_outline, size: 72, color: colorScheme.outline),
+              const SizedBox(height: 16),
+              Text(
+                'サインインが必要です',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 24),
+              FilledButton(
+                onPressed: () => context.push('/signin'),
+                child: const Text('サインイン'),
+              ),
+            ],
+          ),
         ),
       ),
     );

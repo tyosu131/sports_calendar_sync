@@ -15,9 +15,13 @@ class GameCard extends StatelessWidget {
     final isToday = DateTimeUtils.isToday(game.startTimeUtcDateTime);
 
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      elevation: 0,
+      color: theme.colorScheme.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(color: theme.colorScheme.outlineVariant),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -34,7 +38,7 @@ class GameCard extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: theme.colorScheme.primary,
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: BorderRadius.circular(999),
                     ),
                     child: Text(
                       '今日',
@@ -45,13 +49,17 @@ class GameCard extends StatelessWidget {
                     ),
                   ),
                 if (isToday) const SizedBox(width: 8),
-                Text(
-                  DateTimeUtils.formatJst(game.startTimeUtcDateTime),
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+                Expanded(
+                  child: Text(
+                    DateTimeUtils.formatJst(game.startTimeUtcDateTime),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ),
-                const Spacer(),
+                const SizedBox(width: 8),
                 _StatusChip(status: game.status),
               ],
             ),
@@ -88,10 +96,14 @@ class GameCard extends StatelessWidget {
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                   const SizedBox(width: 4),
-                  Text(
-                    game.venue!,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
+                  Expanded(
+                    child: Text(
+                      game.venue!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ),
                 ],
@@ -133,7 +145,7 @@ class _TeamSide extends StatelessWidget {
           name,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
-          style: theme.textTheme.titleMedium?.copyWith(
+          style: theme.textTheme.bodyLarge?.copyWith(
             fontWeight: FontWeight.bold,
           ),
           textAlign: TextAlign.center,
@@ -158,17 +170,21 @@ class _GameTeamLogo extends StatelessWidget {
 
     return CircleAvatar(
       radius: 24,
-      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
       child: logoUrl == null || logoUrl!.isEmpty
           ? fallback
           : ClipOval(
-              child: Image.network(
-                logoUrl!,
+              child: SizedBox(
                 width: 40,
                 height: 40,
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) =>
-                    const Icon(Icons.shield_outlined, size: 24),
+                child: Image.network(
+                  logoUrl!,
+                  fit: BoxFit.contain,
+                  gaplessPlayback: true,
+                  filterQuality: FilterQuality.high,
+                  errorBuilder: (context, error, stackTrace) =>
+                      const Icon(Icons.shield_outlined, size: 24),
+                ),
               ),
             ),
     );
@@ -219,13 +235,13 @@ class _StatusChip extends StatelessWidget {
         color = Colors.red;
         label = 'LIVE';
       case GameStatus.finished:
-        color = theme.colorScheme.outline;
+        color = theme.colorScheme.secondary;
         label = '終了';
       case GameStatus.postponed:
-        color = Colors.orange;
+        color = theme.colorScheme.tertiary;
         label = '延期';
       case GameStatus.cancelled:
-        color = Colors.grey;
+        color = theme.colorScheme.outline;
         label = '中止';
       case GameStatus.scheduled:
         return const SizedBox.shrink();
@@ -233,9 +249,8 @@ class _StatusChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: color, width: 1),
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
         label,
@@ -258,8 +273,8 @@ class _PlatformChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: theme.colorScheme.secondaryContainer,
-        borderRadius: BorderRadius.circular(12),
+        color: theme.colorScheme.secondaryContainer.withValues(alpha: 0.72),
+        borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
         platform,

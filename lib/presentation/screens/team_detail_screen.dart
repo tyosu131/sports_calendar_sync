@@ -91,12 +91,21 @@ class TeamDetailScreen extends ConsumerWidget {
               // Games list
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                  child: Text(
-                    '直近の試合',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                  padding: const EdgeInsets.fromLTRB(16, 18, 16, 8),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.event_note_outlined,
+                        size: 20,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '直近の試合',
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -108,11 +117,8 @@ class TeamDetailScreen extends ConsumerWidget {
                     SliverToBoxAdapter(child: Center(child: Text('エラー: $e'))),
                 data: (games) {
                   if (games.isEmpty) {
-                    return const SliverToBoxAdapter(
-                      child: Padding(
-                        padding: EdgeInsets.all(32),
-                        child: Center(child: Text('直近の試合はありません')),
-                      ),
+                    return SliverToBoxAdapter(
+                      child: _TeamDetailEmptyState(message: '直近の試合はありません'),
                     );
                   }
                   return SliverList(
@@ -164,6 +170,8 @@ class _TeamHeaderBackground extends StatelessWidget {
                 : Image.network(
                     logoUrl!,
                     fit: BoxFit.contain,
+                    gaplessPlayback: true,
+                    filterQuality: FilterQuality.high,
                     errorBuilder: (context, error, stackTrace) => CircleAvatar(
                       radius: 46,
                       backgroundColor: colorScheme.surface,
@@ -175,6 +183,46 @@ class _TeamHeaderBackground extends StatelessWidget {
                     ),
                   ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TeamDetailEmptyState extends StatelessWidget {
+  const _TeamDetailEmptyState({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 32),
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.42),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.event_busy_outlined,
+              color: colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                message,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

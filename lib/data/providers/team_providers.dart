@@ -44,17 +44,23 @@ final followedTeamsProvider = FutureProvider<List<Team>>((ref) async {
 // ── Search ────────────────────────────────────────────────────────────────────
 
 /// Search query state
-final teamSearchQueryProvider = StateProvider<String>((ref) => '');
+final teamSearchQueryProvider = StateProvider.autoDispose<String>((ref) => '');
 
 /// Active competition filter for search.
 /// null = no active competition tab (used by the "Followed" tab).
-final teamSearchCompetitionKeyProvider = StateProvider<String?>((ref) => null);
+final teamSearchCompetitionKeyProvider = StateProvider.autoDispose<String?>(
+  (ref) => null,
+);
 
 /// Whether the search screen is scoped to the current user's followed teams.
-final teamSearchFollowedOnlyProvider = StateProvider<bool>((ref) => true);
+final teamSearchFollowedOnlyProvider = StateProvider.autoDispose<bool>(
+  (ref) => true,
+);
 
 /// Search results scoped to the current query and active competition tab.
-final teamSearchResultsProvider = FutureProvider<List<Team>>((ref) async {
+final teamSearchResultsProvider = FutureProvider.autoDispose<List<Team>>((
+  ref,
+) async {
   final query = ref.watch(teamSearchQueryProvider);
   final followedOnly = ref.watch(teamSearchFollowedOnlyProvider);
   final competitionKey = ref.watch(teamSearchCompetitionKeyProvider);
