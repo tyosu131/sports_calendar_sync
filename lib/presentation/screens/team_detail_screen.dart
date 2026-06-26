@@ -42,20 +42,10 @@ class TeamDetailScreen extends ConsumerWidget {
                 pinned: true,
                 flexibleSpace: FlexibleSpaceBar(
                   title: Text(team.nameJa),
-                  background: team.logoUrl != null
-                      ? Image.network(team.logoUrl!, fit: BoxFit.contain)
-                      : Container(
-                          color: Theme.of(context).colorScheme.primaryContainer,
-                          child: Center(
-                            child: Text(
-                              team.nameJa[0],
-                              style: const TextStyle(
-                                fontSize: 72,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
+                  background: _TeamHeaderBackground(
+                    nameJa: team.nameJa,
+                    logoUrl: team.logoUrl,
+                  ),
                 ),
                 actions: [
                   // Follow/unfollow
@@ -137,6 +127,55 @@ class TeamDetailScreen extends ConsumerWidget {
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+class _TeamHeaderBackground extends StatelessWidget {
+  const _TeamHeaderBackground({required this.nameJa, required this.logoUrl});
+
+  final String nameJa;
+  final String? logoUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Container(
+      color: colorScheme.primaryContainer,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 24, 24, 48),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 140, maxHeight: 96),
+            child: logoUrl == null || logoUrl!.isEmpty
+                ? CircleAvatar(
+                    radius: 46,
+                    backgroundColor: colorScheme.surface,
+                    child: Text(
+                      nameJa.isNotEmpty ? nameJa[0] : '?',
+                      style: const TextStyle(
+                        fontSize: 38,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  )
+                : Image.network(
+                    logoUrl!,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) => CircleAvatar(
+                      radius: 46,
+                      backgroundColor: colorScheme.surface,
+                      child: Icon(
+                        Icons.shield_outlined,
+                        size: 44,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+          ),
+        ),
       ),
     );
   }

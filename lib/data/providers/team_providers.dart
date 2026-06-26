@@ -11,22 +11,26 @@ import 'repository_providers.dart';
 /// null = no filter (all competitions).
 final leaguesByCompetitionProvider =
     FutureProvider.family<List<League>, String?>((ref, competitionKey) async {
-  return ref
-      .watch(teamRepositoryProvider)
-      .fetchLeagues(competitionKey: competitionKey);
-});
+      return ref
+          .watch(teamRepositoryProvider)
+          .fetchLeagues(competitionKey: competitionKey);
+    });
 
 // ── Team providers ────────────────────────────────────────────────────────────
 
 /// Teams for a specific league.
-final teamsByLeagueProvider =
-    FutureProvider.family<List<Team>, String>((ref, leagueId) async {
+final teamsByLeagueProvider = FutureProvider.family<List<Team>, String>((
+  ref,
+  leagueId,
+) async {
   return ref.watch(teamRepositoryProvider).fetchTeamsByLeague(leagueId);
 });
 
 /// A single team by ID.
-final teamByIdProvider =
-    FutureProvider.family<Team?, String>((ref, teamId) async {
+final teamByIdProvider = FutureProvider.family<Team?, String>((
+  ref,
+  teamId,
+) async {
   return ref.watch(teamRepositoryProvider).fetchTeam(teamId);
 });
 
@@ -43,14 +47,40 @@ final followedTeamsProvider = FutureProvider<List<Team>>((ref) async {
 final teamSearchQueryProvider = StateProvider<String>((ref) => '');
 
 /// Active competition filter for search.
-/// null = search across all competitions (matches the "All" tab).
+/// null = no active competition tab (used by the "Followed" tab).
 final teamSearchCompetitionKeyProvider = StateProvider<String?>((ref) => null);
+
+/// Whether the search screen is scoped to the current user's followed teams.
+final teamSearchFollowedOnlyProvider = StateProvider<bool>((ref) => true);
 
 /// Search results scoped to the current query and active competition tab.
 final teamSearchResultsProvider = FutureProvider<List<Team>>((ref) async {
   final query = ref.watch(teamSearchQueryProvider);
+  final followedOnly = ref.watch(teamSearchFollowedOnlyProvider);
   final competitionKey = ref.watch(teamSearchCompetitionKeyProvider);
-  return ref
-      .watch(teamRepositoryProvider)
-      .searchTeams(query, competitionKey: competitionKey);
+  final repository = ref.watch(teamRepositoryProvider);
+
+  if (followedOnly) {
+    final teamIds = ref.watch(followedTeamIdsProvider);
+    final teams = await repository.fetchTeamsByIds(teamIds);
+    final normalizedQuery = _normalizeSearchText(query);
+    if (normalizedQuery.isEmpty) return teams;
+    return teams
+        .where((team) => _teamSearchText(team).contains(normalizedQuery))
+        .toList();
+  }
+
+  return repository.searchTeams(query, competitionKey: competitionKey);
 });
+
+String _teamSearchText(Team team) {
+  return [
+    team.id,
+    team.nameEn,
+    team.nameJa,
+  ].map(_normalizeSearchText).join(' ');
+}
+
+String _normalizeSearchText(String value) {
+  return value.toLowerCase().trim();
+}

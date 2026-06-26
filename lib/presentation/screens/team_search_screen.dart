@@ -28,9 +28,11 @@ class _TeamSearchScreenState extends ConsumerState<TeamSearchScreen>
   void initState() {
     super.initState();
     _tabController = TabController(
-      length: _competitions.length + 1, // +1 for "All" tab
+      length: _competitions.length + 1, // Followed + competitions
       vsync: this,
     );
+    ref.read(teamSearchFollowedOnlyProvider.notifier).state = true;
+    ref.read(teamSearchCompetitionKeyProvider.notifier).state = null;
     // Keep teamSearchCompetitionKeyProvider in sync with the active tab.
     // Using an animation listener (fires on every frame during swipe as well
     // as on tap) ensures the provider is updated for both tap and swipe.
@@ -42,10 +44,19 @@ class _TeamSearchScreenState extends ConsumerState<TeamSearchScreen>
     // tap-based tab changes and swipe gestures without updating for every
     // fractional animation value.
     final index = _tabController.animation!.value.round();
-    final key = index == 0 ? null : _competitions[index - 1].competitionKey;
-    final notifier = ref.read(teamSearchCompetitionKeyProvider.notifier);
-    if (notifier.state != key) {
-      notifier.state = key;
+    final followedOnly = index == 0;
+    final key = followedOnly ? null : _competitions[index - 1].competitionKey;
+
+    final followedNotifier = ref.read(teamSearchFollowedOnlyProvider.notifier);
+    if (followedNotifier.state != followedOnly) {
+      followedNotifier.state = followedOnly;
+    }
+
+    final competitionNotifier = ref.read(
+      teamSearchCompetitionKeyProvider.notifier,
+    );
+    if (competitionNotifier.state != key) {
+      competitionNotifier.state = key;
     }
   }
 
@@ -96,7 +107,7 @@ class _TeamSearchScreenState extends ConsumerState<TeamSearchScreen>
                 controller: _tabController,
                 isScrollable: true,
                 tabs: [
-                  const Tab(text: 'すべて'),
+                  const Tab(text: 'フォロー中'),
                   ..._competitions.map((s) => Tab(text: s.displayNameJa)),
                 ],
               ),
@@ -114,6 +125,8 @@ class _SearchResults extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final resultsAsync = ref.watch(teamSearchResultsProvider);
+    final followedOnly = ref.watch(teamSearchFollowedOnlyProvider);
+    final searchQuery = ref.watch(teamSearchQueryProvider);
     final followedIds = ref.watch(followedTeamIdsProvider);
     final user = ref.watch(currentUserProvider);
     final profile = ref.watch(userProfileProvider).valueOrNull;
@@ -124,7 +137,12 @@ class _SearchResults extends ConsumerWidget {
       error: (e, _) => Center(child: Text('エラー: $e')),
       data: (teams) {
         if (teams.isEmpty) {
-          return const Center(child: Text('チームが見つかりませんでした'));
+          final emptyMessage = followedOnly
+              ? (searchQuery.trim().isEmpty
+                    ? 'フォロー中のチームはありません'
+                    : '条件に合うフォロー中のチームはありません')
+              : 'チームが見つかりませんでした';
+          return Center(child: Text(emptyMessage));
         }
         return ListView.builder(
           itemCount: teams.length,
