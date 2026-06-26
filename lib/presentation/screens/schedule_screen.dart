@@ -376,7 +376,7 @@ class _CalendarGamePreview extends StatelessWidget {
     return FittedBox(
       fit: BoxFit.scaleDown,
       child: SizedBox(
-        width: 112,
+        width: 152,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -395,7 +395,7 @@ class _CalendarGamePreview extends StatelessWidget {
                     'vs',
                     style: TextStyle(
                       color: foregroundColor,
-                      fontSize: 12,
+                      fontSize: 13,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -415,7 +415,7 @@ class _CalendarGamePreview extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 color: foregroundColor,
-                fontSize: 12,
+                fontSize: 13,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -468,13 +468,13 @@ class _MiniTeamIcon extends StatelessWidget {
       name.isEmpty ? '?' : String.fromCharCode(name.runes.first),
       style: TextStyle(
         color: foregroundColor,
-        fontSize: 11,
+        fontSize: 13,
         fontWeight: FontWeight.bold,
       ),
     );
 
     return CircleAvatar(
-      radius: 11,
+      radius: 17,
       backgroundColor: selected
           ? Theme.of(context).colorScheme.primary
           : Theme.of(context).colorScheme.surfaceContainerHighest,
@@ -483,12 +483,12 @@ class _MiniTeamIcon extends StatelessWidget {
           : ClipOval(
               child: Image.network(
                 logoUrl!,
-                width: 18,
-                height: 18,
+                width: 30,
+                height: 30,
                 fit: BoxFit.contain,
                 errorBuilder: (context, error, stackTrace) => Icon(
                   Icons.shield_outlined,
-                  size: 14,
+                  size: 20,
                   color: foregroundColor,
                 ),
               ),

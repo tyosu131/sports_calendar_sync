@@ -28,8 +28,10 @@ class GameCard extends StatelessWidget {
               children: [
                 if (isToday)
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: theme.colorScheme.primary,
                       borderRadius: BorderRadius.circular(4),
@@ -58,11 +60,9 @@ class GameCard extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: Text(
-                    game.homeTeamNameJa,
-                    style: theme.textTheme.titleMedium
-                        ?.copyWith(fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
+                  child: _TeamSide(
+                    name: game.homeTeamNameJa,
+                    logoUrl: game.homeTeamLogoUrl,
                   ),
                 ),
                 Padding(
@@ -70,11 +70,9 @@ class GameCard extends StatelessWidget {
                   child: _ScoreOrVs(game: game),
                 ),
                 Expanded(
-                  child: Text(
-                    game.awayTeamNameJa,
-                    style: theme.textTheme.titleMedium
-                        ?.copyWith(fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
+                  child: _TeamSide(
+                    name: game.awayTeamNameJa,
+                    logoUrl: game.awayTeamLogoUrl,
                   ),
                 ),
               ],
@@ -84,9 +82,11 @@ class GameCard extends StatelessWidget {
               const SizedBox(height: 8),
               Row(
                 children: [
-                  Icon(Icons.location_on_outlined,
-                      size: 14,
-                      color: theme.colorScheme.onSurfaceVariant),
+                  Icon(
+                    Icons.location_on_outlined,
+                    size: 14,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     game.venue!,
@@ -114,6 +114,67 @@ class GameCard extends StatelessWidget {
   }
 }
 
+class _TeamSide extends StatelessWidget {
+  const _TeamSide({required this.name, required this.logoUrl});
+
+  final String name;
+  final String? logoUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _GameTeamLogo(name: name, logoUrl: logoUrl),
+        const SizedBox(height: 6),
+        Text(
+          name,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+}
+
+class _GameTeamLogo extends StatelessWidget {
+  const _GameTeamLogo({required this.name, required this.logoUrl});
+
+  final String name;
+  final String? logoUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    final fallback = Text(
+      name.isEmpty ? '?' : String.fromCharCode(name.runes.first),
+      style: const TextStyle(fontWeight: FontWeight.bold),
+    );
+
+    return CircleAvatar(
+      radius: 24,
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+      child: logoUrl == null || logoUrl!.isEmpty
+          ? fallback
+          : ClipOval(
+              child: Image.network(
+                logoUrl!,
+                width: 40,
+                height: 40,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) =>
+                    const Icon(Icons.shield_outlined, size: 24),
+              ),
+            ),
+    );
+  }
+}
+
 class _ScoreOrVs extends StatelessWidget {
   const _ScoreOrVs({required this.game});
   final Game game;
@@ -121,12 +182,18 @@ class _ScoreOrVs extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    if (game.status == GameStatus.finished ||
-        game.status == GameStatus.live) {
+    final shouldShowScore =
+        (game.status == GameStatus.finished ||
+            game.status == GameStatus.live) &&
+        game.homeScore != null &&
+        game.awayScore != null;
+
+    if (shouldShowScore) {
       return Text(
-        '${game.homeScore ?? '-'} - ${game.awayScore ?? '-'}',
-        style: theme.textTheme.headlineSmall
-            ?.copyWith(fontWeight: FontWeight.bold),
+        '${game.homeScore} - ${game.awayScore}',
+        style: theme.textTheme.headlineSmall?.copyWith(
+          fontWeight: FontWeight.bold,
+        ),
       );
     }
     return Text(

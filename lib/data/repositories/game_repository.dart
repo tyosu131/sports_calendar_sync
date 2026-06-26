@@ -477,9 +477,11 @@ class SampleGameRepository implements GameRepository {
       homeTeamId: homeTeamId,
       homeTeamNameJa: homeTeamNameJa,
       homeTeamNameEn: homeTeamNameEn,
+      homeTeamLogoUrl: _logoUrlForTeam(homeTeamId),
       awayTeamId: awayTeamId,
       awayTeamNameJa: awayTeamNameJa,
       awayTeamNameEn: awayTeamNameEn,
+      awayTeamLogoUrl: _logoUrlForTeam(awayTeamId),
       startTimeUtc: Timestamp.fromDate(startUtc),
       startTimeJst: _formatJst(startUtc),
       timezone: 'Asia/Tokyo',
@@ -489,6 +491,24 @@ class SampleGameRepository implements GameRepository {
       awayScore: awayScore,
       broadcastPlatforms: broadcastPlatforms,
     );
+  }
+
+  String? _logoUrlForTeam(String teamId) {
+    return switch (teamId) {
+      'kashima_antlers' => 'https://media.api-sports.io/football/teams/290.png',
+      'urawa_reds' => 'https://media.api-sports.io/football/teams/287.png',
+      'gamba_osaka' => 'https://media.api-sports.io/football/teams/293.png',
+      'cerezo_osaka' => 'https://media.api-sports.io/football/teams/291.png',
+      'vegalta_sendai' => 'https://media.api-sports.io/football/teams/286.png',
+      'jubilo_iwata' => 'https://media.api-sports.io/football/teams/280.png',
+      'fc_gifu' => 'https://media.api-sports.io/football/teams/297.png',
+      'reilac_shiga' => 'https://media.api-sports.io/football/teams/7117.png',
+      'los_angeles_lakers' =>
+        'https://a.espncdn.com/i/teamlogos/nba/500/lal.png',
+      'golden_state_warriors' =>
+        'https://a.espncdn.com/i/teamlogos/nba/500/gs.png',
+      _ => null,
+    };
   }
 
   DateTime _futureUtc(int daysFromNow, int utcHour) {

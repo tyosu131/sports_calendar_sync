@@ -4894,6 +4894,7 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
     - sample mode hides undeployed Cloud Functions calendar sync actions
     - in-app calendar UI first implementation is completed as `ScheduleScreen`
     - sample / static data now includes football / NPB / NBA sample teams and games
+    - sample mode team logo display has been improved across Team Search / Home / TeamDetail / Schedule
     - team-level ICS local generation remains a later step
     - README / architecture docs / cost-control note have been updated for Free MVP positioning
     - consider GitHub Pages / Cloudflare Pages for static ICS later
@@ -5051,10 +5052,45 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
       - forbidden file scan: PASS
       - `.DS_Store`: none
     - fifth:
-      - Schedule UI polish
+      - sample team logo display polish
+      - status: completed in commit `16aec03 Improve sample team logo display`
+      - Free MVP sample mode team logo display improved across:
+        - Team Search
+        - Home
+        - TeamDetail
+        - Schedule
+      - `SampleTeamRepository` logo mapping was reviewed for all current sample teams
+      - `SampleGameRepository._logoUrlForTeam(...)` was aligned with sample team logo mapping
+      - Cerezo Osaka wrong logo mapping was fixed
+        - Kawasaki Frontale logo is no longer used for `cerezo_osaka`
+      - NPB sample teams keep fallback display because no stable logo URL is confirmed
+      - NBA sample teams keep their current sample logo URLs
+      - `GameCard` now uses `homeTeamLogoUrl` / `awayTeamLogoUrl`
+      - `GameCard` supports home / away logo + center `vs` or score display
+      - `_ScoreOrVs` is null-safe
+        - finished / live + both `homeScore` and `awayScore` present: score is displayed
+        - otherwise: `vs` is displayed
+      - Team Search now starts from `フォロー中`
+      - Team Search `すべて` tab was removed to reduce sample mode noise as sports expand
+      - TeamDetail header logo size was constrained so the team name remains readable
+      - Schedule date cell icons were enlarged for better matchup visibility
+      - Home / TeamDetail sample mode iCalendar sync icons remain hidden
+      - Firestore write / seed / `--write`: 0
+      - API sync: 0
+      - deploy: 0
+      - Blaze upgrade: 0
+      - Firebase secret / config commands: 0
+    - sample team logo display validation:
+      - `dart format`: PASS
+      - `flutter analyze`: PASS
+      - `flutter test`: PASS
+      - `git diff --check`: PASS
+      - package / lockfile diff: none
     - sixth:
-      - sample mode competition tabs / labels cleanup
+      - Schedule UI polish
     - seventh:
+      - sample mode competition tabs / labels cleanup
+    - eighth:
       - team-level ICS local generation
   - Decision
     - cost-control mode:
@@ -5066,9 +5102,9 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
     - API sync:
       - `deferred-by-cost-control`
     - Free MVP:
-      - `readme-cost-control-docs-updated`
+      - `sample-logo-display-improved`
 - Next task: 次の判断段階
-  - README / architecture docs / cost-control note 更新結果を current-state に反映して commit / push する
+  - sample team logo display 改善結果を current-state に反映して commit / push する
   - 次に Schedule UI polish を行うか判断する
   - 次に sample mode competition tabs / labels を整理するか判断する
   - team-level ICS local generation は次以降に扱う
@@ -5082,7 +5118,7 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - npm audit vulnerabilities は別タスク候補として残す
   - 今後の PR は GitHub Actions CI の結果を確認してから merge する
 - 次の合理的な順序
-  1. README / architecture docs / cost-control note 更新結果を current-state に反映して commit / push
+  1. sample team logo display 改善結果を current-state に反映して commit / push
   2. Schedule UI polish を行うか判断
   3. sample mode competition tabs / labels を整理するか判断
   4. team-level ICS local generation は次以降に扱う
@@ -5156,7 +5192,7 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 
 | 不足フィールド | 現状 | 影響 |
 |---|---|---|
-| `homeTeamLogoUrl` / `awayTeamLogoUrl` | `Game` model / J1 sample games / `football_adapter.ts` は対応済み | `GameCard` ではまだロゴを表示していない。詳細は `docs/team-game-model-gaps.md` を参照 |
+| `homeTeamLogoUrl` / `awayTeamLogoUrl` | `Game` model / sample games / `football_adapter.ts` / `GameCard` は対応済み | Home / TeamDetail の `GameCard` で home / away logo + `vs` / score を表示できる。実データ側の logo population と表示確認は引き続き必要 |
 | `competitionRound` / `matchday` | なし | 「第○節」「ラウンド16」等の表示不可 |
 | `broadcastPlatforms` の実データ | 常に空配列 | 放送情報が一切表示されない |
 | `isNeutralVenue` | なし | 中立地開催の判定不可 |

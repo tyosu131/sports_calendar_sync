@@ -214,18 +214,18 @@ class _FollowedTeamCard extends StatelessWidget {
             child: Row(
               children: [
                 CircleAvatar(
-                  radius: 22,
+                  radius: 24,
                   backgroundColor: Theme.of(context).colorScheme.surface,
                   child: logoUrl == null || logoUrl.isEmpty
-                      ? const Icon(Icons.shield_outlined, size: 22)
+                      ? const Icon(Icons.shield_outlined, size: 24)
                       : ClipOval(
                           child: Image.network(
                             logoUrl,
-                            width: 32,
-                            height: 32,
+                            width: 38,
+                            height: 38,
                             fit: BoxFit.contain,
                             errorBuilder: (context, error, stackTrace) =>
-                                const Icon(Icons.shield_outlined, size: 22),
+                                const Icon(Icons.shield_outlined, size: 24),
                           ),
                         ),
                 ),

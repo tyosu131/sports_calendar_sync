@@ -53,19 +53,26 @@ class _TeamLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final fallback = Text(
+      nameJa.isNotEmpty ? nameJa[0] : '?',
+      style: const TextStyle(fontWeight: FontWeight.bold),
+    );
+
     if (logoUrl != null && logoUrl!.isNotEmpty) {
       return CircleAvatar(
-        backgroundImage: NetworkImage(logoUrl!),
-        radius: 22,
-        backgroundColor: Colors.transparent,
+        radius: 26,
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+        child: ClipOval(
+          child: Image.network(
+            logoUrl!,
+            width: 46,
+            height: 46,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) => fallback,
+          ),
+        ),
       );
     }
-    return CircleAvatar(
-      radius: 22,
-      child: Text(
-        nameJa.isNotEmpty ? nameJa[0] : '?',
-        style: const TextStyle(fontWeight: FontWeight.bold),
-      ),
-    );
+    return CircleAvatar(radius: 26, child: fallback);
   }
 }
