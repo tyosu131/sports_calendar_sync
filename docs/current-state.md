@@ -4896,7 +4896,7 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
     - sample / static data now includes football / NPB / NBA sample teams and games
     - sample mode team logo display has been improved across Team Search / Home / TeamDetail / Schedule
     - Free MVP visual design polish has been completed across the main sample-mode screens
-    - team-level ICS local generation remains a later step
+    - team-level ICS local generation first implementation is completed for sample mode
     - README / architecture docs / cost-control note have been updated for Free MVP positioning
     - consider GitHub Pages / Cloudflare Pages for static ICS later
     - add AWS / Terraform design docs or skeleton later without creating paid resources
@@ -5184,9 +5184,60 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
         - `docs/phase0-current-architecture.md`
         - `README.md`
     - eighth:
-      - sample mode competition tabs / labels cleanup
-    - ninth:
       - team-level ICS local generation
+      - status: first implementation completed on branch `feature/team-level-local-ics-generation`
+      - `lib/core/utils/local_ics_builder.dart` added
+      - local-only / sample-mode-safe behavior:
+        - generates iCalendar text inside the Flutter app
+        - no Cloud Functions URL is shown in sample mode
+        - no external `.ics` delivery endpoint is required
+        - TeamDetail sample mode can preview and copy local ICS text
+        - generated ICS includes only the selected team's games
+        - games empty state disables copy naturally
+      - ICS fields included:
+        - `BEGIN:VCALENDAR`
+        - `VERSION:2.0`
+        - `PRODID`
+        - `CALSCALE:GREGORIAN`
+        - `BEGIN:VEVENT`
+        - deterministic `UID`
+        - `DTSTAMP`
+        - UTC `DTSTART` in `yyyyMMddTHHmmssZ` format
+        - `SUMMARY`
+        - `DESCRIPTION`
+        - `LOCATION`
+        - `END:VEVENT`
+        - `END:VCALENDAR`
+      - implementation notes:
+        - `DTEND` is intentionally omitted because game duration differs by sport and the current Free MVP model has no authoritative end time
+        - ICS text escaping covers comma, semicolon, backslash, and newline
+        - UID format uses `${game.id}@sports-calendar-sync.local`
+        - DESCRIPTION records status, score when available, competition metadata, and local sample-mode source
+        - null venue is handled without writing `null`
+      - TeamDetail integration:
+        - sample mode shows `ローカルICSをコピー`
+        - preview bottom sheet shows generated ICS text
+        - Clipboard copy is supported
+        - existing undeployed Cloud Functions calendar sync icon remains hidden in sample mode
+        - non-sample Cloud Functions sync path remains unchanged for future deploy path
+      - tests added:
+        - `test/local_ics_builder_test.dart`
+        - VCALENDAR / VEVENT generation
+        - UTC `DTSTART` `Z` format
+        - Japanese home / away names in SUMMARY
+        - deterministic UID
+        - DESCRIPTION / LOCATION escaping
+        - multiple games generate multiple VEVENT blocks
+        - null venue safety
+      - Firestore write / seed / `--write`: 0
+      - API sync: 0
+      - deploy: 0
+      - Blaze upgrade: 0
+      - Firebase secret / config commands: 0
+      - external API calls: 0
+      - package / lockfile changes: 0
+    - ninth:
+      - sample mode competition tabs / labels cleanup
   - Decision
     - cost-control mode:
       - `enabled`
@@ -5197,13 +5248,14 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
     - API sync:
       - `deferred-by-cost-control`
     - Free MVP:
-      - `visual-design-polished-logo-strategy-documented`
+      - `local-team-ics-generation-implemented`
 - Next task: 次の判断段階
-  - logo asset strategy docs-only 整理結果を commit / push する
+  - team-level local ICS generation 実装結果を commit / push する
   - Schedule UI polish は完了扱い
   - logo asset strategy は docs-only 整理済み
-  - 次に team-level ICS local generation を行うか判断する
   - 次に sample mode competition tabs / labels cleanup の残り確認を行うか判断する
+  - 次に local ICS preview / copy UX を README に反映するか判断する
+  - team-level ICS file save / share sheet / static hosting は別タスクとして扱う
   - logo asset strategy の actual implementation は後回し
   - README / docs への visual polish 反映が必要なら別タスクとして扱う
   - Blaze upgrade は今はしない
@@ -5216,11 +5268,11 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - npm audit vulnerabilities は別タスク候補として残す
   - 今後の PR は GitHub Actions CI の結果を確認してから merge する
 - 次の合理的な順序
-  1. logo asset strategy docs-only 整理結果を commit / push
-  2. team-level ICS local generation を行うか判断
-  3. sample mode competition tabs / labels cleanup の残り確認を行うか判断
-  4. logo asset strategy の actual implementation は後回し
-  5. README / docs への visual polish 反映が必要なら別タスクとして扱う
+  1. team-level local ICS generation 実装結果を commit / push
+  2. sample mode competition tabs / labels cleanup の残り確認を行うか判断
+  3. local ICS preview / copy UX を README に反映するか判断
+  4. team-level ICS file save / share sheet / static hosting は別タスクとして扱う
+  5. logo asset strategy の actual implementation は後回し
   6. Blaze upgrade は今はしない
   7. secret setup は再実行しない
   8. API sync はまだ実行しない
@@ -5473,7 +5525,8 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 - README / architecture docs / cost-control note は Free MVP / cost-control 方針として更新済み
 - Schedule UI polish / Free MVP visual design polish は完了済み
 - logo asset strategy は docs-only で整理済み
-- 次の候補は team-level ICS local generation、sample mode competition tabs / labels cleanup の残り確認
+- team-level ICS local generation は Flutter app 内ローカル生成 / コピーとして第一実装済み
+- 次の候補は sample mode competition tabs / labels cleanup の残り確認、local ICS README 反映、team-level ICS file save / share sheet / static hosting 検討
 - high-resolution logo / SVG / local asset strategy の actual implementation は後回し
 
 ### Task 5: Flutter UI polish / regression check / deferred backend work
