@@ -4895,6 +4895,7 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
     - in-app calendar UI first implementation is completed as `ScheduleScreen`
     - sample / static data now includes football / NPB / NBA sample teams and games
     - sample mode team logo display has been improved across Team Search / Home / TeamDetail / Schedule
+    - Free MVP visual design polish has been completed across the main sample-mode screens
     - team-level ICS local generation remains a later step
     - README / architecture docs / cost-control note have been updated for Free MVP positioning
     - consider GitHub Pages / Cloudflare Pages for static ICS later
@@ -5087,7 +5088,63 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
       - `git diff --check`: PASS
       - package / lockfile diff: none
     - sixth:
-      - Schedule UI polish
+      - Free MVP visual design polish
+      - status: completed in commit `601d0ab Polish free MVP visual design`
+      - target scope:
+        - Home
+        - Team Search
+        - TeamDetail
+        - Schedule
+        - GameCard
+        - TeamListTile
+      - implementation scope:
+        - presentation layer centered changes
+        - `team_providers.dart` changed only for Team Search UI state provider lifecycle correction
+        - repository behavior changes: 0
+        - sample data changes: 0
+        - backend changes: 0
+        - package / lockfile changes: 0
+      - Team Search polish:
+        - Riverpod runtime error fixed
+        - removed synchronous provider mutation from `initState`
+        - provider updates now happen on tab tap only
+        - Team Search UI state providers use `autoDispose` so the screen naturally returns to the `フォロー中` initial scope
+        - tab switching flicker / noisy previous-tab paint was improved to an acceptable range
+        - `フォロー中` initial tab remains
+        - `すべて` tab remains removed
+      - Schedule polish:
+        - visual hierarchy / calendar cell / selected date details were polished
+        - date cell multiple-game policy documented and implemented:
+          - date cell shows primary game preview + `N試合` badge
+          - `N試合` is based on `games.length`
+          - selected date details show all games for that date
+        - multiple-game date manual UI check was not performed because current sample data has no same-date multi-game case
+        - `games.length`-based implementation was confirmed in code
+      - logo / visual asset notes:
+        - small logo roughness remains acceptable for Free MVP
+        - future options: high-resolution logos / SVG / local asset management
+        - NPB fallback remains
+        - Cerezo Osaka wrong-logo fix remains
+      - validation:
+        - `dart format`: PASS
+        - `flutter analyze`: PASS
+        - `flutter test`: PASS
+        - `git diff --check`: PASS
+        - package / lockfile diff: none
+        - forbidden file scan: none
+      - manual UI check:
+        - Team Search initial display: no red screen
+        - Team Search tab switching: no red screen
+        - Team Search tab switching flicker: acceptable range
+        - Schedule details display: OK
+        - TeamDetail header logo: acceptable range
+        - small logo roughness remains but acceptable for Free MVP
+      - Firestore write / seed / `--write`: 0
+      - API sync: 0
+      - deploy: 0
+      - Blaze upgrade: 0
+      - Firebase secret / config commands: 0
+      - new package additions: 0
     - seventh:
       - sample mode competition tabs / labels cleanup
     - eighth:
@@ -5102,12 +5159,14 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
     - API sync:
       - `deferred-by-cost-control`
     - Free MVP:
-      - `sample-logo-display-improved`
+      - `visual-design-polished`
 - Next task: 次の判断段階
-  - sample team logo display 改善結果を current-state に反映して commit / push する
-  - 次に Schedule UI polish を行うか判断する
-  - 次に sample mode competition tabs / labels を整理するか判断する
+  - Free MVP visual design polish 結果を current-state に反映して commit / push する
+  - Schedule UI polish は完了扱い
+  - 次に sample mode competition tabs / labels cleanup の残り確認を行うか判断する
   - team-level ICS local generation は次以降に扱う
+  - high-resolution logo / SVG / local asset strategy は別タスク候補として残す
+  - README / docs への visual polish 反映が必要なら別タスクとして扱う
   - Blaze upgrade は今はしない
   - secret setup は再実行しない
   - API sync はまだ実行しない
@@ -5118,17 +5177,18 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - npm audit vulnerabilities は別タスク候補として残す
   - 今後の PR は GitHub Actions CI の結果を確認してから merge する
 - 次の合理的な順序
-  1. sample team logo display 改善結果を current-state に反映して commit / push
-  2. Schedule UI polish を行うか判断
-  3. sample mode competition tabs / labels を整理するか判断
-  4. team-level ICS local generation は次以降に扱う
-  5. Blaze upgrade は今はしない
-  6. secret setup は再実行しない
-  7. API sync はまだ実行しない
-  8. deploy はまだ実行しない
-  9. Firestore write / seed / `--write` は再実行しない
-  10. npm audit vulnerabilities は別タスク候補として扱う
-  11. 今後の PR は GitHub Actions CI の結果を確認してから merge
+  1. Free MVP visual design polish 結果を current-state に反映して commit / push
+  2. sample mode competition tabs / labels cleanup の残り確認を行うか判断
+  3. team-level ICS local generation は次以降に扱う
+  4. high-resolution logo / SVG / local asset strategy は別タスク候補として扱う
+  5. README / docs への visual polish 反映が必要なら別タスクとして扱う
+  6. Blaze upgrade は今はしない
+  7. secret setup は再実行しない
+  8. API sync はまだ実行しない
+  9. deploy はまだ実行しない
+  10. Firestore write / seed / `--write` は再実行しない
+  11. npm audit vulnerabilities は別タスク候補として扱う
+  12. 今後の PR は GitHub Actions CI の結果を確認してから merge
 - actual Firestore write は完了済み。`--write` の再実行には別承認が必要
 - Do not use bulk approval for Batch 1 or future batches
 - Do not run additional Firestore write / non-dry seed / `--write` without a separate exact plan and approval
@@ -5372,7 +5432,8 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 - Home と同じ followed-team game query behavior を Schedule 用 provider として再利用する
 - football / NPB / NBA sample data は Schedule に混在表示できる状態まで追加済み
 - README / architecture docs / cost-control note は Free MVP / cost-control 方針として更新済み
-- 次の候補は Schedule UI polish、sample mode competition tabs / labels 整理、team-level ICS local generation
+- Schedule UI polish / Free MVP visual design polish は完了済み
+- 次の候補は sample mode competition tabs / labels cleanup の残り確認、team-level ICS local generation、high-resolution logo / SVG / local asset strategy
 
 ### Task 5: Flutter UI polish / regression check / deferred backend work
 - J1 team search / follow / unfollow / home sample-game behavior / My Teams summary は確認済み
