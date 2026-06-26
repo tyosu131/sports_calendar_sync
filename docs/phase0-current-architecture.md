@@ -71,7 +71,7 @@ sports_calendar_sync/
 | **UI / 画面** | `team_detail_screen.dart` | チーム詳細 + 試合一覧 | — |
 | **UI / 画面** | `settings_screen.dart` | アカウント / ICS URL / 言語 | — |
 | **UI / 画面** | `sign_in_screen.dart` | Google / Apple サインイン | Firebase Auth に直接依存 |
-| **UI / Widget** | `game_card.dart` | 試合カード表示 | `homeTeamNameJa` / `awayTeamNameJa` のみ（ロゴなし） |
+| **UI / Widget** | `game_card.dart` | 試合カード表示 | `homeTeamLogoUrl` / `awayTeamLogoUrl` によるロゴ表示対応済み。実データ側の logo population は継続確認 |
 | **UI / Widget** | `team_list_tile.dart` | チームリスト行 | — |
 | **UI / Widget** | `ics_share_sheet.dart` | ICS URL シェア | Cloud Functions URL をハードコード |
 | **State** | `auth_providers.dart` | Firebase Auth 状態 / UserProfile Stream | Firebase 直結 |
@@ -126,9 +126,9 @@ _tabController = TabController(
 // game.dart — 現状
 class Game {
   final String leagueId;
-  final String homeTeamNameJa;  // 日本語名のみ（英語名なし）
+  final String homeTeamNameJa;
   // sportKey がない → どの競技の試合か判別不可
-  // homeTeamLogoUrl / awayTeamLogoUrl がない
+  // homeTeamLogoUrl / awayTeamLogoUrl は追加済み
 }
 ```
 
@@ -242,6 +242,32 @@ sample mode では Firestore read/write を行わず、follow / unfollow は in-
 - date cell 内に試合概要を表示する
 - 日付押下時のみ selected date details を表示する
 - external `.ics` delivery とは別の Flutter UI として扱う
+
+### Logo asset strategy
+
+Free MVP では Team Search / Home / TeamDetail / Schedule / GameCard の logo display は実装済み。
+
+現時点では外部 `logoUrl` と fallback 表示を併用する。小さいロゴは外部画像ソース、縮小描画、Flutter Web rendering の影響で roughness が残るが、Free MVP では許容する。
+
+短期方針:
+
+- 誤ロゴを出さない
+- fallback が崩れない
+- 十分視認できることを優先する
+- NPB は安定 URL がないため fallback を維持する
+- high-resolution logo 改善 / SVG 対応 / local asset 管理は今すぐ実装しない
+- 新規 package は追加しない
+
+将来検討:
+
+- high-resolution logo source verification
+- SVG support strategy
+- local asset management
+- logo source rights / license / usage policy review
+- fallback policy
+- team master data と logo asset metadata の関係整理
+- API-SPORTS logo URL / official source / local asset の優先順位
+- cache / CDN / asset bundle の検討
 
 sample mode では Home / TeamDetail の iCalendar sync icon を非表示にし、未デプロイの Cloud Functions URL をユーザーに見せない。
 

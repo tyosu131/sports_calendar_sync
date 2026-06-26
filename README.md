@@ -78,7 +78,8 @@ When sample mode is off, the app uses the Firestore-backed repositories.
 - Cloud Functions deploy is deferred
 - real iCalendar URL verification is deferred
 - `API_SPORTS_KEY` secret value setup is blocked until a Blaze / billing decision
-- Schedule UI polish remains future work
+- Free MVP visual polish is implemented; small external-logo roughness is accepted for now
+- high-resolution logo / SVG / local asset management remains future work
 - team-level local ICS generation remains future work
 - README / architecture docs will continue to evolve as the Free MVP matures
 
