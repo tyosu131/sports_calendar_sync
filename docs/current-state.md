@@ -5146,8 +5146,46 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
       - Firebase secret / config commands: 0
       - new package additions: 0
     - seventh:
-      - sample mode competition tabs / labels cleanup
+      - logo asset strategy documentation
+      - status: docs-only strategy recorded after Free MVP visual polish
+      - current Free MVP logo display state:
+        - Team Search / Home / TeamDetail / Schedule / GameCard logo display is implemented
+        - small logo roughness remains
+        - roughness is acceptable for Free MVP
+        - current priority is no wrong logo, stable fallback, and sufficient visibility
+        - NPB fallback remains because no stable logo URL is confirmed
+        - Cerezo Osaka wrong-logo fix remains
+      - short-term policy:
+        - keep existing external image URL / fallback approach
+        - do not implement high-resolution logo improvements now
+        - do not add a new package now
+        - SVG support and asset management are separate future tasks
+      - future strategy candidates:
+        - high-resolution logo source verification
+        - SVG support strategy
+        - local asset management
+        - logo source rights / license / usage policy review
+        - fallback policy
+        - team master data and logo asset metadata relationship
+        - API-SPORTS logo URL / official source / local asset priority
+        - cache / CDN / asset bundle options
+      - implementation changes:
+        - code change: 0
+        - package / lockfile change: 0
+        - new package: 0
+        - asset file addition: 0
+        - API call: 0
+        - Firestore write / seed / `--write`: 0
+        - deploy: 0
+        - Blaze upgrade: 0
+        - Firebase secret / config command: 0
+      - docs updated:
+        - `docs/current-state.md`
+        - `docs/phase0-current-architecture.md`
+        - `README.md`
     - eighth:
+      - sample mode competition tabs / labels cleanup
+    - ninth:
       - team-level ICS local generation
   - Decision
     - cost-control mode:
@@ -5159,13 +5197,14 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
     - API sync:
       - `deferred-by-cost-control`
     - Free MVP:
-      - `visual-design-polished`
+      - `visual-design-polished-logo-strategy-documented`
 - Next task: 次の判断段階
-  - Free MVP visual design polish 結果を current-state に反映して commit / push する
+  - logo asset strategy docs-only 整理結果を commit / push する
   - Schedule UI polish は完了扱い
+  - logo asset strategy は docs-only 整理済み
+  - 次に team-level ICS local generation を行うか判断する
   - 次に sample mode competition tabs / labels cleanup の残り確認を行うか判断する
-  - team-level ICS local generation は次以降に扱う
-  - high-resolution logo / SVG / local asset strategy は別タスク候補として残す
+  - logo asset strategy の actual implementation は後回し
   - README / docs への visual polish 反映が必要なら別タスクとして扱う
   - Blaze upgrade は今はしない
   - secret setup は再実行しない
@@ -5177,10 +5216,10 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
   - npm audit vulnerabilities は別タスク候補として残す
   - 今後の PR は GitHub Actions CI の結果を確認してから merge する
 - 次の合理的な順序
-  1. Free MVP visual design polish 結果を current-state に反映して commit / push
-  2. sample mode competition tabs / labels cleanup の残り確認を行うか判断
-  3. team-level ICS local generation は次以降に扱う
-  4. high-resolution logo / SVG / local asset strategy は別タスク候補として扱う
+  1. logo asset strategy docs-only 整理結果を commit / push
+  2. team-level ICS local generation を行うか判断
+  3. sample mode competition tabs / labels cleanup の残り確認を行うか判断
+  4. logo asset strategy の actual implementation は後回し
   5. README / docs への visual polish 反映が必要なら別タスクとして扱う
   6. Blaze upgrade は今はしない
   7. secret setup は再実行しない
@@ -5433,7 +5472,9 @@ Cloud Functions のデプロイ状況・実行ログが未確認。
 - football / NPB / NBA sample data は Schedule に混在表示できる状態まで追加済み
 - README / architecture docs / cost-control note は Free MVP / cost-control 方針として更新済み
 - Schedule UI polish / Free MVP visual design polish は完了済み
-- 次の候補は sample mode competition tabs / labels cleanup の残り確認、team-level ICS local generation、high-resolution logo / SVG / local asset strategy
+- logo asset strategy は docs-only で整理済み
+- 次の候補は team-level ICS local generation、sample mode competition tabs / labels cleanup の残り確認
+- high-resolution logo / SVG / local asset strategy の actual implementation は後回し
 
 ### Task 5: Flutter UI polish / regression check / deferred backend work
 - J1 team search / follow / unfollow / home sample-game behavior / My Teams summary は確認済み
