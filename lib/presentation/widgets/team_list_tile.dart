@@ -21,26 +21,41 @@ class TeamListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return ListTile(
-      onTap: onTap,
-      leading: _TeamLogo(logoUrl: team.logoUrl, nameJa: team.nameJa),
-      title: Text(
-        team.nameJa,
-        style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      elevation: 0,
+      color: theme.colorScheme.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+        side: BorderSide(color: theme.colorScheme.outlineVariant),
       ),
-      subtitle: Text(
-        team.nameEn,
-        style: theme.textTheme.bodySmall?.copyWith(
-          color: theme.colorScheme.onSurfaceVariant,
+      clipBehavior: Clip.antiAlias,
+      child: ListTile(
+        onTap: onTap,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+        leading: _TeamLogo(logoUrl: team.logoUrl, nameJa: team.nameJa),
+        title: Text(
+          team.nameJa,
+          style: theme.textTheme.bodyLarge?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
         ),
-      ),
-      trailing: IconButton(
-        icon: Icon(
-          isFollowing ? Icons.favorite : Icons.favorite_border,
-          color: isFollowing ? theme.colorScheme.primary : null,
+        subtitle: Text(
+          team.nameEn,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
         ),
-        tooltip: isFollowing ? 'フォロー解除' : 'フォローする',
-        onPressed: onFollowToggle,
+        trailing: IconButton(
+          icon: Icon(
+            isFollowing ? Icons.favorite : Icons.favorite_border,
+            color: isFollowing ? theme.colorScheme.primary : null,
+          ),
+          tooltip: isFollowing ? 'フォロー解除' : 'フォローする',
+          onPressed: onFollowToggle,
+        ),
       ),
     );
   }
@@ -63,16 +78,25 @@ class _TeamLogo extends StatelessWidget {
         radius: 26,
         backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
         child: ClipOval(
-          child: Image.network(
-            logoUrl!,
+          child: SizedBox(
             width: 46,
             height: 46,
-            fit: BoxFit.contain,
-            errorBuilder: (context, error, stackTrace) => fallback,
+            child: Image.network(
+              logoUrl!,
+              fit: BoxFit.contain,
+              gaplessPlayback: true,
+              filterQuality: FilterQuality.high,
+              errorBuilder: (context, error, stackTrace) =>
+                  Center(child: fallback),
+            ),
           ),
         ),
       );
     }
-    return CircleAvatar(radius: 26, child: fallback);
+    return CircleAvatar(
+      radius: 26,
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+      child: fallback,
+    );
   }
 }

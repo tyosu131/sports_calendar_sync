@@ -31,19 +31,9 @@ class _TeamSearchScreenState extends ConsumerState<TeamSearchScreen>
       length: _competitions.length + 1, // Followed + competitions
       vsync: this,
     );
-    ref.read(teamSearchFollowedOnlyProvider.notifier).state = true;
-    ref.read(teamSearchCompetitionKeyProvider.notifier).state = null;
-    // Keep teamSearchCompetitionKeyProvider in sync with the active tab.
-    // Using an animation listener (fires on every frame during swipe as well
-    // as on tap) ensures the provider is updated for both tap and swipe.
-    _tabController.animation!.addListener(_onTabAnimationChanged);
   }
 
-  void _onTabAnimationChanged() {
-    // Round to the nearest integer tab index so the provider follows both
-    // tap-based tab changes and swipe gestures without updating for every
-    // fractional animation value.
-    final index = _tabController.animation!.value.round();
+  void _setSearchScope(int index) {
     final followedOnly = index == 0;
     final key = followedOnly ? null : _competitions[index - 1].competitionKey;
 
@@ -62,7 +52,6 @@ class _TeamSearchScreenState extends ConsumerState<TeamSearchScreen>
 
   @override
   void dispose() {
-    _tabController.animation!.removeListener(_onTabAnimationChanged);
     _tabController.dispose();
     _searchController.dispose();
     super.dispose();
@@ -70,6 +59,8 @@ class _TeamSearchScreenState extends ConsumerState<TeamSearchScreen>
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('チームを探す'),
@@ -87,6 +78,15 @@ class _TeamSearchScreenState extends ConsumerState<TeamSearchScreen>
                   controller: _searchController,
                   hintText: 'チーム名で検索...',
                   leading: const Icon(Icons.search),
+                  elevation: const WidgetStatePropertyAll(0),
+                  backgroundColor: WidgetStatePropertyAll(
+                    colorScheme.surfaceContainerHighest.withValues(alpha: 0.55),
+                  ),
+                  shape: WidgetStatePropertyAll(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                  ),
                   trailing: [
                     if (_searchController.text.isNotEmpty)
                       IconButton(
@@ -106,6 +106,7 @@ class _TeamSearchScreenState extends ConsumerState<TeamSearchScreen>
               TabBar(
                 controller: _tabController,
                 isScrollable: true,
+                onTap: _setSearchScope,
                 tabs: [
                   const Tab(text: 'フォロー中'),
                   ..._competitions.map((s) => Tab(text: s.displayNameJa)),
@@ -142,9 +143,10 @@ class _SearchResults extends ConsumerWidget {
                     ? 'フォロー中のチームはありません'
                     : '条件に合うフォロー中のチームはありません')
               : 'チームが見つかりませんでした';
-          return Center(child: Text(emptyMessage));
+          return _TeamSearchEmptyState(message: emptyMessage);
         }
         return ListView.builder(
+          padding: const EdgeInsets.only(top: 8, bottom: 24),
           itemCount: teams.length,
           itemBuilder: (context, index) {
             final team = teams[index];
@@ -177,6 +179,48 @@ class _SearchResults extends ConsumerWidget {
           },
         );
       },
+    );
+  }
+}
+
+class _TeamSearchEmptyState extends StatelessWidget {
+  const _TeamSearchEmptyState({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.42),
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.search_off_outlined,
+                size: 56,
+                color: colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

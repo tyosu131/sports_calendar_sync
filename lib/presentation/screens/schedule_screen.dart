@@ -139,14 +139,18 @@ class _MonthSchedulePicker extends StatelessWidget {
     final canGoPrevious = visibleMonth.isAfter(minMonth);
     final canGoNext = visibleMonth.isBefore(maxMonth);
     final days = _monthCells(visibleMonth);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: _maxCalendarWidth),
         child: Card(
-          margin: const EdgeInsets.fromLTRB(12, 8, 12, 4),
+          margin: const EdgeInsets.fromLTRB(12, 12, 12, 6),
+          elevation: 1,
+          clipBehavior: Clip.antiAlias,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(10, 4, 10, 8),
+            padding: const EdgeInsets.fromLTRB(14, 10, 14, 14),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -166,11 +170,25 @@ class _MonthSchedulePicker extends StatelessWidget {
                       icon: const Icon(Icons.chevron_left),
                     ),
                     Expanded(
-                      child: Text(
-                        '${visibleMonth.year}年${visibleMonth.month}月',
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(fontWeight: FontWeight.bold),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '${visibleMonth.year}年${visibleMonth.month}月',
+                            textAlign: TextAlign.center,
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'フォロー中チームの試合予定',
+                            textAlign: TextAlign.center,
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     IconButton(
@@ -188,8 +206,9 @@ class _MonthSchedulePicker extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 8),
                 const _WeekdayHeader(),
+                const SizedBox(height: 4),
                 GridView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
@@ -241,12 +260,19 @@ class _WeekdayHeader extends StatelessWidget {
     const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
     return Row(
       children: [
-        for (final weekday in weekdays)
+        for (var index = 0; index < weekdays.length; index++)
           Expanded(
             child: Center(
               child: Text(
-                weekday,
-                style: Theme.of(context).textTheme.labelSmall,
+                weekdays[index],
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: index == 0
+                      ? Theme.of(context).colorScheme.error
+                      : index == 6
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
@@ -276,38 +302,40 @@ class _DateCell extends StatelessWidget {
     final isSelected = selectedDate != null && _isSameDate(date, selectedDate!);
     final isToday = _isSameDate(date, today);
     final isPast = date.isBefore(today);
+    final hasGame = games.isNotEmpty;
+    final firstGame = games.isEmpty ? null : games.first;
 
     final backgroundColor = isSelected
         ? colorScheme.primary
         : isToday
         ? colorScheme.primaryContainer
-        : Colors.transparent;
+        : hasGame
+        ? colorScheme.surfaceContainerHighest.withValues(alpha: 0.42)
+        : colorScheme.surface;
     final foregroundColor = isSelected
         ? colorScheme.onPrimary
         : isPast
         ? colorScheme.onSurfaceVariant
         : colorScheme.onSurface;
-    final hasGame = games.isNotEmpty;
-    final firstGame = games.isEmpty ? null : games.first;
 
     return InkWell(
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: BorderRadius.circular(12),
       onTap: onTap,
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: backgroundColor,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected || isToday
                 ? colorScheme.primary
                 : hasGame
-                ? colorScheme.outlineVariant.withValues(alpha: 0.55)
+                ? colorScheme.outlineVariant.withValues(alpha: 0.72)
                 : colorScheme.outlineVariant.withValues(alpha: 0.28),
-            width: isSelected || isToday ? 1.2 : 0.8,
+            width: isSelected || isToday ? 1.4 : 0.8,
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -317,7 +345,7 @@ class _DateCell extends StatelessWidget {
                     '${date.day}',
                     style: TextStyle(
                       color: foregroundColor,
-                      fontSize: 12,
+                      fontSize: 13,
                       fontWeight: isSelected || isToday
                           ? FontWeight.bold
                           : null,
@@ -325,18 +353,30 @@ class _DateCell extends StatelessWidget {
                   ),
                   const Spacer(),
                   if (games.length > 1)
-                    Text(
-                      '+${games.length - 1}',
-                      style: TextStyle(
-                        color: foregroundColor,
-                        fontSize: 9,
-                        fontWeight: FontWeight.bold,
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 5,
+                        vertical: 1,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? colorScheme.onPrimary.withValues(alpha: 0.18)
+                            : colorScheme.primary.withValues(alpha: 0.10),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        '${games.length}試合',
+                        style: TextStyle(
+                          color: foregroundColor,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                 ],
               ),
               if (firstGame != null) ...[
-                const SizedBox(height: 2),
+                const SizedBox(height: 3),
                 Expanded(
                   child: _CalendarGamePreview(
                     game: firstGame,
@@ -376,7 +416,7 @@ class _CalendarGamePreview extends StatelessWidget {
     return FittedBox(
       fit: BoxFit.scaleDown,
       child: SizedBox(
-        width: 152,
+        width: 168,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -415,7 +455,7 @@ class _CalendarGamePreview extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 color: foregroundColor,
-                fontSize: 13,
+                fontSize: 13.5,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -474,22 +514,26 @@ class _MiniTeamIcon extends StatelessWidget {
     );
 
     return CircleAvatar(
-      radius: 17,
+      radius: 18,
       backgroundColor: selected
           ? Theme.of(context).colorScheme.primary
           : Theme.of(context).colorScheme.surfaceContainerHighest,
       child: logoUrl == null || logoUrl!.isEmpty
           ? fallback
           : ClipOval(
-              child: Image.network(
-                logoUrl!,
-                width: 30,
-                height: 30,
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) => Icon(
-                  Icons.shield_outlined,
-                  size: 20,
-                  color: foregroundColor,
+              child: SizedBox(
+                width: 32,
+                height: 32,
+                child: Image.network(
+                  logoUrl!,
+                  fit: BoxFit.contain,
+                  gaplessPlayback: true,
+                  filterQuality: FilterQuality.high,
+                  errorBuilder: (context, error, stackTrace) => Icon(
+                    Icons.shield_outlined,
+                    size: 21,
+                    color: foregroundColor,
+                  ),
                 ),
               ),
             ),
@@ -617,14 +661,29 @@ class _SelectDateHint extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-      child: Text(
-        '日付を選択すると試合詳細を表示します',
-        textAlign: TextAlign.center,
-        style: Theme.of(
-          context,
-        ).textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 1160),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 10, 24, 28),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainerHighest.withValues(
+                alpha: 0.36,
+              ),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              '日付を選択すると試合詳細を表示します',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -640,30 +699,45 @@ class _SelectedDateDetails extends StatelessWidget {
   Widget build(BuildContext context) {
     final title = '${_formatSelectedDate(selectedDate)}の試合';
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-          child: Text(
-            title,
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-          ),
-        ),
-        if (games.isEmpty)
-          const _SelectedDateEmptyState()
-        else
-          Padding(
-            padding: const EdgeInsets.only(bottom: 24),
-            child: Column(
-              children: [
-                for (final game in games) ScheduleGameTile(game: game),
-              ],
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 1160),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.event_available_outlined,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-      ],
+            if (games.isEmpty)
+              const _SelectedDateEmptyState()
+            else
+              Padding(
+                padding: const EdgeInsets.only(bottom: 24),
+                child: Column(
+                  children: [
+                    for (final game in games) ScheduleGameTile(game: game),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -730,13 +804,17 @@ class _TeamIcon extends StatelessWidget {
       child: logoUrl == null || logoUrl!.isEmpty
           ? fallback
           : ClipOval(
-              child: Image.network(
-                logoUrl!,
+              child: SizedBox(
                 width: 28,
                 height: 28,
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) =>
-                    const Icon(Icons.shield_outlined, size: 18),
+                child: Image.network(
+                  logoUrl!,
+                  fit: BoxFit.contain,
+                  gaplessPlayback: true,
+                  filterQuality: FilterQuality.high,
+                  errorBuilder: (context, error, stackTrace) =>
+                      const Icon(Icons.shield_outlined, size: 18),
+                ),
               ),
             ),
     );
