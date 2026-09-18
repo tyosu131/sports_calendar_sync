@@ -1,143 +1,122 @@
-/**
- * getCalendar.ts
- *
- * HTTP Cloud Function (v1 API) that generates a dynamic .ics (iCalendar) file
- * for a user's followed teams.
- *
- * URL: https://asia-northeast1-sports-calendar-sync-a4564.cloudfunctions.net/getCalendar
- * Query params:
- *   - uid: Firebase user ID (required)
- *   - teamId: (optional) restrict to a single team
- */
-
 import * as functions from "firebase-functions/v1";
 import { Request, Response } from "firebase-functions/v1";
-import { getFirestore } from "firebase-admin/firestore";
-import ical, { ICalCalendarMethod } from "ical-generator";
-import { DateTime } from "luxon";
-import { GameDoc, UserDoc } from "../types";
+import { DocumentData, Firestore, Timestamp, getFirestore } from "firebase-admin/firestore";
+import {
+  CalendarFeedNotFoundError,
+  CalendarTeamNotFollowedError,
+  CalendarUserNotFoundError,
+  NormalizedGame,
+  PersonalizedCalendarRepository,
+  buildPersonalizedCalendar,
+} from "../calendar/personalizedCalendar";
+import { GameStatus } from "../types";
 
-export const getCalendar = functions
-  .region("asia-northeast1")
-  .https.onRequest(async (req: Request, res: Response) => {
-    const uid = req.query.uid as string | undefined;
-    const teamId = req.query.teamId as string | undefined;
+const VALID_STATUSES = new Set<GameStatus>([
+  "scheduled", "live", "finished", "postponed", "cancelled",
+]);
 
-    if (!uid) {
-      res.status(400).send("Missing required query parameter: uid");
-      return;
-    }
+function asNormalizedGame(id: string, data: DocumentData): NormalizedGame {
+  const kickoff = data.startTimeUTC;
+  if (!(kickoff instanceof Timestamp)) throw new Error(`Game ${id} has invalid startTimeUTC`);
+  if (typeof data.homeTeamId !== "string" || typeof data.awayTeamId !== "string") {
+    throw new Error(`Game ${id} has invalid team identity`);
+  }
+  if (typeof data.homeTeamNameJa !== "string" || typeof data.awayTeamNameJa !== "string") {
+    throw new Error(`Game ${id} has invalid team names`);
+  }
+  if (!VALID_STATUSES.has(data.status)) throw new Error(`Game ${id} has invalid status`);
 
-    const db = getFirestore();
+  return {
+    id,
+    kickoffUtc: kickoff.toDate(),
+    homeTeamId: data.homeTeamId,
+    awayTeamId: data.awayTeamId,
+    homeTeamName: data.homeTeamNameJa,
+    awayTeamName: data.awayTeamNameJa,
+    status: data.status,
+    venue: typeof data.venue === "string" ? data.venue : undefined,
+    broadcastPlatforms: Array.isArray(data.broadcastPlatforms) ?
+      data.broadcastPlatforms.filter((item: unknown) =>
+        typeof item === "object" && item !== null && typeof (item as { platform?: unknown }).platform === "string"
+      ) : [],
+  };
+}
 
-    // 1. Load user profile to get followed team IDs
-    const userDoc = await db.collection("users").doc(uid).get();
-    if (!userDoc.exists) {
-      res.status(404).send("User not found");
-      return;
-    }
+export class FirestorePersonalizedCalendarRepository implements PersonalizedCalendarRepository {
+  constructor(private readonly db: Firestore, private readonly now: () => Date = () => new Date()) {}
 
-    const userData = userDoc.data() as UserDoc;
-    const followedTeamIds = userData.followedTeamIds ?? [];
-    const favoriteTeamIds =
-      userData.favoriteTeamIdsByCompetition ?
-        Object.values(userData.favoriteTeamIdsByCompetition).flat() :
-        [];
-    let teamIds = Array.from(
-      new Set(followedTeamIds.length > 0 ? followedTeamIds : favoriteTeamIds)
-    );
+  async findFeed(token: string) {
+    const snapshot = await this.db.collection("calendarFeeds").doc(token).get();
+    if (!snapshot.exists) return undefined;
+    const ownerUid = snapshot.get("ownerUid");
+    if (typeof ownerUid !== "string") return undefined;
+    return { ownerUid, active: snapshot.get("active") === true };
+  }
 
-    // If a specific teamId is requested, filter to just that team
-    if (teamId) {
-      if (!teamIds.includes(teamId)) {
-        res.status(403).send("Team not in user's followed list");
-        return;
+  async findUser(uid: string) {
+    const snapshot = await this.db.collection("users").doc(uid).get();
+    if (!snapshot.exists) return undefined;
+    const followed = snapshot.get("followedTeamIds");
+    return { followedTeamIds: Array.isArray(followed) ? followed.filter((id): id is string => typeof id === "string") : [] };
+  }
+
+  async findUpcomingGamesForTeams(teamIds: readonly string[]): Promise<readonly NormalizedGame[]> {
+    const games = new Map<string, NormalizedGame>();
+    // Firestore `in` accepts at most 30 comparison values. Smaller chunks also
+    // keep each home/away query and its response predictably bounded.
+    for (let offset = 0; offset < teamIds.length; offset += 10) {
+      const chunk = teamIds.slice(offset, offset + 10);
+      const query = (field: "homeTeamId" | "awayTeamId") => this.db.collection("games")
+        .where(field, "in", chunk)
+        .where("startTimeUTC", ">=", this.now())
+        .orderBy("startTimeUTC")
+        .limit(100)
+        .get();
+      const [home, away] = await Promise.all([query("homeTeamId"), query("awayTeamId")]);
+      for (const snapshot of [home, away]) {
+        snapshot.forEach((doc) => games.set(doc.id, asNormalizedGame(doc.id, doc.data())));
       }
-      teamIds = [teamId];
     }
+    return [...games.values()];
+  }
+}
 
-    if (teamIds.length === 0) {
-      const cal = ical({ name: "スポーツカレンダー" });
-      res.setHeader("Content-Type", "text/calendar; charset=utf-8");
-      res.setHeader(
-        "Content-Disposition",
-        'attachment; filename="sports_calendar.ics"'
-      );
-      res.send(cal.toString());
-      return;
-    }
+export async function serveCalendar(
+  req: Pick<Request, "query">,
+  res: Pick<Response, "status" | "setHeader" | "send">,
+  repository: PersonalizedCalendarRepository
+): Promise<void> {
+  const token = typeof req.query.token === "string" ? req.query.token.trim() : "";
+  const teamId = typeof req.query.teamId === "string" ? req.query.teamId.trim() : undefined;
+  if (!token) {
+    res.status(400).send("Missing required query parameter: token");
+    return;
+  }
+  if (!/^[A-Za-z0-9_-]{43}$/.test(token)) {
+    res.status(404).send("Calendar feed not found");
+    return;
+  }
 
-    // 2. Fetch upcoming games for all followed teams
-    const now = new Date();
-    const gamesMap = new Map<string, GameDoc>();
-
-    const chunkSize = 10;
-    for (let i = 0; i < teamIds.length; i += chunkSize) {
-      const chunk = teamIds.slice(i, i + chunkSize);
-
-      const [homeSnap, awaySnap] = await Promise.all([
-        db
-          .collection("games")
-          .where("homeTeamId", "in", chunk)
-          .where("startTimeUTC", ">=", now)
-          .orderBy("startTimeUTC")
-          .limit(100)
-          .get(),
-        db
-          .collection("games")
-          .where("awayTeamId", "in", chunk)
-          .where("startTimeUTC", ">=", now)
-          .orderBy("startTimeUTC")
-          .limit(100)
-          .get(),
-      ]);
-
-      homeSnap.forEach((doc) => gamesMap.set(doc.id, doc.data() as GameDoc));
-      awaySnap.forEach((doc) => gamesMap.set(doc.id, doc.data() as GameDoc));
-    }
-
-    // 3. Build iCalendar
-    const cal = ical({
-      name: "スポーツカレンダー",
-      description: "フォロー中チームの試合日程",
-      method: ICalCalendarMethod.PUBLISH,
-      prodId: {
-        company: "sports-calendar-sync",
-        product: "sports-calendar-sync",
-        language: "JA",
-      },
-    });
-
-    for (const [gameId, game] of gamesMap) {
-      const startUtc = game.startTimeUTC.toDate();
-      const endUtc = new Date(startUtc.getTime() + 2 * 60 * 60 * 1000);
-
-      const broadcastLines =
-        game.broadcastPlatforms.length > 0
-          ? `\n📺 視聴: ${game.broadcastPlatforms.map((b) => b.platform).join(" / ")}`
-          : "";
-
-      const jstString = DateTime.fromJSDate(startUtc, { zone: "utc" })
-        .setZone("Asia/Tokyo")
-        .toFormat("M月d日 HH:mm");
-
-      cal.createEvent({
-        id: gameId,
-        summary: `${game.homeTeamNameJa} vs ${game.awayTeamNameJa}`,
-        description: `${jstString} (JST)${broadcastLines}`,
-        location: game.venue,
-        start: startUtc,
-        end: endUtc,
-        timezone: "UTC",
-      });
-    }
-
-    // 4. Return .ics response
+  try {
+    const calendar = await buildPersonalizedCalendar(repository, token, teamId || undefined);
     res.setHeader("Content-Type", "text/calendar; charset=utf-8");
-    res.setHeader(
-      "Content-Disposition",
-      'attachment; filename="sports_calendar.ics"'
-    );
-    res.setHeader("Cache-Control", "public, max-age=3600");
-    res.send(cal.toString());
-  });
+    res.setHeader("Content-Disposition", 'inline; filename="sports_calendar.ics"');
+    res.setHeader("Cache-Control", "private, no-store");
+    res.send(calendar);
+  } catch (error) {
+    if (error instanceof CalendarFeedNotFoundError) {
+      res.status(404).send("Calendar feed not found");
+    } else if (error instanceof CalendarUserNotFoundError) {
+      res.status(404).send("Calendar owner not found");
+    } else if (error instanceof CalendarTeamNotFollowedError) {
+      res.status(403).send("Team is not followed by calendar owner");
+    } else {
+      console.error("Unable to build calendar feed", error);
+      res.status(500).send("Unable to build calendar feed");
+    }
+  }
+}
+
+export const getCalendar = functions.region("asia-northeast1").https.onRequest(
+  (req, res) => serveCalendar(req, res, new FirestorePersonalizedCalendarRepository(getFirestore()))
+);
