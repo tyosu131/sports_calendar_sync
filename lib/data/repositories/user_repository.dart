@@ -92,11 +92,8 @@ class FirestoreUserRepository implements UserRepository {
 
   /// Add a team to the user's followed list.
   ///
-  /// When [competitionKey] is provided, the team is also added to
-  /// [UserProfile.favoriteTeamIdsByCompetition] for that competition, and
-  /// [UserProfile.selectedCompetitions] is updated accordingly.
-  /// The legacy [UserProfile.followedTeamIds] flat list is always kept in sync
-  /// so the existing `getCalendar` Cloud Function continues to work.
+  /// [competitionKey] is retained only for call-site compatibility. It does
+  /// not affect the canonical, global follow state.
   @override
   Future<void> followTeam(
     String uid,
@@ -104,25 +101,16 @@ class FirestoreUserRepository implements UserRepository {
     String? competitionKey,
   }) async {
     final updates = <String, dynamic>{
-      // Legacy flat list — required by getCalendar Cloud Function.
       'followedTeamIds': FieldValue.arrayUnion([teamId]),
     };
-
-    if (competitionKey != null) {
-      // Per-competition tracking (Phase 1+).
-      updates['favoriteTeamIdsByCompetition.$competitionKey'] =
-          FieldValue.arrayUnion([teamId]);
-      updates['selectedCompetitions'] = FieldValue.arrayUnion([competitionKey]);
-    }
 
     await _users.doc(uid).update(updates);
   }
 
   /// Remove a team from the user's followed list.
   ///
-  /// When [competitionKey] is provided, the team is also removed from
-  /// [UserProfile.favoriteTeamIdsByCompetition] for that competition.
-  /// The legacy [UserProfile.followedTeamIds] flat list is always kept in sync.
+  /// [competitionKey] is retained only for call-site compatibility. It does
+  /// not affect the canonical, global follow state.
   @override
   Future<void> unfollowTeam(
     String uid,
@@ -130,18 +118,8 @@ class FirestoreUserRepository implements UserRepository {
     String? competitionKey,
   }) async {
     final updates = <String, dynamic>{
-      // Legacy flat list — required by getCalendar Cloud Function.
       'followedTeamIds': FieldValue.arrayRemove([teamId]),
     };
-
-    if (competitionKey != null) {
-      // Per-competition tracking (Phase 1+).
-      updates['favoriteTeamIdsByCompetition.$competitionKey'] =
-          FieldValue.arrayRemove([teamId]);
-      // Note: we intentionally do NOT remove the competitionKey from
-      // selectedCompetitions here — the user may still follow other teams in
-      // that competition, and removing it would require a read-then-write.
-    }
 
     await _users.doc(uid).update(updates);
   }
@@ -220,25 +198,12 @@ class SampleUserRepository implements UserRepository {
   }) async {
     if (uid != sampleUid) return;
 
-    final followedTeamIds = {..._profile.allFavoriteTeamIds, teamId}.toList();
-
-    final favorites = _copyFavorites(_profile.favoriteTeamIdsByCompetition);
-    if (competitionKey != null) {
-      favorites[competitionKey] = {
-        ...(favorites[competitionKey] ?? const <String>[]),
-        teamId,
-      }.toList();
-    }
-
-    final selectedCompetitions = {
-      ..._profile.selectedCompetitions,
-      ?competitionKey,
-    }.toList();
+    // competitionKey is a compatibility-only argument. Stable team identity
+    // makes follow state global regardless of discovery context.
+    final followedTeamIds = {..._profile.followedTeamIds, teamId}.toList();
 
     _profile = _profile.copyWith(
       followedTeamIds: followedTeamIds,
-      selectedCompetitions: selectedCompetitions,
-      favoriteTeamIdsByCompetition: favorites,
     );
     _profileUpdates.add(_profile);
   }
@@ -251,25 +216,13 @@ class SampleUserRepository implements UserRepository {
   }) async {
     if (uid != sampleUid) return;
 
-    final followedTeamIds = _profile.allFavoriteTeamIds
+    // competitionKey is a compatibility-only argument. Unfollow is global.
+    final followedTeamIds = _profile.followedTeamIds
         .where((id) => id != teamId)
         .toList();
 
-    final favorites = _copyFavorites(_profile.favoriteTeamIdsByCompetition);
-    if (competitionKey != null) {
-      favorites[competitionKey] =
-          (favorites[competitionKey] ?? const <String>[])
-              .where((id) => id != teamId)
-              .toList();
-    } else {
-      for (final entry in favorites.entries) {
-        favorites[entry.key] = entry.value.where((id) => id != teamId).toList();
-      }
-    }
-
     _profile = _profile.copyWith(
       followedTeamIds: followedTeamIds,
-      favoriteTeamIdsByCompetition: favorites,
     );
     _profileUpdates.add(_profile);
   }
@@ -278,11 +231,5 @@ class SampleUserRepository implements UserRepository {
   Future<void> signOut() async {
     // No-op in sample mode. Keeping the profile available makes the free MVP
     // usable without Firebase Auth.
-  }
-
-  Map<String, List<String>> _copyFavorites(Map<String, List<String>> source) {
-    return {
-      for (final entry in source.entries) entry.key: [...entry.value],
-    };
   }
 }
