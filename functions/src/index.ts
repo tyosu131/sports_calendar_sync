@@ -24,6 +24,7 @@ admin.initializeApp();
 // ── HTTPS Functions ───────────────────────────────────────────────────────────
 
 export { getCalendar } from "./functions/getCalendar";
+export { ensureCalendarFeed, rotateCalendarFeed } from "./functions/calendarFeeds";
 
 // ── Scheduled Functions ───────────────────────────────────────────────────────
 
