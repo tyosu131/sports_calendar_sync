@@ -1,8 +1,12 @@
 /// A sports team stored in Firestore under /teams/{id}.
 ///
-/// ## competitionKey
-/// Identifies which competition (league) this team belongs to.
-/// Must match a [SportDefinition.competitionKey] in [SportsRegistry].
+/// [id] is the stable team identity across competitions and seasons. Canonical
+/// participation belongs to a CompetitionSeasonMembership, not this document.
+///
+/// ## competitionKey and leagueId
+/// These are compatibility fields used by current Firestore queries and UI.
+/// They describe the legacy/default competition view only and must not be used
+/// as the canonical source of a team's competition-season memberships.
 ///
 /// When reading legacy Firestore documents that lack `competitionKey`, the
 /// field is left as null rather than guessed from `sportType`.
@@ -28,10 +32,12 @@ class Team {
   final String id;
   final String nameEn;
   final String nameJa;
+  /// Legacy/default league used by existing queries; not canonical membership.
   final String leagueId;
 
-  /// Competition key matching [SportDefinition.competitionKey].
-  /// null when the Firestore document predates Phase 0.
+  /// Legacy/default competition key matching [SportDefinition.competitionKey].
+  /// Null when the Firestore document predates Phase 0; not canonical
+  /// competition-season membership.
   final String? competitionKey;
 
   final String? logoUrl;

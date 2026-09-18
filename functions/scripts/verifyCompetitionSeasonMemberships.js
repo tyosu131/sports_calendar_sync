@@ -12,6 +12,7 @@
 const {
   competitionSeasonMemberships,
 } = require('./data/competitionSeasonMemberships');
+const { listCompetitionKeys } = require('./data/competitionRegistry');
 const { j1Teams } = require('./data/j1Teams');
 const { j2Teams } = require('./data/j2Teams');
 const { j3Teams } = require('./data/j3Teams');
@@ -62,6 +63,13 @@ const SPECIAL_2026_GROUP_KEYS = new Set([
   'east_b',
   'west_a',
   'west_b',
+]);
+
+// The special tournament has no standalone team-master registry entry. Keep
+// that existing exception explicit while validating every registry-backed key.
+const KNOWN_COMPETITION_KEYS = new Set([
+  ...listCompetitionKeys(),
+  'football_j2_j3_special',
 ]);
 
 function parseArgs(argv) {
@@ -189,8 +197,17 @@ function validateUniqueSeasonKeys(seasons, failures) {
   }
 }
 
-function validateRequiredSeasonFields(season, failures) {
+function validateRequiredSeasonFields(
+  season,
+  failures,
+  knownCompetitionKeys = KNOWN_COMPETITION_KEYS
+) {
   const competitionSeasonKey = season && season.competitionSeasonKey;
+
+  if (!season || typeof season !== 'object' || Array.isArray(season)) {
+    addFailure(failures, 'Membership must be an object.');
+    return;
+  }
 
   for (const field of REQUIRED_SEASON_FIELDS) {
     if (!Object.prototype.hasOwnProperty.call(season, field)) {
@@ -222,6 +239,12 @@ function validateRequiredSeasonFields(season, failures) {
     addFailure(
       failures,
       'competitionKey must be a non-empty string.',
+      { competitionSeasonKey }
+    );
+  } else if (!knownCompetitionKeys.has(season.competitionKey)) {
+    addFailure(
+      failures,
+      'competitionKey must reference a known competition.',
       { competitionSeasonKey }
     );
   }
@@ -276,7 +299,55 @@ function validateGroups(season, failures) {
     teamIds: [],
   };
 
-  if (typeof season.groups === 'undefined') {
+  const hasGroups = Object.prototype.hasOwnProperty.call(season, 'groups');
+  const hasMemberTeamIds = Object.prototype.hasOwnProperty.call(
+    season,
+    'memberTeamIds'
+  );
+
+  if (hasGroups && hasMemberTeamIds) {
+    addFailure(
+      failures,
+      'Membership must use either groups or memberTeamIds, not both.',
+      { competitionSeasonKey }
+    );
+    return result;
+  }
+
+  if (!hasGroups && !hasMemberTeamIds) {
+    addFailure(
+      failures,
+      'Membership must define groups or memberTeamIds.',
+      { competitionSeasonKey }
+    );
+    return result;
+  }
+
+  if (hasMemberTeamIds) {
+    if (!Array.isArray(season.memberTeamIds)) {
+      addFailure(failures, 'memberTeamIds must be an array.', {
+        competitionSeasonKey,
+      });
+      return result;
+    }
+
+    const seenTeamIds = new Set();
+    for (const teamId of season.memberTeamIds) {
+      result.teamIds.push(teamId);
+      if (!isNonEmptyString(teamId)) {
+        addFailure(failures, 'teamId must be a non-empty string.', {
+          competitionSeasonKey,
+        });
+      } else if (seenTeamIds.has(teamId)) {
+        addFailure(
+          failures,
+          'teamId must not be duplicated within the same competitionSeasonKey.',
+          { competitionSeasonKey, teamId }
+        );
+      } else {
+        seenTeamIds.add(teamId);
+      }
+    }
     return result;
   }
 
@@ -549,10 +620,13 @@ function validateSpecial2026SeedabilityApproved(season, failures) {
   }
 }
 
-function verifyCompetitionSeasonMemberships(args) {
+function verifyCompetitionSeasonMemberships(args = {}, options = {}) {
   const failures = [];
-  const seasons = validateModuleShape(failures);
-  const confirmedTeamIds = collectConfirmedTeamIds([j1Teams, j2Teams, j3Teams]);
+  const seasons = options.seasons || validateModuleShape(failures);
+  const confirmedTeamIds = options.confirmedTeamIds ||
+    collectConfirmedTeamIds([j1Teams, j2Teams, j3Teams]);
+  const knownCompetitionKeys = options.knownCompetitionKeys ||
+    KNOWN_COMPETITION_KEYS;
   const counts = {
     checkedSeasons: 0,
     checkedGroups: 0,
@@ -580,7 +654,10 @@ function verifyCompetitionSeasonMemberships(args) {
   for (const season of targetSeasons) {
     counts.checkedSeasons += 1;
 
-    validateRequiredSeasonFields(season, failures);
+    validateRequiredSeasonFields(season, failures, knownCompetitionKeys);
+    if (!season || typeof season !== 'object' || Array.isArray(season)) {
+      continue;
+    }
     const groupResult = validateGroups(season, failures);
     validateSpecial2026Season(season, groupResult, failures);
 
@@ -649,4 +726,11 @@ function main() {
   }
 }
 
-main();
+if (require.main === module) {
+  main();
+}
+
+module.exports = {
+  KNOWN_COMPETITION_KEYS,
+  verifyCompetitionSeasonMemberships,
+};
