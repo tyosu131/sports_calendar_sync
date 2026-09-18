@@ -36,9 +36,9 @@ final userProfileProvider = StreamProvider<UserProfile?>((ref) {
 
 /// Convenience: flat list of all followed team IDs for the current user.
 ///
-/// Uses [UserProfile.allFavoriteTeamIds] which returns the union of all
-/// per-competition team IDs when available, falling back to the legacy
-/// [UserProfile.followedTeamIds] field for old documents.
+/// [UserProfile.followedTeamIds] is the canonical, competition-independent
+/// follow state. Compatibility per-competition fields are intentionally not
+/// consulted.
 final followedTeamIdsProvider = Provider<List<String>>((ref) {
-  return ref.watch(userProfileProvider).valueOrNull?.allFavoriteTeamIds ?? [];
+  return ref.watch(userProfileProvider).valueOrNull?.followedTeamIds ?? [];
 });

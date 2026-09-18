@@ -2,17 +2,19 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// User profile stored in Firestore under /users/{uid}.
 ///
-/// ## selectedCompetitions / favoriteTeamIdsByCompetition
-/// Phase 0 adds per-competition team tracking.
+/// ## Canonical follow state
+/// [followedTeamIds] is the authoritative list of stable team IDs followed by
+/// the user. Following a team is independent of the competition in which the
+/// team was discovered.
+///
+/// ## Compatibility fields
 /// - [selectedCompetitions]: competition keys the user has opted into.
 ///   Each value must match a [SportDefinition.competitionKey] in [SportsRegistry].
 /// - [favoriteTeamIdsByCompetition]: map from competitionKey to list of team IDs.
+/// These fields remain readable and writable for existing documents, but they
+/// are not canonical follow state.
 ///
 /// ## Backward compatibility
-/// - [followedTeamIds] is a legacy flat list kept for the existing
-///   `getCalendar` Cloud Function which queries this field directly.
-///   On save, [allFavoriteTeamIds] is written to `followedTeamIds` so the
-///   function continues to work without modification.
 /// - Legacy Firestore documents that only have `followedTeamIds` are read
 ///   correctly; [selectedCompetitions] and [favoriteTeamIdsByCompetition]
 ///   will be empty.
@@ -34,17 +36,19 @@ class UserProfile {
   final String? displayName;
   final String? photoUrl;
 
-  /// Competition keys the user has opted into.
+  /// Compatibility field: competition keys the user has opted into.
+  /// This is not canonical follow state.
   /// Each value matches [SportDefinition.competitionKey] in [SportsRegistry].
   /// Examples: ["football_j1", "baseball_npb"]
   final List<String> selectedCompetitions;
 
-  /// Map from competitionKey to list of followed team IDs.
+  /// Compatibility field mapping competitionKey to team IDs.
+  /// This is not canonical follow state.
   /// Example: {"football_j1": ["kashima_antlers"], "baseball_npb": ["yomiuri_giants"]}
   final Map<String, List<String>> favoriteTeamIdsByCompetition;
 
-  /// @deprecated Use [favoriteTeamIdsByCompetition].
-  /// Kept for backward compatibility with the `getCalendar` Cloud Function.
+  /// Stable team IDs currently followed by the user.
+  /// This flat list is the authoritative, competition-independent follow state.
   final List<String> followedTeamIds;
 
   /// 'ja' or 'en'.
@@ -52,19 +56,8 @@ class UserProfile {
 
   final Timestamp? createdAt;
 
-  /// All followed team IDs across all competitions (deduped).
-  /// Used by the legacy `getCalendar` function and as the value written to
-  /// the `followedTeamIds` Firestore field.
-  List<String> get allFavoriteTeamIds {
-    if (favoriteTeamIdsByCompetition.isNotEmpty) {
-      return favoriteTeamIdsByCompetition.values
-          .expand((ids) => ids)
-          .toSet()
-          .toList();
-    }
-    // Fallback: legacy documents only have followedTeamIds.
-    return followedTeamIds;
-  }
+  /// Compatibility alias for the canonical [followedTeamIds] list.
+  List<String> get allFavoriteTeamIds => followedTeamIds;
 
   factory UserProfile.fromFirestore(Map<String, dynamic> data, String uid) {
     final Map<String, List<String>> favoriteTeamIdsByCompetition = {};
@@ -98,8 +91,8 @@ class UserProfile {
       if (photoUrl != null) 'photoUrl': photoUrl,
       'selectedCompetitions': selectedCompetitions,
       'favoriteTeamIdsByCompetition': favoriteTeamIdsByCompetition,
-      // Legacy field — written so getCalendar Cloud Function keeps working.
-      'followedTeamIds': allFavoriteTeamIds,
+      // Canonical follow state; also consumed by getCalendar.
+      'followedTeamIds': followedTeamIds,
       'preferredLanguage': preferredLanguage,
       if (createdAt != null) 'createdAt': createdAt,
     };
@@ -130,11 +123,13 @@ class UserProfile {
     );
   }
 
-  /// Returns the followed team IDs for a specific competition.
+  /// Returns compatibility team IDs recorded for a specific competition.
+  /// This does not determine whether a team is globally followed.
   List<String> favoriteTeamIdsForCompetition(String competitionKey) =>
       favoriteTeamIdsByCompetition[competitionKey] ?? [];
 
-  /// Returns true if the user has opted into the given competition.
+  /// Returns true if the compatibility competition preference is selected.
+  /// This does not determine whether a team is globally followed.
   bool hasCompetitionSelected(String competitionKey) =>
       selectedCompetitions.contains(competitionKey);
 }
