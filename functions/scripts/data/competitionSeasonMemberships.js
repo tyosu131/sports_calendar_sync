@@ -1,7 +1,7 @@
 /**
  * competitionSeasonMemberships.js
  *
- * Data-only scaffold for season / tournament membership review.
+ * Data-only source of truth for season / tournament membership review.
  *
  * This intentionally does not write Firestore. It models membership separately
  * from stable team identity so promotion / relegation can move the same
@@ -10,6 +10,28 @@
  */
 
 'use strict';
+
+/**
+ * Minimal CompetitionSeasonMembership contract.
+ *
+ * A membership owns the competition/season relationship; a team document does
+ * not. `memberTeamIds` is used for ungrouped competitions, while `groups` keeps
+ * the existing special-tournament shape. A membership must use one shape, and
+ * a stable team ID may intentionally occur in any number of different season
+ * memberships.
+ *
+ * @typedef {Object} CompetitionSeasonMembership
+ * @property {string} competitionSeasonKey
+ * @property {string} competitionKey
+ * @property {number} seasonYear
+ * @property {string} displayNameJa
+ * @property {'league'|'special_tournament'|'cup'|'playoff'} membershipType
+ * @property {string[]} [memberTeamIds]
+ * @property {{groupKey: string, displayNameJa: string, teamIds: string[]}[]} [groups]
+ * @property {Object<string, string>} [teamIdStatuses]
+ * @property {'review'|'approved'|'seedable'|'seeded'} status
+ * @property {boolean} seedable
+ */
 
 const jLeagueMembershipScaffolds = [
   {
