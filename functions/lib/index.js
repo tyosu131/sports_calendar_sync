@@ -48,7 +48,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.triggerFootballSync = exports.scheduledSyncFootball = exports.getCalendar = void 0;
+exports.triggerFootballSync = exports.scheduledSyncFootball = exports.rotateCalendarFeed = exports.ensureCalendarFeed = exports.getCalendar = void 0;
 const admin = __importStar(require("firebase-admin"));
 const functions = __importStar(require("firebase-functions/v1"));
 const params_1 = require("firebase-functions/params");
@@ -57,6 +57,9 @@ admin.initializeApp();
 // ── HTTPS Functions ───────────────────────────────────────────────────────────
 var getCalendar_1 = require("./functions/getCalendar");
 Object.defineProperty(exports, "getCalendar", { enumerable: true, get: function () { return getCalendar_1.getCalendar; } });
+var calendarFeeds_1 = require("./functions/calendarFeeds");
+Object.defineProperty(exports, "ensureCalendarFeed", { enumerable: true, get: function () { return calendarFeeds_1.ensureCalendarFeed; } });
+Object.defineProperty(exports, "rotateCalendarFeed", { enumerable: true, get: function () { return calendarFeeds_1.rotateCalendarFeed; } });
 // ── Scheduled Functions ───────────────────────────────────────────────────────
 const syncFootball_1 = require("./pipelines/syncFootball");
 const API_SPORTS_KEY = (0, params_1.defineSecret)("API_SPORTS_KEY");
