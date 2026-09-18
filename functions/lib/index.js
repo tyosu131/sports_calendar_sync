@@ -5,7 +5,8 @@
  * Functions exported here:
  *
  * 1. getCalendar (HTTPS)
- *    - Generates a dynamic .ics file for a user's followed teams
+ *    - Resolves a revocable feed token and generates a dynamic .ics file for
+ *      its owner's followed teams
  *
  * 2. scheduledSyncFootball (Scheduled, every 6 hours)
  *    - Fetches football fixtures from RapidAPI
