@@ -2,6 +2,10 @@
   "name": "sports-calendar-sync-functions",
   "scripts": {
     "build": "tsc",
+    "pretest": "npm run build",
+    "test": "node --test test/*.test.js",
+    "prevalidate:config": "npm run build",
+    "validate:config": "node --test test/config/*.test.js",
     "build:watch": "tsc --watch",
     "serve": "npm run build && firebase emulators:start --only functions",
     "shell": "npm run build && firebase functions:shell",

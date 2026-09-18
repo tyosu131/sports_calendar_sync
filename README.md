@@ -43,10 +43,21 @@ Sample mode uses local in-memory repositories and does not read or write Firesto
 
 ## Validation
 
+Run the same deterministic gates as PR CI (Node 20, Flutter 3.41.4):
+
 ```shell
-flutter analyze
-flutter test
+npm --prefix functions ci
+npm --prefix functions run build
+npm --prefix functions test
+npm --prefix functions run validate:config
+flutter pub get
+flutter analyze --no-pub
+flutter test --no-pub
 ```
+
+Functions test/config commands rebuild TypeScript before checking compiled code.
+These gates use local synthetic fixtures and config only; no provider API, Firebase credentials, or Firestore data is needed.
+The existing football status verifier characterizes unknown statuses as `scheduled`; changing that behavior requires a separate decision/PR.
 
 ## Architecture summary
 
