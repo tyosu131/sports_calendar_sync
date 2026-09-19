@@ -8,10 +8,16 @@ import 'package:sports_calendar_sync/presentation/widgets/game_card.dart';
 
 Game _game(String competitionKey) => Game(
       id: 'competition-game',
-      leagueId: 'league',
+      leagueId: 'emperor_cup',
       competitionKey: competitionKey,
+      competitionSeasonKey: 'football_emperor_cup_2026',
+      homeTeamId: 'kawasaki_frontale',
       homeTeamNameJa: '川崎フロンターレ',
+      homeTeamNameEn: 'Kawasaki Frontale',
+      homeTeamProviderName: 'Kawasaki Frontale',
       awayTeamNameJa: '鹿島アントラーズ',
+      awayTeamNameEn: 'Kashima Antlers',
+      awayTeamProviderName: 'Kashima Antlers',
       startTimeUtc: Timestamp.fromDate(DateTime.utc(2026, 9, 19, 9)),
       startTimeJst: '2026-09-19 18:00',
       timezone: 'UTC',
@@ -38,13 +44,18 @@ void main() {
     tester,
   ) async {
     final value = _game('football_emperor_cup');
+    expect(value.competitionKey, 'football_emperor_cup');
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: ListView(children: [
-            GameCard(game: value),
-            ScheduleGameTile(game: value),
-          ]),
+          body: SingleChildScrollView(
+            child: Column(
+              children: [
+                GameCard(game: value),
+                ScheduleGameTile(game: value),
+              ],
+            ),
+          ),
         ),
       ),
     );
