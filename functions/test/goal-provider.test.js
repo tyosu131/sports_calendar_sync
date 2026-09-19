@@ -8,7 +8,7 @@ const { adaptGoalFixtureToGameDoc, UnsupportedGoalStatusError } = require('../li
 const { internalTeamIdForGoalTeam } = require('../lib/providers/goal/teamIdentity');
 const { orchestrateGoalTeamFixtures } = require('../lib/providers/goal/syncOrchestrator');
 
-const fixture = () => structuredClone(payload.fixtures[0]);
+const fixture = () => structuredClone(payload.data[0]);
 const context = {
   competitionKey: 'football_premier', competitionSeasonKey: 'football_premier_2026',
   leagueId: 'premier', homeTeamId: 'arsenal', awayTeamId: 'kawasaki_frontale',
@@ -28,11 +28,20 @@ test('client constructs authenticated Team requests and parses string IDs', asyn
   ]);
 });
 
-test('client classifies 429 and malformed responses', async () => {
+test('client classifies 429 and malformed documented envelopes', async () => {
   const rateLimited = new GoalApiClient('key', { get: async () => { const e = new Error('no'); e.response = { status: 429 }; throw e; } });
   await assert.rejects(rateLimited.fixtures('x'), (e) => e instanceof GoalApiError && e.kind === 'rate_limited' && e.status === 429);
-  const malformed = new GoalApiClient('key', { get: async () => ({ data: { fixtures: [{ id: 7 }] } }) });
+  const malformed = new GoalApiClient('key', { get: async () => ({ data: { success: true, data: [{ id: 7 }] } }) });
   await assert.rejects(malformed.fixtures('x'), (e) => e.kind === 'invalid_response');
+  const unsuccessful = new GoalApiClient('key', { get: async () => ({ data: { success: false, data: [] } }) });
+  await assert.rejects(unsuccessful.fixtures('x'), (e) => e.kind === 'invalid_response');
+});
+
+test('client rejects the legacy fixtures envelope without documented data', async () => {
+  const legacyEnvelope = { fixtures: structuredClone(payload.data) };
+  const client = new GoalApiClient('key', { get: async () => ({ data: legacyEnvelope }) });
+  await assert.rejects(client.fixtures('x'),
+    (e) => e instanceof GoalApiError && e.kind === 'invalid_response');
 });
 
 test('adapter maps SCHEDULED, null venue, string identity and does not mutate input', () => {
@@ -68,7 +77,7 @@ test('orchestration includes approved membership and fails closed otherwise', as
   const unknownTeam = fixture(); unknownTeam.id = 'unknown-team'; unknownTeam.awayTeam.id = 'not-mapped';
   const unsupported = fixture(); unsupported.id = 'unsupported-status'; unsupported.matchStatus = 'LIVE';
   const unknownCompetition = fixture(); unknownCompetition.id = 'unknown-competition'; unknownCompetition.league.id = 'not-configured';
-  const source = { fixtures: async () => [...structuredClone(payload.fixtures), unknownCompetition, unknownTeam, unsupported] };
+  const source = { fixtures: async () => [...structuredClone(payload.data), unknownCompetition, unknownTeam, unsupported] };
   const membership = {
     competitionSeasonKey: 'football_premier_2026', competitionKey: 'football_premier', seasonYear: 2026,
     displayNameJa: 'Premier', membershipType: 'league', memberTeamIds: ['arsenal', 'kawasaki_frontale'],

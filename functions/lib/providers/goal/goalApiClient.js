@@ -37,10 +37,15 @@ class GoalApiClient {
                 timeout: this.timeoutMs,
             });
             const body = response.data;
-            if (!body || !Array.isArray(body.fixtures) || !body.fixtures.every(isGoalFixture)) {
+            if (!body || typeof body !== "object") {
                 throw new GoalApiError("invalid_response", "GOAL response did not contain valid fixtures");
             }
-            return body.fixtures;
+            const envelope = body;
+            if (envelope.success !== true || !Array.isArray(envelope.data) ||
+                !envelope.data.every(isGoalFixture)) {
+                throw new GoalApiError("invalid_response", "GOAL response did not contain valid fixtures");
+            }
+            return envelope.data;
         }
         catch (error) {
             if (error instanceof GoalApiError)

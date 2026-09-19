@@ -40,11 +40,16 @@ export class GoalApiClient {
         headers: { Authorization: `Bearer ${this.apiKey}` },
         timeout: this.timeoutMs,
       });
-      const body = response.data as { fixtures?: unknown };
-      if (!body || !Array.isArray(body.fixtures) || !body.fixtures.every(isGoalFixture)) {
+      const body = response.data;
+      if (!body || typeof body !== "object") {
         throw new GoalApiError("invalid_response", "GOAL response did not contain valid fixtures");
       }
-      return body.fixtures;
+      const envelope = body as { success?: unknown; data?: unknown };
+      if (envelope.success !== true || !Array.isArray(envelope.data) ||
+          !envelope.data.every(isGoalFixture)) {
+        throw new GoalApiError("invalid_response", "GOAL response did not contain valid fixtures");
+      }
+      return envelope.data;
     } catch (error: unknown) {
       if (error instanceof GoalApiError) throw error;
       const candidate = error as { code?: string; response?: { status?: number } };
