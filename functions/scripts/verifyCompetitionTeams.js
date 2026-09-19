@@ -80,14 +80,14 @@ function representativeKeyword(team) {
   return keywords[keywords.length - 1];
 }
 
-function verifyInMemory({ competitionKey, teams, teamsTodo }) {
+function verifyInMemory({ competitionKey, competition, teams, teamsTodo }) {
   console.log(`[verify:teams] competitionKey: ${competitionKey}`);
   console.log('[verify:teams] dryRun: true');
   console.log(`[verify:teams] confirmed teams: ${teams.length}`);
   console.log(`[verify:teams] teamsTodo ignored: ${teamsTodo.length}`);
 
   for (const team of teams) {
-    validateTeam(team);
+    validateTeam(team, competition);
     const keywords = expectedKeywords(team);
     if (keywords.length === 0) {
       throw new Error(`searchKeywords would be empty for team: ${team.id}`);
@@ -213,10 +213,10 @@ async function verify({ competitionKey, dryRun }) {
   }
 
   const { competition, teams, teamsTodo } = getCompetitionTeamData(competitionKey);
-  validateTeamsArray(teams);
+  validateTeamsArray(teams, competition);
 
   if (dryRun) {
-    return verifyInMemory({ competitionKey, teams, teamsTodo });
+    return verifyInMemory({ competitionKey, competition, teams, teamsTodo });
   }
 
   const admin = require('firebase-admin');

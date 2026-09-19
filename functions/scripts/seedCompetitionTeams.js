@@ -34,7 +34,7 @@ async function seed({ competitionKey, dryRun }) {
   }
 
   const { competition, teams, teamsTodo } = getCompetitionTeamData(competitionKey);
-  validateTeamsArray(teams);
+  validateTeamsArray(teams, competition);
 
   console.log(`[seed:teams] competitionKey: ${competitionKey}`);
   console.log(`[seed:teams] dryRun: ${dryRun}`);

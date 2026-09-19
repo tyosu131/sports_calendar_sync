@@ -4,8 +4,15 @@
 
 const { generateSearchKeywords } = require('./searchKeywords');
 
-function validateTeam(team) {
-  const requiredFields = ['id', 'nameJa', 'nameEn', 'aliases', 'source'];
+function validateTeam(team, { requiredTeamFields = [] } = {}) {
+  const requiredFields = [
+    'id',
+    'nameJa',
+    'nameEn',
+    'aliases',
+    'source',
+    ...requiredTeamFields,
+  ];
 
   for (const field of requiredFields) {
     if (team[field] === undefined || team[field] === null || team[field] === '') {
@@ -27,8 +34,8 @@ function validateTeam(team) {
   }
 }
 
-function validateTeamsArray(teams) {
-  for (const team of teams) validateTeam(team);
+function validateTeamsArray(teams, options) {
+  for (const team of teams) validateTeam(team, options);
 }
 
 function toTeamDoc({ competition, team }) {

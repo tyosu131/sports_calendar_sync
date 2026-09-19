@@ -7,7 +7,7 @@ const path = require('node:path');
 const { getCompetitionTeamData, listCompetitionKeys } = require('../../scripts/data/competitionRegistry');
 const localSeasons = require('../../scripts/data/competitionSeasons');
 const runtimeSeasons = require('../../lib/config/competitionSeasons');
-const { toTeamDoc } = require('../../scripts/teamMasterContract');
+const { toTeamDoc, validateTeam } = require('../../scripts/teamMasterContract');
 
 function verify(script, args = []) {
   execFileSync(process.execPath, [path.join(__dirname, '../../scripts', script), ...args]);
@@ -40,6 +40,7 @@ test('Arsenal serializes as a discoverable stable team without invented provider
   const { competition, teams } = getCompetitionTeamData('football_premier');
   const team = teams.find(({ id }) => id === 'arsenal');
   assert.ok(team);
+  assert.doesNotThrow(() => validateTeam(team, competition));
   const doc = toTeamDoc({ competition, team });
 
   assert.equal(team.id, 'arsenal');
@@ -54,6 +55,28 @@ test('Arsenal serializes as a discoverable stable team without invented provider
   assert.ok(!Object.hasOwn(doc, 'rapidApiId'));
   assert.ok(!Object.hasOwn(doc, 'logoUrl'));
   assert.ok(!Object.values(doc).includes(undefined));
+});
+
+test('API-SPORTS masters still require externalTeamId and logoUrl', () => {
+  for (const competitionKey of ['football_j1', 'football_j2', 'football_j3']) {
+    const { competition, teams } = getCompetitionTeamData(competitionKey);
+    assert.ok(teams.length > 0);
+    assert.doesNotThrow(() => validateTeam(teams[0], competition));
+  }
+
+  const { competition, teams } = getCompetitionTeamData('football_j1');
+  const [representative] = teams;
+  const { externalTeamId: _externalTeamId, ...withoutExternalTeamId } = representative;
+  const { logoUrl: _logoUrl, ...withoutLogoUrl } = representative;
+
+  assert.throws(
+    () => validateTeam(withoutExternalTeamId, competition),
+    /Missing required field "externalTeamId"/
+  );
+  assert.throws(
+    () => validateTeam(withoutLogoUrl, competition),
+    /Missing required field "logoUrl"/
+  );
 });
 
 test('existing Kawasaki serialization retains API-SPORTS compatibility fields', () => {
