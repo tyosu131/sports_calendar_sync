@@ -13,6 +13,33 @@ test('Japanese competitions use confirmed master localization without identity i
   }), '鹿島アントラーズ');
 });
 
+test('domestic cups localize J2 and J3 display evidence', () => {
+  assert.equal(displayTeamName('football_emperor_cup', {
+    japanese: 'Vegalta Sendai', provider: 'Vegalta Sendai',
+  }), 'ベガルタ仙台');
+  assert.equal(displayTeamName('football_emperor_cup', {
+    japanese: 'FC Gifu', provider: 'FC Gifu',
+  }), 'ＦＣ岐阜');
+  const game = asNormalizedGame('domestic-cup-game', {
+    competitionKey: 'football_emperor_cup', leagueId: 'emperor-cup',
+    startTimeUTC: Timestamp.fromDate(new Date('2026-09-19T09:00:00Z')),
+    status: 'scheduled', broadcastPlatforms: [], homeTeamId: 'followed',
+    homeTeamNameJa: 'Vegalta Sendai', homeTeamNameEn: 'Vegalta Sendai',
+    awayTeamNameJa: 'FC Gifu', awayTeamNameEn: 'FC Gifu',
+  });
+  assert.match(buildCalendar([game]), /SUMMARY:ベガルタ仙台 vs ＦＣ岐阜/);
+  assert.equal(game.awayTeamId, undefined);
+});
+
+test('safe normalization accepts width punctuation whitespace and case', () => {
+  assert.equal(displayTeamName('football_j_league_cup', {
+    japanese: 'provider', provider: '  kyoto sanga f．c． ',
+  }), '京都サンガF.C.');
+  assert.equal(displayTeamName('football_j_league_cup', {
+    japanese: 'provider', provider: 'f c  gifu',
+  }), 'ＦＣ岐阜');
+});
+
 test('European competitions use English names', () => {
   assert.equal(displayTeamName('football_premier', {
     japanese: 'アーセナル', english: 'Arsenal', provider: 'Arsenal',

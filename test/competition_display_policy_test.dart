@@ -1,0 +1,54 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:sports_calendar_sync/domain/models/game.dart';
+import 'package:sports_calendar_sync/domain/policies/competition_display_policy.dart';
+import 'package:sports_calendar_sync/presentation/screens/schedule_screen.dart';
+import 'package:sports_calendar_sync/presentation/widgets/game_card.dart';
+
+Game _game(String competitionKey) => Game(
+      id: 'competition-game',
+      leagueId: 'league',
+      competitionKey: competitionKey,
+      homeTeamNameJa: '川崎フロンターレ',
+      awayTeamNameJa: '鹿島アントラーズ',
+      startTimeUtc: Timestamp.fromDate(DateTime.utc(2026, 9, 19, 9)),
+      startTimeJst: '2026-09-19 18:00',
+      timezone: 'UTC',
+      status: GameStatus.scheduled,
+    );
+
+void main() {
+  test('catalog covers every V1 competition with full and compact labels', () {
+    const expected = {
+      'football_j1': ('J1リーグ', 'J1'),
+      'football_j_league_cup': ('ルヴァンカップ', 'ルヴァン'),
+      'football_emperor_cup': ('天皇杯', '天皇杯'),
+      'football_premier': ('Premier League', 'PL'),
+      'football_champions_league': ('Champions League', 'UCL'),
+      'football_league_cup': ('League Cup', 'EFL Cup'),
+    };
+    for (final entry in expected.entries) {
+      final display = CompetitionDisplayPolicy.forKey(entry.key)!;
+      expect((display.label, display.compact), entry.value);
+    }
+  });
+
+  testWidgets('home and selected-date cards show competition identity', (
+    tester,
+  ) async {
+    final value = _game('football_emperor_cup');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ListView(children: [
+            GameCard(game: value),
+            ScheduleGameTile(game: value),
+          ]),
+        ),
+      ),
+    );
+    expect(find.text('天皇杯'), findsNWidgets(2));
+    expect(tester.takeException(), isNull);
+  });
+}

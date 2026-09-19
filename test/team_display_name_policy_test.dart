@@ -11,6 +11,8 @@ Game game({
   required String awayJa,
   String? homeEn,
   String? awayEn,
+  String? homeProvider,
+  String? awayProvider,
 }) => Game(
       id: 'game',
       leagueId: 'league',
@@ -19,6 +21,8 @@ Game game({
       awayTeamNameJa: awayJa,
       homeTeamNameEn: homeEn,
       awayTeamNameEn: awayEn,
+      homeTeamProviderName: homeProvider,
+      awayTeamProviderName: awayProvider,
       startTimeUtc: Timestamp.fromDate(DateTime.utc(2026, 9, 19, 9)),
       startTimeJst: '2026-09-19 18:00',
       timezone: 'UTC',
@@ -54,6 +58,32 @@ void main() {
     expect(teamDisplayNames.homeName(value), '川崎フロンターレ');
     expect(teamDisplayNames.awayName(value), '鹿島アントラーズ');
     expect(value.awayTeamId, isNull);
+  });
+
+  test('domestic cups localize J2 and J3 evidence without identity', () {
+    final value = game(
+      competition: 'football_emperor_cup',
+      homeJa: 'Vegalta Sendai',
+      awayJa: 'FC Gifu',
+      homeEn: 'Vegalta Sendai',
+      awayEn: 'FC Gifu',
+    );
+    expect(teamDisplayNames.homeName(value), 'ベガルタ仙台');
+    expect(teamDisplayNames.awayName(value), 'ＦＣ岐阜');
+    expect(value.homeTeamId, isNull);
+    expect(value.awayTeamId, isNull);
+  });
+
+  test('safe normalization handles width punctuation whitespace and case', () {
+    final value = game(
+      competition: 'football_j_league_cup',
+      homeJa: 'provider value',
+      awayJa: 'provider value',
+      homeProvider: '  kyoto  sanga f．c． ',
+      awayProvider: 'f c   gifu',
+    );
+    expect(teamDisplayNames.homeName(value), '京都サンガF.C.');
+    expect(teamDisplayNames.awayName(value), 'ＦＣ岐阜');
   });
 
   test('European names use English', () {

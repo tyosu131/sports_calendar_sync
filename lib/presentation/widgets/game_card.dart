@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/utils/date_time_utils.dart';
 import '../../domain/models/game.dart';
 import '../../domain/policies/team_display_name_policy.dart';
+import 'competition_badge.dart';
 
 /// Displays a single game/match as a card.
 class GameCard extends StatelessWidget {
@@ -28,6 +29,8 @@ class GameCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            CompetitionBadge(competitionKey: game.competitionKey),
+            const SizedBox(height: 8),
             // Date/time row
             Row(
               children: [

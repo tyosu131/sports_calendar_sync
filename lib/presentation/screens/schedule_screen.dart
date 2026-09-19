@@ -5,6 +5,7 @@ import '../../core/utils/date_time_utils.dart';
 import '../../data/providers/game_providers.dart';
 import '../../domain/models/game.dart';
 import '../../domain/policies/team_display_name_policy.dart';
+import '../widgets/competition_badge.dart';
 
 /// In-app schedule view for followed-team games.
 ///
@@ -671,6 +672,8 @@ class ScheduleGameTile extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            CompetitionBadge(competitionKey: game.competitionKey),
+            const SizedBox(height: 8),
             Row(
               children: [
                 Text(
