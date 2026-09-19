@@ -5,6 +5,7 @@ export interface CalendarGame {
   kickoffUtc: Date;
   homeTeamName: string;
   awayTeamName: string;
+  competitionName?: string;
   status: GameStatus;
   venue?: string | null;
   broadcastPlatforms?: Array<{ platform: string }> | null;
@@ -59,7 +60,8 @@ export function buildCalendar(games: readonly CalendarGame[]): string {
     // clock dependency; freshness is represented by each game's DTSTART.
     lines.push("DTSTAMP:19700101T000000Z");
     lines.push(`DTSTART:${utc(game.kickoffUtc)}`);
-    lines.push(`SUMMARY:${text(`${game.homeTeamName} vs ${game.awayTeamName}`)}`);
+    const competition = game.competitionName ? ` (${game.competitionName})` : "";
+    lines.push(`SUMMARY:${text(`${game.homeTeamName} vs ${game.awayTeamName}${competition}`)}`);
     if (game.venue) lines.push(`LOCATION:${text(game.venue)}`);
     const platforms = game.broadcastPlatforms?.map((item) => item.platform).filter(Boolean);
     if (platforms?.length) lines.push(`DESCRIPTION:${text(`Viewing: ${platforms.join(" / ")}`)}`);

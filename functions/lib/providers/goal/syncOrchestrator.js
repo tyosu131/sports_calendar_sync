@@ -5,6 +5,7 @@ const goalFootballAdapter_1 = require("../../adapters/goalFootballAdapter");
 const competitionSeasonMembership_1 = require("../../domain/competitionSeasonMembership");
 const teamIdentity_1 = require("./teamIdentity");
 const statusPolicy_1 = require("./statusPolicy");
+const teamDisplayNamePolicy_1 = require("../../domain/teamDisplayNamePolicy");
 /** Fetches and normalizes one supported team's fixtures without persistence. */
 async function orchestrateGoalTeamFixtures(source, internalTeamId, bindings, names, now = () => new Date()) {
     const providerTeamId = (0, teamIdentity_1.goalTeamIdForInternalTeam)(internalTeamId);
@@ -43,8 +44,10 @@ async function orchestrateGoalTeamFixtures(source, internalTeamId, bindings, nam
                 leagueId: binding.leagueId,
                 homeTeamId,
                 awayTeamId,
-                homeTeamNameJa: homeTeamId ? names.nameJa(homeTeamId) : fixture.homeTeam.name,
-                awayTeamNameJa: awayTeamId ? names.nameJa(awayTeamId) : fixture.awayTeam.name,
+                homeTeamNameJa: homeTeamId ? names.nameJa(homeTeamId) :
+                    (0, teamDisplayNamePolicy_1.confirmedJapaneseName)(fixture.homeTeam.name) ?? fixture.homeTeam.name,
+                awayTeamNameJa: awayTeamId ? names.nameJa(awayTeamId) :
+                    (0, teamDisplayNamePolicy_1.confirmedJapaneseName)(fixture.awayTeam.name) ?? fixture.awayTeam.name,
             }));
         }
         catch (error) {

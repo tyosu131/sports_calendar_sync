@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../../core/utils/date_time_utils.dart';
 import '../../domain/models/game.dart';
+import '../../domain/policies/competition_display_policy.dart';
+import '../../domain/policies/team_display_name_policy.dart';
+import 'competition_badge.dart';
 
 /// Displays a single game/match as a card.
 class GameCard extends StatelessWidget {
@@ -13,6 +16,7 @@ class GameCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isToday = DateTimeUtils.isToday(game.startTimeUtcDateTime);
+    final competition = CompetitionDisplayPolicy.forKey(game.competitionKey);
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -27,6 +31,10 @@ class GameCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (competition != null) ...[
+              CompetitionBadge(competition: competition),
+              const SizedBox(height: 8),
+            ],
             // Date/time row
             Row(
               children: [
@@ -69,7 +77,7 @@ class GameCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: _TeamSide(
-                    name: game.homeTeamNameJa,
+                    name: teamDisplayNames.homeName(game),
                     logoUrl: game.homeTeamLogoUrl,
                   ),
                 ),
@@ -79,7 +87,7 @@ class GameCard extends StatelessWidget {
                 ),
                 Expanded(
                   child: _TeamSide(
-                    name: game.awayTeamNameJa,
+                    name: teamDisplayNames.awayName(game),
                     logoUrl: game.awayTeamLogoUrl,
                   ),
                 ),

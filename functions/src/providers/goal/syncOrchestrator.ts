@@ -3,6 +3,7 @@ import { CompetitionSeasonMembership, teamIdsForMembership } from "../../domain/
 import { GameDoc, GoalFixture } from "../../types";
 import { goalTeamIdForInternalTeam, internalTeamIdForGoalTeam } from "./teamIdentity";
 import { isGoalTemporalAnomaly } from "./statusPolicy";
+import { confirmedJapaneseName } from "../../domain/teamDisplayNamePolicy";
 
 export interface GoalFixtureSource {
   fixtures(teamId: string): Promise<GoalFixture[]>;
@@ -76,8 +77,10 @@ export async function orchestrateGoalTeamFixtures(
         leagueId: binding.leagueId,
         homeTeamId,
         awayTeamId,
-        homeTeamNameJa: homeTeamId ? names.nameJa(homeTeamId) : fixture.homeTeam.name,
-        awayTeamNameJa: awayTeamId ? names.nameJa(awayTeamId) : fixture.awayTeam.name,
+        homeTeamNameJa: homeTeamId ? names.nameJa(homeTeamId) :
+          confirmedJapaneseName(fixture.homeTeam.name) ?? fixture.homeTeam.name,
+        awayTeamNameJa: awayTeamId ? names.nameJa(awayTeamId) :
+          confirmedJapaneseName(fixture.awayTeam.name) ?? fixture.awayTeam.name,
       }));
     } catch (error: unknown) {
       if (error instanceof UnsupportedGoalStatusError) {

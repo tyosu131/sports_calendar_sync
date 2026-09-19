@@ -49,7 +49,8 @@ function buildCalendar(games) {
         // clock dependency; freshness is represented by each game's DTSTART.
         lines.push("DTSTAMP:19700101T000000Z");
         lines.push(`DTSTART:${utc(game.kickoffUtc)}`);
-        lines.push(`SUMMARY:${text(`${game.homeTeamName} vs ${game.awayTeamName}`)}`);
+        const competition = game.competitionName ? ` (${game.competitionName})` : "";
+        lines.push(`SUMMARY:${text(`${game.homeTeamName} vs ${game.awayTeamName}${competition}`)}`);
         if (game.venue)
             lines.push(`LOCATION:${text(game.venue)}`);
         const platforms = game.broadcastPlatforms?.map((item) => item.platform).filter(Boolean);
