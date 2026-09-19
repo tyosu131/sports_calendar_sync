@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -118,6 +117,7 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
 @visibleForTesting
 class ScheduleMonthCalendar extends StatelessWidget {
   const ScheduleMonthCalendar({
+    super.key,
     required this.visibleMonth,
     required this.minMonth,
     required this.maxMonth,
