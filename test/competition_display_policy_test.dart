@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:sports_calendar_sync/domain/models/game.dart';
 import 'package:sports_calendar_sync/domain/policies/competition_display_policy.dart';
 import 'package:sports_calendar_sync/presentation/screens/schedule_screen.dart';
@@ -25,6 +26,10 @@ Game _emperorCupGame() => Game(
     );
 
 void main() {
+  setUpAll(() async {
+    await initializeDateFormatting('ja');
+  });
+
   test('catalog covers every V1 competition with full and compact labels', () {
     const expected = {
       'football_j1': ('J1リーグ', 'J1 League', 'J1'),
