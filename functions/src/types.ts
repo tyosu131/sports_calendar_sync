@@ -81,13 +81,17 @@ export interface GameDoc {
   /** @deprecated Legacy alias for competitionKey. */
   sportKey?: CompetitionKey;
   leagueId: string;
-  homeTeamId: string;
+  homeTeamId?: string;
+  /** Provider participant identity; does not imply a canonical Team exists. */
+  homeSourceTeamId?: string;
   homeTeamNameJa: string;
   /** English team name — used as translation fallback. */
   homeTeamNameEn?: string;
   /** Team logo URL. */
   homeTeamLogoUrl?: string;
-  awayTeamId: string;
+  awayTeamId?: string;
+  /** Provider participant identity; does not imply a canonical Team exists. */
+  awaySourceTeamId?: string;
   awayTeamNameJa: string;
   awayTeamNameEn?: string;
   awayTeamLogoUrl?: string;
@@ -118,9 +122,11 @@ export interface GoalFixture {
   kickoffUtc: string;
   matchStatus: string;
   league: { id: string; name: string };
+  leagueYear: string;
   homeTeam: { id: string; name: string };
   awayTeam: { id: string; name: string };
-  venue: string | null;
+  venue?: string | null;
+  matchStadium?: string | null;
 }
 
 export interface UserDoc {

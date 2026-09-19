@@ -14,6 +14,11 @@ export interface GoalHttpClient {
   get(url: string, config: { headers: Record<string, string>; timeout: number }): Promise<{ data: unknown }>;
 }
 
+export interface GoalFixturesPage {
+  fixtures: GoalFixture[];
+  pagination: { total: number; limit: number; offset: number; hasMore: boolean };
+}
+
 const BASE_URL = "https://api.goal-api.com/v1";
 
 /** Small, injectable boundary for the only two GOAL endpoints used by V1. */
@@ -27,7 +32,33 @@ export class GoalApiClient {
   }
 
   fixtures(teamId: string): Promise<GoalFixture[]> {
-    return this.fetch(`/teams/${encodeURIComponent(teamId)}/fixtures`);
+    return this.fixturesAll(teamId);
+  }
+
+  async fixturesPage(teamId: string, options: { limit: number; offset: number }): Promise<GoalFixturesPage> {
+    const query = `limit=${encodeURIComponent(options.limit)}&offset=${encodeURIComponent(options.offset)}`;
+    const body = await this.request(`/teams/${encodeURIComponent(teamId)}/fixtures?${query}`);
+    const pagination = (body as { pagination?: unknown }).pagination;
+    if (!isPagination(pagination)) {
+      throw new GoalApiError("invalid_response", "GOAL fixtures response did not contain valid pagination");
+    }
+    return { fixtures: this.parseFixtures(body), pagination };
+  }
+
+  async fixturesAll(teamId: string, limit = 100, maxPages = 100): Promise<GoalFixture[]> {
+    const byId = new Map<string, GoalFixture>();
+    let offset = 0;
+    for (let page = 0; page < maxPages; page += 1) {
+      const result = await this.fixturesPage(teamId, { limit, offset });
+      for (const fixture of result.fixtures) byId.set(fixture.id, fixture);
+      if (!result.pagination.hasMore) return [...byId.values()];
+      const nextOffset = result.pagination.offset + result.pagination.limit;
+      if (result.pagination.limit <= 0 || nextOffset <= offset) {
+        throw new GoalApiError("invalid_response", "GOAL fixtures pagination made no progress");
+      }
+      offset = nextOffset;
+    }
+    throw new GoalApiError("invalid_response", "GOAL fixtures pagination exceeded maximum pages");
   }
 
   upcoming(teamId: string): Promise<GoalFixture[]> {
@@ -35,6 +66,19 @@ export class GoalApiClient {
   }
 
   private async fetch(path: string): Promise<GoalFixture[]> {
+    return this.parseFixtures(await this.request(path));
+  }
+
+  private parseFixtures(body: unknown): GoalFixture[] {
+    const envelope = body as { success?: unknown; data?: unknown };
+    if (envelope.success !== true || !Array.isArray(envelope.data) ||
+        !envelope.data.every(isGoalFixture)) {
+      throw new GoalApiError("invalid_response", "GOAL response did not contain valid fixtures");
+    }
+    return envelope.data;
+  }
+
+  private async request(path: string): Promise<unknown> {
     try {
       const response = await this.http.get(`${BASE_URL}${path}`, {
         headers: { Authorization: `Bearer ${this.apiKey}` },
@@ -44,12 +88,7 @@ export class GoalApiClient {
       if (!body || typeof body !== "object") {
         throw new GoalApiError("invalid_response", "GOAL response did not contain valid fixtures");
       }
-      const envelope = body as { success?: unknown; data?: unknown };
-      if (envelope.success !== true || !Array.isArray(envelope.data) ||
-          !envelope.data.every(isGoalFixture)) {
-        throw new GoalApiError("invalid_response", "GOAL response did not contain valid fixtures");
-      }
-      return envelope.data;
+      return body;
     } catch (error: unknown) {
       if (error instanceof GoalApiError) throw error;
       const candidate = error as { code?: string; response?: { status?: number } };
@@ -72,6 +111,15 @@ function isGoalFixture(value: unknown): value is GoalFixture {
     typeof (value as { name?: unknown }).name === "string";
   return typeof fixture.id === "string" && typeof fixture.kickoffUtc === "string" &&
     typeof fixture.matchStatus === "string" && team(fixture.league) &&
+    typeof fixture.leagueYear === "string" &&
     team(fixture.homeTeam) && team(fixture.awayTeam) &&
-    (fixture.venue === null || typeof fixture.venue === "string");
+    (fixture.venue === undefined || fixture.venue === null || typeof fixture.venue === "string") &&
+    (fixture.matchStadium === undefined || fixture.matchStadium === null || typeof fixture.matchStadium === "string");
+}
+
+function isPagination(value: unknown): value is GoalFixturesPage["pagination"] {
+  if (!value || typeof value !== "object") return false;
+  const page = value as Partial<GoalFixturesPage["pagination"]>;
+  return Number.isInteger(page.total) && Number.isInteger(page.limit) &&
+    Number.isInteger(page.offset) && typeof page.hasMore === "boolean";
 }

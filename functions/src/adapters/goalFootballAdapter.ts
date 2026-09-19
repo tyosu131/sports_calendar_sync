@@ -13,8 +13,8 @@ export interface GoalAdapterContext {
   competitionKey: CompetitionKey;
   competitionSeasonKey: string;
   leagueId: string;
-  homeTeamId: string;
-  awayTeamId: string;
+  homeTeamId?: string;
+  awayTeamId?: string;
   homeTeamNameJa: string;
   awayTeamNameJa: string;
 }
@@ -28,19 +28,25 @@ export function adaptGoalFixtureToGameDoc(fixture: GoalFixture, context: GoalAda
     competitionSeasonKey: context.competitionSeasonKey,
     sportKey: context.competitionKey,
     leagueId: context.leagueId,
-    homeTeamId: context.homeTeamId,
+    ...(context.homeTeamId ? { homeTeamId: context.homeTeamId } : {}),
+    homeSourceTeamId: fixture.homeTeam.id,
     homeTeamNameJa: context.homeTeamNameJa,
     homeTeamNameEn: fixture.homeTeam.name,
-    awayTeamId: context.awayTeamId,
+    ...(context.awayTeamId ? { awayTeamId: context.awayTeamId } : {}),
+    awaySourceTeamId: fixture.awayTeam.id,
     awayTeamNameJa: context.awayTeamNameJa,
     awayTeamNameEn: fixture.awayTeam.name,
     startTimeUTC: Timestamp.fromDate(utc),
     startTimeJST: toJstStorageString(fixture.kickoffUtc),
     timezone: "UTC",
     status: "scheduled",
-    venue: fixture.venue ?? undefined,
+    venue: nonEmpty(fixture.venue) ?? nonEmpty(fixture.matchStadium),
     broadcastPlatforms: [],
     sourceProvider: "goal",
     sourceFixtureId: fixture.id,
   };
+}
+
+function nonEmpty(value: string | null | undefined): string | undefined {
+  return typeof value === "string" && value.trim().length > 0 ? value : undefined;
 }
