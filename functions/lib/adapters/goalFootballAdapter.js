@@ -19,6 +19,7 @@ function adaptGoalFixtureToGameDoc(fixture, context) {
     if (!status)
         throw new UnsupportedGoalStatusError(fixture.matchStatus);
     const utc = (0, timezone_1.toUtcDate)(fixture.kickoffUtc);
+    const venue = nonEmpty(fixture.venue) ?? nonEmpty(fixture.matchStadium);
     return {
         competitionKey: context.competitionKey,
         competitionSeasonKey: context.competitionSeasonKey,
@@ -36,7 +37,7 @@ function adaptGoalFixtureToGameDoc(fixture, context) {
         startTimeJST: (0, timezone_1.toJstStorageString)(fixture.kickoffUtc),
         timezone: "UTC",
         status,
-        venue: nonEmpty(fixture.venue) ?? nonEmpty(fixture.matchStadium),
+        ...(venue ? { venue } : {}),
         broadcastPlatforms: [],
         sourceProvider: "goal",
         sourceFixtureId: fixture.id,
