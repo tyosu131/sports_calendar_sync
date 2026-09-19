@@ -471,21 +471,28 @@ class _CompactGameLine extends StatelessWidget {
     final away = teamDisplayNames.awayName(game);
     final marker = '${_initial(home)}/${_initial(away)}';
     final meta = _compactMeta(game);
-    return Row(
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Expanded(
-          child: Text(
-            marker,
-            maxLines: 1,
-            overflow: TextOverflow.clip,
-            style: TextStyle(
-              color: foregroundColor,
-              fontSize: 9,
-              fontWeight: FontWeight.bold,
-            ),
+        Text(
+          marker,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: foregroundColor,
+            fontSize: 9,
+            fontWeight: FontWeight.bold,
           ),
         ),
-        Text(meta, style: TextStyle(color: foregroundColor, fontSize: 8)),
+        Text(
+          meta,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
+          style: TextStyle(color: foregroundColor, fontSize: 8),
+        ),
       ],
     );
   }
