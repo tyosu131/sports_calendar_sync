@@ -1,4 +1,5 @@
 import '../../domain/models/game.dart';
+import '../../domain/policies/competition_display_policy.dart';
 import '../../domain/policies/team_display_name_policy.dart';
 
 /// Builds a local, copyable iCalendar document for Free MVP flows.
@@ -52,8 +53,10 @@ class LocalIcsBuilder {
   }
 
   static String _summaryFor(Game game) {
+    final competition = CompetitionDisplayPolicy.forKey(game.competitionKey);
+    final suffix = competition == null ? '' : ' (${competition.label})';
     return '${teamDisplayNames.homeName(game)} vs '
-        '${teamDisplayNames.awayName(game)}';
+        '${teamDisplayNames.awayName(game)}$suffix';
   }
 
   static String _descriptionFor(Game game) {

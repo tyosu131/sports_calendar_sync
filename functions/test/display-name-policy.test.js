@@ -6,6 +6,21 @@ const { Timestamp } = require('firebase-admin/firestore');
 const { displayTeamName } = require('../lib/domain/teamDisplayNamePolicy');
 const { asNormalizedGame } = require('../lib/functions/getCalendar');
 const { buildCalendar } = require('../lib/calendar/icsBuilder');
+const { competitionDisplayMetadata } = require('../lib/domain/competitionDisplayPolicy');
+
+test('competition catalog carries Japanese English and compact V1 metadata', () => {
+  const keys = [
+    'football_j1', 'football_j_league_cup', 'football_emperor_cup',
+    'football_premier', 'football_champions_league', 'football_league_cup',
+  ];
+  for (const key of keys) {
+    const metadata = competitionDisplayMetadata(key);
+    assert.ok(metadata?.nameJa);
+    assert.ok(metadata?.nameEn);
+    assert.ok(metadata?.compact);
+  }
+  assert.equal(competitionDisplayMetadata('unsupported'), undefined);
+});
 
 test('Japanese competitions use confirmed master localization without identity inference', () => {
   assert.equal(displayTeamName('football_j1', {
@@ -27,7 +42,7 @@ test('domestic cups localize J2 and J3 display evidence', () => {
     homeTeamNameJa: 'Vegalta Sendai', homeTeamNameEn: 'Vegalta Sendai',
     awayTeamNameJa: 'FC Gifu', awayTeamNameEn: 'FC Gifu',
   });
-  assert.match(buildCalendar([game]), /SUMMARY:ベガルタ仙台 vs ＦＣ岐阜/);
+  assert.match(buildCalendar([game]), /SUMMARY:ベガルタ仙台 vs ＦＣ岐阜 \(天皇杯\)/);
   assert.equal(game.awayTeamId, undefined);
 });
 
@@ -68,8 +83,8 @@ test('normalized calendar and ICS SUMMARY share competition policy', () => {
     awayTeamNameJa: 'アーセナル', awayTeamNameEn: 'Arsenal',
   });
   const ics = buildCalendar([domestic, european]);
-  assert.match(ics, /SUMMARY:川崎フロンターレ vs 鹿島アントラーズ/);
-  assert.match(ics, /SUMMARY:Brighton & Hove Albion vs Arsenal/);
+  assert.match(ics, /SUMMARY:川崎フロンターレ vs 鹿島アントラーズ \(J1リーグ\)/);
+  assert.match(ics, /SUMMARY:Brighton & Hove Albion vs Arsenal \(Premier League\)/);
   assert.equal(domestic.awayTeamId, undefined);
   assert.match(ics, /UID:j1-game@sports-calendar-sync/);
 });

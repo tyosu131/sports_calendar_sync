@@ -27,16 +27,24 @@ Game _emperorCupGame() => Game(
 void main() {
   test('catalog covers every V1 competition with full and compact labels', () {
     const expected = {
-      'football_j1': ('J1リーグ', 'J1'),
-      'football_j_league_cup': ('ルヴァンカップ', 'ルヴァン'),
-      'football_emperor_cup': ('天皇杯', '天皇杯'),
-      'football_premier': ('Premier League', 'PL'),
-      'football_champions_league': ('Champions League', 'UCL'),
-      'football_league_cup': ('League Cup', 'EFL Cup'),
+      'football_j1': ('J1リーグ', 'J1 League', 'J1'),
+      'football_j_league_cup': (
+        'ルヴァンカップ',
+        'J.League Cup',
+        'ルヴァン',
+      ),
+      'football_emperor_cup': ('天皇杯', "Emperor's Cup", '天皇杯'),
+      'football_premier': ('プレミアリーグ', 'Premier League', 'PL'),
+      'football_champions_league': (
+        'UEFAチャンピオンズリーグ',
+        'Champions League',
+        'UCL',
+      ),
+      'football_league_cup': ('リーグカップ', 'League Cup', 'EFL Cup'),
     };
     for (final entry in expected.entries) {
       final display = CompetitionDisplayPolicy.forKey(entry.key)!;
-      expect((display.label, display.compact), entry.value);
+      expect((display.nameJa, display.nameEn, display.compact), entry.value);
     }
   });
 

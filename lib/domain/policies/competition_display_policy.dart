@@ -1,33 +1,61 @@
-class CompetitionDisplayName {
-  const CompetitionDisplayName({required this.label, required this.compact});
+enum CompetitionDisplayLanguage { japanese, english }
 
-  final String label;
+class CompetitionDisplayName {
+  const CompetitionDisplayName({
+    required this.nameJa,
+    required this.nameEn,
+    required this.compact,
+    required this.defaultLanguage,
+  });
+
+  final String nameJa;
+  final String nameEn;
   final String compact;
+  final CompetitionDisplayLanguage defaultLanguage;
+
+  String get label => defaultLanguage == CompetitionDisplayLanguage.japanese
+      ? nameJa
+      : nameEn;
 }
 
-/// Presentation catalog for competition identity already carried by Game.
+/// Presentation metadata for the current V1 competition scope only.
 abstract final class CompetitionDisplayPolicy {
   static const _names = <String, CompetitionDisplayName>{
-    'football_j1': CompetitionDisplayName(label: 'J1リーグ', compact: 'J1'),
+    'football_j1': CompetitionDisplayName(
+      nameJa: 'J1リーグ',
+      nameEn: 'J1 League',
+      compact: 'J1',
+      defaultLanguage: CompetitionDisplayLanguage.japanese,
+    ),
     'football_j_league_cup': CompetitionDisplayName(
-      label: 'ルヴァンカップ',
+      nameJa: 'ルヴァンカップ',
+      nameEn: 'J.League Cup',
       compact: 'ルヴァン',
+      defaultLanguage: CompetitionDisplayLanguage.japanese,
     ),
     'football_emperor_cup': CompetitionDisplayName(
-      label: '天皇杯',
+      nameJa: '天皇杯',
+      nameEn: "Emperor's Cup",
       compact: '天皇杯',
+      defaultLanguage: CompetitionDisplayLanguage.japanese,
     ),
     'football_premier': CompetitionDisplayName(
-      label: 'Premier League',
+      nameJa: 'プレミアリーグ',
+      nameEn: 'Premier League',
       compact: 'PL',
+      defaultLanguage: CompetitionDisplayLanguage.english,
     ),
     'football_champions_league': CompetitionDisplayName(
-      label: 'Champions League',
+      nameJa: 'UEFAチャンピオンズリーグ',
+      nameEn: 'Champions League',
       compact: 'UCL',
+      defaultLanguage: CompetitionDisplayLanguage.english,
     ),
     'football_league_cup': CompetitionDisplayName(
-      label: 'League Cup',
+      nameJa: 'リーグカップ',
+      nameEn: 'League Cup',
       compact: 'EFL Cup',
+      defaultLanguage: CompetitionDisplayLanguage.english,
     ),
   };
 
