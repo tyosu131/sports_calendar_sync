@@ -35,6 +35,7 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getCalendar = exports.FirestorePersonalizedCalendarRepository = exports.CALENDAR_LOOKBACK_DAYS = void 0;
 exports.calendarWindowStart = calendarWindowStart;
+exports.asNormalizedGame = asNormalizedGame;
 exports.serveCalendar = serveCalendar;
 const functions = __importStar(require("firebase-functions/v1"));
 const firestore_1 = require("firebase-admin/firestore");
@@ -47,11 +48,17 @@ exports.CALENDAR_LOOKBACK_DAYS = 30;
 function calendarWindowStart(now) {
     return new Date(now.getTime() - exports.CALENDAR_LOOKBACK_DAYS * 24 * 60 * 60 * 1000);
 }
+/** Validates a Firestore Game document at the Calendar domain boundary. */
 function asNormalizedGame(id, data) {
     const kickoff = data.startTimeUTC;
     if (!(kickoff instanceof firestore_1.Timestamp))
         throw new Error(`Game ${id} has invalid startTimeUTC`);
-    if (typeof data.homeTeamId !== "string" || typeof data.awayTeamId !== "string") {
+    const hasHomeTeamId = Object.prototype.hasOwnProperty.call(data, "homeTeamId");
+    const hasAwayTeamId = Object.prototype.hasOwnProperty.call(data, "awayTeamId");
+    const validOptionalTeamId = (present, value) => !present || (typeof value === "string" && value.trim().length > 0);
+    if (!validOptionalTeamId(hasHomeTeamId, data.homeTeamId) ||
+        !validOptionalTeamId(hasAwayTeamId, data.awayTeamId) ||
+        (!hasHomeTeamId && !hasAwayTeamId)) {
         throw new Error(`Game ${id} has invalid team identity`);
     }
     if (typeof data.homeTeamNameJa !== "string" || typeof data.awayTeamNameJa !== "string") {
@@ -62,8 +69,8 @@ function asNormalizedGame(id, data) {
     return {
         id,
         kickoffUtc: kickoff.toDate(),
-        homeTeamId: data.homeTeamId,
-        awayTeamId: data.awayTeamId,
+        ...(hasHomeTeamId ? { homeTeamId: data.homeTeamId } : {}),
+        ...(hasAwayTeamId ? { awayTeamId: data.awayTeamId } : {}),
         homeTeamName: data.homeTeamNameJa,
         awayTeamName: data.awayTeamNameJa,
         status: data.status,

@@ -22,10 +22,17 @@ export function calendarWindowStart(now: Date): Date {
   return new Date(now.getTime() - CALENDAR_LOOKBACK_DAYS * 24 * 60 * 60 * 1000);
 }
 
-function asNormalizedGame(id: string, data: DocumentData): NormalizedGame {
+/** Validates a Firestore Game document at the Calendar domain boundary. */
+export function asNormalizedGame(id: string, data: DocumentData): NormalizedGame {
   const kickoff = data.startTimeUTC;
   if (!(kickoff instanceof Timestamp)) throw new Error(`Game ${id} has invalid startTimeUTC`);
-  if (typeof data.homeTeamId !== "string" || typeof data.awayTeamId !== "string") {
+  const hasHomeTeamId = Object.prototype.hasOwnProperty.call(data, "homeTeamId");
+  const hasAwayTeamId = Object.prototype.hasOwnProperty.call(data, "awayTeamId");
+  const validOptionalTeamId = (present: boolean, value: unknown) =>
+    !present || (typeof value === "string" && value.trim().length > 0);
+  if (!validOptionalTeamId(hasHomeTeamId, data.homeTeamId) ||
+      !validOptionalTeamId(hasAwayTeamId, data.awayTeamId) ||
+      (!hasHomeTeamId && !hasAwayTeamId)) {
     throw new Error(`Game ${id} has invalid team identity`);
   }
   if (typeof data.homeTeamNameJa !== "string" || typeof data.awayTeamNameJa !== "string") {
@@ -36,8 +43,8 @@ function asNormalizedGame(id: string, data: DocumentData): NormalizedGame {
   return {
     id,
     kickoffUtc: kickoff.toDate(),
-    homeTeamId: data.homeTeamId,
-    awayTeamId: data.awayTeamId,
+    ...(hasHomeTeamId ? { homeTeamId: data.homeTeamId as string } : {}),
+    ...(hasAwayTeamId ? { awayTeamId: data.awayTeamId as string } : {}),
     homeTeamName: data.homeTeamNameJa,
     awayTeamName: data.awayTeamNameJa,
     status: data.status,
