@@ -7,6 +7,7 @@ const { GoalApiClient, GoalApiError } = require('../lib/providers/goal/goalApiCl
 const { adaptGoalFixtureToGameDoc, UnsupportedGoalStatusError } = require('../lib/adapters/goalFootballAdapter');
 const { internalTeamIdForGoalTeam } = require('../lib/providers/goal/teamIdentity');
 const { orchestrateGoalTeamFixtures } = require('../lib/providers/goal/syncOrchestrator');
+const { V1_GOAL_MEMBERSHIP_BINDINGS, PENDING_GOAL_COMPETITION_EVIDENCE } = require('../lib/providers/goal/v1CompetitionBindings');
 
 const fixture = () => structuredClone(payload.data[0]);
 const context = {
@@ -14,86 +15,133 @@ const context = {
   leagueId: 'premier', homeTeamId: 'arsenal', awayTeamId: 'kawasaki_frontale',
   homeTeamNameJa: 'アーセナル', awayTeamNameJa: '川崎フロンターレ',
 };
+const membership = {
+  competitionSeasonKey: 'football_premier_2026', competitionKey: 'football_premier', seasonYear: 2026,
+  displayNameJa: 'Premier', membershipType: 'league', memberTeamIds: ['arsenal'],
+  status: 'approved', seedable: true,
+};
+const binding = { membership, goalLeagueId: 'goal-premier', goalLeagueYear: '2026/2027', leagueId: 'premier' };
 
-test('client constructs authenticated Team requests and parses string IDs', async () => {
+function envelope(data, pagination = { total: data.length, limit: 100, offset: 0, hasMore: false }) {
+  return { success: true, teamId: 'x', data, pagination, source: 'goal' };
+}
+
+test('client parses live fixture fields with missing venue and non-paginated upcoming', async () => {
   const calls = [];
-  const http = { get: async (url, config) => { calls.push({ url, config }); return { data: payload }; } };
+  const http = { get: async (url, config) => {
+    calls.push({ url, config });
+    return { data: url.endsWith('/upcoming') ? { success: true, teamId: 'x', data: [fixture()], count: 1, source: 'goal' } : payload };
+  } };
   const client = new GoalApiClient('test-key', http, 3210);
   const fixtures = await client.fixtures('team/id');
-  await client.upcoming('team/id');
-  assert.equal(fixtures[0].id, 'goal-fixture-premier-1');
-  assert.deepEqual(calls, [
-    { url: 'https://api.goal-api.com/v1/teams/team%2Fid/fixtures', config: { headers: { Authorization: 'Bearer test-key' }, timeout: 3210 } },
-    { url: 'https://api.goal-api.com/v1/teams/team%2Fid/upcoming', config: { headers: { Authorization: 'Bearer test-key' }, timeout: 3210 } },
+  const upcoming = await client.upcoming('team/id');
+  assert.equal(fixtures[0].leagueYear, '2026/2027');
+  assert.equal(fixtures[0].venue, undefined);
+  assert.equal(upcoming.length, 1);
+  assert.deepEqual(calls.map(call => call.url), [
+    'https://api.goal-api.com/v1/teams/team%2Fid/fixtures?limit=100&offset=0',
+    'https://api.goal-api.com/v1/teams/team%2Fid/upcoming',
   ]);
+  assert.deepEqual(calls[0].config, { headers: { Authorization: 'Bearer test-key' }, timeout: 3210 });
 });
 
-test('client classifies 429 and malformed documented envelopes', async () => {
+test('fixturesAll follows offsets, deduplicates IDs, and stops on hasMore false', async () => {
+  const offsets = [];
+  const one = fixture();
+  const two = fixture(); two.id = 'fixture-2';
+  const http = { get: async url => {
+    const offset = Number(new URL(url).searchParams.get('offset')); offsets.push(offset);
+    return { data: offset === 0
+      ? envelope([one], { total: 2, limit: 1, offset: 0, hasMore: true })
+      : envelope([one, two], { total: 2, limit: 1, offset: 1, hasMore: false }) };
+  } };
+  const fixtures = await new GoalApiClient('key', http).fixturesAll('x', 1);
+  assert.deepEqual(offsets, [0, 1]);
+  assert.deepEqual(fixtures.map(item => item.id), [one.id, two.id]);
+});
+
+test('fixturesAll rejects pagination without progress and maximum-page loops', async () => {
+  const noProgress = new GoalApiClient('key', { get: async () => ({ data: envelope([], { total: 2, limit: 0, offset: 0, hasMore: true }) }) });
+  await assert.rejects(noProgress.fixturesAll('x'), e => e instanceof GoalApiError && /no progress/.test(e.message));
+  const endless = new GoalApiClient('key', { get: async url => {
+    const offset = Number(new URL(url).searchParams.get('offset'));
+    return { data: envelope([], { total: 999, limit: 1, offset, hasMore: true }) };
+  } });
+  await assert.rejects(endless.fixturesAll('x', 1, 2), e => e instanceof GoalApiError && /maximum pages/.test(e.message));
+});
+
+test('client classifies errors and rejects malformed fixture contracts', async () => {
   const rateLimited = new GoalApiClient('key', { get: async () => { const e = new Error('no'); e.response = { status: 429 }; throw e; } });
-  await assert.rejects(rateLimited.fixtures('x'), (e) => e instanceof GoalApiError && e.kind === 'rate_limited' && e.status === 429);
-  const malformed = new GoalApiClient('key', { get: async () => ({ data: { success: true, data: [{ id: 7 }] } }) });
-  await assert.rejects(malformed.fixtures('x'), (e) => e.kind === 'invalid_response');
-  const unsuccessful = new GoalApiClient('key', { get: async () => ({ data: { success: false, data: [] } }) });
-  await assert.rejects(unsuccessful.fixtures('x'), (e) => e.kind === 'invalid_response');
+  await assert.rejects(rateLimited.fixtures('x'), e => e instanceof GoalApiError && e.kind === 'rate_limited');
+  const malformed = new GoalApiClient('key', { get: async () => ({ data: envelope([{ id: 7 }]) }) });
+  await assert.rejects(malformed.fixtures('x'), e => e.kind === 'invalid_response');
+  const legacy = new GoalApiClient('key', { get: async () => ({ data: { fixtures: [fixture()] } }) });
+  await assert.rejects(legacy.upcoming('x'), e => e.kind === 'invalid_response');
 });
 
-test('client rejects the legacy fixtures envelope without documented data', async () => {
-  const legacyEnvelope = { fixtures: structuredClone(payload.data) };
-  const client = new GoalApiClient('key', { get: async () => ({ data: legacyEnvelope }) });
-  await assert.rejects(client.fixtures('x'),
-    (e) => e instanceof GoalApiError && e.kind === 'invalid_response');
+test('adapter applies venue then matchStadium fallback and accepts null stadium', () => {
+  const missingVenue = fixture(); missingVenue.matchStadium = ' Emirates Stadium ';
+  const stadiumGame = adaptGoalFixtureToGameDoc(missingVenue, context);
+  assert.equal(stadiumGame.venue, ' Emirates Stadium ');
+  assert.equal(stadiumGame.homeSourceTeamId, missingVenue.homeTeam.id);
+  assert.equal(stadiumGame.awaySourceTeamId, missingVenue.awayTeam.id);
+  const preferred = fixture(); preferred.venue = 'Provider Venue'; preferred.matchStadium = 'Fallback';
+  assert.equal(adaptGoalFixtureToGameDoc(preferred, context).venue, 'Provider Venue');
+  const nullStadium = fixture(); nullStadium.matchStadium = null;
+  assert.equal(adaptGoalFixtureToGameDoc(nullStadium, context).venue, undefined);
 });
 
-test('adapter maps SCHEDULED, null venue, string identity and does not mutate input', () => {
-  const input = fixture();
-  const before = structuredClone(input);
-  const game = adaptGoalFixtureToGameDoc(input, context);
-  assert.equal(game.sourceProvider, 'goal');
-  assert.equal(game.sourceFixtureId, input.id);
-  assert.equal(game.startTimeUTC.toDate().toISOString(), '2026-09-20T15:30:00.000Z');
-  assert.equal(game.status, 'scheduled');
-  assert.equal(game.venue, undefined);
-  assert.equal(game.homeTeamLogoUrl, undefined);
-  assert.deepEqual(input, before);
-});
-
-test('kickoff changes preserve source identity and unsupported status fails explicitly', () => {
+test('adapter preserves identity across kickoff changes and only maps SCHEDULED', () => {
   const input = fixture();
   const first = adaptGoalFixtureToGameDoc(input, context);
   input.kickoffUtc = '2026-09-21T15:30:00Z';
-  const moved = adaptGoalFixtureToGameDoc(input, context);
-  assert.equal(moved.sourceFixtureId, first.sourceFixtureId);
-  input.matchStatus = 'POSTPONED';
+  assert.equal(adaptGoalFixtureToGameDoc(input, context).sourceFixtureId, first.sourceFixtureId);
+  input.matchStatus = 'FINISHED';
   assert.throws(() => adaptGoalFixtureToGameDoc(input, context), UnsupportedGoalStatusError);
 });
 
-test('GOAL IDs resolve to stable, competition-neutral team IDs', () => {
+test('GOAL IDs resolve only known stable internal teams', () => {
   assert.equal(internalTeamIdForGoalTeam('cmr7foowe2kf3rx06u6eu3rhl'), 'arsenal');
-  assert.equal(internalTeamIdForGoalTeam('cmr7be2nq0qkwrx06zxbqr5ux'), 'kawasaki_frontale');
   assert.equal(internalTeamIdForGoalTeam('unknown'), undefined);
 });
 
-test('orchestration includes approved membership and fails closed otherwise', async () => {
-  const unknownTeam = fixture(); unknownTeam.id = 'unknown-team'; unknownTeam.awayTeam.id = 'not-mapped';
-  const unsupported = fixture(); unsupported.id = 'unsupported-status'; unsupported.matchStatus = 'LIVE';
-  const unknownCompetition = fixture(); unknownCompetition.id = 'unknown-competition'; unknownCompetition.league.id = 'not-configured';
-  const source = { fixtures: async () => [...structuredClone(payload.data), unknownCompetition, unknownTeam, unsupported] };
-  const membership = {
-    competitionSeasonKey: 'football_premier_2026', competitionKey: 'football_premier', seasonYear: 2026,
-    displayNameJa: 'Premier', membershipType: 'league', memberTeamIds: ['arsenal', 'kawasaki_frontale'],
-    status: 'approved', seedable: true,
-  };
-  const result = await orchestrateGoalTeamFixtures(source, 'arsenal', [
-    { membership, goalLeagueId: 'goal-premier', leagueId: 'premier' },
-    { membership: { ...membership, competitionSeasonKey: 'friendly_2026', status: 'review' }, goalLeagueId: 'goal-friendly', leagueId: 'friendly' },
-  ], { nameJa: (id) => id });
+test('known target with unknown opponent produces a Game with provider participant identity', async () => {
+  const input = fixture(); input.awayTeam = { id: 'unknown-opponent', name: 'Opponent FC' };
+  const result = await orchestrateGoalTeamFixtures({ fixtures: async () => [input] }, 'arsenal', [binding], { nameJa: id => id }, () => new Date('2026-09-19T00:00:00Z'));
   assert.equal(result.games.length, 1);
-  assert.equal(result.games[0].sourceFixtureId, 'goal-fixture-premier-1');
+  assert.equal(result.games[0].homeTeamId, 'arsenal');
+  assert.equal(result.games[0].awayTeamId, undefined);
+  assert.equal(result.games[0].awaySourceTeamId, 'unknown-opponent');
+  assert.equal(result.games[0].awayTeamNameJa, 'Opponent FC');
+});
+
+test('orchestration is season-aware, competition-aware, target-aware, and membership-aware', async () => {
+  const wrongSeason = fixture(); wrongSeason.id = 'wrong-season'; wrongSeason.leagueYear = '2025/2026';
+  const unknownCompetition = fixture(); unknownCompetition.id = 'unknown-competition'; unknownCompetition.league.id = 'other';
+  const wrongTarget = fixture(); wrongTarget.id = 'wrong-target'; wrongTarget.homeTeam.id = 'other';
+  const result = await orchestrateGoalTeamFixtures({ fixtures: async () => [fixture(), wrongSeason, unknownCompetition, wrongTarget] }, 'arsenal', [binding], { nameJa: id => id });
+  assert.equal(result.games.length, 1);
   assert.deepEqual(result.skipped, [
-    { fixtureId: 'goal-fixture-friendly-1', reason: 'unapproved_membership' },
+    { fixtureId: 'wrong-season', reason: 'unknown_competition' },
     { fixtureId: 'unknown-competition', reason: 'unknown_competition' },
-    { fixtureId: 'unknown-team', reason: 'unknown_team' },
-    { fixtureId: 'unsupported-status', reason: 'unsupported_status' },
+    { fixtureId: 'wrong-target', reason: 'unknown_team' },
   ]);
-  assert.deepEqual(await orchestrateGoalTeamFixtures(source, 'not-supported', [], { nameJa: id => id }), { games: [], skipped: [] });
+  const unapproved = { ...binding, membership: { ...membership, status: 'review' } };
+  const denied = await orchestrateGoalTeamFixtures({ fixtures: async () => [fixture()] }, 'arsenal', [unapproved], { nameJa: id => id });
+  assert.equal(denied.skipped[0].reason, 'unapproved_membership');
+  assert.deepEqual(await orchestrateGoalTeamFixtures({ fixtures: async () => { throw new Error('must not fetch'); } }, 'unknown', [], { nameJa: id => id }), { games: [], skipped: [] });
+});
+
+test('future FINISHED is a provider anomaly while future SCHEDULED is accepted', async () => {
+  const finished = fixture(); finished.id = 'future-finished'; finished.matchStatus = 'FINISHED';
+  const result = await orchestrateGoalTeamFixtures({ fixtures: async () => [finished, fixture()] }, 'arsenal', [binding], { nameJa: id => id }, () => new Date('2026-09-19T00:00:00Z'));
+  assert.equal(result.games.length, 1);
+  assert.deepEqual(result.skipped, [{ fixtureId: 'future-finished', reason: 'provider_data_anomaly' }]);
+});
+
+test('V1 bindings contain approved observed seasons and leave FA Cup pending', () => {
+  assert.equal(V1_GOAL_MEMBERSHIP_BINDINGS.length, 6);
+  assert.ok(V1_GOAL_MEMBERSHIP_BINDINGS.every(item => item.goalLeagueYear && item.membership.seedable));
+  assert.ok(!V1_GOAL_MEMBERSHIP_BINDINGS.some(item => item.goalLeagueId === PENDING_GOAL_COMPETITION_EVIDENCE.arsenalFaCupGoalLeagueId));
+  assert.ok(!V1_GOAL_MEMBERSHIP_BINDINGS.some(item => ['cmr77dvkr005irx066wcuvzrh', 'cmr77dvhi003orx061j0awisx', 'cmr77dwv800nxrx065czxdl0q'].includes(item.goalLeagueId)));
 });

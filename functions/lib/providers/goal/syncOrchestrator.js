@@ -5,29 +5,36 @@ const goalFootballAdapter_1 = require("../../adapters/goalFootballAdapter");
 const competitionSeasonMembership_1 = require("../../domain/competitionSeasonMembership");
 const teamIdentity_1 = require("./teamIdentity");
 /** Fetches and normalizes one supported team's fixtures without persistence. */
-async function orchestrateGoalTeamFixtures(source, internalTeamId, bindings, names) {
+async function orchestrateGoalTeamFixtures(source, internalTeamId, bindings, names, now = () => new Date()) {
     const providerTeamId = (0, teamIdentity_1.goalTeamIdForInternalTeam)(internalTeamId);
     if (!providerTeamId)
         return { games: [], skipped: [] };
     const fixtures = await source.fixtures(providerTeamId);
     const result = { games: [], skipped: [] };
     for (const fixture of fixtures) {
-        const binding = bindings.find((item) => item.goalLeagueId === fixture.league.id);
+        if (fixture.homeTeam.id !== providerTeamId && fixture.awayTeam.id !== providerTeamId) {
+            result.skipped.push({ fixtureId: fixture.id, reason: "unknown_team" });
+            continue;
+        }
+        const binding = bindings.find((item) => item.goalLeagueId === fixture.league.id &&
+            item.goalLeagueYear === fixture.leagueYear);
         if (!binding) {
             result.skipped.push({ fixtureId: fixture.id, reason: "unknown_competition" });
             continue;
         }
         const homeTeamId = (0, teamIdentity_1.internalTeamIdForGoalTeam)(fixture.homeTeam.id);
         const awayTeamId = (0, teamIdentity_1.internalTeamIdForGoalTeam)(fixture.awayTeam.id);
-        if (!homeTeamId || !awayTeamId) {
-            result.skipped.push({ fixtureId: fixture.id, reason: "unknown_team" });
-            continue;
-        }
         const membership = binding.membership;
         const members = (0, competitionSeasonMembership_1.teamIdsForMembership)(membership);
         if (membership.status === "review" || !membership.seedable ||
-            !members.includes(homeTeamId) || !members.includes(awayTeamId)) {
+            !members.includes(internalTeamId)) {
             result.skipped.push({ fixtureId: fixture.id, reason: "unapproved_membership" });
+            continue;
+        }
+        const kickoff = new Date(fixture.kickoffUtc);
+        if (fixture.matchStatus !== "SCHEDULED" && Number.isFinite(kickoff.getTime()) &&
+            kickoff.getTime() > now().getTime() + 5 * 60 * 1000) {
+            result.skipped.push({ fixtureId: fixture.id, reason: "provider_data_anomaly" });
             continue;
         }
         try {
@@ -37,8 +44,8 @@ async function orchestrateGoalTeamFixtures(source, internalTeamId, bindings, nam
                 leagueId: binding.leagueId,
                 homeTeamId,
                 awayTeamId,
-                homeTeamNameJa: names.nameJa(homeTeamId),
-                awayTeamNameJa: names.nameJa(awayTeamId),
+                homeTeamNameJa: homeTeamId ? names.nameJa(homeTeamId) : fixture.homeTeam.name,
+                awayTeamNameJa: awayTeamId ? names.nameJa(awayTeamId) : fixture.awayTeam.name,
             }));
         }
         catch (error) {

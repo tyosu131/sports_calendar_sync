@@ -39,6 +39,7 @@ async function buildPersonalizedCalendar(repository, token, requestedTeamId) {
     const games = await repository.findCalendarGamesForTeams(teamIds);
     // Repository queries are an optimization, never an authorization boundary.
     // Reapply membership here so an over-broad adapter cannot leak fixtures.
-    return (0, icsBuilder_1.buildCalendar)(games.filter((game) => allowed.has(game.homeTeamId) || allowed.has(game.awayTeamId)));
+    return (0, icsBuilder_1.buildCalendar)(games.filter((game) => (game.homeTeamId !== undefined && allowed.has(game.homeTeamId)) ||
+        (game.awayTeamId !== undefined && allowed.has(game.awayTeamId))));
 }
 //# sourceMappingURL=personalizedCalendar.js.map

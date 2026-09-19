@@ -1,5 +1,6 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
+const { Timestamp } = require("firebase-admin/firestore");
 const {
   CalendarFeedNotFoundError,
   CalendarTeamNotFollowedError,
@@ -7,6 +8,7 @@ const {
 } = require("../lib/calendar/personalizedCalendar");
 const {
   CALENDAR_LOOKBACK_DAYS,
+  asNormalizedGame,
   calendarWindowStart,
   serveCalendar,
 } = require("../lib/functions/getCalendar");
@@ -17,8 +19,8 @@ function game(id, homeTeamId, awayTeamId) {
     kickoffUtc: new Date("2026-10-01T10:00:00Z"),
     homeTeamId,
     awayTeamId,
-    homeTeamName: homeTeamId,
-    awayTeamName: awayTeamId,
+    homeTeamName: homeTeamId ?? "Unmapped Home",
+    awayTeamName: awayTeamId ?? "Unmapped Away",
     status: "scheduled",
   };
 }
@@ -54,6 +56,42 @@ test("membership filtering excludes games unrelated to followed teams", async ()
   assert.match(calendar, /UID:included-home@/);
   assert.match(calendar, /UID:included-away@/);
   assert.doesNotMatch(calendar, /not-a-member/);
+});
+
+test("personalized filtering includes either mapped side and fails closed otherwise", async () => {
+  const calendar = await buildPersonalizedCalendar(repository({
+    findUser: async () => ({ followedTeamIds: ["arsenal"] }),
+    findCalendarGamesForTeams: async () => [
+      game("arsenal-home", "arsenal", undefined),
+      game("arsenal-away", undefined, "arsenal"),
+      game("neither-mapped", undefined, undefined),
+      game("mapped-not-followed", "brighton", undefined),
+    ],
+  }), "secret");
+  assert.match(calendar, /UID:arsenal-home@/);
+  assert.match(calendar, /UID:arsenal-away@/);
+  assert.doesNotMatch(calendar, /neither-mapped/);
+  assert.doesNotMatch(calendar, /mapped-not-followed/);
+});
+
+test("Firestore normalization accepts one canonical side and rejects invalid identity", () => {
+  const base = {
+    startTimeUTC: Timestamp.fromDate(new Date("2026-10-01T10:00:00Z")),
+    homeTeamNameJa: "Opponent FC",
+    awayTeamNameJa: "アーセナル",
+    status: "scheduled",
+  };
+  const awayMapped = asNormalizedGame("away-mapped", { ...base, awayTeamId: "arsenal" });
+  assert.equal(awayMapped.homeTeamId, undefined);
+  assert.equal(awayMapped.awayTeamId, "arsenal");
+  const homeMapped = asNormalizedGame("home-mapped", {
+    ...base, homeTeamId: "arsenal", homeTeamNameJa: "アーセナル", awayTeamNameJa: "Opponent FC",
+  });
+  assert.equal(homeMapped.homeTeamId, "arsenal");
+  assert.equal(homeMapped.awayTeamId, undefined);
+  assert.throws(() => asNormalizedGame("neither", base), /invalid team identity/);
+  assert.throws(() => asNormalizedGame("empty", { ...base, awayTeamId: " " }), /invalid team identity/);
+  assert.throws(() => asNormalizedGame("wrong-type", { ...base, homeTeamId: 7 }), /invalid team identity/);
 });
 
 test("team feed must be a member of the owner's canonical follows", async () => {

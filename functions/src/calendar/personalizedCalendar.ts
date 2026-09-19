@@ -11,8 +11,8 @@ export interface CalendarUser {
 }
 
 export interface NormalizedGame extends CalendarGame {
-  homeTeamId: string;
-  awayTeamId: string;
+  homeTeamId?: string;
+  awayTeamId?: string;
 }
 
 export interface PersonalizedCalendarRepository {
@@ -59,6 +59,7 @@ export async function buildPersonalizedCalendar(
   // Repository queries are an optimization, never an authorization boundary.
   // Reapply membership here so an over-broad adapter cannot leak fixtures.
   return buildCalendar(games.filter((game) =>
-    allowed.has(game.homeTeamId) || allowed.has(game.awayTeamId)
+    (game.homeTeamId !== undefined && allowed.has(game.homeTeamId)) ||
+    (game.awayTeamId !== undefined && allowed.has(game.awayTeamId))
   ));
 }

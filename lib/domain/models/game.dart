@@ -58,9 +58,11 @@ class Game {
   const Game({
     required this.id,
     required this.leagueId,
-    required this.homeTeamId,
+    this.homeTeamId,
+    this.homeSourceTeamId,
     required this.homeTeamNameJa,
-    required this.awayTeamId,
+    this.awayTeamId,
+    this.awaySourceTeamId,
     required this.awayTeamNameJa,
     required this.startTimeUtc,
     required this.startTimeJst,
@@ -78,6 +80,8 @@ class Game {
     this.broadcastPlatforms = const [],
     this.externalFixtureId,
     @Deprecated('Use externalFixtureId') this.rapidApiFixtureId,
+    this.sourceProvider,
+    this.sourceFixtureId,
   });
 
   final String id;
@@ -94,9 +98,11 @@ class Game {
   final String? competitionSeasonKey;
 
   final String leagueId;
-  final String homeTeamId;
+  final String? homeTeamId;
+  final String? homeSourceTeamId;
   final String homeTeamNameJa;
-  final String awayTeamId;
+  final String? awayTeamId;
+  final String? awaySourceTeamId;
   final String awayTeamNameJa;
 
   /// English team name — used as translation fallback and in English UI.
@@ -131,6 +137,10 @@ class Game {
   // ignore: deprecated_member_use_from_same_package
   final int? rapidApiFixtureId;
 
+  /// Provider-neutral fixture identity used by non-API-Football sources.
+  final String? sourceProvider;
+  final String? sourceFixtureId;
+
   factory Game.fromFirestore(Map<String, dynamic> data, String docId) {
     final broadcastList = (data['broadcastPlatforms'] as List<dynamic>? ?? [])
         .map((e) => BroadcastInfo.fromMap(e as Map<String, dynamic>))
@@ -146,9 +156,11 @@ class Game {
       competitionKey: competitionKey,
       competitionSeasonKey: data['competitionSeasonKey'] as String?,
       leagueId: data['leagueId'] as String,
-      homeTeamId: data['homeTeamId'] as String,
+      homeTeamId: data['homeTeamId'] as String?,
+      homeSourceTeamId: data['homeSourceTeamId'] as String?,
       homeTeamNameJa: data['homeTeamNameJa'] as String,
-      awayTeamId: data['awayTeamId'] as String,
+      awayTeamId: data['awayTeamId'] as String?,
+      awaySourceTeamId: data['awaySourceTeamId'] as String?,
       awayTeamNameJa: data['awayTeamNameJa'] as String,
       homeTeamNameEn: data['homeTeamNameEn'] as String?,
       awayTeamNameEn: data['awayTeamNameEn'] as String?,
@@ -169,6 +181,8 @@ class Game {
           data['rapidApiFixtureId'] as int?,
       // ignore: deprecated_member_use_from_same_package
       rapidApiFixtureId: data['rapidApiFixtureId'] as int?,
+      sourceProvider: data['sourceProvider'] as String?,
+      sourceFixtureId: data['sourceFixtureId'] as String?,
     );
   }
 
@@ -180,9 +194,11 @@ class Game {
       // Legacy alias — kept so existing queries on `sportKey` still work.
       if (competitionKey != null) 'sportKey': competitionKey,
       'leagueId': leagueId,
-      'homeTeamId': homeTeamId,
+      if (homeTeamId != null) 'homeTeamId': homeTeamId,
+      if (homeSourceTeamId != null) 'homeSourceTeamId': homeSourceTeamId,
       'homeTeamNameJa': homeTeamNameJa,
-      'awayTeamId': awayTeamId,
+      if (awayTeamId != null) 'awayTeamId': awayTeamId,
+      if (awaySourceTeamId != null) 'awaySourceTeamId': awaySourceTeamId,
       'awayTeamNameJa': awayTeamNameJa,
       if (homeTeamNameEn != null) 'homeTeamNameEn': homeTeamNameEn,
       if (awayTeamNameEn != null) 'awayTeamNameEn': awayTeamNameEn,
@@ -199,6 +215,8 @@ class Game {
       if (externalFixtureId != null) 'externalFixtureId': externalFixtureId,
       // Legacy alias.
       if (externalFixtureId != null) 'rapidApiFixtureId': externalFixtureId,
+      if (sourceProvider != null) 'sourceProvider': sourceProvider,
+      if (sourceFixtureId != null) 'sourceFixtureId': sourceFixtureId,
     };
   }
 

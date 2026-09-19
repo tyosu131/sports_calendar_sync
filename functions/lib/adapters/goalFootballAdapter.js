@@ -22,20 +22,25 @@ function adaptGoalFixtureToGameDoc(fixture, context) {
         competitionSeasonKey: context.competitionSeasonKey,
         sportKey: context.competitionKey,
         leagueId: context.leagueId,
-        homeTeamId: context.homeTeamId,
+        ...(context.homeTeamId ? { homeTeamId: context.homeTeamId } : {}),
+        homeSourceTeamId: fixture.homeTeam.id,
         homeTeamNameJa: context.homeTeamNameJa,
         homeTeamNameEn: fixture.homeTeam.name,
-        awayTeamId: context.awayTeamId,
+        ...(context.awayTeamId ? { awayTeamId: context.awayTeamId } : {}),
+        awaySourceTeamId: fixture.awayTeam.id,
         awayTeamNameJa: context.awayTeamNameJa,
         awayTeamNameEn: fixture.awayTeam.name,
         startTimeUTC: firestore_1.Timestamp.fromDate(utc),
         startTimeJST: (0, timezone_1.toJstStorageString)(fixture.kickoffUtc),
         timezone: "UTC",
         status: "scheduled",
-        venue: fixture.venue ?? undefined,
+        venue: nonEmpty(fixture.venue) ?? nonEmpty(fixture.matchStadium),
         broadcastPlatforms: [],
         sourceProvider: "goal",
         sourceFixtureId: fixture.id,
     };
+}
+function nonEmpty(value) {
+    return typeof value === "string" && value.trim().length > 0 ? value : undefined;
 }
 //# sourceMappingURL=goalFootballAdapter.js.map

@@ -25,12 +25,49 @@ class GoalApiClient {
             throw new Error("GOAL API key is required");
     }
     fixtures(teamId) {
-        return this.fetch(`/teams/${encodeURIComponent(teamId)}/fixtures`);
+        return this.fixturesAll(teamId);
+    }
+    async fixturesPage(teamId, options) {
+        const query = `limit=${encodeURIComponent(options.limit)}&offset=${encodeURIComponent(options.offset)}`;
+        const body = await this.request(`/teams/${encodeURIComponent(teamId)}/fixtures?${query}`);
+        const pagination = body.pagination;
+        if (!isPagination(pagination)) {
+            throw new GoalApiError("invalid_response", "GOAL fixtures response did not contain valid pagination");
+        }
+        return { fixtures: this.parseFixtures(body), pagination };
+    }
+    async fixturesAll(teamId, limit = 100, maxPages = 100) {
+        const byId = new Map();
+        let offset = 0;
+        for (let page = 0; page < maxPages; page += 1) {
+            const result = await this.fixturesPage(teamId, { limit, offset });
+            for (const fixture of result.fixtures)
+                byId.set(fixture.id, fixture);
+            if (!result.pagination.hasMore)
+                return [...byId.values()];
+            const nextOffset = result.pagination.offset + result.pagination.limit;
+            if (result.pagination.limit <= 0 || nextOffset <= offset) {
+                throw new GoalApiError("invalid_response", "GOAL fixtures pagination made no progress");
+            }
+            offset = nextOffset;
+        }
+        throw new GoalApiError("invalid_response", "GOAL fixtures pagination exceeded maximum pages");
     }
     upcoming(teamId) {
         return this.fetch(`/teams/${encodeURIComponent(teamId)}/upcoming`);
     }
     async fetch(path) {
+        return this.parseFixtures(await this.request(path));
+    }
+    parseFixtures(body) {
+        const envelope = body;
+        if (envelope.success !== true || !Array.isArray(envelope.data) ||
+            !envelope.data.every(isGoalFixture)) {
+            throw new GoalApiError("invalid_response", "GOAL response did not contain valid fixtures");
+        }
+        return envelope.data;
+    }
+    async request(path) {
         try {
             const response = await this.http.get(`${BASE_URL}${path}`, {
                 headers: { Authorization: `Bearer ${this.apiKey}` },
@@ -40,12 +77,7 @@ class GoalApiClient {
             if (!body || typeof body !== "object") {
                 throw new GoalApiError("invalid_response", "GOAL response did not contain valid fixtures");
             }
-            const envelope = body;
-            if (envelope.success !== true || !Array.isArray(envelope.data) ||
-                !envelope.data.every(isGoalFixture)) {
-                throw new GoalApiError("invalid_response", "GOAL response did not contain valid fixtures");
-            }
-            return envelope.data;
+            return body;
         }
         catch (error) {
             if (error instanceof GoalApiError)
@@ -71,7 +103,16 @@ function isGoalFixture(value) {
         typeof value.name === "string";
     return typeof fixture.id === "string" && typeof fixture.kickoffUtc === "string" &&
         typeof fixture.matchStatus === "string" && team(fixture.league) &&
+        typeof fixture.leagueYear === "string" &&
         team(fixture.homeTeam) && team(fixture.awayTeam) &&
-        (fixture.venue === null || typeof fixture.venue === "string");
+        (fixture.venue === undefined || fixture.venue === null || typeof fixture.venue === "string") &&
+        (fixture.matchStadium === undefined || fixture.matchStadium === null || typeof fixture.matchStadium === "string");
+}
+function isPagination(value) {
+    if (!value || typeof value !== "object")
+        return false;
+    const page = value;
+    return Number.isInteger(page.total) && Number.isInteger(page.limit) &&
+        Number.isInteger(page.offset) && typeof page.hasMore === "boolean";
 }
 //# sourceMappingURL=goalApiClient.js.map

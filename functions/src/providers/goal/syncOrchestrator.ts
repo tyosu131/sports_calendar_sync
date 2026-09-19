@@ -11,6 +11,7 @@ export interface GoalFixtureSource {
 export interface GoalMembershipBinding {
   membership: CompetitionSeasonMembership;
   goalLeagueId: string;
+  goalLeagueYear: string;
   leagueId: string;
 }
 
@@ -18,7 +19,8 @@ export type GoalSkipReason =
   | "unknown_competition"
   | "unknown_team"
   | "unapproved_membership"
-  | "unsupported_status";
+  | "unsupported_status"
+  | "provider_data_anomaly";
 
 export interface GoalSyncResult {
   games: GameDoc[];
@@ -34,7 +36,8 @@ export async function orchestrateGoalTeamFixtures(
   source: GoalFixtureSource,
   internalTeamId: string,
   bindings: readonly GoalMembershipBinding[],
-  names: TeamNames
+  names: TeamNames,
+  now: () => Date = () => new Date()
 ): Promise<GoalSyncResult> {
   const providerTeamId = goalTeamIdForInternalTeam(internalTeamId);
   if (!providerTeamId) return { games: [], skipped: [] };
@@ -42,22 +45,29 @@ export async function orchestrateGoalTeamFixtures(
   const fixtures = await source.fixtures(providerTeamId);
   const result: GoalSyncResult = { games: [], skipped: [] };
   for (const fixture of fixtures) {
-    const binding = bindings.find((item) => item.goalLeagueId === fixture.league.id);
+    if (fixture.homeTeam.id !== providerTeamId && fixture.awayTeam.id !== providerTeamId) {
+      result.skipped.push({ fixtureId: fixture.id, reason: "unknown_team" });
+      continue;
+    }
+    const binding = bindings.find((item) => item.goalLeagueId === fixture.league.id &&
+      item.goalLeagueYear === fixture.leagueYear);
     if (!binding) {
       result.skipped.push({ fixtureId: fixture.id, reason: "unknown_competition" });
       continue;
     }
     const homeTeamId = internalTeamIdForGoalTeam(fixture.homeTeam.id);
     const awayTeamId = internalTeamIdForGoalTeam(fixture.awayTeam.id);
-    if (!homeTeamId || !awayTeamId) {
-      result.skipped.push({ fixtureId: fixture.id, reason: "unknown_team" });
-      continue;
-    }
     const membership = binding.membership;
     const members = teamIdsForMembership(membership);
     if (membership.status === "review" || !membership.seedable ||
-        !members.includes(homeTeamId) || !members.includes(awayTeamId)) {
+        !members.includes(internalTeamId)) {
       result.skipped.push({ fixtureId: fixture.id, reason: "unapproved_membership" });
+      continue;
+    }
+    const kickoff = new Date(fixture.kickoffUtc);
+    if (fixture.matchStatus !== "SCHEDULED" && Number.isFinite(kickoff.getTime()) &&
+        kickoff.getTime() > now().getTime() + 5 * 60 * 1000) {
+      result.skipped.push({ fixtureId: fixture.id, reason: "provider_data_anomaly" });
       continue;
     }
     try {
@@ -67,8 +77,8 @@ export async function orchestrateGoalTeamFixtures(
         leagueId: binding.leagueId,
         homeTeamId,
         awayTeamId,
-        homeTeamNameJa: names.nameJa(homeTeamId),
-        awayTeamNameJa: names.nameJa(awayTeamId),
+        homeTeamNameJa: homeTeamId ? names.nameJa(homeTeamId) : fixture.homeTeam.name,
+        awayTeamNameJa: awayTeamId ? names.nameJa(awayTeamId) : fixture.awayTeam.name,
       }));
     } catch (error: unknown) {
       if (error instanceof UnsupportedGoalStatusError) {
