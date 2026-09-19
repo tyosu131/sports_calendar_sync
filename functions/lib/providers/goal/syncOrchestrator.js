@@ -4,6 +4,7 @@ exports.orchestrateGoalTeamFixtures = orchestrateGoalTeamFixtures;
 const goalFootballAdapter_1 = require("../../adapters/goalFootballAdapter");
 const competitionSeasonMembership_1 = require("../../domain/competitionSeasonMembership");
 const teamIdentity_1 = require("./teamIdentity");
+const statusPolicy_1 = require("./statusPolicy");
 /** Fetches and normalizes one supported team's fixtures without persistence. */
 async function orchestrateGoalTeamFixtures(source, internalTeamId, bindings, names, now = () => new Date()) {
     const providerTeamId = (0, teamIdentity_1.goalTeamIdForInternalTeam)(internalTeamId);
@@ -31,9 +32,7 @@ async function orchestrateGoalTeamFixtures(source, internalTeamId, bindings, nam
             result.skipped.push({ fixtureId: fixture.id, reason: "unapproved_membership" });
             continue;
         }
-        const kickoff = new Date(fixture.kickoffUtc);
-        if (fixture.matchStatus !== "SCHEDULED" && Number.isFinite(kickoff.getTime()) &&
-            kickoff.getTime() > now().getTime() + 5 * 60 * 1000) {
+        if ((0, statusPolicy_1.isGoalTemporalAnomaly)(fixture.matchStatus, fixture.kickoffUtc, now())) {
             result.skipped.push({ fixtureId: fixture.id, reason: "provider_data_anomaly" });
             continue;
         }

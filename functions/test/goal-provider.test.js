@@ -5,6 +5,8 @@ const { test } = require('node:test');
 const payload = require('./fixtures/goal/team-fixtures.json');
 const { GoalApiClient, GoalApiError } = require('../lib/providers/goal/goalApiClient');
 const { adaptGoalFixtureToGameDoc, UnsupportedGoalStatusError } = require('../lib/adapters/goalFootballAdapter');
+const { stableGoalGameId, persistGoalWrites, syncGoalV1Fixtures } = require('../lib/pipelines/syncGoalV1');
+const { V1_GOAL_MEMBERSHIPS } = require('../lib/config/v1GoalMemberships');
 const { internalTeamIdForGoalTeam } = require('../lib/providers/goal/teamIdentity');
 const { orchestrateGoalTeamFixtures } = require('../lib/providers/goal/syncOrchestrator');
 const { V1_GOAL_MEMBERSHIP_BINDINGS, PENDING_GOAL_COMPETITION_EVIDENCE } = require('../lib/providers/goal/v1CompetitionBindings');
@@ -91,13 +93,24 @@ test('adapter applies venue then matchStadium fallback and accepts null stadium'
   assert.equal(adaptGoalFixtureToGameDoc(nullStadium, context).venue, undefined);
 });
 
-test('adapter preserves identity across kickoff changes and only maps SCHEDULED', () => {
+test('adapter maps every supported lifecycle status and stable identity ignores mutable fields', () => {
   const input = fixture();
   const first = adaptGoalFixtureToGameDoc(input, context);
+  const id = stableGoalGameId(input.id);
   input.kickoffUtc = '2026-09-21T15:30:00Z';
   assert.equal(adaptGoalFixtureToGameDoc(input, context).sourceFixtureId, first.sourceFixtureId);
-  input.matchStatus = 'FINISHED';
-  assert.throws(() => adaptGoalFixtureToGameDoc(input, context), UnsupportedGoalStatusError);
+  assert.equal(stableGoalGameId(input.id), id);
+  const expected = { SCHEDULED: 'scheduled', LIVE: 'live', HALF_TIME: 'live', FINISHED: 'finished',
+    AFTER_ET: 'finished', AFTER_PEN: 'finished', POSTPONED: 'postponed', CANCELLED: 'cancelled' };
+  for (const [provider, canonical] of Object.entries(expected)) {
+    input.matchStatus = provider;
+    assert.equal(adaptGoalFixtureToGameDoc(input, context).status, canonical);
+    assert.equal(stableGoalGameId(input.id), id);
+  }
+  for (const status of ['AWARDED', 'ABANDONED', 'SUSPENDED', 'FUTURE_VALUE']) {
+    input.matchStatus = status;
+    assert.throws(() => adaptGoalFixtureToGameDoc(input, context), UnsupportedGoalStatusError);
+  }
 });
 
 test('GOAL IDs resolve only known stable internal teams', () => {
@@ -132,11 +145,47 @@ test('orchestration is season-aware, competition-aware, target-aware, and member
   assert.deepEqual(await orchestrateGoalTeamFixtures({ fixtures: async () => { throw new Error('must not fetch'); } }, 'unknown', [], { nameJa: id => id }), { games: [], skipped: [] });
 });
 
-test('future FINISHED is a provider anomaly while future SCHEDULED is accepted', async () => {
+test('future active/finished is anomalous while future cancelled and postponed are accepted', async () => {
   const finished = fixture(); finished.id = 'future-finished'; finished.matchStatus = 'FINISHED';
-  const result = await orchestrateGoalTeamFixtures({ fixtures: async () => [finished, fixture()] }, 'arsenal', [binding], { nameJa: id => id }, () => new Date('2026-09-19T00:00:00Z'));
-  assert.equal(result.games.length, 1);
+  const cancelled = fixture(); cancelled.id = 'future-cancelled'; cancelled.matchStatus = 'CANCELLED';
+  const postponed = fixture(); postponed.id = 'future-postponed'; postponed.matchStatus = 'POSTPONED';
+  const result = await orchestrateGoalTeamFixtures({ fixtures: async () => [finished, cancelled, postponed] }, 'arsenal', [binding], { nameJa: id => id }, () => new Date('2026-09-19T00:00:00Z'));
+  assert.deepEqual(result.games.map(game => game.status), ['cancelled', 'postponed']);
   assert.deepEqual(result.skipped, [{ fixtureId: 'future-finished', reason: 'provider_data_anomaly' }]);
+});
+
+test('fresh write batches are used after chunk commits', async () => {
+  const batches = [];
+  const persistence = { gameRef: id => id, newBatch: () => {
+    const batch = { committed: false, writes: [], set(ref) { assert.equal(this.committed, false); this.writes.push(ref); },
+      delete() {}, async commit() { assert.equal(this.committed, false); this.committed = true; } };
+    batches.push(batch); return batch;
+  } };
+  const game = adaptGoalFixtureToGameDoc(fixture(), context);
+  await persistGoalWrites(persistence, Array.from({ length: 5 }, (_, i) => ({ kind: 'set', id: `${i}`, game })), 2);
+  assert.deepEqual(batches.map(batch => batch.writes.length), [2, 2, 1]);
+  assert.ok(batches.every(batch => batch.committed));
+});
+
+test('pipeline deduplicates cross-target fixture and unsupported state deletes stable document', async () => {
+  const input = fixture();
+  // Use real active binding identifiers so persistence boundary is exercised.
+  input.league.id = V1_GOAL_MEMBERSHIP_BINDINGS[3].goalLeagueId;
+  input.leagueYear = V1_GOAL_MEMBERSHIP_BINDINGS[3].goalLeagueYear;
+  const writes = [];
+  const persistence = { gameRef: id => id, newBatch: () => ({
+    set: (ref, game, options) => writes.push({ kind: 'set', ref, game, options }),
+    delete: ref => writes.push({ kind: 'delete', ref }), commit: async () => {},
+  }) };
+  const source = { fixtures: async () => [structuredClone(input)] };
+  const summary = await syncGoalV1Fixtures('test', { source, persistence, targets: ['arsenal', 'arsenal'],
+    names: { nameJa: id => id }, now: () => new Date('2026-09-19T00:00:00Z') });
+  assert.equal(summary.duplicates, 1);
+  assert.equal(writes.length, 1);
+  assert.deepEqual(writes[0].options, { merge: true });
+  writes.length = 0; input.matchStatus = 'AWARDED';
+  await syncGoalV1Fixtures('test', { source, persistence, targets: ['arsenal'], names: { nameJa: id => id } });
+  assert.deepEqual(writes, [{ kind: 'delete', ref: stableGoalGameId(input.id) }]);
 });
 
 test('V1 bindings contain approved observed seasons and leave FA Cup pending', () => {
@@ -144,4 +193,8 @@ test('V1 bindings contain approved observed seasons and leave FA Cup pending', (
   assert.ok(V1_GOAL_MEMBERSHIP_BINDINGS.every(item => item.goalLeagueYear && item.membership.seedable));
   assert.ok(!V1_GOAL_MEMBERSHIP_BINDINGS.some(item => item.goalLeagueId === PENDING_GOAL_COMPETITION_EVIDENCE.arsenalFaCupGoalLeagueId));
   assert.ok(!V1_GOAL_MEMBERSHIP_BINDINGS.some(item => ['cmr77dvkr005irx066wcuvzrh', 'cmr77dvhi003orx061j0awisx', 'cmr77dwv800nxrx065czxdl0q'].includes(item.goalLeagueId)));
+  assert.equal(V1_GOAL_MEMBERSHIP_BINDINGS[0].membership, V1_GOAL_MEMBERSHIPS.j1);
+  assert.deepEqual(V1_GOAL_MEMBERSHIPS.jLeagueCup.membershipType, 'cup');
+  assert.deepEqual(V1_GOAL_MEMBERSHIPS.emperorCup.membershipType, 'cup');
+  assert.deepEqual(V1_GOAL_MEMBERSHIPS.leagueCup.membershipType, 'cup');
 });

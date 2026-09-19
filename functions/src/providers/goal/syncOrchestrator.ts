@@ -2,6 +2,7 @@ import { adaptGoalFixtureToGameDoc, UnsupportedGoalStatusError } from "../../ada
 import { CompetitionSeasonMembership, teamIdsForMembership } from "../../domain/competitionSeasonMembership";
 import { GameDoc, GoalFixture } from "../../types";
 import { goalTeamIdForInternalTeam, internalTeamIdForGoalTeam } from "./teamIdentity";
+import { isGoalTemporalAnomaly } from "./statusPolicy";
 
 export interface GoalFixtureSource {
   fixtures(teamId: string): Promise<GoalFixture[]>;
@@ -64,9 +65,7 @@ export async function orchestrateGoalTeamFixtures(
       result.skipped.push({ fixtureId: fixture.id, reason: "unapproved_membership" });
       continue;
     }
-    const kickoff = new Date(fixture.kickoffUtc);
-    if (fixture.matchStatus !== "SCHEDULED" && Number.isFinite(kickoff.getTime()) &&
-        kickoff.getTime() > now().getTime() + 5 * 60 * 1000) {
+    if (isGoalTemporalAnomaly(fixture.matchStatus, fixture.kickoffUtc, now())) {
       result.skipped.push({ fixtureId: fixture.id, reason: "provider_data_anomaly" });
       continue;
     }

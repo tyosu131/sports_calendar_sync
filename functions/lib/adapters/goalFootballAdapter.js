@@ -4,6 +4,7 @@ exports.UnsupportedGoalStatusError = void 0;
 exports.adaptGoalFixtureToGameDoc = adaptGoalFixtureToGameDoc;
 const firestore_1 = require("firebase-admin/firestore");
 const timezone_1 = require("../utils/timezone");
+const statusPolicy_1 = require("../providers/goal/statusPolicy");
 class UnsupportedGoalStatusError extends Error {
     constructor(providerStatus) {
         super(`Unsupported GOAL match status: ${providerStatus}`);
@@ -14,7 +15,8 @@ class UnsupportedGoalStatusError extends Error {
 exports.UnsupportedGoalStatusError = UnsupportedGoalStatusError;
 /** GOAL fixture to canonical GameDoc. Only an evidenced status is accepted. */
 function adaptGoalFixtureToGameDoc(fixture, context) {
-    if (fixture.matchStatus !== "SCHEDULED")
+    const status = (0, statusPolicy_1.goalGameStatus)(fixture.matchStatus);
+    if (!status)
         throw new UnsupportedGoalStatusError(fixture.matchStatus);
     const utc = (0, timezone_1.toUtcDate)(fixture.kickoffUtc);
     return {
@@ -33,7 +35,7 @@ function adaptGoalFixtureToGameDoc(fixture, context) {
         startTimeUTC: firestore_1.Timestamp.fromDate(utc),
         startTimeJST: (0, timezone_1.toJstStorageString)(fixture.kickoffUtc),
         timezone: "UTC",
-        status: "scheduled",
+        status,
         venue: nonEmpty(fixture.venue) ?? nonEmpty(fixture.matchStadium),
         broadcastPlatforms: [],
         sourceProvider: "goal",
