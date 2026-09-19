@@ -1,0 +1,22 @@
+{
+  "fixtures": [
+    {
+      "id": "goal-fixture-premier-1",
+      "kickoffUtc": "2026-09-20T15:30:00Z",
+      "matchStatus": "SCHEDULED",
+      "league": { "id": "goal-premier", "name": "Premier League" },
+      "homeTeam": { "id": "cmr7foowe2kf3rx06u6eu3rhl", "name": "Arsenal" },
+      "awayTeam": { "id": "cmr7be2nq0qkwrx06zxbqr5ux", "name": "Kawasaki Frontale" },
+      "venue": null
+    },
+    {
+      "id": "goal-fixture-friendly-1",
+      "kickoffUtc": "2026-09-27T12:00:00Z",
+      "matchStatus": "SCHEDULED",
+      "league": { "id": "goal-friendly", "name": "Club Friendlies" },
+      "homeTeam": { "id": "cmr7foowe2kf3rx06u6eu3rhl", "name": "Arsenal" },
+      "awayTeam": { "id": "cmr7be2nq0qkwrx06zxbqr5ux", "name": "Kawasaki Frontale" },
+      "venue": "Synthetic Ground"
+    }
+  ]
+}

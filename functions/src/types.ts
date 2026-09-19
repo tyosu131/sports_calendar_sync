@@ -106,6 +106,21 @@ export interface GameDoc {
   externalFixtureId?: number;
   /** @deprecated Use externalFixtureId. */
   rapidApiFixtureId?: number;
+  /** Provider-neutral source identity. New providers must preserve IDs as strings. */
+  sourceProvider?: string;
+  sourceFixtureId?: string;
+}
+
+// ── GOAL Team fixture response (sanitized/minimal contract) ──────────────────────────
+
+export interface GoalFixture {
+  id: string;
+  kickoffUtc: string;
+  matchStatus: string;
+  league: { id: string; name: string };
+  homeTeam: { id: string; name: string };
+  awayTeam: { id: string; name: string };
+  venue: string | null;
 }
 
 export interface UserDoc {
