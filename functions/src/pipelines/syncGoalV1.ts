@@ -3,6 +3,7 @@ import { GameDoc } from "../types";
 import { GoalApiClient } from "../providers/goal/goalApiClient";
 import { orchestrateGoalTeamFixtures, GoalFixtureSource, GoalSkipReason, TeamNames } from "../providers/goal/syncOrchestrator";
 import { V1_GOAL_MEMBERSHIP_BINDINGS } from "../providers/goal/v1CompetitionBindings";
+import { v1TeamNameJa } from "../providers/goal/teamIdentity";
 
 export const GOAL_WRITE_CHUNK_SIZE = 400;
 export const V1_GOAL_TARGETS = Object.freeze(["kawasaki_frontale", "arsenal"] as const);
@@ -69,7 +70,7 @@ export interface SyncGoalOptions {
 export async function syncGoalV1Fixtures(apiKey: string, options: SyncGoalOptions = {}): Promise<GoalSyncSummary> {
   const source = options.source ?? new GoalApiClient(apiKey);
   const persistence = options.persistence ?? firestorePersistence(admin.firestore());
-  const names = options.names ?? { nameJa: (id: string) => id };
+  const names = options.names ?? { nameJa: v1TeamNameJa };
   const targets = options.targets ?? V1_GOAL_TARGETS;
   const games = new Map<string, GameDoc>();
   const unsupported = new Set<string>();

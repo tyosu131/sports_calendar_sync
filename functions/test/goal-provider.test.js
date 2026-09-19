@@ -7,7 +7,7 @@ const { GoalApiClient, GoalApiError } = require('../lib/providers/goal/goalApiCl
 const { adaptGoalFixtureToGameDoc, UnsupportedGoalStatusError } = require('../lib/adapters/goalFootballAdapter');
 const { stableGoalGameId, persistGoalWrites, syncGoalV1Fixtures } = require('../lib/pipelines/syncGoalV1');
 const { V1_GOAL_MEMBERSHIPS } = require('../lib/config/v1GoalMemberships');
-const { internalTeamIdForGoalTeam } = require('../lib/providers/goal/teamIdentity');
+const { internalTeamIdForGoalTeam, v1TeamNameJa } = require('../lib/providers/goal/teamIdentity');
 const { orchestrateGoalTeamFixtures } = require('../lib/providers/goal/syncOrchestrator');
 const { V1_GOAL_MEMBERSHIP_BINDINGS, PENDING_GOAL_COMPETITION_EVIDENCE } = require('../lib/providers/goal/v1CompetitionBindings');
 
@@ -116,6 +116,48 @@ test('adapter maps every supported lifecycle status and stable identity ignores 
 test('GOAL IDs resolve only known stable internal teams', () => {
   assert.equal(internalTeamIdForGoalTeam('cmr7foowe2kf3rx06u6eu3rhl'), 'arsenal');
   assert.equal(internalTeamIdForGoalTeam('unknown'), undefined);
+  assert.equal(v1TeamNameJa('kawasaki_frontale'), '川崎フロンターレ');
+  assert.equal(v1TeamNameJa('arsenal'), 'アーセナル');
+  assert.throws(() => v1TeamNameJa('unknown'), /Missing V1 Japanese display name/);
+});
+
+test('production default names localize both V1 targets and preserve an unmapped opponent name', async () => {
+  const kawasaki = fixture();
+  kawasaki.id = 'kawasaki-default-name';
+  kawasaki.league.id = V1_GOAL_MEMBERSHIP_BINDINGS[0].goalLeagueId;
+  kawasaki.leagueYear = V1_GOAL_MEMBERSHIP_BINDINGS[0].goalLeagueYear;
+  kawasaki.homeTeam = { id: 'cmr7be2nq0qkwrx06zxbqr5ux', name: 'Kawasaki Frontale' };
+  kawasaki.awayTeam = { id: 'unmapped-j1-opponent', name: 'Provider J1 Opponent' };
+
+  const arsenal = fixture();
+  arsenal.id = 'arsenal-default-name';
+  arsenal.league.id = V1_GOAL_MEMBERSHIP_BINDINGS[3].goalLeagueId;
+  arsenal.leagueYear = V1_GOAL_MEMBERSHIP_BINDINGS[3].goalLeagueYear;
+  arsenal.homeTeam = { id: 'cmr7foowe2kf3rx06u6eu3rhl', name: 'Arsenal' };
+  arsenal.awayTeam = { id: 'unmapped-premier-opponent', name: 'Provider Premier Opponent' };
+
+  const games = [];
+  const persistence = { gameRef: id => id, newBatch: () => ({
+    set: (_ref, game) => games.push(game), delete: () => {}, commit: async () => {},
+  }) };
+  const byProviderTeam = new Map([
+    ['cmr7be2nq0qkwrx06zxbqr5ux', [kawasaki]],
+    ['cmr7foowe2kf3rx06u6eu3rhl', [arsenal]],
+  ]);
+
+  await syncGoalV1Fixtures('test', {
+    source: { fixtures: async teamId => structuredClone(byProviderTeam.get(teamId) ?? []) },
+    persistence,
+    // Deliberately omit `names`: this exercises the production resolver.
+    targets: ['kawasaki_frontale', 'arsenal'],
+  });
+
+  const kawasakiGame = games.find(game => game.sourceFixtureId === kawasaki.id);
+  const arsenalGame = games.find(game => game.sourceFixtureId === arsenal.id);
+  assert.equal(kawasakiGame.homeTeamNameJa, '川崎フロンターレ');
+  assert.equal(kawasakiGame.awayTeamNameJa, 'Provider J1 Opponent');
+  assert.equal(arsenalGame.homeTeamNameJa, 'アーセナル');
+  assert.equal(arsenalGame.awayTeamNameJa, 'Provider Premier Opponent');
 });
 
 test('known target with unknown opponent produces a Game with provider participant identity', async () => {

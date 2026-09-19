@@ -41,6 +41,7 @@ const admin = __importStar(require("firebase-admin"));
 const goalApiClient_1 = require("../providers/goal/goalApiClient");
 const syncOrchestrator_1 = require("../providers/goal/syncOrchestrator");
 const v1CompetitionBindings_1 = require("../providers/goal/v1CompetitionBindings");
+const teamIdentity_1 = require("../providers/goal/teamIdentity");
 exports.GOAL_WRITE_CHUNK_SIZE = 400;
 exports.V1_GOAL_TARGETS = Object.freeze(["kawasaki_frontale", "arsenal"]);
 function stableGoalGameId(sourceFixtureId) {
@@ -71,7 +72,7 @@ async function persistGoalWrites(persistence, writes, chunkSize = exports.GOAL_W
 async function syncGoalV1Fixtures(apiKey, options = {}) {
     const source = options.source ?? new goalApiClient_1.GoalApiClient(apiKey);
     const persistence = options.persistence ?? firestorePersistence(admin.firestore());
-    const names = options.names ?? { nameJa: (id) => id };
+    const names = options.names ?? { nameJa: teamIdentity_1.v1TeamNameJa };
     const targets = options.targets ?? exports.V1_GOAL_TARGETS;
     const games = new Map();
     const unsupported = new Set();
