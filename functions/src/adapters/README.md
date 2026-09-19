@@ -39,3 +39,9 @@ API-SPORTS football API
 ```
 
 adapter 層を挟むことで、データソースを差し替えても `GameDoc` 以降のコードは変更不要になる。
+# GOAL V1 boundary
+
+`goalFootballAdapter.ts` intentionally supports only the evidenced `SCHEDULED`
+status. Other GOAL status semantics are a known gap and are returned as an
+explicit orchestration skip; they must not default to scheduled. Provider
+adoption is not wired to the production scheduler in this wave.
