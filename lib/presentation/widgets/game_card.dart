@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/utils/date_time_utils.dart';
 import '../../domain/models/game.dart';
+import '../../domain/policies/team_display_name_policy.dart';
 
 /// Displays a single game/match as a card.
 class GameCard extends StatelessWidget {
@@ -69,7 +70,7 @@ class GameCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: _TeamSide(
-                    name: game.homeTeamNameJa,
+                    name: teamDisplayNames.homeName(game),
                     logoUrl: game.homeTeamLogoUrl,
                   ),
                 ),
@@ -79,7 +80,7 @@ class GameCard extends StatelessWidget {
                 ),
                 Expanded(
                   child: _TeamSide(
-                    name: game.awayTeamNameJa,
+                    name: teamDisplayNames.awayName(game),
                     logoUrl: game.awayTeamLogoUrl,
                   ),
                 ),

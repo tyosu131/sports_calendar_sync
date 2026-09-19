@@ -10,6 +10,7 @@ import {
   buildPersonalizedCalendar,
 } from "../calendar/personalizedCalendar";
 import { GameStatus } from "../types";
+import { displayTeamName } from "../domain/teamDisplayNamePolicy";
 
 const VALID_STATUSES = new Set<GameStatus>([
   "scheduled", "live", "finished", "postponed", "cancelled",
@@ -45,8 +46,16 @@ export function asNormalizedGame(id: string, data: DocumentData): NormalizedGame
     kickoffUtc: kickoff.toDate(),
     ...(hasHomeTeamId ? { homeTeamId: data.homeTeamId as string } : {}),
     ...(hasAwayTeamId ? { awayTeamId: data.awayTeamId as string } : {}),
-    homeTeamName: data.homeTeamNameJa,
-    awayTeamName: data.awayTeamNameJa,
+    homeTeamName: displayTeamName(data.competitionKey ?? data.sportKey, {
+      japanese: data.homeTeamNameJa,
+      english: data.homeTeamNameEn,
+      provider: data.homeTeamProviderName,
+    }),
+    awayTeamName: displayTeamName(data.competitionKey ?? data.sportKey, {
+      japanese: data.awayTeamNameJa,
+      english: data.awayTeamNameEn,
+      provider: data.awayTeamProviderName,
+    }),
     status: data.status,
     venue: typeof data.venue === "string" ? data.venue : undefined,
     broadcastPlatforms: Array.isArray(data.broadcastPlatforms) ?

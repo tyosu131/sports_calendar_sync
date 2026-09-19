@@ -1,9 +1,11 @@
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/utils/date_time_utils.dart';
 import '../../data/providers/game_providers.dart';
 import '../../domain/models/game.dart';
+import '../../domain/policies/team_display_name_policy.dart';
 
 /// In-app schedule view for followed-team games.
 ///
@@ -49,7 +51,7 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
                   constraints: BoxConstraints(minHeight: constraints.maxHeight),
                   child: Column(
                     children: [
-                      _MonthSchedulePicker(
+                      ScheduleMonthCalendar(
                         visibleMonth: visibleMonth,
                         minMonth: _minMonth(gamesByDate.keys),
                         maxMonth: _maxMonth(gamesByDate.keys),
@@ -113,8 +115,9 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
   }
 }
 
-class _MonthSchedulePicker extends StatelessWidget {
-  const _MonthSchedulePicker({
+@visibleForTesting
+class ScheduleMonthCalendar extends StatelessWidget {
+  const ScheduleMonthCalendar({
     required this.visibleMonth,
     required this.minMonth,
     required this.maxMonth,
@@ -209,25 +212,31 @@ class _MonthSchedulePicker extends StatelessWidget {
                 const SizedBox(height: 8),
                 const _WeekdayHeader(),
                 const SizedBox(height: 4),
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: days.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 7,
-                    mainAxisSpacing: 4,
-                    crossAxisSpacing: 4,
-                    mainAxisExtent: 112,
-                  ),
-                  itemBuilder: (context, index) {
-                    final date = days[index];
-                    if (date == null) return const SizedBox.shrink();
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final compact = constraints.maxWidth < 700;
+                    return GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: days.length,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 7,
+                        mainAxisSpacing: compact ? 2 : 4,
+                        crossAxisSpacing: compact ? 2 : 4,
+                        mainAxisExtent: compact ? 88 : 112,
+                      ),
+                      itemBuilder: (context, index) {
+                        final date = days[index];
+                        if (date == null) return const SizedBox.shrink();
 
-                    return _DateCell(
-                      date: date,
-                      selectedDate: selectedDate,
-                      games: gamesByDate[date] ?? const <Game>[],
-                      onTap: () => onDateSelected(date),
+                        return _DateCell(
+                          date: date,
+                          selectedDate: selectedDate,
+                          games: gamesByDate[date] ?? const <Game>[],
+                          compact: compact,
+                          onTap: () => onDateSelected(date),
+                        );
+                      },
                     );
                   },
                 ),
@@ -286,12 +295,14 @@ class _DateCell extends StatelessWidget {
     required this.date,
     required this.selectedDate,
     required this.games,
+    required this.compact,
     required this.onTap,
   });
 
   final DateTime date;
   final DateTime? selectedDate;
   final List<Game> games;
+  final bool compact;
   final VoidCallback onTap;
 
   @override
@@ -303,7 +314,6 @@ class _DateCell extends StatelessWidget {
     final isToday = _isSameDate(date, today);
     final isPast = date.isBefore(today);
     final hasGame = games.isNotEmpty;
-    final firstGame = games.isEmpty ? null : games.first;
 
     final backgroundColor = isSelected
         ? colorScheme.primary
@@ -335,7 +345,10 @@ class _DateCell extends StatelessWidget {
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+          padding: EdgeInsets.symmetric(
+            horizontal: compact ? 3 : 5,
+            vertical: compact ? 3 : 5,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -352,7 +365,7 @@ class _DateCell extends StatelessWidget {
                     ),
                   ),
                   const Spacer(),
-                  if (games.length > 1)
+                  if (games.length > 1 && !compact)
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 5,
@@ -375,14 +388,19 @@ class _DateCell extends StatelessWidget {
                     ),
                 ],
               ),
-              if (firstGame != null) ...[
+              if (games.isNotEmpty) ...[
                 const SizedBox(height: 3),
                 Expanded(
-                  child: _CalendarGamePreview(
-                    game: firstGame,
-                    foregroundColor: foregroundColor,
-                    selected: isSelected,
-                  ),
+                  child: compact
+                      ? _CompactCalendarGames(
+                          games: games,
+                          foregroundColor: foregroundColor,
+                        )
+                      : _CalendarGamePreview(
+                          game: games.first,
+                          foregroundColor: foregroundColor,
+                          selected: isSelected,
+                        ),
                 ),
               ] else
                 const Spacer(),
@@ -396,6 +414,93 @@ class _DateCell extends StatelessWidget {
   bool _isSameDate(DateTime a, DateTime b) {
     return a.year == b.year && a.month == b.month && a.day == b.day;
   }
+}
+
+class _CompactCalendarGames extends StatelessWidget {
+  const _CompactCalendarGames({
+    required this.games,
+    required this.foregroundColor,
+  });
+
+  final List<Game> games;
+  final Color foregroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final visible = games.take(2).toList();
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        for (var index = 0; index < visible.length; index++)
+          Expanded(
+            child: _CompactGameLine(
+              key: ValueKey('compact-game-${visible[index].id}'),
+              game: visible[index],
+              foregroundColor: foregroundColor,
+            ),
+          ),
+        if (games.length > 2)
+          Text(
+            '+${games.length - 2}',
+            key: const ValueKey('compact-more-games'),
+            style: TextStyle(
+              color: foregroundColor,
+              fontSize: 9,
+              fontWeight: FontWeight.bold,
+              height: 1,
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _CompactGameLine extends StatelessWidget {
+  const _CompactGameLine({
+    super.key,
+    required this.game,
+    required this.foregroundColor,
+  });
+
+  final Game game;
+  final Color foregroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final home = teamDisplayNames.homeName(game);
+    final away = teamDisplayNames.awayName(game);
+    final marker = '${_initial(home)}/${_initial(away)}';
+    final meta = _compactMeta(game);
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            marker,
+            maxLines: 1,
+            overflow: TextOverflow.clip,
+            style: TextStyle(
+              color: foregroundColor,
+              fontSize: 9,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        Text(meta, style: TextStyle(color: foregroundColor, fontSize: 8)),
+      ],
+    );
+  }
+
+  String _initial(String name) =>
+      name.isEmpty ? '?' : String.fromCharCode(name.runes.first);
+
+  String _compactMeta(Game game) => switch (game.status) {
+        GameStatus.scheduled =>
+          DateTimeUtils.formatTimeOnly(game.startTimeUtcDateTime),
+        GameStatus.live => 'LIVE',
+        GameStatus.finished => '終了',
+        GameStatus.postponed => '延期',
+        GameStatus.cancelled => '中止',
+      };
 }
 
 class _CalendarGamePreview extends StatelessWidget {
@@ -424,7 +529,7 @@ class _CalendarGamePreview extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 _MiniTeamIcon(
-                  name: game.homeTeamNameJa,
+                  name: teamDisplayNames.homeName(game),
                   logoUrl: game.homeTeamLogoUrl,
                   foregroundColor: foregroundColor,
                   selected: selected,
@@ -441,7 +546,7 @@ class _CalendarGamePreview extends StatelessWidget {
                   ),
                 ),
                 _MiniTeamIcon(
-                  name: game.awayTeamNameJa,
+                  name: teamDisplayNames.awayName(game),
                   logoUrl: game.awayTeamLogoUrl,
                   foregroundColor: foregroundColor,
                   selected: selected,
@@ -577,7 +682,7 @@ class ScheduleGameTile extends StatelessWidget {
               children: [
                 Expanded(
                   child: _TeamSide(
-                    name: game.homeTeamNameJa,
+                    name: teamDisplayNames.homeName(game),
                     logoUrl: game.homeTeamLogoUrl,
                     alignment: CrossAxisAlignment.start,
                   ),
@@ -593,7 +698,7 @@ class ScheduleGameTile extends StatelessWidget {
                 ),
                 Expanded(
                   child: _TeamSide(
-                    name: game.awayTeamNameJa,
+                    name: teamDisplayNames.awayName(game),
                     logoUrl: game.awayTeamLogoUrl,
                     alignment: CrossAxisAlignment.end,
                   ),

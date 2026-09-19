@@ -40,6 +40,7 @@ exports.serveCalendar = serveCalendar;
 const functions = __importStar(require("firebase-functions/v1"));
 const firestore_1 = require("firebase-admin/firestore");
 const personalizedCalendar_1 = require("../calendar/personalizedCalendar");
+const teamDisplayNamePolicy_1 = require("../domain/teamDisplayNamePolicy");
 const VALID_STATUSES = new Set([
     "scheduled", "live", "finished", "postponed", "cancelled",
 ]);
@@ -71,8 +72,16 @@ function asNormalizedGame(id, data) {
         kickoffUtc: kickoff.toDate(),
         ...(hasHomeTeamId ? { homeTeamId: data.homeTeamId } : {}),
         ...(hasAwayTeamId ? { awayTeamId: data.awayTeamId } : {}),
-        homeTeamName: data.homeTeamNameJa,
-        awayTeamName: data.awayTeamNameJa,
+        homeTeamName: (0, teamDisplayNamePolicy_1.displayTeamName)(data.competitionKey ?? data.sportKey, {
+            japanese: data.homeTeamNameJa,
+            english: data.homeTeamNameEn,
+            provider: data.homeTeamProviderName,
+        }),
+        awayTeamName: (0, teamDisplayNamePolicy_1.displayTeamName)(data.competitionKey ?? data.sportKey, {
+            japanese: data.awayTeamNameJa,
+            english: data.awayTeamNameEn,
+            provider: data.awayTeamProviderName,
+        }),
         status: data.status,
         venue: typeof data.venue === "string" ? data.venue : undefined,
         broadcastPlatforms: Array.isArray(data.broadcastPlatforms) ?

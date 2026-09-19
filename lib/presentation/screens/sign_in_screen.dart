@@ -1,5 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show debugPrint, kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -7,8 +7,9 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import '../../data/providers/repository_providers.dart';
+import '../../core/utils/auth_failure_message.dart';
 
-/// Sign-in screen supporting Google, Apple, and Email/Password auth.
+/// Sign-in screen supporting the V1 Google and Apple options.
 class SignInScreen extends ConsumerStatefulWidget {
   const SignInScreen({super.key});
 
@@ -59,10 +60,11 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
       if (mounted) context.go('/');
     } on FirebaseAuthException catch (e) {
-      setState(
-          () => _errorMessage = '[${e.code}] ${e.message ?? e.toString()}');
+      debugPrint('Google sign-in Firebase error (${e.code}): ${e.message}');
+      setState(() => _errorMessage = authenticationFailureMessage('Google'));
     } catch (e) {
-      setState(() => _errorMessage = e.toString());
+      debugPrint('Google sign-in error: $e');
+      setState(() => _errorMessage = authenticationFailureMessage('Google'));
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -96,9 +98,14 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
       if (mounted) context.go('/');
     } on SignInWithAppleAuthorizationException catch (e) {
-      setState(() => _errorMessage = e.message);
+      debugPrint('Apple sign-in authorization error (${e.code}): ${e.message}');
+      setState(() => _errorMessage = authenticationFailureMessage('Apple'));
     } on FirebaseAuthException catch (e) {
-      setState(() => _errorMessage = e.message);
+      debugPrint('Apple sign-in Firebase error (${e.code}): ${e.message}');
+      setState(() => _errorMessage = authenticationFailureMessage('Apple'));
+    } catch (e) {
+      debugPrint('Apple sign-in error: $e');
+      setState(() => _errorMessage = authenticationFailureMessage('Apple'));
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }

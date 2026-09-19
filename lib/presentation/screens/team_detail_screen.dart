@@ -8,6 +8,7 @@ import '../../data/providers/game_providers.dart';
 import '../../data/providers/repository_providers.dart';
 import '../../data/providers/team_providers.dart';
 import '../../domain/models/game.dart';
+import '../../domain/policies/team_display_name_policy.dart';
 import '../widgets/game_card.dart';
 import '../widgets/calendar_sync_button.dart';
 
@@ -43,9 +44,9 @@ class TeamDetailScreen extends ConsumerWidget {
                 expandedHeight: 180,
                 pinned: true,
                 flexibleSpace: FlexibleSpaceBar(
-                  title: Text(team.nameJa),
+                  title: Text(teamDisplayNames.teamName(team)),
                   background: _TeamHeaderBackground(
-                    nameJa: team.nameJa,
+                    nameJa: teamDisplayNames.teamName(team),
                     logoUrl: team.logoUrl,
                   ),
                 ),
@@ -92,7 +93,7 @@ class TeamDetailScreen extends ConsumerWidget {
                             ? null
                             : () => _showLocalIcsSheet(
                                 context,
-                                team.nameJa,
+                                teamDisplayNames.teamName(team),
                                 teamId,
                                 games,
                               ),
