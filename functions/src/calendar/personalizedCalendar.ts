@@ -18,7 +18,7 @@ export interface NormalizedGame extends CalendarGame {
 export interface PersonalizedCalendarRepository {
   findFeed(token: string): Promise<CalendarFeed | undefined>;
   findUser(uid: string): Promise<CalendarUser | undefined>;
-  findUpcomingGamesForTeams(teamIds: readonly string[]): Promise<readonly NormalizedGame[]>;
+  findCalendarGamesForTeams(teamIds: readonly string[]): Promise<readonly NormalizedGame[]>;
 }
 
 export class CalendarFeedNotFoundError extends Error {}
@@ -54,7 +54,7 @@ export async function buildPersonalizedCalendar(
 
   if (teamIds.length === 0) return buildCalendar([]);
   const allowed = new Set(teamIds);
-  const games = await repository.findUpcomingGamesForTeams(teamIds);
+  const games = await repository.findCalendarGamesForTeams(teamIds);
 
   // Repository queries are an optimization, never an authorization boundary.
   // Reapply membership here so an over-broad adapter cannot leak fixtures.

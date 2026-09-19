@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../repositories/calendar_feed_repository.dart';
 import '../repositories/game_repository.dart';
 import '../repositories/team_repository.dart';
 import '../repositories/user_repository.dart';
@@ -18,4 +19,8 @@ final teamRepositoryProvider = Provider<TeamRepository>((ref) {
 
 final gameRepositoryProvider = Provider<GameRepository>((ref) {
   return useSampleData ? SampleGameRepository() : FirestoreGameRepository();
+});
+
+final calendarFeedRepositoryProvider = Provider<CalendarFeedRepository>((ref) {
+  return CalendarFeedRepository.firebase();
 });

@@ -33,7 +33,8 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getCalendar = exports.FirestorePersonalizedCalendarRepository = void 0;
+exports.getCalendar = exports.FirestorePersonalizedCalendarRepository = exports.CALENDAR_LOOKBACK_DAYS = void 0;
+exports.calendarWindowStart = calendarWindowStart;
 exports.serveCalendar = serveCalendar;
 const functions = __importStar(require("firebase-functions/v1"));
 const firestore_1 = require("firebase-admin/firestore");
@@ -41,6 +42,11 @@ const personalizedCalendar_1 = require("../calendar/personalizedCalendar");
 const VALID_STATUSES = new Set([
     "scheduled", "live", "finished", "postponed", "cancelled",
 ]);
+exports.CALENDAR_LOOKBACK_DAYS = 30;
+/** Deterministic lower bound used by calendar retrieval queries. */
+function calendarWindowStart(now) {
+    return new Date(now.getTime() - exports.CALENDAR_LOOKBACK_DAYS * 24 * 60 * 60 * 1000);
+}
 function asNormalizedGame(id, data) {
     const kickoff = data.startTimeUTC;
     if (!(kickoff instanceof firestore_1.Timestamp))
@@ -87,15 +93,16 @@ class FirestorePersonalizedCalendarRepository {
         const followed = snapshot.get("followedTeamIds");
         return { followedTeamIds: Array.isArray(followed) ? followed.filter((id) => typeof id === "string") : [] };
     }
-    async findUpcomingGamesForTeams(teamIds) {
+    async findCalendarGamesForTeams(teamIds) {
         const games = new Map();
+        const windowStart = calendarWindowStart(this.now());
         // Firestore `in` accepts at most 30 comparison values. Smaller chunks also
         // keep each home/away query and its response predictably bounded.
         for (let offset = 0; offset < teamIds.length; offset += 10) {
             const chunk = teamIds.slice(offset, offset + 10);
             const query = (field) => this.db.collection("games")
                 .where(field, "in", chunk)
-                .where("startTimeUTC", ">=", this.now())
+                .where("startTimeUTC", ">=", windowStart)
                 .orderBy("startTimeUTC")
                 .limit(100)
                 .get();

@@ -15,6 +15,13 @@ const VALID_STATUSES = new Set<GameStatus>([
   "scheduled", "live", "finished", "postponed", "cancelled",
 ]);
 
+export const CALENDAR_LOOKBACK_DAYS = 30;
+
+/** Deterministic lower bound used by calendar retrieval queries. */
+export function calendarWindowStart(now: Date): Date {
+  return new Date(now.getTime() - CALENDAR_LOOKBACK_DAYS * 24 * 60 * 60 * 1000);
+}
+
 function asNormalizedGame(id: string, data: DocumentData): NormalizedGame {
   const kickoff = data.startTimeUTC;
   if (!(kickoff instanceof Timestamp)) throw new Error(`Game ${id} has invalid startTimeUTC`);
@@ -60,15 +67,16 @@ export class FirestorePersonalizedCalendarRepository implements PersonalizedCale
     return { followedTeamIds: Array.isArray(followed) ? followed.filter((id): id is string => typeof id === "string") : [] };
   }
 
-  async findUpcomingGamesForTeams(teamIds: readonly string[]): Promise<readonly NormalizedGame[]> {
+  async findCalendarGamesForTeams(teamIds: readonly string[]): Promise<readonly NormalizedGame[]> {
     const games = new Map<string, NormalizedGame>();
+    const windowStart = calendarWindowStart(this.now());
     // Firestore `in` accepts at most 30 comparison values. Smaller chunks also
     // keep each home/away query and its response predictably bounded.
     for (let offset = 0; offset < teamIds.length; offset += 10) {
       const chunk = teamIds.slice(offset, offset + 10);
       const query = (field: "homeTeamId" | "awayTeamId") => this.db.collection("games")
         .where(field, "in", chunk)
-        .where("startTimeUTC", ">=", this.now())
+        .where("startTimeUTC", ">=", windowStart)
         .orderBy("startTimeUTC")
         .limit(100)
         .get();

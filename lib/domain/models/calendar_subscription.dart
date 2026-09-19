@@ -12,7 +12,7 @@ class CalendarSubscription {
   final String teamId;
 
   /// iCalendar URL served by Cloud Functions
-  /// e.g. https://asia-northeast1-sports-calendar-sync-a4564.cloudfunctions.net/getCalendar?uid=xxx
+  /// Uses an opaque feed token; Firebase UIDs are never URL credentials.
   final String icsUrl;
 
   /// Google Calendar ID if synced via Google Calendar API
