@@ -48,26 +48,27 @@ void main() {
     }
   });
 
-  testWidgets('home and selected-date cards show competition identity', (
+  testWidgets('home GameCard shows competition identity', (tester) async {
+    final value = _emperorCupGame();
+    expect(value.competitionKey, 'football_emperor_cup');
+    await tester.pumpWidget(
+      MaterialApp(home: Scaffold(body: GameCard(game: value))),
+    );
+    expect(find.text('天皇杯'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('selected-date ScheduleGameTile shows competition identity', (
     tester,
   ) async {
     final value = _emperorCupGame();
     expect(value.competitionKey, 'football_emperor_cup');
     await tester.pumpWidget(
       MaterialApp(
-        home: Scaffold(
-          body: SingleChildScrollView(
-            child: Column(
-              children: [
-                GameCard(game: value),
-                ScheduleGameTile(game: value),
-              ],
-            ),
-          ),
-        ),
+        home: Scaffold(body: ScheduleGameTile(game: value)),
       ),
     );
-    expect(find.text('天皇杯'), findsNWidgets(2));
+    expect(find.text('天皇杯'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }
