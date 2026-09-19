@@ -7,6 +7,7 @@ const path = require('node:path');
 const { getCompetitionTeamData, listCompetitionKeys } = require('../../scripts/data/competitionRegistry');
 const localSeasons = require('../../scripts/data/competitionSeasons');
 const runtimeSeasons = require('../../lib/config/competitionSeasons');
+const { toTeamDoc, validateTeam } = require('../../scripts/teamMasterContract');
 
 function verify(script, args = []) {
   execFileSync(process.execPath, [path.join(__dirname, '../../scripts', script), ...args]);
@@ -26,11 +27,67 @@ test('team master IDs and provider IDs are unique across the current registry', 
     assert.equal(competition.competitionKey, key);
     for (const team of teams) {
       assert.ok(!ids.has(team.id), `Duplicate team ID: ${team.id}`);
-      assert.ok(!externalIds.has(team.externalTeamId), `Duplicate external team ID: ${team.externalTeamId}`);
+      if (team.externalTeamId !== undefined) {
+        assert.ok(!externalIds.has(team.externalTeamId), `Duplicate external team ID: ${team.externalTeamId}`);
+        externalIds.add(team.externalTeamId);
+      }
       ids.add(team.id);
-      externalIds.add(team.externalTeamId);
     }
   }
+});
+
+test('Arsenal serializes as a discoverable stable team without invented provider fields', () => {
+  const { competition, teams } = getCompetitionTeamData('football_premier');
+  const team = teams.find(({ id }) => id === 'arsenal');
+  assert.ok(team);
+  assert.doesNotThrow(() => validateTeam(team, competition));
+  const doc = toTeamDoc({ competition, team });
+
+  assert.equal(team.id, 'arsenal');
+  assert.equal(doc.nameEn, 'Arsenal');
+  assert.equal(doc.nameJa, 'アーセナル');
+  assert.equal(doc.competitionKey, 'football_premier');
+  assert.equal(doc.sportKey, 'football_premier');
+  assert.equal(doc.leagueId, 'premier_league');
+  assert.ok(doc.searchKeywords.includes('arsenal'));
+  assert.ok(doc.searchKeywords.includes('アーセナル'));
+  assert.ok(!Object.hasOwn(doc, 'externalTeamId'));
+  assert.ok(!Object.hasOwn(doc, 'rapidApiId'));
+  assert.ok(!Object.hasOwn(doc, 'logoUrl'));
+  assert.ok(!Object.values(doc).includes(undefined));
+});
+
+test('API-SPORTS masters still require externalTeamId and logoUrl', () => {
+  for (const competitionKey of ['football_j1', 'football_j2', 'football_j3']) {
+    const { competition, teams } = getCompetitionTeamData(competitionKey);
+    assert.ok(teams.length > 0);
+    assert.doesNotThrow(() => validateTeam(teams[0], competition));
+  }
+
+  const { competition, teams } = getCompetitionTeamData('football_j1');
+  const [representative] = teams;
+  const { externalTeamId: _externalTeamId, ...withoutExternalTeamId } = representative;
+  const { logoUrl: _logoUrl, ...withoutLogoUrl } = representative;
+
+  assert.throws(
+    () => validateTeam(withoutExternalTeamId, competition),
+    /Missing required field "externalTeamId"/
+  );
+  assert.throws(
+    () => validateTeam(withoutLogoUrl, competition),
+    /Missing required field "logoUrl"/
+  );
+});
+
+test('existing Kawasaki serialization retains API-SPORTS compatibility fields', () => {
+  const { competition, teams } = getCompetitionTeamData('football_j1');
+  const team = teams.find(({ id }) => id === 'kawasaki_frontale');
+  assert.ok(team);
+  const doc = toTeamDoc({ competition, team });
+
+  assert.equal(doc.externalTeamId, team.externalTeamId);
+  assert.equal(doc.rapidApiId, team.externalTeamId);
+  assert.equal(doc.logoUrl, team.logoUrl);
 });
 
 test('season profiles have valid keys, competition references, dates and fields', () => {

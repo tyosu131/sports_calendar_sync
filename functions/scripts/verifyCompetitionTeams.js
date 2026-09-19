@@ -15,6 +15,7 @@
 
 const { generateSearchKeywords } = require('./searchKeywords');
 const { getCompetitionTeamData, listCompetitionKeys } = require('./data/competitionRegistry');
+const { validateTeam, validateTeamsArray } = require('./teamMasterContract');
 
 const MAX_UNICODE_SUFFIX = '\uDBFF\uDFFF';
 
@@ -60,42 +61,6 @@ function checkQueryContainsAll(label, docs, expectedIds) {
   return pass;
 }
 
-function validateTeam(team) {
-  const requiredFields = [
-    'id',
-    'nameJa',
-    'nameEn',
-    'aliases',
-    'externalTeamId',
-    'logoUrl',
-    'source',
-  ];
-
-  for (const field of requiredFields) {
-    if (team[field] === undefined || team[field] === null || team[field] === '') {
-      throw new Error(`Missing required field "${field}" for team: ${team.id || '(unknown)'}`);
-    }
-  }
-
-  if (!Array.isArray(team.aliases)) {
-    throw new Error(`aliases must be an array for team: ${team.id}`);
-  }
-
-  if (typeof team.externalTeamId !== 'number') {
-    throw new Error(`externalTeamId must be a number for team: ${team.id}`);
-  }
-
-  if (team.status !== 'confirmed') {
-    throw new Error(`teams must contain confirmed teams only. Move unconfirmed team "${team.id}" to teamsTodo.`);
-  }
-}
-
-function validateTeamsArray(teams) {
-  for (const team of teams) {
-    validateTeam(team);
-  }
-}
-
 function expectedKeywords(team) {
   return generateSearchKeywords({
     nameJa: team.nameJa,
@@ -115,14 +80,14 @@ function representativeKeyword(team) {
   return keywords[keywords.length - 1];
 }
 
-function verifyInMemory({ competitionKey, teams, teamsTodo }) {
+function verifyInMemory({ competitionKey, competition, teams, teamsTodo }) {
   console.log(`[verify:teams] competitionKey: ${competitionKey}`);
   console.log('[verify:teams] dryRun: true');
   console.log(`[verify:teams] confirmed teams: ${teams.length}`);
   console.log(`[verify:teams] teamsTodo ignored: ${teamsTodo.length}`);
 
   for (const team of teams) {
-    validateTeam(team);
+    validateTeam(team, competition);
     const keywords = expectedKeywords(team);
     if (keywords.length === 0) {
       throw new Error(`searchKeywords would be empty for team: ${team.id}`);
@@ -154,9 +119,13 @@ async function verifyDocumentFields({ db, competition, teams }) {
     allPassed = check('sportKey (legacy)', data.sportKey, competition.competitionKey) && allPassed;
     allPassed = check('sportType (legacy)', data.sportType, competition.sportType) && allPassed;
     allPassed = check('dataSourceKey', data.dataSourceKey, competition.dataSourceKey) && allPassed;
-    allPassed = check('externalTeamId', data.externalTeamId, team.externalTeamId) && allPassed;
-    allPassed = check('rapidApiId (legacy)', data.rapidApiId, team.externalTeamId) && allPassed;
-    allPassed = check('logoUrl', data.logoUrl, team.logoUrl) && allPassed;
+    if (team.externalTeamId !== undefined) {
+      allPassed = check('externalTeamId', data.externalTeamId, team.externalTeamId) && allPassed;
+      allPassed = check('rapidApiId (legacy)', data.rapidApiId, team.externalTeamId) && allPassed;
+    }
+    if (team.logoUrl !== undefined) {
+      allPassed = check('logoUrl', data.logoUrl, team.logoUrl) && allPassed;
+    }
     allPassed = checkArrayIncludesAll('searchKeywords', data.searchKeywords, expectedKeywords(team)) && allPassed;
   }
 
@@ -244,10 +213,10 @@ async function verify({ competitionKey, dryRun }) {
   }
 
   const { competition, teams, teamsTodo } = getCompetitionTeamData(competitionKey);
-  validateTeamsArray(teams);
+  validateTeamsArray(teams, competition);
 
   if (dryRun) {
-    return verifyInMemory({ competitionKey, teams, teamsTodo });
+    return verifyInMemory({ competitionKey, competition, teams, teamsTodo });
   }
 
   const admin = require('firebase-admin');

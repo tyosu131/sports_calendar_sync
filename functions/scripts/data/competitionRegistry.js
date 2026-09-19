@@ -36,6 +36,15 @@ const {
   j3Teams,
   j3TeamsTodo,
 } = require('./j3Teams');
+const {
+  PREMIER_COMPETITION_KEY,
+  PREMIER_LEAGUE_ID,
+  PREMIER_COUNTRY,
+  PREMIER_DATA_SOURCE_KEY,
+  PREMIER_SPORT_TYPE,
+  premierTeams,
+  premierTeamsTodo,
+} = require('./premierTeams');
 
 const competitionTeamDataByKey = {
   [J1_COMPETITION_KEY]: {
@@ -49,6 +58,7 @@ const competitionTeamDataByKey = {
       country: J1_COUNTRY,
       dataSourceKey: J1_DATA_SOURCE_KEY,
       externalLeagueId: 98,
+      requiredTeamFields: ['externalTeamId', 'logoUrl'],
     },
     teams: j1Teams,
     teamsTodo: j1TeamsTodo,
@@ -63,6 +73,7 @@ const competitionTeamDataByKey = {
       sportType: J2_SPORT_TYPE,
       country: J2_COUNTRY,
       dataSourceKey: J2_DATA_SOURCE_KEY,
+      requiredTeamFields: ['externalTeamId', 'logoUrl'],
     },
     teams: j2Teams,
     teamsTodo: j2TeamsTodo,
@@ -77,9 +88,25 @@ const competitionTeamDataByKey = {
       sportType: J3_SPORT_TYPE,
       country: J3_COUNTRY,
       dataSourceKey: J3_DATA_SOURCE_KEY,
+      requiredTeamFields: ['externalTeamId', 'logoUrl'],
     },
     teams: j3Teams,
     teamsTodo: j3TeamsTodo,
+  },
+  [PREMIER_COMPETITION_KEY]: {
+    competition: {
+      competitionKey: PREMIER_COMPETITION_KEY,
+      leagueId: PREMIER_LEAGUE_ID,
+      displayNameJa: 'プレミアリーグ',
+      displayNameEn: 'Premier League',
+      sportCategory: 'football',
+      sportType: PREMIER_SPORT_TYPE,
+      country: PREMIER_COUNTRY,
+      dataSourceKey: PREMIER_DATA_SOURCE_KEY,
+      requiredTeamFields: [],
+    },
+    teams: premierTeams,
+    teamsTodo: premierTeamsTodo,
   },
 };
 
