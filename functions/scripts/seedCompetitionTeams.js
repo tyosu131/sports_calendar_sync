@@ -13,8 +13,8 @@
 
 'use strict';
 
-const { generateSearchKeywords } = require('./searchKeywords');
 const { getCompetitionTeamData, listCompetitionKeys } = require('./data/competitionRegistry');
+const { toTeamDoc, validateTeamsArray } = require('./teamMasterContract');
 
 function parseArgs(argv) {
   const competitionKey = argv.find((arg) => !arg.startsWith('--'));
@@ -26,65 +26,6 @@ function parseArgs(argv) {
 
 function usage() {
   return `Usage: node functions/scripts/seedCompetitionTeams.js <competitionKey> [--dry-run]\nAvailable competitionKeys: ${listCompetitionKeys().join(', ')}`;
-}
-
-function validateTeam(team) {
-  const requiredFields = [
-    'id',
-    'nameJa',
-    'nameEn',
-    'aliases',
-    'externalTeamId',
-    'logoUrl',
-    'source',
-  ];
-
-  for (const field of requiredFields) {
-    if (team[field] === undefined || team[field] === null || team[field] === '') {
-      throw new Error(`Missing required field "${field}" for team: ${team.id || '(unknown)'}`);
-    }
-  }
-
-  if (!Array.isArray(team.aliases)) {
-    throw new Error(`aliases must be an array for team: ${team.id}`);
-  }
-
-  if (typeof team.externalTeamId !== 'number') {
-    throw new Error(`externalTeamId must be a number for team: ${team.id}`);
-  }
-
-  if (team.status !== 'confirmed') {
-    throw new Error(`teams must contain confirmed teams only. Move unconfirmed team "${team.id}" to teamsTodo.`);
-  }
-}
-
-function validateTeamsArray(teams) {
-  for (const team of teams) {
-    validateTeam(team);
-  }
-}
-
-function toTeamDoc({ competition, team }) {
-  const searchKeywords = generateSearchKeywords({
-    nameJa: team.nameJa,
-    nameEn: team.nameEn,
-    aliases: team.aliases,
-  });
-
-  return {
-    nameJa: team.nameJa,
-    nameEn: team.nameEn,
-    searchKeywords,
-    leagueId: competition.leagueId,
-    country: competition.country,
-    competitionKey: competition.competitionKey,
-    sportKey: competition.competitionKey,
-    sportType: competition.sportType,
-    dataSourceKey: competition.dataSourceKey,
-    externalTeamId: team.externalTeamId,
-    rapidApiId: team.externalTeamId,
-    logoUrl: team.logoUrl,
-  };
 }
 
 async function seed({ competitionKey, dryRun }) {
