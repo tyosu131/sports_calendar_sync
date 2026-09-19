@@ -3,14 +3,12 @@ import 'package:flutter/material.dart';
 import '../../domain/policies/competition_display_policy.dart';
 
 class CompetitionBadge extends StatelessWidget {
-  const CompetitionBadge({super.key, required this.competitionKey});
+  const CompetitionBadge({super.key, required this.competition});
 
-  final String? competitionKey;
+  final CompetitionDisplayName competition;
 
   @override
   Widget build(BuildContext context) {
-    final competition = CompetitionDisplayPolicy.forKey(competitionKey);
-    if (competition == null) return const SizedBox.shrink();
     final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),

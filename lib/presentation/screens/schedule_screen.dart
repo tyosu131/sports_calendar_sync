@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/utils/date_time_utils.dart';
 import '../../data/providers/game_providers.dart';
 import '../../domain/models/game.dart';
+import '../../domain/policies/competition_display_policy.dart';
 import '../../domain/policies/team_display_name_policy.dart';
 import '../widgets/competition_badge.dart';
 
@@ -664,6 +665,7 @@ class ScheduleGameTile extends StatelessWidget {
     final theme = Theme.of(context);
     final statusText = _statusText(game);
     final scoreText = _scoreOrVs(game);
+    final competition = CompetitionDisplayPolicy.forKey(game.competitionKey);
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -672,8 +674,10 @@ class ScheduleGameTile extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CompetitionBadge(competitionKey: game.competitionKey),
-            const SizedBox(height: 8),
+            if (competition != null) ...[
+              CompetitionBadge(competition: competition),
+              const SizedBox(height: 8),
+            ],
             Row(
               children: [
                 Text(

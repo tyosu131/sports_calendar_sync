@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/utils/date_time_utils.dart';
 import '../../domain/models/game.dart';
+import '../../domain/policies/competition_display_policy.dart';
 import '../../domain/policies/team_display_name_policy.dart';
 import 'competition_badge.dart';
 
@@ -15,6 +16,7 @@ class GameCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isToday = DateTimeUtils.isToday(game.startTimeUtcDateTime);
+    final competition = CompetitionDisplayPolicy.forKey(game.competitionKey);
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -29,8 +31,10 @@ class GameCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CompetitionBadge(competitionKey: game.competitionKey),
-            const SizedBox(height: 8),
+            if (competition != null) ...[
+              CompetitionBadge(competition: competition),
+              const SizedBox(height: 8),
+            ],
             // Date/time row
             Row(
               children: [
