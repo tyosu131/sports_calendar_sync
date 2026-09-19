@@ -1,6 +1,9 @@
 # Apple Sign-In readiness (Human Gate)
 
-The Apple option remains in the application and failures are handled without
+The Apple option remains visible as **準備中**, but its sign-in action is gated
+by `AuthReadiness.appleSignInEnabled` in
+`lib/core/config/auth_readiness.dart`. Set that single readiness value to
+`true` only after every gate below is complete. Failures are handled without
 showing raw platform exceptions. The repository intentionally does **not**
 enable the entitlement unconditionally: development currently uses a Personal
 Team, for which that capability can make the proven device build un-signable.
@@ -19,6 +22,8 @@ To complete the external-account gate:
    not put these values in Git.
 5. Re-run Google and Apple sign-in on a physical iPhone. Apple physical-device
    E2E is not considered verified until this succeeds.
+6. After that verification succeeds, change
+   `AuthReadiness.appleSignInEnabled` to `true` and rerun the auth widget tests.
 
 ## iOS dependency configuration
 

@@ -6,8 +6,9 @@ import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
-import '../../data/providers/repository_providers.dart';
+import '../../core/config/auth_readiness.dart';
 import '../../core/utils/auth_failure_message.dart';
+import '../../data/providers/repository_providers.dart';
 
 /// Sign-in screen supporting the V1 Google and Apple options.
 class SignInScreen extends ConsumerStatefulWidget {
@@ -180,18 +181,37 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                 ),
                 const SizedBox(height: 12),
 
-                // Apple sign-in
-                OutlinedButton.icon(
-                  onPressed: _signInWithApple,
-                  icon: const Icon(Icons.apple, size: 24),
-                  label: const Text('Appleでサインイン'),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
+                if (AuthReadiness.appleSignInEnabled)
+                  OutlinedButton.icon(
+                    onPressed: _signInWithApple,
+                    icon: const Icon(Icons.apple, size: 24),
+                    label: const Text('Appleでサインイン'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  )
+                else
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(10),
                     ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.apple, size: 24),
+                        SizedBox(width: 8),
+                        Text('Appleでサインイン（準備中）'),
+                      ],
+                    ),
                   ),
-                ),
               ],
             ],
           ),
