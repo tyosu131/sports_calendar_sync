@@ -28,6 +28,14 @@ function envelope(data, pagination = { total: data.length, limit: 100, offset: 0
   return { success: true, teamId: 'x', data, pagination, source: 'goal' };
 }
 
+function assertNoExplicitUndefined(value, path = 'game') {
+  if (value === null || typeof value !== 'object') return;
+  for (const [key, child] of Object.entries(value)) {
+    assert.notEqual(child, undefined, `${path}.${key} must not be undefined`);
+    assertNoExplicitUndefined(child, `${path}.${key}`);
+  }
+}
+
 test('client parses live fixture fields with missing venue and non-paginated upcoming', async () => {
   const calls = [];
   const http = { get: async (url, config) => {
@@ -81,7 +89,7 @@ test('client classifies errors and rejects malformed fixture contracts', async (
   await assert.rejects(legacy.upcoming('x'), e => e.kind === 'invalid_response');
 });
 
-test('adapter applies venue then matchStadium fallback and accepts null stadium', () => {
+test('adapter prefers venue, falls back to matchStadium, and omits an unavailable venue', () => {
   const missingVenue = fixture(); missingVenue.matchStadium = ' Emirates Stadium ';
   const stadiumGame = adaptGoalFixtureToGameDoc(missingVenue, context);
   assert.equal(stadiumGame.venue, ' Emirates Stadium ');
@@ -90,7 +98,9 @@ test('adapter applies venue then matchStadium fallback and accepts null stadium'
   const preferred = fixture(); preferred.venue = 'Provider Venue'; preferred.matchStadium = 'Fallback';
   assert.equal(adaptGoalFixtureToGameDoc(preferred, context).venue, 'Provider Venue');
   const nullStadium = fixture(); nullStadium.matchStadium = null;
-  assert.equal(adaptGoalFixtureToGameDoc(nullStadium, context).venue, undefined);
+  const noVenueGame = adaptGoalFixtureToGameDoc(nullStadium, context);
+  assert.equal(noVenueGame.venue, undefined);
+  assert.equal(Object.hasOwn(noVenueGame, 'venue'), false);
 });
 
 test('adapter maps every supported lifecycle status and stable identity ignores mutable fields', () => {
@@ -211,6 +221,8 @@ test('fresh write batches are used after chunk commits', async () => {
 
 test('pipeline deduplicates cross-target fixture and unsupported state deletes stable document', async () => {
   const input = fixture();
+  input.venue = null;
+  input.matchStadium = null;
   // Use real active binding identifiers so persistence boundary is exercised.
   input.league.id = V1_GOAL_MEMBERSHIP_BINDINGS[3].goalLeagueId;
   input.leagueYear = V1_GOAL_MEMBERSHIP_BINDINGS[3].goalLeagueYear;
@@ -225,6 +237,8 @@ test('pipeline deduplicates cross-target fixture and unsupported state deletes s
   assert.equal(summary.duplicates, 1);
   assert.equal(writes.length, 1);
   assert.deepEqual(writes[0].options, { merge: true });
+  assert.equal(Object.hasOwn(writes[0].game, 'venue'), false);
+  assertNoExplicitUndefined(writes[0].game);
   writes.length = 0; input.matchStatus = 'AWARDED';
   await syncGoalV1Fixtures('test', { source, persistence, targets: ['arsenal'], names: { nameJa: id => id } });
   assert.deepEqual(writes, [{ kind: 'delete', ref: stableGoalGameId(input.id) }]);

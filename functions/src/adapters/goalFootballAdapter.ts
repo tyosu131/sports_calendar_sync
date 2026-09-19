@@ -25,6 +25,7 @@ export function adaptGoalFixtureToGameDoc(fixture: GoalFixture, context: GoalAda
   const status = goalGameStatus(fixture.matchStatus);
   if (!status) throw new UnsupportedGoalStatusError(fixture.matchStatus);
   const utc = toUtcDate(fixture.kickoffUtc);
+  const venue = nonEmpty(fixture.venue) ?? nonEmpty(fixture.matchStadium);
   return {
     competitionKey: context.competitionKey,
     competitionSeasonKey: context.competitionSeasonKey,
@@ -42,7 +43,7 @@ export function adaptGoalFixtureToGameDoc(fixture: GoalFixture, context: GoalAda
     startTimeJST: toJstStorageString(fixture.kickoffUtc),
     timezone: "UTC",
     status,
-    venue: nonEmpty(fixture.venue) ?? nonEmpty(fixture.matchStadium),
+    ...(venue ? { venue } : {}),
     broadcastPlatforms: [],
     sourceProvider: "goal",
     sourceFixtureId: fixture.id,
