@@ -9,11 +9,11 @@
  *      its owner's followed teams
  *
  * 2. scheduledSyncFootball (Scheduled, every 6 hours)
- *    - Fetches football fixtures from RapidAPI
+ *    - Fetches and persists approved V1 football fixtures from GOAL
  *    - Normalizes timezone, applies translation map, upserts to Firestore
  *
  * Secrets:
- *   API_SPORTS_KEY (Firebase Functions secret / Secret Manager)
+ *   GOAL_API_KEY (Firebase Functions secret / Secret Manager)
  */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -62,40 +62,39 @@ var calendarFeeds_1 = require("./functions/calendarFeeds");
 Object.defineProperty(exports, "ensureCalendarFeed", { enumerable: true, get: function () { return calendarFeeds_1.ensureCalendarFeed; } });
 Object.defineProperty(exports, "rotateCalendarFeed", { enumerable: true, get: function () { return calendarFeeds_1.rotateCalendarFeed; } });
 // ── Scheduled Functions ───────────────────────────────────────────────────────
-const syncFootball_1 = require("./pipelines/syncFootball");
-const API_SPORTS_KEY = (0, params_1.defineSecret)("API_SPORTS_KEY");
-function getApiSportsKey() {
-    const value = API_SPORTS_KEY.value();
+const syncGoalV1_1 = require("./pipelines/syncGoalV1");
+const adminAuthorization_1 = require("./functions/adminAuthorization");
+const GOAL_API_KEY = (0, params_1.defineSecret)("GOAL_API_KEY");
+function getGoalApiKey() {
+    const value = GOAL_API_KEY.value();
     const trimmed = typeof value === "string" ? value.trim() : "";
     return trimmed.length > 0 ? trimmed : undefined;
 }
 /** Sync football fixtures every 6 hours. */
 exports.scheduledSyncFootball = functions
-    .runWith({ secrets: [API_SPORTS_KEY] })
+    .runWith({ secrets: [GOAL_API_KEY] })
     .region("asia-northeast1")
     .pubsub.schedule("every 6 hours")
     .timeZone("Asia/Tokyo")
     .onRun(async (_context) => {
-    const apiSportsKey = getApiSportsKey();
-    if (!apiSportsKey) {
-        console.error("API_SPORTS_KEY secret is not configured for scheduledSyncFootball.");
+    const goalApiKey = getGoalApiKey();
+    if (!goalApiKey) {
+        console.error("GOAL_API_KEY secret is not configured for scheduledSyncFootball.");
         return;
     }
-    await (0, syncFootball_1.syncFootballFixtures)(apiSportsKey);
+    await (0, syncGoalV1_1.syncGoalV1Fixtures)(goalApiKey);
 });
 /** Manual trigger for football sync (HTTPS callable — for testing/admin use). */
 exports.triggerFootballSync = functions
-    .runWith({ secrets: [API_SPORTS_KEY] })
+    .runWith({ secrets: [GOAL_API_KEY] })
     .region("asia-northeast1")
     .https.onCall(async (_data, context) => {
-    if (!context.auth) {
-        throw new functions.https.HttpsError("unauthenticated", "Authentication required");
+    (0, adminAuthorization_1.requireAdmin)(context);
+    const goalApiKey = getGoalApiKey();
+    if (!goalApiKey) {
+        throw new functions.https.HttpsError("failed-precondition", "GOAL API key not configured");
     }
-    const apiSportsKey = getApiSportsKey();
-    if (!apiSportsKey) {
-        throw new functions.https.HttpsError("failed-precondition", "API-SPORTS key not configured");
-    }
-    await (0, syncFootball_1.syncFootballFixtures)(apiSportsKey);
+    await (0, syncGoalV1_1.syncGoalV1Fixtures)(goalApiKey);
     return { success: true };
 });
 //# sourceMappingURL=index.js.map

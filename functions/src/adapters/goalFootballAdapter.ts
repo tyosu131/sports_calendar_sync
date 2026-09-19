@@ -1,6 +1,7 @@
 import { Timestamp } from "firebase-admin/firestore";
 import { CompetitionKey, GameDoc, GoalFixture } from "../types";
 import { toJstStorageString, toUtcDate } from "../utils/timezone";
+import { goalGameStatus } from "../providers/goal/statusPolicy";
 
 export class UnsupportedGoalStatusError extends Error {
   constructor(public readonly providerStatus: string) {
@@ -21,7 +22,8 @@ export interface GoalAdapterContext {
 
 /** GOAL fixture to canonical GameDoc. Only an evidenced status is accepted. */
 export function adaptGoalFixtureToGameDoc(fixture: GoalFixture, context: GoalAdapterContext): GameDoc {
-  if (fixture.matchStatus !== "SCHEDULED") throw new UnsupportedGoalStatusError(fixture.matchStatus);
+  const status = goalGameStatus(fixture.matchStatus);
+  if (!status) throw new UnsupportedGoalStatusError(fixture.matchStatus);
   const utc = toUtcDate(fixture.kickoffUtc);
   return {
     competitionKey: context.competitionKey,
@@ -39,7 +41,7 @@ export function adaptGoalFixtureToGameDoc(fixture: GoalFixture, context: GoalAda
     startTimeUTC: Timestamp.fromDate(utc),
     startTimeJST: toJstStorageString(fixture.kickoffUtc),
     timezone: "UTC",
-    status: "scheduled",
+    status,
     venue: nonEmpty(fixture.venue) ?? nonEmpty(fixture.matchStadium),
     broadcastPlatforms: [],
     sourceProvider: "goal",
