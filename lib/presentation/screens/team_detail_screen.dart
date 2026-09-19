@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 
-import '../../core/utils/ics_url_builder.dart';
 import '../../core/utils/local_ics_builder.dart';
 import '../../data/providers/auth_providers.dart';
 import '../../data/providers/game_providers.dart';
@@ -10,7 +9,7 @@ import '../../data/providers/repository_providers.dart';
 import '../../data/providers/team_providers.dart';
 import '../../domain/models/game.dart';
 import '../widgets/game_card.dart';
-import '../widgets/ics_share_sheet.dart';
+import '../widgets/calendar_sync_button.dart';
 
 /// Detail screen for a single team: shows schedule + follow/sync actions.
 class TeamDetailScreen extends ConsumerWidget {
@@ -81,14 +80,7 @@ class TeamDetailScreen extends ConsumerWidget {
                   ),
                   // Calendar sync
                   if (!useSampleData && userId != null)
-                    IconButton(
-                      icon: const Icon(Icons.calendar_month),
-                      tooltip: 'カレンダーに同期',
-                      onPressed: () {
-                        final url = IcsUrlBuilder.buildForTeam(userId, teamId);
-                        IcsShareSheet.show(context, url);
-                      },
-                    ),
+                    const CalendarSyncButton(),
                   if (useSampleData)
                     gamesAsync.maybeWhen(
                       data: (games) => IconButton(

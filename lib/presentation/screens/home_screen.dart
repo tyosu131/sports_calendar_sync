@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../core/utils/ics_url_builder.dart';
 import '../../data/providers/auth_providers.dart';
 import '../../data/providers/game_providers.dart';
 import '../../data/providers/repository_providers.dart';
 import '../../data/providers/team_providers.dart';
 import '../../domain/models/team.dart';
 import '../widgets/game_card.dart';
-import '../widgets/ics_share_sheet.dart';
+import '../widgets/calendar_sync_button.dart';
 
 /// Home screen: shows upcoming games for the user's followed teams.
 class HomeScreen extends ConsumerWidget {
@@ -39,14 +38,7 @@ class HomeScreen extends ConsumerWidget {
           // Calendar sync button
           userAsync.whenOrNull(
                 data: (profile) => !useSampleData && profile != null
-                    ? IconButton(
-                        icon: const Icon(Icons.calendar_month),
-                        tooltip: 'カレンダーに同期',
-                        onPressed: () {
-                          final url = IcsUrlBuilder.buildForUser(profile.uid);
-                          IcsShareSheet.show(context, url);
-                        },
-                      )
+                    ? const CalendarSyncButton()
                     : null,
               ) ??
               const SizedBox.shrink(),

@@ -36,7 +36,7 @@ async function buildPersonalizedCalendar(repository, token, requestedTeamId) {
     if (teamIds.length === 0)
         return (0, icsBuilder_1.buildCalendar)([]);
     const allowed = new Set(teamIds);
-    const games = await repository.findUpcomingGamesForTeams(teamIds);
+    const games = await repository.findCalendarGamesForTeams(teamIds);
     // Repository queries are an optimization, never an authorization boundary.
     // Reapply membership here so an over-broad adapter cannot leak fixtures.
     return (0, icsBuilder_1.buildCalendar)(games.filter((game) => allowed.has(game.homeTeamId) || allowed.has(game.awayTeamId)));

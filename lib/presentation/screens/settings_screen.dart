@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../core/utils/ics_url_builder.dart';
 import '../../data/providers/auth_providers.dart';
 import '../../data/providers/repository_providers.dart';
-import '../widgets/ics_share_sheet.dart';
+import '../widgets/calendar_sync_button.dart';
 
 /// Settings screen: account info, calendar sync URL, sign out.
 class SettingsScreen extends ConsumerWidget {
@@ -31,8 +30,6 @@ class SettingsScreen extends ConsumerWidget {
             );
           }
 
-          final icsUrl = IcsUrlBuilder.buildForUser(profile.uid);
-
           return ListView(
             children: [
               // Account section
@@ -48,21 +45,18 @@ class SettingsScreen extends ConsumerWidget {
               ),
               const Divider(),
 
-              // Calendar sync section
-              _SectionHeader(title: 'カレンダー同期'),
-              ListTile(
-                leading: const Icon(Icons.calendar_month),
-                title: const Text('iCalendar URL'),
-                subtitle: Text(
-                  icsUrl,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodySmall,
+              if (!useSampleData) ...[
+                // Personalized calendar sync is an authenticated production
+                // flow; sample mode keeps using its local ICS builder.
+                _SectionHeader(title: 'カレンダー同期'),
+                const ListTile(
+                  leading: Icon(Icons.calendar_month),
+                  title: Text('スポーツカレンダーを購読'),
+                  subtitle: Text('フォロー中のすべてのチーム'),
+                  trailing: CalendarSyncButton(),
                 ),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => IcsShareSheet.show(context, icsUrl),
-              ),
-              const Divider(),
+                const Divider(),
+              ],
 
               // App section
               _SectionHeader(title: 'アプリ'),
