@@ -6,10 +6,10 @@ import 'package:sports_calendar_sync/domain/policies/competition_display_policy.
 import 'package:sports_calendar_sync/presentation/screens/schedule_screen.dart';
 import 'package:sports_calendar_sync/presentation/widgets/game_card.dart';
 
-Game _game(String competitionKey) => Game(
+Game _emperorCupGame() => Game(
       id: 'competition-game',
       leagueId: 'emperor_cup',
-      competitionKey: competitionKey,
+      competitionKey: 'football_emperor_cup',
       competitionSeasonKey: 'football_emperor_cup_2026',
       homeTeamId: 'kawasaki_frontale',
       homeTeamNameJa: '川崎フロンターレ',
@@ -43,7 +43,7 @@ void main() {
   testWidgets('home and selected-date cards show competition identity', (
     tester,
   ) async {
-    final value = _game('football_emperor_cup');
+    final value = _emperorCupGame();
     expect(value.competitionKey, 'football_emperor_cup');
     await tester.pumpWidget(
       MaterialApp(
