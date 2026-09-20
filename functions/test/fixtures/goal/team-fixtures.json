@@ -20,12 +20,26 @@
       "homeTeam": { "id": "cmr7foowe2kf3rx06u6eu3rhl", "name": "Arsenal" },
       "awayTeam": { "id": "cmr7be2nq0qkwrx06zxbqr5ux", "name": "Kawasaki Frontale" },
       "venue": "Synthetic Ground"
+    },
+    {
+      "id": "goal-fixture-premier-finished",
+      "kickoffUtc": "2026-09-18T15:30:00Z",
+      "matchStatus": "FINISHED",
+      "league": { "id": "goal-premier", "name": "Premier League" },
+      "leagueYear": "2026/2027",
+      "homeTeam": { "id": "cmr7foowe2kf3rx06u6eu3rhl", "name": "Arsenal" },
+      "awayTeam": { "id": "cmr7be2nq0qkwrx06zxbqr5ux", "name": "Kawasaki Frontale" },
+      "homeTeamScore": "3",
+      "awayTeamScore": "0",
+      "homeTeamFtScore": "3",
+      "awayTeamFtScore": "0",
+      "matchStadium": "Emirates Stadium"
     }
   ],
   "pagination": {
     "limit": 20,
     "offset": 0,
-    "total": 2,
+    "total": 3,
     "hasMore": false
   }
 }

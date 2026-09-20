@@ -61,11 +61,14 @@ class GoalApiClient {
     }
     parseFixtures(body) {
         const envelope = body;
-        if (envelope.success !== true || !Array.isArray(envelope.data) ||
-            !envelope.data.every(isGoalFixture)) {
+        if (envelope.success !== true || !Array.isArray(envelope.data)) {
             throw new GoalApiError("invalid_response", "GOAL response did not contain valid fixtures");
         }
-        return envelope.data;
+        const fixtures = envelope.data.map(normalizeGoalFixture);
+        if (!fixtures.every((fixture) => fixture !== undefined)) {
+            throw new GoalApiError("invalid_response", "GOAL response did not contain valid fixtures");
+        }
+        return fixtures;
     }
     async request(path) {
         try {
@@ -94,25 +97,40 @@ class GoalApiClient {
     }
 }
 exports.GoalApiClient = GoalApiClient;
-function isGoalFixture(value) {
+function normalizeGoalFixture(value) {
     if (!value || typeof value !== "object")
-        return false;
+        return undefined;
     const fixture = value;
     const team = (value) => !!value && typeof value === "object" &&
         typeof value.id === "string" &&
         typeof value.name === "string";
-    const score = (value) => value === undefined || value === null ||
-        (typeof value === "number" && Number.isInteger(value) && value >= 0);
-    const hasHomeScore = typeof fixture.homeScore === "number";
-    const hasAwayScore = typeof fixture.awayScore === "number";
-    return typeof fixture.id === "string" && typeof fixture.kickoffUtc === "string" &&
+    const validFixture = typeof fixture.id === "string" && typeof fixture.kickoffUtc === "string" &&
         typeof fixture.matchStatus === "string" && team(fixture.league) &&
         typeof fixture.leagueYear === "string" &&
         team(fixture.homeTeam) && team(fixture.awayTeam) &&
-        score(fixture.homeScore) && score(fixture.awayScore) &&
-        hasHomeScore === hasAwayScore &&
         (fixture.venue === undefined || fixture.venue === null || typeof fixture.venue === "string") &&
         (fixture.matchStadium === undefined || fixture.matchStadium === null || typeof fixture.matchStadium === "string");
+    if (!validFixture)
+        return undefined;
+    const scores = normalizeScorePair(fixture.homeTeamScore, fixture.awayTeamScore);
+    if (scores === undefined)
+        return undefined;
+    const { homeTeamScore: _homeTeamScore, awayTeamScore: _awayTeamScore, homeTeamFtScore: _homeTeamFtScore, awayTeamFtScore: _awayTeamFtScore, ...canonical } = fixture;
+    return { ...canonical, ...scores };
+}
+function normalizeScorePair(home, away) {
+    if (home === undefined && away === undefined)
+        return {};
+    if (home === null && away === null)
+        return { homeScore: null, awayScore: null };
+    if (typeof home !== "string" || typeof away !== "string" ||
+        !/^\d+$/.test(home) || !/^\d+$/.test(away))
+        return undefined;
+    const homeScore = Number(home);
+    const awayScore = Number(away);
+    if (!Number.isSafeInteger(homeScore) || !Number.isSafeInteger(awayScore))
+        return undefined;
+    return { homeScore, awayScore };
 }
 function isPagination(value) {
     if (!value || typeof value !== "object")
