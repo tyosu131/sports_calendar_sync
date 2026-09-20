@@ -13,6 +13,11 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == uid;
     }
 
+    // OAuth state, connection metadata, and encrypted credentials are server-only.
+    match /googleCalendarOAuthStates/{document=**} { allow read, write: if false; }
+    match /googleCalendarConnections/{document=**} { allow read, write: if false; }
+    match /googleCalendarCredentials/{document=**} { allow read, write: if false; }
+
     // ── users/{uid} ───────────────────────────────────────────────────────────
     // Users can only read/write their own profile.
     match /users/{uid} {
