@@ -1,5 +1,7 @@
 # Phase 0 — Current Architecture
 
+> **Historical snapshot:** Despite the original title, this document describes the Phase 0 architecture as of 2026-04-29 and is not the current source of truth. See [Current State](current-state.md) for the present implementation and deployment state.
+
 > Generated: 2026-04-29  
 > Purpose: コード構造の観点から責務を整理し、Phase 0 の改善方針を明確にする
 
