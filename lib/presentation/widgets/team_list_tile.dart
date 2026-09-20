@@ -44,16 +44,6 @@ class TeamListTile extends StatelessWidget {
             fontWeight: FontWeight.w700,
           ),
         ),
-        subtitle: Text(
-          teamDisplayNames.teamName(team) == team.nameEn
-              ? team.nameJa
-              : team.nameEn,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
         trailing: IconButton(
           icon: Icon(
             isFollowing ? Icons.favorite : Icons.favorite_border,

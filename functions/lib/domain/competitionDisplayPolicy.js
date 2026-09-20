@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.competitionDisplayMetadata = competitionDisplayMetadata;
 exports.defaultCompetitionDisplayName = defaultCompetitionDisplayName;
+exports.compactCompetitionDisplayName = compactCompetitionDisplayName;
 const COMPETITIONS = Object.freeze({
     football_j1: { nameJa: "J1リーグ", nameEn: "J1 League", compact: "J1", defaultLanguage: "ja" },
     football_j_league_cup: {
@@ -28,5 +29,8 @@ function defaultCompetitionDisplayName(competitionKey) {
     if (!metadata)
         return undefined;
     return metadata.defaultLanguage === "ja" ? metadata.nameJa : metadata.nameEn;
+}
+function compactCompetitionDisplayName(competitionKey) {
+    return competitionDisplayMetadata(competitionKey)?.compact;
 }
 //# sourceMappingURL=competitionDisplayPolicy.js.map

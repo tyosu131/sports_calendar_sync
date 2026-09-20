@@ -69,7 +69,7 @@ function asNormalizedGame(id, data) {
     if (!VALID_STATUSES.has(data.status))
         throw new Error(`Game ${id} has invalid status`);
     const competitionKey = data.competitionKey ?? data.sportKey;
-    const competitionName = (0, competitionDisplayPolicy_1.defaultCompetitionDisplayName)(competitionKey);
+    const competitionCompact = (0, competitionDisplayPolicy_1.compactCompetitionDisplayName)(competitionKey);
     return {
         id,
         kickoffUtc: kickoff.toDate(),
@@ -79,13 +79,13 @@ function asNormalizedGame(id, data) {
             japanese: data.homeTeamNameJa,
             english: data.homeTeamNameEn,
             provider: data.homeTeamProviderName,
-        }),
+        }, undefined, hasHomeTeamId ? data.homeTeamId : undefined),
         awayTeamName: (0, teamDisplayNamePolicy_1.displayTeamName)(competitionKey, {
             japanese: data.awayTeamNameJa,
             english: data.awayTeamNameEn,
             provider: data.awayTeamProviderName,
-        }),
-        ...(competitionName ? { competitionName } : {}),
+        }, undefined, hasAwayTeamId ? data.awayTeamId : undefined),
+        ...(competitionCompact ? { competitionCompact } : {}),
         status: data.status,
         venue: typeof data.venue === "string" ? data.venue : undefined,
         broadcastPlatforms: Array.isArray(data.broadcastPlatforms) ?

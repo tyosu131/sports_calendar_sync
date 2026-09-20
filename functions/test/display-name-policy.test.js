@@ -42,7 +42,7 @@ test('domestic cups localize J2 and J3 display evidence', () => {
     homeTeamNameJa: 'Vegalta Sendai', homeTeamNameEn: 'Vegalta Sendai',
     awayTeamNameJa: 'FC Gifu', awayTeamNameEn: 'FC Gifu',
   });
-  assert.match(buildCalendar([game]), /SUMMARY:ベガルタ仙台 vs ＦＣ岐阜 \(天皇杯\)/);
+  assert.match(buildCalendar([game]), /SUMMARY:\[天皇杯\] ベガルタ仙台 vs ＦＣ岐阜/);
   assert.equal(game.awayTeamId, undefined);
 });
 
@@ -59,6 +59,27 @@ test('European competitions use English names', () => {
   assert.equal(displayTeamName('football_premier', {
     japanese: 'アーセナル', english: 'Arsenal', provider: 'Arsenal',
   }), 'Arsenal');
+});
+
+test('canonical team ids win over stale provider display text', () => {
+  assert.equal(displayTeamName('football_premier', {
+    japanese: 'Wrong Japanese', english: 'Provider Arsenal', provider: 'Provider Arsenal',
+  }, undefined, 'arsenal'), 'Arsenal');
+  assert.equal(displayTeamName('football_premier', {
+    japanese: 'Opponent', provider: 'Leeds United',
+  }, undefined, undefined), 'Leeds United');
+});
+
+test('ICS summaries use compact competition prefixes', () => {
+  const kickoffUtc = new Date('2026-09-19T09:00:00Z');
+  const calendar = buildCalendar([
+    { id: 'pl', kickoffUtc, homeTeamName: 'Arsenal', awayTeamName: 'Leeds United',
+      competitionCompact: 'PL', status: 'scheduled' },
+    { id: 'ucl', kickoffUtc, homeTeamName: 'Arsenal', awayTeamName: 'Lille',
+      competitionCompact: 'UCL', status: 'scheduled' },
+  ]);
+  assert.match(calendar, /SUMMARY:\[PL\] Arsenal vs Leeds United/);
+  assert.match(calendar, /SUMMARY:\[UCL\] Arsenal vs Lille/);
 });
 
 test('unknown domestic names fall back to provider text', () => {
@@ -83,8 +104,8 @@ test('normalized calendar and ICS SUMMARY share competition policy', () => {
     awayTeamNameJa: 'アーセナル', awayTeamNameEn: 'Arsenal',
   });
   const ics = buildCalendar([domestic, european]);
-  assert.match(ics, /SUMMARY:川崎フロンターレ vs 鹿島アントラーズ \(J1リーグ\)/);
-  assert.match(ics, /SUMMARY:Brighton & Hove Albion vs Arsenal \(Premier League\)/);
+  assert.match(ics, /SUMMARY:\[J1\] 川崎フロンターレ vs 鹿島アントラーズ/);
+  assert.match(ics, /SUMMARY:\[PL\] Brighton & Hove Albion vs Arsenal/);
   assert.equal(domestic.awayTeamId, undefined);
   assert.match(ics, /UID:j1-game@sports-calendar-sync/);
 });

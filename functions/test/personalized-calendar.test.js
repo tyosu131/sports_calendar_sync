@@ -84,10 +84,12 @@ test("Firestore normalization accepts one canonical side and rejects invalid ide
   const awayMapped = asNormalizedGame("away-mapped", { ...base, awayTeamId: "arsenal" });
   assert.equal(awayMapped.homeTeamId, undefined);
   assert.equal(awayMapped.awayTeamId, "arsenal");
+  assert.equal(awayMapped.awayTeamName, "Arsenal");
   const homeMapped = asNormalizedGame("home-mapped", {
     ...base, homeTeamId: "arsenal", homeTeamNameJa: "アーセナル", awayTeamNameJa: "Opponent FC",
   });
   assert.equal(homeMapped.homeTeamId, "arsenal");
+  assert.equal(homeMapped.homeTeamName, "Arsenal");
   assert.equal(homeMapped.awayTeamId, undefined);
   assert.throws(() => asNormalizedGame("neither", base), /invalid team identity/);
   assert.throws(() => asNormalizedGame("empty", { ...base, awayTeamId: " " }), /invalid team identity/);
