@@ -4,6 +4,7 @@ const crypto = require("node:crypto");
 const {encryptRefreshToken} = require("../lib/googleCalendar/connectionService");
 const {googleEventId, googleEventFor, reconcileEvents} = require("../lib/googleCalendar/reconciliation");
 const {GoogleCalendarSyncService, CredentialError, syncUsersBounded} = require("../lib/googleCalendar/syncService");
+const {classifyCalendarLookupFailure, MANAGED_EVENT_LIST_PARAMS} = require("../lib/functions/googleCalendarConnection");
 
 const game = (overrides = {}) => ({id: "game/1", kickoffUtc: new Date("2026-09-20T10:00:00Z"),
   homeTeamName: "Arsenal", awayTeamName: "Chelsea", competitionCompact: "PL", status: "scheduled", venue: "Emirates", ...overrides});
@@ -28,8 +29,80 @@ test("Google presentation shares scheduled, result, zero, venue and status seman
   assert.equal(googleEventFor(game({status: "finished", homeScore: 2, awayScore: 1})).summary, "[PL] Arsenal 2-1 Chelsea");
   assert.equal(googleEventFor(game({status: "finished", homeScore: 0, awayScore: 0})).summary, "[PL] Arsenal 0-0 Chelsea");
   assert.equal(googleEventFor(game({status: "postponed"})).status, "tentative");
-  assert.equal(googleEventFor(game({status: "cancelled"})).status, "cancelled");
+  assert.equal(googleEventFor(game({status: "cancelled"})).status, "confirmed");
+  assert.equal(googleEventFor(game({status: "cancelled"})).summary, "[CANCELLED] [PL] Arsenal vs Chelsea");
   assert.equal(new Date(googleEventFor(game()).end.dateTime) - new Date(googleEventFor(game()).start.dateTime), 7200000);
+});
+
+test("cancelled canonical games stay visible, idempotent, and can return to scheduled", async () => {
+  const events = new Events();
+  const cancelled = game({status: "cancelled"});
+  assert.equal((await reconcileEvents(events, "cal", [cancelled])).created, 1);
+  const stored = events.items.get(googleEventId(cancelled.id));
+  assert.equal(stored.status, "confirmed");
+  assert.match(stored.summary, /^\[CANCELLED\]/);
+  assert.equal(MANAGED_EVENT_LIST_PARAMS.showDeleted, false);
+  events.calls.length = 0;
+  assert.deepEqual(await reconcileEvents(events, "cal", [cancelled]),
+    {created: 0, updated: 0, deleted: 0, unchanged: 1});
+  assert.deepEqual(events.calls, []);
+  assert.equal((await reconcileEvents(events, "cal", [game()])).updated, 1);
+  assert.equal(events.items.get(googleEventId(cancelled.id)).summary, "[PL] Arsenal vs Chelsea");
+  assert.equal((await reconcileEvents(events, "cal", [])).deleted, 1);
+});
+
+test("calendar lookup classifies quota/rate limits as retryable and only 404/410 as missing", () => {
+  for (const reason of ["userRateLimitExceeded", "rateLimitExceeded", "quotaExceeded"]) {
+    const failure = classifyCalendarLookupFailure(403, reason);
+    assert.equal(failure.kind, "retryable");
+    assert.notEqual(failure.code, "credential-rejected");
+  }
+  assert.deepEqual(classifyCalendarLookupFailure(429), {kind: "retryable", code: "rate-limited"});
+  assert.equal(classifyCalendarLookupFailure(403, "unknown").kind, "retryable");
+  assert.equal(classifyCalendarLookupFailure(404).kind, "missing");
+  assert.equal(classifyCalendarLookupFailure(410).kind, "missing");
+});
+
+test("quota and rate-limit lookup failures keep the connection active with sanitized codes", async () => {
+  const key = crypto.randomBytes(32).toString("base64");
+  const cases = [
+    [403, "userRateLimitExceeded"],
+    [403, "rateLimitExceeded"],
+    [403, "quotaExceeded"],
+    [429, undefined],
+  ];
+  for (const [status, reason] of cases) {
+    let reauth = false; const records = [];
+    const store = {getConnection: async () => ({status: "active", calendarId: "cal"}),
+      getCredential: async () => encryptRefreshToken("refresh", key), getGames: async () => [],
+      updateCalendar: async () => {}, record: async (_, value) => records.push(value),
+      requireReauth: async () => { reauth = true; }};
+    const failure = classifyCalendarLookupFailure(status, reason);
+    const google = {refresh: async () => "access", calendarUsable: async () => {
+      throw new CredentialError(false, failure.code);
+    }};
+    await assert.rejects(() => new GoogleCalendarSyncService(store, google, key).sync("uid"));
+    assert.equal(reauth, false);
+    assert.equal(records.at(-1).status, "error");
+    assert.equal(records.at(-1).errorCode, failure.code);
+  }
+});
+
+test("404 and 410 calendar lookups recreate the calendar and reconcile events", async () => {
+  const key = crypto.randomBytes(32).toString("base64");
+  for (const status of [404, 410]) {
+    let recreated = 0; const events = new Events();
+    const store = {getConnection: async () => ({status: "active", calendarId: "missing"}),
+      getCredential: async () => encryptRefreshToken("refresh", key), getGames: async () => [game()],
+      updateCalendar: async () => {}, record: async () => {}, requireReauth: async () => assert.fail()};
+    const google = {refresh: async () => "access", calendarUsable: async () =>
+      classifyCalendarLookupFailure(status).kind !== "missing",
+    createCalendar: async () => { recreated++; return "replacement"; }, events: () => events};
+    const result = await new GoogleCalendarSyncService(store, google, key).sync("uid");
+    assert.equal(result.calendarRecreated, true);
+    assert.equal(result.created, 1);
+    assert.equal(recreated, 1);
+  }
 });
 
 test("reconciliation creates, is idempotent, updates changes, recreates deletion and removes only managed stale events", async () => {

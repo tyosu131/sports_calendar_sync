@@ -36,6 +36,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.MANAGED_EVENT_LIST_PARAMS = void 0;
+exports.classifyCalendarLookupFailure = classifyCalendarLookupFailure;
 exports.syncService = syncService;
 exports.callbackHtml = callbackHtml;
 exports.createGoogleCalendarHandlers = createGoogleCalendarHandlers;
@@ -211,10 +213,12 @@ class GoogleSyncHttpGateway {
             return true;
         }
         catch (error) {
-            if (axios_1.default.isAxiosError(error) && [404, 410].includes(error.response?.status ?? 0))
-                return false;
-            if (axios_1.default.isAxiosError(error) && [401, 403].includes(error.response?.status ?? 0))
-                throw new syncService_1.CredentialError(true, "credential-rejected");
+            if (axios_1.default.isAxiosError(error)) {
+                const failure = classifyCalendarLookupFailure(error.response?.status, error.response?.data?.error?.errors?.[0]?.reason);
+                if (failure.kind === "missing")
+                    return false;
+                throw new syncService_1.CredentialError(failure.kind === "reauth", failure.code);
+            }
             throw error;
         }
     }
@@ -232,7 +236,7 @@ class GoogleSyncHttpGateway {
                 let pageToken;
                 do {
                     const response = await axios_1.default.get(base(calendarId), { headers: this.headers(token), params: {
-                            privateExtendedProperty: `sportsCalendarSync=${reconciliation_1.MANAGED_EVENT_MARKER}`, showDeleted: false, maxResults: 2500, pageToken,
+                            ...exports.MANAGED_EVENT_LIST_PARAMS, pageToken,
                         } });
                     events.push(...(Array.isArray(response.data.items) ? response.data.items : []));
                     pageToken = response.data.nextPageToken;
@@ -257,6 +261,29 @@ class GoogleSyncHttpGateway {
             remove: async (calendarId, id) => { await axios_1.default.delete(`${base(calendarId)}/${encodeURIComponent(id)}`, { headers: this.headers(token) }); },
         };
     }
+}
+exports.MANAGED_EVENT_LIST_PARAMS = Object.freeze({
+    privateExtendedProperty: `sportsCalendarSync=${reconciliation_1.MANAGED_EVENT_MARKER}`,
+    showDeleted: false,
+    maxResults: 2500,
+});
+/** Classifies only documented, sanitized fields; a 403 is never auth failure by status alone. */
+function classifyCalendarLookupFailure(status, reason) {
+    if (status === 404 || status === 410)
+        return { kind: "missing", code: "calendar-missing" };
+    if (status === 401)
+        return { kind: "reauth", code: "credential-rejected" };
+    const quotaReasons = {
+        userRateLimitExceeded: "user-rate-limit-exceeded",
+        rateLimitExceeded: "rate-limit-exceeded",
+        quotaExceeded: "quota-exceeded",
+    };
+    if (status === 403 && typeof reason === "string" && quotaReasons[reason]) {
+        return { kind: "retryable", code: quotaReasons[reason] };
+    }
+    if (status === 429)
+        return { kind: "retryable", code: "rate-limited" };
+    return { kind: "retryable", code: "calendar-lookup-failed" };
 }
 function service(secrets) {
     return new connectionService_1.GoogleCalendarConnectionService(new FirestoreConnectionStore((0, firestore_1.getFirestore)()), new GoogleHttpGateway(secrets), { clientId: secrets.clientId, redirectUri: secrets.redirectUri, encryptionKey: secrets.encryptionKey });

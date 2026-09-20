@@ -12,7 +12,7 @@ The Google OAuth application remains External / Testing. Google's unverified-app
 
 The integration requests only `https://www.googleapis.com/auth/calendar.app.created`. It creates and exclusively manages the secondary **Sports Calendar**; it neither requests primary-calendar access nor broad Calendar scopes. Canonical Firestore games plus `users/{uid}.followedTeamIds` are the source of truth. The public personalized ICS feed remains available for Apple Calendar and generic/manual subscriptions.
 
-ICS and Google adapters consume the same pure calendar presentation policy. It supplies compact competition labels, localized team names produced by canonical normalization, authoritative finished scores (including 0-0), venue, and lifecycle status. ICS maps cancelled/postponed to RFC 5545 `CANCELLED`/`TENTATIVE`; Google maps them to `cancelled`/`tentative`.
+ICS and Google adapters consume the same pure calendar presentation policy. It supplies compact competition labels, localized team names produced by canonical normalization, authoritative finished scores (including 0-0), venue, and lifecycle status. ICS maps cancelled/postponed to RFC 5545 `CANCELLED`/`TENTATIVE`. Google maps postponed to `tentative`, while a canonical cancellation remains a live `confirmed` resource with `[CANCELLED]` in its title because Google's event status `cancelled` represents deletion.
 
 Google requires event end time while the canonical model has no authoritative end. The Google adapter alone uses an explicitly synthetic two-hour duration. It is not written to Firestore and can be changed without changing provider truth.
 
@@ -44,7 +44,7 @@ No per-game Firestore trigger or unbounded fan-out is used.
 
 Refresh credentials remain in the existing server-only collection and use the existing Secret Manager AES-256-GCM key. Decryption validates algorithm, key, IV, tag, ciphertext, and authentication before use. Refresh/access tokens, OAuth codes, client secrets, and encrypted payloads are never returned or deliberately logged; access tokens are never persisted.
 
-`invalid_grant`, rejected credentials, missing credentials, and malformed ciphertext transition the connection to `reauth_required`, delete the unusable credential, preserve the user's Google calendar, and stop automatic retry. Transient token/API failures retain `active`, record a sanitized retryable error, and never trigger calendar recreation or destructive reconciliation. Only 404/410 from calendar lookup means missing calendar.
+`invalid_grant`, rejected credentials, missing credentials, and malformed ciphertext transition the connection to `reauth_required`, delete the unusable credential, preserve the user's Google calendar, and stop automatic retry. Calendar API 403 quota reasons (`userRateLimitExceeded`, `rateLimitExceeded`, and `quotaExceeded`) and HTTP 429 retain `active`, record a sanitized retryable error, and never trigger calendar recreation or destructive reconciliation. A 403 is not treated as permanent based on status alone. Only 404/410 from calendar lookup means missing calendar.
 
 ## OAuth return and UI race handling
 

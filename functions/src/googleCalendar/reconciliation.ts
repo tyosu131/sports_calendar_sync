@@ -9,7 +9,7 @@ export interface GoogleEvent {
   id: string;
   summary: string;
   location?: string;
-  status: "confirmed" | "tentative" | "cancelled";
+  status: "confirmed" | "tentative";
   start: {dateTime: string};
   end: {dateTime: string};
   extendedProperties: {private: {sportsCalendarSync: string; gameId: string}};
@@ -32,10 +32,13 @@ export function googleEventId(gameId: string): string {
 
 export function googleEventFor(game: CalendarGame): GoogleEvent {
   const view = presentCalendarGame(game);
+  // Google uses event status "cancelled" for deleted resources. Keep a
+  // canonical cancellation visible and encode it in the transport title.
+  const summary = view.status === "cancelled" ? `[CANCELLED] ${view.title}` : view.title;
   return {
-    id: googleEventId(game.id), summary: view.title,
+    id: googleEventId(game.id), summary,
     ...(view.venue ? {location: view.venue} : {}),
-    status: view.status === "cancelled" ? "cancelled" : view.status === "postponed" ? "tentative" : "confirmed",
+    status: view.status === "postponed" ? "tentative" : "confirmed",
     start: {dateTime: game.kickoffUtc.toISOString()},
     // Google requires an end. It is adapter-only synthetic data, never canonical provider truth.
     end: {dateTime: new Date(game.kickoffUtc.getTime() + SYNTHETIC_EVENT_DURATION_MS).toISOString()},

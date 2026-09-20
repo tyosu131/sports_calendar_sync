@@ -185,8 +185,14 @@ class GoogleSyncHttpGateway implements SyncGoogleGateway {
   async calendarUsable(token: string, id: string) {
     try { await axios.get(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(id)}`, {headers: this.headers(token)}); return true; }
     catch (error) {
-      if (axios.isAxiosError(error) && [404, 410].includes(error.response?.status ?? 0)) return false;
-      if (axios.isAxiosError(error) && [401, 403].includes(error.response?.status ?? 0)) throw new CredentialError(true, "credential-rejected");
+      if (axios.isAxiosError(error)) {
+        const failure = classifyCalendarLookupFailure(
+          error.response?.status,
+          error.response?.data?.error?.errors?.[0]?.reason
+        );
+        if (failure.kind === "missing") return false;
+        throw new CredentialError(failure.kind === "reauth", failure.code);
+      }
       throw error;
     }
   }
@@ -203,7 +209,7 @@ class GoogleSyncHttpGateway implements SyncGoogleGateway {
         const events: GoogleEvent[] = []; let pageToken: string | undefined;
         do {
           const response = await axios.get(base(calendarId), {headers: this.headers(token), params: {
-            privateExtendedProperty: `sportsCalendarSync=${MANAGED_EVENT_MARKER}`, showDeleted: false, maxResults: 2500, pageToken,
+            ...MANAGED_EVENT_LIST_PARAMS, pageToken,
           }});
           events.push(...(Array.isArray(response.data.items) ? response.data.items : []));
           pageToken = response.data.nextPageToken;
@@ -224,6 +230,33 @@ class GoogleSyncHttpGateway implements SyncGoogleGateway {
       remove: async (calendarId, id) => { await axios.delete(`${base(calendarId)}/${encodeURIComponent(id)}`, {headers: this.headers(token)}); },
     };
   }
+}
+
+export const MANAGED_EVENT_LIST_PARAMS = Object.freeze({
+  privateExtendedProperty: `sportsCalendarSync=${MANAGED_EVENT_MARKER}`,
+  showDeleted: false,
+  maxResults: 2500,
+});
+
+export type CalendarLookupFailure =
+  | {kind: "missing"; code: "calendar-missing"}
+  | {kind: "reauth"; code: "credential-rejected"}
+  | {kind: "retryable"; code: string};
+
+/** Classifies only documented, sanitized fields; a 403 is never auth failure by status alone. */
+export function classifyCalendarLookupFailure(status?: number, reason?: unknown): CalendarLookupFailure {
+  if (status === 404 || status === 410) return {kind: "missing", code: "calendar-missing"};
+  if (status === 401) return {kind: "reauth", code: "credential-rejected"};
+  const quotaReasons: Record<string, string> = {
+    userRateLimitExceeded: "user-rate-limit-exceeded",
+    rateLimitExceeded: "rate-limit-exceeded",
+    quotaExceeded: "quota-exceeded",
+  };
+  if (status === 403 && typeof reason === "string" && quotaReasons[reason]) {
+    return {kind: "retryable", code: quotaReasons[reason]};
+  }
+  if (status === 429) return {kind: "retryable", code: "rate-limited"};
+  return {kind: "retryable", code: "calendar-lookup-failed"};
 }
 
 function service(secrets: GoogleCalendarSecrets): GoogleCalendarConnectionService {
