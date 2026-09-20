@@ -12,6 +12,7 @@ const { orchestrateGoalTeamFixtures } = require('../lib/providers/goal/syncOrche
 const { V1_GOAL_MEMBERSHIP_BINDINGS, PENDING_GOAL_COMPETITION_EVIDENCE } = require('../lib/providers/goal/v1CompetitionBindings');
 
 const fixture = () => structuredClone(payload.data[0]);
+const scoredFixture = () => structuredClone(payload.data[2]);
 const context = {
   competitionKey: 'football_premier', competitionSeasonKey: 'football_premier_2026',
   leagueId: 'premier', homeTeamId: 'arsenal', awayTeamId: 'kawasaki_frontale',
@@ -89,35 +90,51 @@ test('client classifies errors and rejects malformed fixture contracts', async (
   await assert.rejects(legacy.upcoming('x'), e => e.kind === 'invalid_response');
 });
 
-test('client accepts nullable or paired non-negative integer GOAL scores and preserves 0-0', async () => {
-  const nilNil = fixture(); nilNil.homeScore = 0; nilNil.awayScore = 0;
-  const unavailable = fixture(); unavailable.id = 'unavailable'; unavailable.homeScore = null; unavailable.awayScore = null;
-  const client = new GoalApiClient('key', { get: async () => ({ data: envelope([nilNil, unavailable]) }) });
+test('client normalizes GOAL scoreboard strings and preserves 0-0 and unavailable scores', async () => {
+  const threeNil = scoredFixture(); threeNil.homeTeamFtScore = '9'; threeNil.awayTeamFtScore = '8';
+  const nilNil = scoredFixture(); nilNil.id = 'nil-nil'; nilNil.homeTeamScore = '0'; nilNil.awayTeamScore = '0';
+  const unavailable = fixture(); unavailable.id = 'unavailable';
+  const nullable = fixture(); nullable.id = 'nullable'; nullable.homeTeamScore = null; nullable.awayTeamScore = null;
+  const client = new GoalApiClient('key', { get: async () => ({ data: envelope([threeNil, nilNil, unavailable, nullable]) }) });
   const result = await client.fixtures('x');
-  assert.deepEqual([result[0].homeScore, result[0].awayScore], [0, 0]);
-  assert.deepEqual([result[1].homeScore, result[1].awayScore], [null, null]);
+  assert.deepEqual([result[0].homeScore, result[0].awayScore], [3, 0]);
+  assert.deepEqual([result[1].homeScore, result[1].awayScore], [0, 0]);
+  assert.equal(Object.hasOwn(result[2], 'homeScore'), false);
+  assert.equal(Object.hasOwn(result[2], 'awayScore'), false);
+  assert.deepEqual([result[3].homeScore, result[3].awayScore], [null, null]);
+  assert.equal(Object.hasOwn(result[0], 'homeTeamScore'), false);
+  assert.equal(Object.hasOwn(result[0], 'homeTeamFtScore'), false);
 });
 
-test('client rejects malformed and asymmetric GOAL scores', async () => {
+test('client rejects malformed, negative, decimal, and asymmetric GOAL scoreboard values', async () => {
   for (const scores of [
-    { homeScore: '2', awayScore: 1 },
-    { homeScore: -1, awayScore: 1 },
-    { homeScore: 1.5, awayScore: 1 },
-    { homeScore: 2 },
-    { homeScore: null, awayScore: 2 },
+    { homeTeamScore: 'two', awayTeamScore: '1' },
+    { homeTeamScore: '-1', awayTeamScore: '1' },
+    { homeTeamScore: '1.5', awayTeamScore: '1' },
+    { homeTeamScore: '2' },
+    { homeTeamScore: null, awayTeamScore: '2' },
   ]) {
-    const input = Object.assign(fixture(), scores);
+    const input = Object.assign(scoredFixture(), scores);
+    if (!Object.hasOwn(scores, 'awayTeamScore')) delete input.awayTeamScore;
     const client = new GoalApiClient('key', { get: async () => ({ data: envelope([input]) }) });
     await assert.rejects(client.fixtures('x'), e => e.kind === 'invalid_response');
   }
 });
 
-test('adapter maps paired authoritative scores and omits unavailable scores', () => {
-  const scored = fixture(); scored.matchStatus = 'FINISHED'; scored.homeScore = 2; scored.awayScore = 0;
+test('client passes canonical numeric scores to the adapter and resulting GameDoc', async () => {
+  const client = new GoalApiClient('key', { get: async () => ({ data: envelope([scoredFixture()]) }) });
+  const [scored] = await client.fixtures('x');
+  assert.deepEqual([scored.homeScore, scored.awayScore], [3, 0]);
+  const game = adaptGoalFixtureToGameDoc(scored, context);
   assert.deepEqual(
-    [adaptGoalFixtureToGameDoc(scored, context).homeScore, adaptGoalFixtureToGameDoc(scored, context).awayScore],
-    [2, 0],
+    [game.homeScore, game.awayScore],
+    [3, 0],
   );
+  assert.equal(typeof game.homeScore, 'number');
+  assert.equal(typeof game.awayScore, 'number');
+});
+
+test('adapter omits unavailable canonical scores', () => {
   const unavailable = fixture(); unavailable.homeScore = null; unavailable.awayScore = null;
   const game = adaptGoalFixtureToGameDoc(unavailable, context);
   assert.equal(Object.hasOwn(game, 'homeScore'), false);

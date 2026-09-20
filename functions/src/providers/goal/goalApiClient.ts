@@ -71,11 +71,14 @@ export class GoalApiClient {
 
   private parseFixtures(body: unknown): GoalFixture[] {
     const envelope = body as { success?: unknown; data?: unknown };
-    if (envelope.success !== true || !Array.isArray(envelope.data) ||
-        !envelope.data.every(isGoalFixture)) {
+    if (envelope.success !== true || !Array.isArray(envelope.data)) {
       throw new GoalApiError("invalid_response", "GOAL response did not contain valid fixtures");
     }
-    return envelope.data;
+    const fixtures = envelope.data.map(normalizeGoalFixture);
+    if (!fixtures.every((fixture): fixture is GoalFixture => fixture !== undefined)) {
+      throw new GoalApiError("invalid_response", "GOAL response did not contain valid fixtures");
+    }
+    return fixtures;
   }
 
   private async request(path: string): Promise<unknown> {
@@ -102,26 +105,49 @@ export class GoalApiClient {
   }
 }
 
-function isGoalFixture(value: unknown): value is GoalFixture {
-  if (!value || typeof value !== "object") return false;
-  const fixture = value as Partial<GoalFixture>;
+type RawGoalFixture = Omit<GoalFixture, "homeScore" | "awayScore"> & {
+  homeTeamScore?: unknown;
+  awayTeamScore?: unknown;
+  homeTeamFtScore?: unknown;
+  awayTeamFtScore?: unknown;
+};
+
+function normalizeGoalFixture(value: unknown): GoalFixture | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const fixture = value as Partial<RawGoalFixture>;
   const team = (value: unknown): value is { id: string; name: string } =>
     !!value && typeof value === "object" &&
     typeof (value as { id?: unknown }).id === "string" &&
     typeof (value as { name?: unknown }).name === "string";
-  const score = (value: unknown): value is number | null | undefined =>
-    value === undefined || value === null ||
-    (typeof value === "number" && Number.isInteger(value) && value >= 0);
-  const hasHomeScore = typeof fixture.homeScore === "number";
-  const hasAwayScore = typeof fixture.awayScore === "number";
-  return typeof fixture.id === "string" && typeof fixture.kickoffUtc === "string" &&
+  const validFixture = typeof fixture.id === "string" && typeof fixture.kickoffUtc === "string" &&
     typeof fixture.matchStatus === "string" && team(fixture.league) &&
     typeof fixture.leagueYear === "string" &&
     team(fixture.homeTeam) && team(fixture.awayTeam) &&
-    score(fixture.homeScore) && score(fixture.awayScore) &&
-    hasHomeScore === hasAwayScore &&
     (fixture.venue === undefined || fixture.venue === null || typeof fixture.venue === "string") &&
     (fixture.matchStadium === undefined || fixture.matchStadium === null || typeof fixture.matchStadium === "string");
+  if (!validFixture) return undefined;
+
+  const scores = normalizeScorePair(fixture.homeTeamScore, fixture.awayTeamScore);
+  if (scores === undefined) return undefined;
+  const {
+    homeTeamScore: _homeTeamScore,
+    awayTeamScore: _awayTeamScore,
+    homeTeamFtScore: _homeTeamFtScore,
+    awayTeamFtScore: _awayTeamFtScore,
+    ...canonical
+  } = fixture;
+  return { ...canonical, ...scores } as GoalFixture;
+}
+
+function normalizeScorePair(home: unknown, away: unknown): Pick<GoalFixture, "homeScore" | "awayScore"> | undefined {
+  if (home === undefined && away === undefined) return {};
+  if (home === null && away === null) return { homeScore: null, awayScore: null };
+  if (typeof home !== "string" || typeof away !== "string" ||
+      !/^\d+$/.test(home) || !/^\d+$/.test(away)) return undefined;
+  const homeScore = Number(home);
+  const awayScore = Number(away);
+  if (!Number.isSafeInteger(homeScore) || !Number.isSafeInteger(awayScore)) return undefined;
+  return { homeScore, awayScore };
 }
 
 function isPagination(value: unknown): value is GoalFixturesPage["pagination"] {
