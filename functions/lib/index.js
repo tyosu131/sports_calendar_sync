@@ -49,7 +49,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.triggerFootballSync = exports.scheduledSyncFootball = exports.rotateCalendarFeed = exports.ensureCalendarFeed = exports.getCalendar = void 0;
+exports.triggerFootballSync = exports.scheduledSyncFootball = exports.googleCalendarOAuthCallback = exports.disconnectGoogleCalendar = exports.getGoogleCalendarConnectionStatus = exports.beginGoogleCalendarConnection = exports.rotateCalendarFeed = exports.ensureCalendarFeed = exports.getCalendar = void 0;
 const admin = __importStar(require("firebase-admin"));
 const functions = __importStar(require("firebase-functions/v1"));
 const params_1 = require("firebase-functions/params");
@@ -61,6 +61,29 @@ Object.defineProperty(exports, "getCalendar", { enumerable: true, get: function 
 var calendarFeeds_1 = require("./functions/calendarFeeds");
 Object.defineProperty(exports, "ensureCalendarFeed", { enumerable: true, get: function () { return calendarFeeds_1.ensureCalendarFeed; } });
 Object.defineProperty(exports, "rotateCalendarFeed", { enumerable: true, get: function () { return calendarFeeds_1.rotateCalendarFeed; } });
+const googleCalendarConnection_1 = require("./functions/googleCalendarConnection");
+const GOOGLE_CALENDAR_OAUTH_CLIENT_ID = (0, params_1.defineSecret)("GOOGLE_CALENDAR_OAUTH_CLIENT_ID");
+const GOOGLE_CALENDAR_OAUTH_CLIENT_SECRET = (0, params_1.defineSecret)("GOOGLE_CALENDAR_OAUTH_CLIENT_SECRET");
+const GOOGLE_CALENDAR_TOKEN_ENCRYPTION_KEY = (0, params_1.defineSecret)("GOOGLE_CALENDAR_TOKEN_ENCRYPTION_KEY");
+const GOOGLE_CALENDAR_OAUTH_REDIRECT_URI = (0, params_1.defineSecret)("GOOGLE_CALENDAR_OAUTH_REDIRECT_URI");
+const calendarSecrets = [GOOGLE_CALENDAR_OAUTH_CLIENT_ID, GOOGLE_CALENDAR_OAUTH_CLIENT_SECRET,
+    GOOGLE_CALENDAR_TOKEN_ENCRYPTION_KEY, GOOGLE_CALENDAR_OAUTH_REDIRECT_URI];
+function googleHandlers() {
+    return (0, googleCalendarConnection_1.createGoogleCalendarHandlers)({
+        clientId: GOOGLE_CALENDAR_OAUTH_CLIENT_ID.value(),
+        clientSecret: GOOGLE_CALENDAR_OAUTH_CLIENT_SECRET.value(),
+        encryptionKey: GOOGLE_CALENDAR_TOKEN_ENCRYPTION_KEY.value(),
+        redirectUri: GOOGLE_CALENDAR_OAUTH_REDIRECT_URI.value(),
+    });
+}
+exports.beginGoogleCalendarConnection = functions.runWith({ secrets: calendarSecrets })
+    .region("asia-northeast1").https.onCall((data, context) => googleHandlers().begin(data, context));
+exports.getGoogleCalendarConnectionStatus = functions.runWith({ secrets: calendarSecrets })
+    .region("asia-northeast1").https.onCall((data, context) => googleHandlers().status(data, context));
+exports.disconnectGoogleCalendar = functions.runWith({ secrets: calendarSecrets })
+    .region("asia-northeast1").https.onCall((data, context) => googleHandlers().disconnect(data, context));
+exports.googleCalendarOAuthCallback = functions.runWith({ secrets: calendarSecrets })
+    .region("asia-northeast1").https.onRequest((request, response) => googleHandlers().callback(request, response));
 // ── Scheduled Functions ───────────────────────────────────────────────────────
 const syncGoalV1_1 = require("./pipelines/syncGoalV1");
 const adminAuthorization_1 = require("./functions/adminAuthorization");

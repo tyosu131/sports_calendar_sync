@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../data/providers/auth_providers.dart';
 import '../../data/providers/repository_providers.dart';
 import '../widgets/calendar_sync_button.dart';
+import '../widgets/google_calendar_connection_tile.dart';
 
 /// Settings screen: account info, calendar sync URL, sign out.
 class SettingsScreen extends ConsumerWidget {
@@ -55,6 +56,7 @@ class SettingsScreen extends ConsumerWidget {
                   subtitle: Text('フォロー中のすべてのチーム'),
                   trailing: CalendarSyncButton(),
                 ),
+                const GoogleCalendarConnectionTile(),
                 const Divider(),
               ],
 

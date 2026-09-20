@@ -27,6 +27,30 @@ admin.initializeApp();
 export { getCalendar } from "./functions/getCalendar";
 export { ensureCalendarFeed, rotateCalendarFeed } from "./functions/calendarFeeds";
 
+import { createGoogleCalendarHandlers } from "./functions/googleCalendarConnection";
+const GOOGLE_CALENDAR_OAUTH_CLIENT_ID = defineSecret("GOOGLE_CALENDAR_OAUTH_CLIENT_ID");
+const GOOGLE_CALENDAR_OAUTH_CLIENT_SECRET = defineSecret("GOOGLE_CALENDAR_OAUTH_CLIENT_SECRET");
+const GOOGLE_CALENDAR_TOKEN_ENCRYPTION_KEY = defineSecret("GOOGLE_CALENDAR_TOKEN_ENCRYPTION_KEY");
+const GOOGLE_CALENDAR_OAUTH_REDIRECT_URI = defineSecret("GOOGLE_CALENDAR_OAUTH_REDIRECT_URI");
+const calendarSecrets = [GOOGLE_CALENDAR_OAUTH_CLIENT_ID, GOOGLE_CALENDAR_OAUTH_CLIENT_SECRET,
+  GOOGLE_CALENDAR_TOKEN_ENCRYPTION_KEY, GOOGLE_CALENDAR_OAUTH_REDIRECT_URI];
+function googleHandlers() {
+  return createGoogleCalendarHandlers({
+    clientId: GOOGLE_CALENDAR_OAUTH_CLIENT_ID.value(),
+    clientSecret: GOOGLE_CALENDAR_OAUTH_CLIENT_SECRET.value(),
+    encryptionKey: GOOGLE_CALENDAR_TOKEN_ENCRYPTION_KEY.value(),
+    redirectUri: GOOGLE_CALENDAR_OAUTH_REDIRECT_URI.value(),
+  });
+}
+export const beginGoogleCalendarConnection = functions.runWith({secrets: calendarSecrets})
+  .region("asia-northeast1").https.onCall((data, context) => googleHandlers().begin(data, context));
+export const getGoogleCalendarConnectionStatus = functions.runWith({secrets: calendarSecrets})
+  .region("asia-northeast1").https.onCall((data, context) => googleHandlers().status(data, context));
+export const disconnectGoogleCalendar = functions.runWith({secrets: calendarSecrets})
+  .region("asia-northeast1").https.onCall((data, context) => googleHandlers().disconnect(data, context));
+export const googleCalendarOAuthCallback = functions.runWith({secrets: calendarSecrets})
+  .region("asia-northeast1").https.onRequest((request, response) => googleHandlers().callback(request, response));
+
 // ── Scheduled Functions ───────────────────────────────────────────────────────
 
 import { syncGoalV1Fixtures } from "./pipelines/syncGoalV1";
