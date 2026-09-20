@@ -22,8 +22,12 @@ class Store {
 }
 
 class Google {
-  constructor() { this.created = 0; this.existing = undefined; this.result = {refreshToken: "secret-token", scopes: ["scope"]}; }
+  constructor() { this.created = 0; this.accessible = true; this.result = {refreshToken: "secret-token", scopes: ["scope"]}; }
   async exchangeCode() { if (this.failure) throw new Error(); return this.result; }
+  async isCalendarAccessible() {
+    if (this.accessFailure) throw new Error("provider unavailable");
+    return this.accessible;
+  }
   async createCalendar() { this.created++; return "calendar-id"; }
 }
 
@@ -121,11 +125,49 @@ test("bootstrap encrypts credentials and status is sanitized", async () => {
   assert.equal(JSON.stringify(await fixture.service.status("uid-1")).includes("token"), false);
 });
 
-test("reconnect reuses the persisted calendar and disconnect disables use", async () => {
+test("accessible persisted calendar is reused without duplicate creation", async () => {
   const fixture = make();
   await fixture.service.callback({state: await stateFrom(fixture.service), code: "x"});
   await fixture.service.callback({state: await stateFrom(fixture.service), code: "x"});
   assert.equal(fixture.google.created, 1);
+  assert.equal(fixture.store.connections.get("uid-1").calendarId, "calendar-id");
+});
+
+test("inaccessible or deleted persisted calendar is replaced and persisted", async () => {
+  for (const condition of ["inaccessible", "deleted"]) {
+    const fixture = make();
+    fixture.store.connections.set("uid-1", {status: "disconnected", calendarId: `old-${condition}`});
+    fixture.google.accessible = false;
+    fixture.google.createCalendar = async () => {
+      fixture.google.created++;
+      return `new-${condition}`;
+    };
+
+    await fixture.service.callback({state: await stateFrom(fixture.service), code: "x"});
+    assert.equal(fixture.google.created, 1);
+    assert.equal(fixture.store.connections.get("uid-1").calendarId, `new-${condition}`);
+  }
+});
+
+test("unexpected calendar verification failure does not create or activate", async () => {
+  const fixture = make();
+  fixture.store.connections.set("uid-1", {status: "disconnected", calendarId: "existing-id"});
+  fixture.google.accessFailure = true;
+  const state = await stateFrom(fixture.service);
+  await assert.rejects(
+    () => fixture.service.callback({state, code: "x"}),
+    error => error.code === "calendar-verification-failed"
+  );
+  assert.equal(fixture.google.created, 0);
+  assert.deepEqual(fixture.store.connections.get("uid-1"), {
+    status: "disconnected", calendarId: "existing-id",
+  });
+  assert.equal(fixture.store.credentials.size, 0);
+});
+
+test("disconnect disables active use while preserving the usable calendar id", async () => {
+  const fixture = make();
+  await fixture.service.callback({state: await stateFrom(fixture.service), code: "x"});
   await fixture.service.disconnect("uid-1");
   assert.deepEqual(await fixture.service.status("uid-1"), {connected: false});
   assert.equal(fixture.store.credentials.has("uid-1"), false);

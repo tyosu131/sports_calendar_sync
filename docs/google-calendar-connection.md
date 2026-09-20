@@ -20,12 +20,13 @@ tag, and algorithm are stored in the server-only
 Access tokens are used transiently and are not persisted.
 
 The calendar carries the description marker
-`sports-calendar-sync:app-created`. Bootstrap reuses the calendar ID already
-recorded for the user, and the one-time state makes a replayed callback fail
-before another calendar can be created. This avoids requiring a broader scope
-for calendar-list discovery. Disconnect deletes the encrypted credential and
-marks the connection inactive, while deliberately preserving the Google
-calendar and its contents.
+`sports-calendar-sync:app-created`. On reconnect, bootstrap checks a recorded
+calendar ID directly with `calendars.get` using the newly authorized credential.
+It reuses an accessible calendar, but creates and records a new app-created
+calendar when the old ID is deleted or belongs to another Google account. This
+recovery uses the narrow scope and does not require calendar-list discovery.
+Disconnect deletes the encrypted credential and marks the connection inactive,
+while deliberately preserving the Google calendar and its contents.
 
 ## Human-required Google Cloud configuration
 
@@ -54,9 +55,9 @@ and [Firebase Functions secrets](https://firebase.google.com/docs/functions/conf
 
 - Revocation at Google is not attempted on disconnect; local write capability
   is removed immediately and the calendar is retained.
-- If a user deletes the already-recorded calendar in Google and reconnects, the
-  existing ID currently wins; future sync should classify Google's `404` as a
-  recoverable invalid-calendar condition.
+- A recorded calendar that returns `404` or `410` from `calendars.get` is
+  replaced on reconnect. Authentication, quota, and unexpected provider errors
+  fail the connection instead of silently creating or activating a calendar.
 - The app-created scope must be validated against the configured OAuth project
   during release testing. The code does not silently fall back to broader
   Calendar scopes.

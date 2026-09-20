@@ -75,14 +75,30 @@ class GoogleCalendarConnectionService {
         // unrecorded Google calendar behind.
         const encryptedCredential = encryptRefreshToken(token.refreshToken, this.config.encryptionKey);
         const previous = await this.store.getConnection(uid);
-        let calendarId = previous?.calendarId;
-        try {
-            calendarId = calendarId ?? await this.google.createCalendar(token.refreshToken);
+        let calendarId;
+        if (previous?.calendarId) {
+            let accessible;
+            try {
+                accessible = await this.google.isCalendarAccessible(token.refreshToken, previous.calendarId);
+            }
+            catch (error) {
+                if (error instanceof CalendarConnectionError)
+                    throw error;
+                throw new CalendarConnectionError("calendar-verification-failed");
+            }
+            if (accessible) {
+                calendarId = previous.calendarId;
+            }
         }
-        catch (error) {
-            if (error instanceof CalendarConnectionError)
-                throw error;
-            throw new CalendarConnectionError("calendar-creation-failed");
+        if (!calendarId) {
+            try {
+                calendarId = await this.google.createCalendar(token.refreshToken);
+            }
+            catch (error) {
+                if (error instanceof CalendarConnectionError)
+                    throw error;
+                throw new CalendarConnectionError("calendar-creation-failed");
+            }
         }
         await this.store.saveCredential(uid, encryptedCredential);
         await this.store.saveConnection(uid, {

@@ -22,6 +22,7 @@ export interface ConnectionStore {
 
 export interface GoogleGateway {
   exchangeCode(code: string): Promise<{refreshToken?: string; scopes: string[]}>;
+  isCalendarAccessible(refreshToken: string, calendarId: string): Promise<boolean>;
   createCalendar(refreshToken: string): Promise<string>;
 }
 
@@ -97,12 +98,29 @@ export class GoogleCalendarConnectionService {
     );
 
     const previous = await this.store.getConnection(uid);
-    let calendarId = previous?.calendarId;
-    try {
-      calendarId = calendarId ?? await this.google.createCalendar(token.refreshToken);
-    } catch (error) {
-      if (error instanceof CalendarConnectionError) throw error;
-      throw new CalendarConnectionError("calendar-creation-failed");
+    let calendarId: string | undefined;
+    if (previous?.calendarId) {
+      let accessible: boolean;
+      try {
+        accessible = await this.google.isCalendarAccessible(
+          token.refreshToken,
+          previous.calendarId
+        );
+      } catch (error) {
+        if (error instanceof CalendarConnectionError) throw error;
+        throw new CalendarConnectionError("calendar-verification-failed");
+      }
+      if (accessible) {
+        calendarId = previous.calendarId;
+      }
+    }
+    if (!calendarId) {
+      try {
+        calendarId = await this.google.createCalendar(token.refreshToken);
+      } catch (error) {
+        if (error instanceof CalendarConnectionError) throw error;
+        throw new CalendarConnectionError("calendar-creation-failed");
+      }
     }
 
     await this.store.saveCredential(uid, encryptedCredential);

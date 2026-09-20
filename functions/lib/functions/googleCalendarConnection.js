@@ -118,6 +118,18 @@ class GoogleHttpGateway {
         }
         throw error;
     }
+    async isCalendarAccessible(refreshToken, calendarId) {
+        try {
+            await axios_1.default.get(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}`, { headers: this.headers(refreshToken) });
+            return true;
+        }
+        catch (error) {
+            if (axios_1.default.isAxiosError(error) && [404, 410].includes(error.response?.status ?? 0)) {
+                return false;
+            }
+            return this.rethrowCredential(error);
+        }
+    }
     async createCalendar(refreshToken) {
         try {
             const response = await axios_1.default.post("https://www.googleapis.com/calendar/v3/calendars", {
