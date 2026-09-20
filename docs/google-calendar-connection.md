@@ -4,8 +4,8 @@
 
 - **Code complete:** OAuth connection, direct event reconciliation, triggers, app return, and sanitized UI status are implemented in this repository.
 - **Production deployed:** yes. The direct integration delivered through PR #37 is deployed.
-- **Production verified on iOS:** yes. A real iPhone completed OAuth, returned to the app, recreated a deleted app-owned **Sports Calendar**, and populated its initial events. Competition labels and finished scores were visible in those events.
-- **Still unverified / pending:** Android real-device behavior, OAuth denial UX on a real device, terminated-app deep-link return, revoked-credential and quota/rate-limit production behavior, every transient/callback failure path, and Google OAuth app publishing/verification.
+- **Production verified on iOS:** yes. A real iPhone completed OAuth, recreated a deleted app-owned **Sports Calendar**, and populated its initial events. Competition labels and finished scores were visible in those events.
+- **Still unverified / pending:** clean standard OAuth callback to `sportscalendar://` automatic app return after removal of the legacy Google ICS route, Android real-device behavior, OAuth denial UX on a real device, terminated-app deep-link return, revoked-credential and quota/rate-limit production behavior, every transient/callback failure path, and Google OAuth app publishing/verification.
 
 The Google OAuth application remains External / Testing. Google's unverified-app warning and OAuth publishing/verification are operational work, not completed by this change. Functions intentionally remain on Node.js 20; its announced decommission must be handled separately.
 
@@ -55,6 +55,6 @@ Browser launch itself is not success. On app resume Flutter polls authoritative 
 
 ## Production evidence and remaining checks
 
-Verified in production on a real iPhone: OAuth connection, return to the app, app-created calendar creation, deleted-calendar recreation, initial direct event population, competition labels, and finished scores.
+Verified in production on a real iPhone: OAuth connection completion, app-created calendar creation, deleted-calendar recreation, initial direct event population, competition labels, and finished scores.
 
-Still requiring production-only verification: the Android real-device flow, OAuth denial UX, terminated-app deep-link return, revoked-credential behavior, quota/rate-limit behavior, and all transient failure paths. Google OAuth publishing/verification also remains incomplete. Follow/unfollow and other update paths should remain in the human post-merge smoke plan where they have not been separately observed. Do not claim OAuth publishing/verification until Google completes it.
+Still requiring production-only verification: clean standard callback to `sportscalendar://` and automatic app return after removal of the legacy Google ICS route, the Android real-device flow, OAuth denial UX, terminated-app deep-link return, revoked-credential behavior, quota/rate-limit behavior, and all transient failure paths. Google OAuth publishing/verification also remains incomplete. Follow/unfollow and other update paths should remain in the human post-merge smoke plan where they have not been separately observed. Do not claim OAuth publishing/verification until Google completes it.

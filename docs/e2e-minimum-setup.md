@@ -1,5 +1,7 @@
 # E2E Minimum Setup Guide
 
+> **Historical / deprecated:** This guide records an earlier project phase and is not a current deployment or operations runbook. Its undeployed-service status, API-SPORTS, `functions.config()`, service-account, and deployment steps must not be treated as current instructions. See [Current State](current-state.md) for the current source of truth and [Google Calendar direct synchronization](google-calendar-connection.md) for the current Google flow; current real synchronization uses the GOAL V1 path.
+
 > 目的: Firestore に最小データを入れ、Cloud Functions を 1 回走らせ、アプリに実データが出るところまで確認する  
 > 前提: Firebase CLI ログイン済み (`firebase login:list` で `tyosu131@gmail.com` が表示されること)  
 > プロジェクト ID: `sports-calendar-sync-a4564`
