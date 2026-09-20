@@ -132,8 +132,6 @@ function buildSampleGameDocs({ timestampFromDate } = {}) {
         timezone: TIMEZONE,
         status: 'scheduled',
         venue: definition.venue,
-        homeScore: null,
-        awayScore: null,
         broadcastPlatforms: [],
         externalFixtureId: definition.externalFixtureId,
         rapidApiFixtureId: definition.externalFixtureId,

@@ -39,6 +39,10 @@ function adaptGoalFixtureToGameDoc(fixture, context) {
         startTimeJST: (0, timezone_1.toJstStorageString)(fixture.kickoffUtc),
         timezone: "UTC",
         status,
+        ...(typeof fixture.homeScore === "number" && typeof fixture.awayScore === "number" ? {
+            homeScore: fixture.homeScore,
+            awayScore: fixture.awayScore,
+        } : {}),
         ...(venue ? { venue } : {}),
         broadcastPlatforms: [],
         sourceProvider: "goal",

@@ -12,6 +12,7 @@ const {
   calendarWindowStart,
   serveCalendar,
 } = require("../lib/functions/getCalendar");
+const { buildSampleGameDocs } = require("../scripts/seedJ1SampleGame");
 
 function game(id, homeTeamId, awayTeamId) {
   return {
@@ -94,6 +95,62 @@ test("Firestore normalization accepts one canonical side and rejects invalid ide
   assert.throws(() => asNormalizedGame("neither", base), /invalid team identity/);
   assert.throws(() => asNormalizedGame("empty", { ...base, awayTeamId: " " }), /invalid team identity/);
   assert.throws(() => asNormalizedGame("wrong-type", { ...base, homeTeamId: 7 }), /invalid team identity/);
+});
+
+test("Firestore scores and venue flow through the same personalized ICS feed", async () => {
+  const normalized = asNormalizedGame("result", {
+    startTimeUTC: Timestamp.fromDate(new Date("2026-09-20T10:00:00Z")),
+    competitionKey: "football_j1",
+    homeTeamId: "kawasaki_frontale",
+    awayTeamId: "nagoya_grampus",
+    homeTeamNameJa: "川崎フロンターレ",
+    awayTeamNameJa: "名古屋グランパス",
+    status: "finished",
+    homeScore: 3,
+    awayScore: 0,
+    venue: "等々力陸上競技場",
+  });
+  const calendar = await buildPersonalizedCalendar(repository({
+    findUser: async () => ({ followedTeamIds: ["kawasaki_frontale"] }),
+    findCalendarGamesForTeams: async () => [normalized],
+  }), "secret");
+  assert.match(calendar, /SUMMARY:\[J1\] 川崎フロンターレ 3-0 名古屋グランパス/);
+  assert.match(calendar, /LOCATION:等々力陸上競技場/);
+  assert.match(calendar, /UID:result@sports-calendar-sync/);
+});
+
+test("Firestore normalization preserves 0-0 and rejects malformed score pairs", () => {
+  const base = {
+    startTimeUTC: Timestamp.fromDate(new Date("2026-10-01T10:00:00Z")),
+    homeTeamId: "home",
+    awayTeamId: "away",
+    homeTeamNameJa: "Home",
+    awayTeamNameJa: "Away",
+    status: "finished",
+  };
+  const unavailable = asNormalizedGame("absent", base);
+  assert.equal(Object.hasOwn(unavailable, "homeScore"), false);
+  assert.equal(Object.hasOwn(unavailable, "awayScore"), false);
+  const nilNil = asNormalizedGame("nil-nil", { ...base, homeScore: 0, awayScore: 0 });
+  assert.deepEqual([nilNil.homeScore, nilNil.awayScore], [0, 0]);
+  const legacyUnavailable = asNormalizedGame("legacy-null", {
+    ...base, homeScore: null, awayScore: null,
+  });
+  assert.equal(Object.hasOwn(legacyUnavailable, "homeScore"), false);
+  assert.equal(Object.hasOwn(legacyUnavailable, "awayScore"), false);
+  assert.throws(() => asNormalizedGame("one-sided", { ...base, homeScore: 1 }), /invalid scores/);
+  assert.throws(() => asNormalizedGame("home-only", { ...base, homeScore: 1, awayScore: null }), /invalid scores/);
+  assert.throws(() => asNormalizedGame("away-only", { ...base, homeScore: null, awayScore: 1 }), /invalid scores/);
+  assert.throws(() => asNormalizedGame("negative", { ...base, homeScore: -1, awayScore: 0 }), /invalid scores/);
+  assert.throws(() => asNormalizedGame("decimal", { ...base, homeScore: 1.5, awayScore: 0 }), /invalid scores/);
+  assert.throws(() => asNormalizedGame("string", { ...base, homeScore: "1", awayScore: 0 }), /invalid scores/);
+});
+
+test("sample game builder omits unavailable score fields", () => {
+  for (const { data } of buildSampleGameDocs()) {
+    assert.equal(Object.hasOwn(data, "homeScore"), false);
+    assert.equal(Object.hasOwn(data, "awayScore"), false);
+  }
 });
 
 test("team feed must be a member of the owner's canonical follows", async () => {
