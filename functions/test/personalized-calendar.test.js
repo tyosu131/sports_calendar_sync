@@ -12,6 +12,7 @@ const {
   calendarWindowStart,
   serveCalendar,
 } = require("../lib/functions/getCalendar");
+const { buildSampleGameDocs } = require("../scripts/seedJ1SampleGame");
 
 function game(id, homeTeamId, awayTeamId) {
   return {
@@ -127,10 +128,29 @@ test("Firestore normalization preserves 0-0 and rejects malformed score pairs", 
     awayTeamNameJa: "Away",
     status: "finished",
   };
+  const unavailable = asNormalizedGame("absent", base);
+  assert.equal(Object.hasOwn(unavailable, "homeScore"), false);
+  assert.equal(Object.hasOwn(unavailable, "awayScore"), false);
   const nilNil = asNormalizedGame("nil-nil", { ...base, homeScore: 0, awayScore: 0 });
   assert.deepEqual([nilNil.homeScore, nilNil.awayScore], [0, 0]);
+  const legacyUnavailable = asNormalizedGame("legacy-null", {
+    ...base, homeScore: null, awayScore: null,
+  });
+  assert.equal(Object.hasOwn(legacyUnavailable, "homeScore"), false);
+  assert.equal(Object.hasOwn(legacyUnavailable, "awayScore"), false);
   assert.throws(() => asNormalizedGame("one-sided", { ...base, homeScore: 1 }), /invalid scores/);
+  assert.throws(() => asNormalizedGame("home-only", { ...base, homeScore: 1, awayScore: null }), /invalid scores/);
+  assert.throws(() => asNormalizedGame("away-only", { ...base, homeScore: null, awayScore: 1 }), /invalid scores/);
+  assert.throws(() => asNormalizedGame("negative", { ...base, homeScore: -1, awayScore: 0 }), /invalid scores/);
   assert.throws(() => asNormalizedGame("decimal", { ...base, homeScore: 1.5, awayScore: 0 }), /invalid scores/);
+  assert.throws(() => asNormalizedGame("string", { ...base, homeScore: "1", awayScore: 0 }), /invalid scores/);
+});
+
+test("sample game builder omits unavailable score fields", () => {
+  for (const { data } of buildSampleGameDocs()) {
+    assert.equal(Object.hasOwn(data, "homeScore"), false);
+    assert.equal(Object.hasOwn(data, "awayScore"), false);
+  }
 });
 
 test("team feed must be a member of the owner's canonical follows", async () => {

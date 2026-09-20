@@ -46,8 +46,12 @@ export function asNormalizedGame(id: string, data: DocumentData): NormalizedGame
   const hasHomeScore = Object.prototype.hasOwnProperty.call(data, "homeScore");
   const hasAwayScore = Object.prototype.hasOwnProperty.call(data, "awayScore");
   const validScore = (value: unknown) => typeof value === "number" && Number.isInteger(value) && value >= 0;
-  if (hasHomeScore !== hasAwayScore ||
-      (hasHomeScore && (!validScore(data.homeScore) || !validScore(data.awayScore)))) {
+  const scoresAbsent = !hasHomeScore && !hasAwayScore;
+  const legacyScoresUnavailable = hasHomeScore && hasAwayScore &&
+    data.homeScore === null && data.awayScore === null;
+  const hasAuthoritativeScores = hasHomeScore && hasAwayScore &&
+    validScore(data.homeScore) && validScore(data.awayScore);
+  if (!scoresAbsent && !legacyScoresUnavailable && !hasAuthoritativeScores) {
     throw new Error(`Game ${id} has invalid scores`);
   }
 
@@ -68,7 +72,10 @@ export function asNormalizedGame(id: string, data: DocumentData): NormalizedGame
     }, undefined, hasAwayTeamId ? data.awayTeamId as string : undefined),
     ...(competitionCompact ? { competitionCompact } : {}),
     status: data.status,
-    ...(hasHomeScore ? { homeScore: data.homeScore as number, awayScore: data.awayScore as number } : {}),
+    ...(hasAuthoritativeScores ? {
+      homeScore: data.homeScore as number,
+      awayScore: data.awayScore as number,
+    } : {}),
     venue: typeof data.venue === "string" ? data.venue : undefined,
     broadcastPlatforms: Array.isArray(data.broadcastPlatforms) ?
       data.broadcastPlatforms.filter((item: unknown) =>
