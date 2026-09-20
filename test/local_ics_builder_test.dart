@@ -41,7 +41,7 @@ void main() {
       );
 
       expect(ics, contains('UID:sample_game_001@sports-calendar-sync.local'));
-      expect(ics, contains('SUMMARY:鹿島アントラーズ vs 浦和レッズ'));
+      expect(ics, contains('SUMMARY:[J1] 鹿島アントラーズ vs 浦和レッズ'));
     });
 
     test('escapes description and location text', () {

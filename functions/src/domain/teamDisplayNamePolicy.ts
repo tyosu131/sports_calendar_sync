@@ -18,17 +18,25 @@ export interface TeamDisplayNames {
   provider?: unknown;
 }
 
-/** Future explicit preference is the final optional argument. */
+const CANONICAL_NAMES: Readonly<Record<string, { ja: string; en: string }>> = Object.freeze({
+  kawasaki_frontale: { ja: "川崎フロンターレ", en: "Kawasaki Frontale" },
+  arsenal: { ja: "アーセナル", en: "Arsenal" },
+});
+
+/** A language override and canonical team id are optional presentation inputs. */
 export function displayTeamName(
   competitionKey: string | undefined,
   names: TeamDisplayNames,
-  languageOverride?: DisplayLanguage
+  languageOverride?: DisplayLanguage,
+  teamId?: string
 ): string {
   const value = (candidate: unknown) => typeof candidate === "string" ? candidate.trim() : "";
   const ja = value(names.japanese);
   const en = value(names.english);
   const provider = value(names.provider);
   const language = languageOverride ?? defaultDisplayLanguage(competitionKey);
+  const canonical = teamId === undefined ? undefined : CANONICAL_NAMES[teamId];
+  if (canonical) return canonical[language];
   if (language === "en") return en || provider || ja;
   const confirmed = confirmedJapaneseName(en) ?? confirmedJapaneseName(provider) ?? confirmedJapaneseName(ja);
   if (confirmed) return confirmed;

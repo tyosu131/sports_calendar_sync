@@ -32,6 +32,7 @@ class TeamDisplayNamePolicy {
       );
 
   String homeName(Game game) => _select(
+        teamId: game.homeTeamId,
         competitionKey: game.competitionKey,
         japanese: game.homeTeamNameJa,
         english: game.homeTeamNameEn,
@@ -39,6 +40,7 @@ class TeamDisplayNamePolicy {
       );
 
   String awayName(Game game) => _select(
+        teamId: game.awayTeamId,
         competitionKey: game.competitionKey,
         japanese: game.awayTeamNameJa,
         english: game.awayTeamNameEn,
@@ -46,6 +48,7 @@ class TeamDisplayNamePolicy {
       );
 
   String _select({
+    String? teamId,
     required String? competitionKey,
     required String japanese,
     required String? english,
@@ -54,7 +57,14 @@ class TeamDisplayNamePolicy {
     final ja = japanese.trim();
     final en = english?.trim() ?? '';
     final raw = provider?.trim() ?? '';
-    if (languageFor(competitionKey) == DisplayLanguage.english) {
+    final language = languageFor(competitionKey);
+    final canonical = _canonicalNames[teamId];
+    if (canonical != null) {
+      return language == DisplayLanguage.japanese
+          ? canonical.japanese
+          : canonical.english;
+    }
+    if (language == DisplayLanguage.english) {
       return en.isNotEmpty ? en : raw.isNotEmpty ? raw : ja;
     }
 
@@ -71,5 +81,13 @@ class TeamDisplayNamePolicy {
   bool _containsJapanese(String value) =>
       RegExp(r'[\u3040-\u30ff\u3400-\u9fff]').hasMatch(value);
 }
+
+const _canonicalNames = <String, ({String japanese, String english})>{
+  'kawasaki_frontale': (
+    japanese: '川崎フロンターレ',
+    english: 'Kawasaki Frontale',
+  ),
+  'arsenal': (japanese: 'アーセナル', english: 'Arsenal'),
+};
 
 const teamDisplayNames = TeamDisplayNamePolicy();

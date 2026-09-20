@@ -54,9 +54,9 @@ class LocalIcsBuilder {
 
   static String _summaryFor(Game game) {
     final competition = CompetitionDisplayPolicy.forKey(game.competitionKey);
-    final suffix = competition == null ? '' : ' (${competition.label})';
-    return '${teamDisplayNames.homeName(game)} vs '
-        '${teamDisplayNames.awayName(game)}$suffix';
+    final prefix = competition == null ? '' : '[${competition.compact}] ';
+    return '$prefix${teamDisplayNames.homeName(game)} vs '
+        '${teamDisplayNames.awayName(game)}';
   }
 
   static String _descriptionFor(Game game) {

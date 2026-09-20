@@ -35,3 +35,7 @@ export function defaultCompetitionDisplayName(competitionKey: string | undefined
   if (!metadata) return undefined;
   return metadata.defaultLanguage === "ja" ? metadata.nameJa : metadata.nameEn;
 }
+
+export function compactCompetitionDisplayName(competitionKey: string | undefined): string | undefined {
+  return competitionDisplayMetadata(competitionKey)?.compact;
+}

@@ -13,10 +13,14 @@ Game game({
   String? awayEn,
   String? homeProvider,
   String? awayProvider,
+  String? homeTeamId,
+  String? awayTeamId,
 }) => Game(
       id: 'game',
       leagueId: 'league',
       competitionKey: competition,
+      homeTeamId: homeTeamId,
+      awayTeamId: awayTeamId,
       homeTeamNameJa: homeJa,
       awayTeamNameJa: awayJa,
       homeTeamNameEn: homeEn,
@@ -96,6 +100,20 @@ void main() {
     );
     expect(teamDisplayNames.homeName(value), 'Brighton & Hove Albion');
     expect(teamDisplayNames.awayName(value), 'Arsenal');
+  });
+
+  test('canonical team id wins over provider display text', () {
+    final value = game(
+      competition: 'football_premier',
+      homeTeamId: 'arsenal',
+      homeJa: 'Provider Arsenal',
+      homeEn: 'Provider Arsenal',
+      homeProvider: 'Provider Arsenal',
+      awayJa: 'Leeds United',
+      awayProvider: 'Leeds United',
+    );
+    expect(teamDisplayNames.homeName(value), 'Arsenal');
+    expect(teamDisplayNames.awayName(value), 'Leeds United');
   });
 
   test('unknown domestic translation safely uses provider name', () {
