@@ -41,7 +41,15 @@ API-SPORTS football API
 adapter 層を挟むことで、データソースを差し替えても `GameDoc` 以降のコードは変更不要になる。
 # GOAL V1 boundary
 
-`goalFootballAdapter.ts` intentionally supports only the evidenced `SCHEDULED`
-status. Other GOAL status semantics are a known gap and are returned as an
-explicit orchestration skip; they must not default to scheduled. Provider
-adoption is not wired to the production scheduler in this wave.
+`goalFootballAdapter.ts` accepts only lifecycle values enumerated by the GOAL
+status policy; unknown values are explicit orchestration skips and never
+default to scheduled.
+
+The score boundary follows the official GOAL SDK fixture examples confirmed for
+this quality pass: `homeScore` and `awayScore` are nullable numeric fixture
+properties. The checked-in `/teams/:id/fixtures` capture predates completed
+results and contains neither property, which is treated as unavailable rather
+than as a zero. At runtime each value must be a non-negative integer or
+null/absent. Numeric values must be present as a pair; malformed or asymmetric
+numeric data rejects the provider response. The adapter persists both values
+only when both are numeric, preserving `0-0`, and otherwise omits both fields.

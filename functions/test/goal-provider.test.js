@@ -89,6 +89,42 @@ test('client classifies errors and rejects malformed fixture contracts', async (
   await assert.rejects(legacy.upcoming('x'), e => e.kind === 'invalid_response');
 });
 
+test('client accepts nullable or paired non-negative integer GOAL scores and preserves 0-0', async () => {
+  const nilNil = fixture(); nilNil.homeScore = 0; nilNil.awayScore = 0;
+  const unavailable = fixture(); unavailable.id = 'unavailable'; unavailable.homeScore = null; unavailable.awayScore = null;
+  const client = new GoalApiClient('key', { get: async () => ({ data: envelope([nilNil, unavailable]) }) });
+  const result = await client.fixtures('x');
+  assert.deepEqual([result[0].homeScore, result[0].awayScore], [0, 0]);
+  assert.deepEqual([result[1].homeScore, result[1].awayScore], [null, null]);
+});
+
+test('client rejects malformed and asymmetric GOAL scores', async () => {
+  for (const scores of [
+    { homeScore: '2', awayScore: 1 },
+    { homeScore: -1, awayScore: 1 },
+    { homeScore: 1.5, awayScore: 1 },
+    { homeScore: 2 },
+    { homeScore: null, awayScore: 2 },
+  ]) {
+    const input = Object.assign(fixture(), scores);
+    const client = new GoalApiClient('key', { get: async () => ({ data: envelope([input]) }) });
+    await assert.rejects(client.fixtures('x'), e => e.kind === 'invalid_response');
+  }
+});
+
+test('adapter maps paired authoritative scores and omits unavailable scores', () => {
+  const scored = fixture(); scored.matchStatus = 'FINISHED'; scored.homeScore = 2; scored.awayScore = 0;
+  assert.deepEqual(
+    [adaptGoalFixtureToGameDoc(scored, context).homeScore, adaptGoalFixtureToGameDoc(scored, context).awayScore],
+    [2, 0],
+  );
+  const unavailable = fixture(); unavailable.homeScore = null; unavailable.awayScore = null;
+  const game = adaptGoalFixtureToGameDoc(unavailable, context);
+  assert.equal(Object.hasOwn(game, 'homeScore'), false);
+  assert.equal(Object.hasOwn(game, 'awayScore'), false);
+  assertNoExplicitUndefined(game);
+});
+
 test('adapter prefers venue, falls back to matchStadium, and omits an unavailable venue', () => {
   const missingVenue = fixture(); missingVenue.matchStadium = ' Emirates Stadium ';
   const stadiumGame = adaptGoalFixtureToGameDoc(missingVenue, context);

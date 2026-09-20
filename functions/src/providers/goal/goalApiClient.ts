@@ -109,10 +109,17 @@ function isGoalFixture(value: unknown): value is GoalFixture {
     !!value && typeof value === "object" &&
     typeof (value as { id?: unknown }).id === "string" &&
     typeof (value as { name?: unknown }).name === "string";
+  const score = (value: unknown): value is number | null | undefined =>
+    value === undefined || value === null ||
+    (typeof value === "number" && Number.isInteger(value) && value >= 0);
+  const hasHomeScore = typeof fixture.homeScore === "number";
+  const hasAwayScore = typeof fixture.awayScore === "number";
   return typeof fixture.id === "string" && typeof fixture.kickoffUtc === "string" &&
     typeof fixture.matchStatus === "string" && team(fixture.league) &&
     typeof fixture.leagueYear === "string" &&
     team(fixture.homeTeam) && team(fixture.awayTeam) &&
+    score(fixture.homeScore) && score(fixture.awayScore) &&
+    hasHomeScore === hasAwayScore &&
     (fixture.venue === undefined || fixture.venue === null || typeof fixture.venue === "string") &&
     (fixture.matchStadium === undefined || fixture.matchStadium === null || typeof fixture.matchStadium === "string");
 }

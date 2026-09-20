@@ -23,6 +23,24 @@ test("identity is stable while changed kickoff changes DTSTART", () => {
   assert.notEqual(first.match(/DTSTART:.+/)[0], changed.match(/DTSTART:.+/)[0]);
 });
 
+test("finished score changes summary without changing stable UID", () => {
+  const first = buildCalendar([game({ status: "finished", homeScore: 2, awayScore: 1 })]);
+  const changed = buildCalendar([game({ status: "finished", homeScore: 3, awayScore: 1 })]);
+  assert.match(first, /SUMMARY:Home 2-1 Away/);
+  assert.match(changed, /SUMMARY:Home 3-1 Away/);
+  assert.equal(first.match(/UID:.+/)[0], changed.match(/UID:.+/)[0]);
+});
+
+test("finished 0-0 is preserved and unavailable score retains versus summary", () => {
+  assert.match(buildCalendar([game({ status: "finished", homeScore: 0, awayScore: 0 })]), /SUMMARY:Home 0-0 Away/);
+  assert.match(buildCalendar([game({ status: "finished" })]), /SUMMARY:Home vs Away/);
+});
+
+test("the personalized calendar shape preserves venue in the shared ICS event", () => {
+  const result = buildCalendar([game({ venue: "National Stadium" })]);
+  assert.match(result, /LOCATION:National Stadium/);
+});
+
 test("duplicate game IDs produce one event", () => {
   assert.equal((buildCalendar([game(), game()]).match(/BEGIN:VEVENT/g) || []).length, 1);
 });

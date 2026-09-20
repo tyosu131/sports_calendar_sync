@@ -13,7 +13,9 @@ import '../widgets/competition_badge.dart';
 /// This screen is intentionally competition-agnostic: any [Game] returned by
 /// [scheduleGamesForFollowedTeamsProvider] can be grouped and displayed here.
 class ScheduleScreen extends ConsumerStatefulWidget {
-  const ScheduleScreen({super.key});
+  const ScheduleScreen({super.key, this.now = DateTime.now});
+
+  final DateTime Function() now;
 
   @override
   ConsumerState<ScheduleScreen> createState() => _ScheduleScreenState();
@@ -39,7 +41,10 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
 
           final gamesByDate = _groupGamesByJstDate(games);
           final visibleMonth =
-              _visibleMonth ?? _initialVisibleMonth(gamesByDate);
+              _visibleMonth ?? resolveInitialVisibleMonth(
+                gamesByDate.keys,
+                widget.now().toUtc(),
+              );
           final selectedDate = _selectedDate;
           final selectedGames = selectedDate == null
               ? const <Game>[]
@@ -86,12 +91,6 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
     );
   }
 
-  DateTime _initialVisibleMonth(Map<DateTime, List<Game>> gamesByDate) {
-    final sortedDates = gamesByDate.keys.toList()..sort();
-    final firstDate = sortedDates.first;
-    return DateTime(firstDate.year, firstDate.month);
-  }
-
   Map<DateTime, List<Game>> _groupGamesByJstDate(List<Game> games) {
     final sortedGames = [...games]
       ..sort((a, b) => a.startTimeUtc.compareTo(b.startTimeUtc));
@@ -114,6 +113,22 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
     final sorted = dates.toList()..sort();
     return DateTime(sorted.last.year, sorted.last.month);
   }
+}
+
+/// Chooses the current JST month, clamped to the months represented by games.
+@visibleForTesting
+DateTime resolveInitialVisibleMonth(
+  Iterable<DateTime> availableDates,
+  DateTime nowUtc,
+) {
+  final dates = availableDates.toList()..sort();
+  final minMonth = DateTime(dates.first.year, dates.first.month);
+  final maxMonth = DateTime(dates.last.year, dates.last.month);
+  final nowJst = DateTimeUtils.toJst(nowUtc);
+  final currentMonth = DateTime(nowJst.year, nowJst.month);
+  if (currentMonth.isBefore(minMonth)) return minMonth;
+  if (currentMonth.isAfter(maxMonth)) return maxMonth;
+  return currentMonth;
 }
 
 @visibleForTesting
@@ -506,7 +521,9 @@ class _CompactGameLine extends StatelessWidget {
         GameStatus.scheduled =>
           DateTimeUtils.formatTimeOnly(game.startTimeUtcDateTime),
         GameStatus.live => 'LIVE',
-        GameStatus.finished => '終了',
+        GameStatus.finished => game.homeScore != null && game.awayScore != null
+            ? '${game.homeScore}-${game.awayScore}'
+            : '終了',
         GameStatus.postponed => '延期',
         GameStatus.cancelled => '中止',
       };

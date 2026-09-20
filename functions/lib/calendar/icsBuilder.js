@@ -50,7 +50,13 @@ function buildCalendar(games) {
         lines.push("DTSTAMP:19700101T000000Z");
         lines.push(`DTSTART:${utc(game.kickoffUtc)}`);
         const competition = game.competitionCompact ? `[${game.competitionCompact}] ` : "";
-        lines.push(`SUMMARY:${text(`${competition}${game.homeTeamName} vs ${game.awayTeamName}`)}`);
+        const hasResult = game.status === "finished" &&
+            Number.isInteger(game.homeScore) && Number.isInteger(game.awayScore) &&
+            game.homeScore >= 0 && game.awayScore >= 0;
+        const matchup = hasResult
+            ? `${game.homeTeamName} ${game.homeScore}-${game.awayScore} ${game.awayTeamName}`
+            : `${game.homeTeamName} vs ${game.awayTeamName}`;
+        lines.push(`SUMMARY:${text(`${competition}${matchup}`)}`);
         if (game.venue)
             lines.push(`LOCATION:${text(game.venue)}`);
         const platforms = game.broadcastPlatforms?.map((item) => item.platform).filter(Boolean);

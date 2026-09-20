@@ -70,6 +70,13 @@ function asNormalizedGame(id, data) {
         throw new Error(`Game ${id} has invalid status`);
     const competitionKey = data.competitionKey ?? data.sportKey;
     const competitionCompact = (0, competitionDisplayPolicy_1.compactCompetitionDisplayName)(competitionKey);
+    const hasHomeScore = Object.prototype.hasOwnProperty.call(data, "homeScore");
+    const hasAwayScore = Object.prototype.hasOwnProperty.call(data, "awayScore");
+    const validScore = (value) => typeof value === "number" && Number.isInteger(value) && value >= 0;
+    if (hasHomeScore !== hasAwayScore ||
+        (hasHomeScore && (!validScore(data.homeScore) || !validScore(data.awayScore)))) {
+        throw new Error(`Game ${id} has invalid scores`);
+    }
     return {
         id,
         kickoffUtc: kickoff.toDate(),
@@ -87,6 +94,7 @@ function asNormalizedGame(id, data) {
         }, undefined, hasAwayTeamId ? data.awayTeamId : undefined),
         ...(competitionCompact ? { competitionCompact } : {}),
         status: data.status,
+        ...(hasHomeScore ? { homeScore: data.homeScore, awayScore: data.awayScore } : {}),
         venue: typeof data.venue === "string" ? data.venue : undefined,
         broadcastPlatforms: Array.isArray(data.broadcastPlatforms) ?
             data.broadcastPlatforms.filter((item) => typeof item === "object" && item !== null && typeof item.platform === "string") : [],

@@ -128,6 +128,9 @@ export interface GoalFixture {
   leagueYear: string;
   homeTeam: { id: string; name: string };
   awayTeam: { id: string; name: string };
+  /** Nullable integer scores exposed by the official GOAL fixture contract. */
+  homeScore?: number | null;
+  awayScore?: number | null;
   venue?: string | null;
   matchStadium?: string | null;
 }
