@@ -82,6 +82,24 @@ test("missing refresh token is rejected without persistence", async () => {
   assert.equal(fixture.store.credentials.size, 0);
 });
 
+test("invalid encryption configuration fails before calendar creation", async () => {
+  const store = new Store();
+  const google = new Google();
+  const service = new GoogleCalendarConnectionService(store, google, {
+    ...config,
+    encryptionKey: Buffer.from("too-short").toString("base64"),
+  }, () => new Date("2026-01-01"));
+
+  const state = await stateFrom(service);
+  await assert.rejects(
+    () => service.callback({state, code: "x"}),
+    error => error.code === "invalid-encryption-key"
+  );
+  assert.equal(google.created, 0);
+  assert.equal(store.credentials.size, 0);
+  assert.equal(store.connections.size, 0);
+});
+
 test("token exchange and calendar creation failures are distinguished", async () => {
   const exchange = make(); exchange.google.failure = true;
   const exchangeState = await stateFrom(exchange.service);

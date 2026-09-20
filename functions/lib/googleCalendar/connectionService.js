@@ -70,6 +70,10 @@ class GoogleCalendarConnectionService {
         }
         if (!token.refreshToken)
             throw new CalendarConnectionError("missing-refresh-token");
+        // Validate local credential configuration before making an irreversible
+        // external change. In particular, a bad encryption key must never leave an
+        // unrecorded Google calendar behind.
+        const encryptedCredential = encryptRefreshToken(token.refreshToken, this.config.encryptionKey);
         const previous = await this.store.getConnection(uid);
         let calendarId = previous?.calendarId;
         try {
@@ -80,7 +84,7 @@ class GoogleCalendarConnectionService {
                 throw error;
             throw new CalendarConnectionError("calendar-creation-failed");
         }
-        await this.store.saveCredential(uid, encryptRefreshToken(token.refreshToken, this.config.encryptionKey));
+        await this.store.saveCredential(uid, encryptedCredential);
         await this.store.saveConnection(uid, {
             status: "active", calendarId, grantedScopes: token.scopes,
         });
