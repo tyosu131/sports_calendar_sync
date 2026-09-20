@@ -94,7 +94,7 @@ class IcsShareSheet extends StatelessWidget {
             // Action buttons
             _ActionButton(
               icon: Icons.calendar_today,
-              label: 'Googleカレンダーで開く',
+              label: 'Googleカレンダーに手動登録（互換用）',
               onTap: () => _openGoogleCalendar(context),
             ),
             const SizedBox(height: 8),

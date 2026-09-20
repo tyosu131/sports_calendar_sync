@@ -36,16 +36,16 @@ void main() {
       'authorizationUrl': 'https://accounts.google.com/o/oauth2/v2/auth?state=x'
     });
     await tester.pump();
-    expect(find.text('未連携'), findsOneWidget);
+    expect(find.text('処理中'), findsOneWidget);
   });
 
   testWidgets('renders connected and error states from backend status',
       (tester) async {
     await tester.pumpWidget(app(GoogleCalendarConnectionRepository(
-      call: (_) async => {'connected': true, 'calendarName': 'Sports Calendar'},
+      call: (_) async => {'connected': true, 'calendarName': 'Sports Calendar', 'syncStatus': 'synced'},
     )));
     await tester.pump();
-    expect(find.text('連携済み'), findsOneWidget);
+    expect(find.text('連携済み・同期済み'), findsOneWidget);
     expect(find.text('連携解除'), findsOneWidget);
 
     await tester.pumpWidget(app(GoogleCalendarConnectionRepository(
@@ -53,5 +53,19 @@ void main() {
     )));
     await tester.pump();
     expect(find.text('エラー（タップして再試行）'), findsOneWidget);
+  });
+
+  testWidgets('renders sync failure and reconnect-required states', (tester) async {
+    await tester.pumpWidget(app(GoogleCalendarConnectionRepository(
+      call: (_) async => {'connected': true, 'syncStatus': 'error'},
+    )));
+    await tester.pump();
+    expect(find.text('連携済み・同期エラー（タップして再試行）'), findsOneWidget);
+
+    await tester.pumpWidget(app(GoogleCalendarConnectionRepository(
+      call: (_) async => {'connected': false, 'reauthRequired': true},
+    )));
+    await tester.pump();
+    expect(find.text('再連携が必要です'), findsOneWidget);
   });
 }

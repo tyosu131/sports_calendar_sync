@@ -27,7 +27,7 @@ admin.initializeApp();
 export { getCalendar } from "./functions/getCalendar";
 export { ensureCalendarFeed, rotateCalendarFeed } from "./functions/calendarFeeds";
 
-import { createGoogleCalendarHandlers } from "./functions/googleCalendarConnection";
+import { createGoogleCalendarHandlers, syncAllActiveGoogleCalendars, syncService } from "./functions/googleCalendarConnection";
 const GOOGLE_CALENDAR_OAUTH_CLIENT_ID = defineSecret("GOOGLE_CALENDAR_OAUTH_CLIENT_ID");
 const GOOGLE_CALENDAR_OAUTH_CLIENT_SECRET = defineSecret("GOOGLE_CALENDAR_OAUTH_CLIENT_SECRET");
 const GOOGLE_CALENDAR_TOKEN_ENCRYPTION_KEY = defineSecret("GOOGLE_CALENDAR_TOKEN_ENCRYPTION_KEY");
@@ -50,6 +50,19 @@ export const disconnectGoogleCalendar = functions.runWith({secrets: calendarSecr
   .region("asia-northeast1").https.onCall((data, context) => googleHandlers().disconnect(data, context));
 export const googleCalendarOAuthCallback = functions.runWith({secrets: calendarSecrets})
   .region("asia-northeast1").https.onRequest((request, response) => googleHandlers().callback(request, response));
+export const syncGoogleCalendarNow = functions.runWith({secrets: calendarSecrets})
+  .region("asia-northeast1").https.onCall((data, context) => googleHandlers().sync(data, context));
+
+/** Follow changes are decoupled from the client write; a provider failure cannot undo it. */
+export const syncGoogleCalendarOnFollowChange = functions.runWith({secrets: calendarSecrets})
+  .region("asia-northeast1").firestore.document("users/{uid}").onUpdate(async (change, context) => {
+    const before = change.before.get("followedTeamIds");
+    const after = change.after.get("followedTeamIds");
+    if (JSON.stringify(before ?? []) === JSON.stringify(after ?? [])) return;
+    try { await syncService({clientId: GOOGLE_CALENDAR_OAUTH_CLIENT_ID.value(), clientSecret: GOOGLE_CALENDAR_OAUTH_CLIENT_SECRET.value(),
+      encryptionKey: GOOGLE_CALENDAR_TOKEN_ENCRYPTION_KEY.value(), redirectUri: GOOGLE_CALENDAR_OAUTH_REDIRECT_URI.value()}).sync(context.params.uid); }
+    catch (error) { console.warn("Follow-change Google Calendar reconciliation failed", {uid: context.params.uid}); }
+  });
 
 // ── Scheduled Functions ───────────────────────────────────────────────────────
 
@@ -66,7 +79,7 @@ function getGoalApiKey(): string | undefined {
 
 /** Sync football fixtures every 6 hours. */
 export const scheduledSyncFootball = functions
-  .runWith({ secrets: [GOAL_API_KEY] })
+  .runWith({ secrets: [GOAL_API_KEY, ...calendarSecrets] })
   .region("asia-northeast1")
   .pubsub.schedule("every 6 hours")
   .timeZone("Asia/Tokyo")
@@ -79,11 +92,15 @@ export const scheduledSyncFootball = functions
       return;
     }
     await syncGoalV1Fixtures(goalApiKey);
+    // Canonical ingestion remains successful even when individual Google users fail.
+    try { await syncAllActiveGoogleCalendars({clientId: GOOGLE_CALENDAR_OAUTH_CLIENT_ID.value(), clientSecret: GOOGLE_CALENDAR_OAUTH_CLIENT_SECRET.value(),
+      encryptionKey: GOOGLE_CALENDAR_TOKEN_ENCRYPTION_KEY.value(), redirectUri: GOOGLE_CALENDAR_OAUTH_REDIRECT_URI.value()}); }
+    catch (_) { console.warn("Canonical sync succeeded; Google Calendar batch could not start"); }
   });
 
 /** Manual trigger for football sync (HTTPS callable — for testing/admin use). */
 export const triggerFootballSync = functions
-  .runWith({ secrets: [GOAL_API_KEY] })
+  .runWith({ secrets: [GOAL_API_KEY, ...calendarSecrets] })
   .region("asia-northeast1")
   .https.onCall(
     async (_data: unknown, context: functions.https.CallableContext) => {
@@ -98,6 +115,9 @@ export const triggerFootballSync = functions
       }
 
       await syncGoalV1Fixtures(goalApiKey);
+      try { await syncAllActiveGoogleCalendars({clientId: GOOGLE_CALENDAR_OAUTH_CLIENT_ID.value(), clientSecret: GOOGLE_CALENDAR_OAUTH_CLIENT_SECRET.value(),
+        encryptionKey: GOOGLE_CALENDAR_TOKEN_ENCRYPTION_KEY.value(), redirectUri: GOOGLE_CALENDAR_OAUTH_REDIRECT_URI.value()}); }
+      catch (_) { console.warn("Canonical sync succeeded; Google Calendar batch could not start"); }
       return { success: true };
     }
   );

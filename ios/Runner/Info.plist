@@ -78,6 +78,12 @@
 				<string>com.googleusercontent.apps.1070492584469-0430dd5848g6pnujglut5h1n2kmlualn</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array><string>sportscalendar</string></array>
+		</dict>
 	</array>
 </dict>
 </plist>
