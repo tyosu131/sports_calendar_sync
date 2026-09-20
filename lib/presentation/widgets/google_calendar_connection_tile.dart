@@ -55,11 +55,18 @@ class _GoogleCalendarConnectionTileState extends State<GoogleCalendarConnectionT
       } else { status = await _repository.status(); }
       _awaitingOAuth = false;
       if (!mounted) return;
-      if (status.reauthRequired) setState(() => _state = GoogleCalendarTileState.reauthRequired);
-      else if (!status.connected) setState(() => _state = GoogleCalendarTileState.disconnected);
-      else if (status.syncStatus == 'error') setState(() => _state = GoogleCalendarTileState.syncError);
-      else if (status.syncStatus == 'synced') setState(() => _state = GoogleCalendarTileState.connected);
-      else { setState(() => _state = GoogleCalendarTileState.syncing); await _sync(); }
+      if (status.reauthRequired) {
+        setState(() => _state = GoogleCalendarTileState.reauthRequired);
+      } else if (!status.connected) {
+        setState(() => _state = GoogleCalendarTileState.disconnected);
+      } else if (status.syncStatus == 'error') {
+        setState(() => _state = GoogleCalendarTileState.syncError);
+      } else if (status.syncStatus == 'synced') {
+        setState(() => _state = GoogleCalendarTileState.connected);
+      } else {
+        setState(() => _state = GoogleCalendarTileState.syncing);
+        await _sync();
+      }
     } catch (_) {
       if (mounted) setState(() => _state = GoogleCalendarTileState.error);
     }
