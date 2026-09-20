@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.calendarEventUid = calendarEventUid;
 exports.buildCalendar = buildCalendar;
+const eventPresentation_1 = require("./eventPresentation");
 const CRLF = "\r\n";
 function text(value) {
     return value
@@ -49,24 +50,18 @@ function buildCalendar(games) {
         // clock dependency; freshness is represented by each game's DTSTART.
         lines.push("DTSTAMP:19700101T000000Z");
         lines.push(`DTSTART:${utc(game.kickoffUtc)}`);
-        const competition = game.competitionCompact ? `[${game.competitionCompact}] ` : "";
-        const hasResult = game.status === "finished" &&
-            Number.isInteger(game.homeScore) && Number.isInteger(game.awayScore) &&
-            game.homeScore >= 0 && game.awayScore >= 0;
-        const matchup = hasResult
-            ? `${game.homeTeamName} ${game.homeScore}-${game.awayScore} ${game.awayTeamName}`
-            : `${game.homeTeamName} vs ${game.awayTeamName}`;
-        lines.push(`SUMMARY:${text(`${competition}${matchup}`)}`);
-        if (game.venue)
-            lines.push(`LOCATION:${text(game.venue)}`);
+        const presentation = (0, eventPresentation_1.presentCalendarGame)(game);
+        lines.push(`SUMMARY:${text(presentation.title)}`);
+        if (presentation.venue)
+            lines.push(`LOCATION:${text(presentation.venue)}`);
         const platforms = game.broadcastPlatforms?.map((item) => item.platform).filter(Boolean);
         if (platforms?.length)
             lines.push(`DESCRIPTION:${text(`Viewing: ${platforms.join(" / ")}`)}`);
-        if (game.status === "cancelled")
+        if (presentation.status === "cancelled")
             lines.push("STATUS:CANCELLED");
         // RFC 5545 has no POSTPONED status. TENTATIVE preserves the UID while
         // communicating that the published kickoff is not confirmed.
-        if (game.status === "postponed")
+        if (presentation.status === "postponed")
             lines.push("STATUS:TENTATIVE");
         lines.push("END:VEVENT");
     }

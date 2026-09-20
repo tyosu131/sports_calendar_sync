@@ -1,71 +1,57 @@
-# Google Calendar connection setup
+# Google Calendar direct synchronization
 
-## Status and boundary
+## Delivery state
 
-The connection code is complete, but **Google Cloud OAuth configuration is not
-complete by this repository change**. No deployment or production secret
-mutation is performed here. Game/event synchronization is intentionally out of
-scope.
+- **Code complete:** OAuth connection, direct event reconciliation, triggers, app return, and sanitized UI status are implemented in this repository.
+- **Production deployed:** no. This change does not deploy Functions or Firestore rules and does not mutate secrets.
+- **Production verified:** no. Real-device callback return and real Google event behavior must be verified after review/deployment.
 
-The Firebase-authenticated callable starts a separate Google OAuth flow. A
-random, ten-minute, single-use state is stored only as a SHA-256 hash and bound
-to the Firebase UID. The browser callback derives ownership exclusively from
-that state. It exchanges the code for offline credentials, then creates or
-recovers the app-created `Sports Calendar` secondary calendar.
+The Google OAuth application remains External / Testing. Google's unverified-app warning and OAuth publishing/verification are operational work, not completed by this change. Functions intentionally remain on Node.js 20; its announced decommission must be handled separately.
 
-Refresh tokens are AES-256-GCM encrypted. Only ciphertext, IV, authentication
-tag, and algorithm are stored in the server-only
-`googleCalendarCredentials/{uid}` collection. Connection metadata is stored in
-`googleCalendarConnections/{uid}`; neither collection is client-readable.
-Access tokens are used transiently and are not persisted.
+## Architecture and permission boundary
 
-The calendar carries the description marker
-`sports-calendar-sync:app-created`. On reconnect, bootstrap checks a recorded
-calendar ID directly with `calendars.get` using the newly authorized credential.
-It reuses an accessible calendar, but creates and records a new app-created
-calendar when the old ID is deleted or belongs to another Google account. This
-recovery uses the narrow scope and does not require calendar-list discovery.
-Disconnect deletes the encrypted credential and marks the connection inactive,
-while deliberately preserving the Google calendar and its contents.
+The integration requests only `https://www.googleapis.com/auth/calendar.app.created`. It creates and exclusively manages the secondary **Sports Calendar**; it neither requests primary-calendar access nor broad Calendar scopes. Canonical Firestore games plus `users/{uid}.followedTeamIds` are the source of truth. The public personalized ICS feed remains available for Apple Calendar and generic/manual subscriptions.
 
-## Human-required Google Cloud configuration
+ICS and Google adapters consume the same pure calendar presentation policy. It supplies compact competition labels, localized team names produced by canonical normalization, authoritative finished scores (including 0-0), venue, and lifecycle status. ICS maps cancelled/postponed to RFC 5545 `CANCELLED`/`TENTATIVE`; Google maps them to `cancelled`/`tentative`.
 
-1. Enable **Google Calendar API** in the deployment project.
-2. Configure the OAuth consent screen and request only
-   `https://www.googleapis.com/auth/calendar.app.created`.
-3. Create an OAuth **Web application** client. Add the deployed HTTPS URL for
-   `googleCalendarOAuthCallback` as an exact authorized redirect URI.
-4. If the consent screen is in testing, add all intended Google accounts as
-   test users. Complete Google's production verification/review when required;
-   this remains a release concern.
-5. Configure these Firebase Functions/Secret Manager secrets (values must never
-   be committed):
-   - `GOOGLE_CALENDAR_OAUTH_CLIENT_ID`
-   - `GOOGLE_CALENDAR_OAUTH_CLIENT_SECRET`
-   - `GOOGLE_CALENDAR_OAUTH_REDIRECT_URI`
-   - `GOOGLE_CALENDAR_TOKEN_ENCRYPTION_KEY` — a base64-encoded 32-byte random key
-6. Deploy the functions and Firestore rules through the normal release process,
-   then verify consent, callback, reconnect, and disconnect with a test user.
+Google requires event end time while the canonical model has no authoritative end. The Google adapter alone uses an explicitly synthetic two-hour duration. It is not written to Firestore and can be changed without changing provider truth.
 
-Official references: [Calendar API authorization scopes](https://developers.google.com/workspace/calendar/api/auth),
-[OAuth 2.0 web-server flow](https://developers.google.com/identity/protocols/oauth2/web-server),
-and [Firebase Functions secrets](https://firebase.google.com/docs/functions/config-env#secret-manager).
+## Identity and reconciliation
 
-## Operational notes and risks
+Event IDs are `sc` plus a SHA-256 hex digest of the canonical Firestore game ID. This satisfies Google's base32hex-compatible ID alphabet, is stable across mutable fixture changes, and avoids exposing or assuming validity of raw IDs. Each event also carries private properties `sportsCalendarSync=1` and `gameId=<canonical id>`.
 
-- Revocation at Google is not attempted on disconnect; local write capability
-  is removed immediately and the calendar is retained.
-- A recorded calendar that returns `404` or `410` from `calendars.get` is
-  replaced on reconnect. Authentication, quota, and unexpected provider errors
-  fail the connection instead of silently creating or activating a calendar.
-- The app-created scope must be validated against the configured OAuth project
-  during release testing. The code does not silently fall back to broader
-  Calendar scopes.
-- State and credential collections should have retention/monitoring policies;
-  expired state documents are rejected but are not proactively swept in this
-  foundation phase.
-- There is a small orphan-calendar risk if the process terminates after Google
-  creates a calendar but before Firestore records its ID. Calendar-list recovery
-  was intentionally not added because it would require permission beyond the
-  mandated `calendar.app.created` bootstrap boundary. A later operational
-  reconciliation design must not silently widen that scope.
+For an active user, reconciliation:
+
+1. loads the server-only connection and AES-256-GCM credential;
+2. decrypts the refresh token and exchanges it for an in-memory short-lived access token;
+3. verifies the recorded app-created calendar, creating and persisting a replacement only on genuine 404/410 absence;
+4. queries the same 30-day lookback window as personalized ICS and reapplies followed-team membership;
+5. lists only marker-bearing managed events;
+6. creates missing, updates changed, deletes stale managed events, and leaves unmarked/user events untouched;
+7. persists sanitized `lastSyncAt`, `lastSyncStatus`, `lastSyncErrorCode`, and counters.
+
+Deterministic identity makes retries idempotent. A manually deleted Google event is inserted again; a retained Google tombstone conflict is restored with the same ID. Cancelled, postponed, and finished games remain desired while they remain inside the shared calendar window.
+
+## Triggers and quota behavior
+
+- **Initial/manual:** after backend connection becomes active, Flutter invokes authenticated `syncGoogleCalendarNow`. The callable derives the UID only from Firebase Auth and returns sanitized counters.
+- **Canonical refresh:** one bounded reconciliation pass runs after successful scheduled or admin GOAL ingestion. Up to three users run concurrently; one user's failure is isolated and does not roll back canonical ingestion.
+- **Follow/unfollow:** the `users/{uid}` update trigger compares `followedTeamIds` and reconciles only that user. The client Firestore write is not coupled to Google success.
+
+No per-game Firestore trigger or unbounded fan-out is used.
+
+## Credential and error semantics
+
+Refresh credentials remain in the existing server-only collection and use the existing Secret Manager AES-256-GCM key. Decryption validates algorithm, key, IV, tag, ciphertext, and authentication before use. Refresh/access tokens, OAuth codes, client secrets, and encrypted payloads are never returned or deliberately logged; access tokens are never persisted.
+
+`invalid_grant`, rejected credentials, missing credentials, and malformed ciphertext transition the connection to `reauth_required`, delete the unusable credential, preserve the user's Google calendar, and stop automatic retry. Transient token/API failures retain `active`, record a sanitized retryable error, and never trigger calendar recreation or destructive reconciliation. Only 404/410 from calendar lookup means missing calendar.
+
+## OAuth return and UI race handling
+
+The registered HTTPS callback remains unchanged. After server persistence it renders a styled Japanese result page, attempts `sportscalendar://google-calendar/oauth-complete`, and always provides an explicit **Sports Calendarに戻る** button and fallback instruction. iOS and Android register that minimal scheme. Failure pages provide a return button but never claim success or expose provider details.
+
+Browser launch itself is not success. On app resume Flutter polls authoritative connection status with bounded backoff (about 5.5 seconds), then settles to disconnected, retryable error, or connected. A newly connected account starts sync immediately. UI states distinguish checking, syncing, synced, sync error/retry, and reauthentication required. The legacy Google ICS action is explicitly labeled as a manual compatibility route.
+
+## Operational verification still required
+
+After merge, an operator must deploy the Functions/rules with the existing four Google secrets, then verify on real iOS and Android devices: successful and denied callback return, background/terminated-app return, initial event population, follow/unfollow, score/kickoff/venue updates, manual deletion recreation, calendar deletion recovery, revocation/reauth, and transient quota behavior. Also inspect sanitized Function logs and Firestore sync metadata. Do not claim OAuth verification/publishing until Google completes it.

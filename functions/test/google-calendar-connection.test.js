@@ -4,8 +4,10 @@ const crypto = require("node:crypto");
 const {
   GoogleCalendarConnectionService,
   CalendarConnectionError,
+  encryptRefreshToken,
+  decryptRefreshToken,
 } = require("../lib/googleCalendar/connectionService");
-const {createGoogleCalendarHandlers} = require("../lib/functions/googleCalendarConnection");
+const {createGoogleCalendarHandlers, callbackHtml} = require("../lib/functions/googleCalendarConnection");
 
 class Store {
   constructor() { this.states = new Map(); this.connections = new Map(); this.credentials = new Map(); }
@@ -40,9 +42,26 @@ test("all Google Calendar callables require Firebase authentication", async () =
   const handlers = createGoogleCalendarHandlers({
     clientId: "unused", clientSecret: "unused", redirectUri: "https://example.test", encryptionKey: key,
   });
-  for (const handler of [handlers.begin, handlers.status, handlers.disconnect]) {
+  for (const handler of [handlers.begin, handlers.status, handlers.disconnect, handlers.sync]) {
     await assert.rejects(() => handler({}, {}), error => error.code === "unauthenticated");
   }
+});
+
+test("AES-GCM credential round trip rejects malformed records", () => {
+  const encrypted = encryptRefreshToken("refresh-secret", key);
+  assert.equal(decryptRefreshToken(encrypted, key), "refresh-secret");
+  assert.throws(() => decryptRefreshToken({...encrypted, authTag: "bad"}, key),
+    error => error.code === "invalid-encrypted-credential");
+});
+
+test("callback HTML has a safe app action and failure never claims success", () => {
+  const success = callbackHtml(true);
+  assert.match(success, /sportscalendar:\/\/google-calendar\/oauth-complete/);
+  assert.match(success, /Sports Calendarに戻る/);
+  const failure = callbackHtml(false);
+  assert.match(failure, /もう一度お試しください/);
+  assert.doesNotMatch(failure, /連携が完了しました/);
+  assert.doesNotMatch(failure, /<script>/);
 });
 
 async function stateFrom(service) {

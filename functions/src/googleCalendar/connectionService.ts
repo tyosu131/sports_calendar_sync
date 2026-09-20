@@ -1,4 +1,4 @@
-import { createCipheriv, randomBytes } from "crypto";
+import { createCipheriv, createDecipheriv, randomBytes } from "crypto";
 
 export const GOOGLE_CALENDAR_SCOPE =
   "https://www.googleapis.com/auth/calendar.app.created";
@@ -6,9 +6,10 @@ export const CALENDAR_NAME = "Sports Calendar";
 export const CALENDAR_MARKER = "sports-calendar-sync:app-created";
 
 export type Connection = {
-  status: "active" | "disconnected";
+  status: "active" | "disconnected" | "reauth_required";
   calendarId?: string;
   grantedScopes?: string[];
+  lastSyncStatus?: "pending" | "synced" | "error" | "reauth_required";
 };
 
 export interface ConnectionStore {
@@ -49,6 +50,24 @@ export function encryptRefreshToken(token: string, base64Key: string): Encrypted
     iv: iv.toString("base64"),
     authTag: cipher.getAuthTag().toString("base64"),
   };
+}
+
+export function decryptRefreshToken(value: EncryptedCredential, base64Key: string): string {
+  if (!value || value.algorithm !== "aes-256-gcm") throw new CalendarConnectionError("invalid-encrypted-credential");
+  try {
+    const key = Buffer.from(base64Key, "base64");
+    const iv = Buffer.from(value.iv, "base64");
+    const tag = Buffer.from(value.authTag, "base64");
+    const ciphertext = Buffer.from(value.ciphertext, "base64");
+    if (key.length !== 32 || iv.length !== 12 || tag.length !== 16 || ciphertext.length === 0) throw new Error();
+    const decipher = createDecipheriv("aes-256-gcm", key, iv);
+    decipher.setAuthTag(tag);
+    const cleartext = Buffer.concat([decipher.update(ciphertext), decipher.final()]).toString("utf8");
+    if (!cleartext) throw new Error();
+    return cleartext;
+  } catch (_) {
+    throw new CalendarConnectionError("invalid-encrypted-credential");
+  }
 }
 
 export class GoogleCalendarConnectionService {
@@ -129,11 +148,11 @@ export class GoogleCalendarConnectionService {
     });
   }
 
-  async status(uid: string): Promise<{connected: boolean; calendarName?: string}> {
+  async status(uid: string): Promise<{connected: boolean; calendarName?: string; reauthRequired?: boolean}> {
     const connection = await this.store.getConnection(uid);
     return connection?.status === "active"
       ? {connected: true, calendarName: CALENDAR_NAME}
-      : {connected: false};
+      : {connected: false, ...(connection?.status === "reauth_required" ? {reauthRequired: true} : {})};
   }
 
   async disconnect(uid: string): Promise<void> {
