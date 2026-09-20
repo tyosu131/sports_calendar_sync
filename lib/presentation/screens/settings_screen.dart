@@ -49,14 +49,7 @@ class SettingsScreen extends ConsumerWidget {
               if (!useSampleData) ...[
                 // Personalized calendar sync is an authenticated production
                 // flow; sample mode keeps using its local ICS builder.
-                _SectionHeader(title: 'カレンダー同期'),
-                const ListTile(
-                  leading: Icon(Icons.calendar_month),
-                  title: Text('スポーツカレンダーを購読'),
-                  subtitle: Text('フォロー中のすべてのチーム'),
-                  trailing: CalendarSyncButton(),
-                ),
-                const GoogleCalendarConnectionTile(),
+                const CalendarSyncSettingsSection(),
                 const Divider(),
               ],
 
@@ -156,6 +149,32 @@ class SettingsScreen extends ConsumerWidget {
       if (context.mounted) context.go('/');
     }
   }
+}
+
+/// Distinguishes URL-based Apple/generic subscriptions from direct Google sync.
+class CalendarSyncSettingsSection extends StatelessWidget {
+  const CalendarSyncSettingsSection({
+    super.key,
+    this.calendarSyncButton = const CalendarSyncButton(),
+    this.googleCalendarTile = const GoogleCalendarConnectionTile(),
+  });
+
+  final Widget calendarSyncButton;
+  final Widget googleCalendarTile;
+
+  @override
+  Widget build(BuildContext context) => Column(
+        children: [
+          _SectionHeader(title: 'カレンダー同期'),
+          ListTile(
+            leading: const Icon(Icons.calendar_month),
+            title: const Text('Apple・その他のカレンダー'),
+            subtitle: const Text('購読URLで同期'),
+            trailing: calendarSyncButton,
+          ),
+          googleCalendarTile,
+        ],
+      );
 }
 
 class _SectionHeader extends StatelessWidget {

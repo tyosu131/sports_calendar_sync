@@ -3,8 +3,9 @@
 ## Delivery state
 
 - **Code complete:** OAuth connection, direct event reconciliation, triggers, app return, and sanitized UI status are implemented in this repository.
-- **Production deployed:** no. This change does not deploy Functions or Firestore rules and does not mutate secrets.
-- **Production verified:** no. Real-device callback return and real Google event behavior must be verified after review/deployment.
+- **Production deployed:** yes. The direct integration delivered through PR #37 is deployed.
+- **Production verified on iOS:** yes. A real iPhone completed OAuth, returned to the app, recreated a deleted app-owned **Sports Calendar**, and populated its initial events. Competition labels and finished scores were visible in those events.
+- **Still unverified / pending:** Android real-device behavior, OAuth denial UX on a real device, terminated-app deep-link return, revoked-credential and quota/rate-limit production behavior, every transient/callback failure path, and Google OAuth app publishing/verification.
 
 The Google OAuth application remains External / Testing. Google's unverified-app warning and OAuth publishing/verification are operational work, not completed by this change. Functions intentionally remain on Node.js 20; its announced decommission must be handled separately.
 
@@ -50,8 +51,10 @@ Refresh credentials remain in the existing server-only collection and use the ex
 
 The registered HTTPS callback remains unchanged. After server persistence it renders a styled Japanese result page, attempts `sportscalendar://google-calendar/oauth-complete`, and always provides an explicit **Sports Calendarに戻る** button and fallback instruction. iOS and Android register that minimal scheme. Failure pages provide a return button but never claim success or expose provider details.
 
-Browser launch itself is not success. On app resume Flutter polls authoritative connection status with bounded backoff (about 5.5 seconds), then settles to disconnected, retryable error, or connected. A newly connected account starts sync immediately. UI states distinguish checking, syncing, synced, sync error/retry, and reauthentication required. The legacy Google ICS action is explicitly labeled as a manual compatibility route.
+Browser launch itself is not success. On app resume Flutter polls authoritative connection status with bounded backoff (about 5.5 seconds), then settles to disconnected, retryable error, or connected. A newly connected account starts sync immediately. UI states distinguish checking, syncing, synced, sync error/retry, and reauthentication required. Google direct API integration is the only normal Google Calendar path; personalized ICS remains for Apple Calendar and other ICS-capable clients.
 
-## Operational verification still required
+## Production evidence and remaining checks
 
-After merge, an operator must deploy the Functions/rules with the existing four Google secrets, then verify on real iOS and Android devices: successful and denied callback return, background/terminated-app return, initial event population, follow/unfollow, score/kickoff/venue updates, manual deletion recreation, calendar deletion recovery, revocation/reauth, and transient quota behavior. Also inspect sanitized Function logs and Firestore sync metadata. Do not claim OAuth verification/publishing until Google completes it.
+Verified in production on a real iPhone: OAuth connection, return to the app, app-created calendar creation, deleted-calendar recreation, initial direct event population, competition labels, and finished scores.
+
+Still requiring production-only verification: the Android real-device flow, OAuth denial UX, terminated-app deep-link return, revoked-credential behavior, quota/rate-limit behavior, and all transient failure paths. Google OAuth publishing/verification also remains incomplete. Follow/unfollow and other update paths should remain in the human post-merge smoke plan where they have not been separately observed. Do not claim OAuth publishing/verification until Google completes it.

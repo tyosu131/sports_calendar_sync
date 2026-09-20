@@ -50,7 +50,7 @@ class IcsShareSheet extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'このURLをカレンダーアプリに登録すると、試合日程が自動で同期されます。',
+              'AppleカレンダーなどにこのURLを登録すると、試合日程が自動で同期されます。',
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -93,12 +93,6 @@ class IcsShareSheet extends StatelessWidget {
             const SizedBox(height: 20),
             // Action buttons
             _ActionButton(
-              icon: Icons.calendar_today,
-              label: 'Googleカレンダーに手動登録（互換用）',
-              onTap: () => _openGoogleCalendar(context),
-            ),
-            const SizedBox(height: 8),
-            _ActionButton(
               icon: Icons.apple,
               label: 'Appleカレンダーで開く',
               onTap: () => _openAppleCalendar(context),
@@ -118,15 +112,6 @@ class IcsShareSheet extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  Future<void> _openGoogleCalendar(BuildContext context) async {
-    final encoded = Uri.encodeComponent(icsUrl);
-    final uri = Uri.parse(
-        'https://www.google.com/calendar/render?cid=$encoded');
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    }
   }
 
   Future<void> _openAppleCalendar(BuildContext context) async {
