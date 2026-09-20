@@ -72,6 +72,8 @@ class Game {
     this.competitionSeasonKey,
     this.homeTeamNameEn,
     this.awayTeamNameEn,
+    this.homeTeamProviderName,
+    this.awayTeamProviderName,
     this.homeTeamLogoUrl,
     this.awayTeamLogoUrl,
     this.venue,
@@ -108,6 +110,8 @@ class Game {
   /// English team name — used as translation fallback and in English UI.
   final String? homeTeamNameEn;
   final String? awayTeamNameEn;
+  final String? homeTeamProviderName;
+  final String? awayTeamProviderName;
 
   /// Team logo URL.  null when not available.
   final String? homeTeamLogoUrl;
@@ -164,6 +168,8 @@ class Game {
       awayTeamNameJa: data['awayTeamNameJa'] as String,
       homeTeamNameEn: data['homeTeamNameEn'] as String?,
       awayTeamNameEn: data['awayTeamNameEn'] as String?,
+      homeTeamProviderName: data['homeTeamProviderName'] as String?,
+      awayTeamProviderName: data['awayTeamProviderName'] as String?,
       homeTeamLogoUrl: data['homeTeamLogoUrl'] as String?,
       awayTeamLogoUrl: data['awayTeamLogoUrl'] as String?,
       startTimeUtc: data['startTimeUTC'] as Timestamp,
@@ -202,6 +208,10 @@ class Game {
       'awayTeamNameJa': awayTeamNameJa,
       if (homeTeamNameEn != null) 'homeTeamNameEn': homeTeamNameEn,
       if (awayTeamNameEn != null) 'awayTeamNameEn': awayTeamNameEn,
+      if (homeTeamProviderName != null)
+        'homeTeamProviderName': homeTeamProviderName,
+      if (awayTeamProviderName != null)
+        'awayTeamProviderName': awayTeamProviderName,
       if (homeTeamLogoUrl != null) 'homeTeamLogoUrl': homeTeamLogoUrl,
       if (awayTeamLogoUrl != null) 'awayTeamLogoUrl': awayTeamLogoUrl,
       'startTimeUTC': startTimeUtc,

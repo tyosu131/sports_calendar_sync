@@ -10,6 +10,8 @@ import {
   buildPersonalizedCalendar,
 } from "../calendar/personalizedCalendar";
 import { GameStatus } from "../types";
+import { displayTeamName } from "../domain/teamDisplayNamePolicy";
+import { competitionDisplayMetadata } from "../domain/competitionDisplayPolicy";
 
 const VALID_STATUSES = new Set<GameStatus>([
   "scheduled", "live", "finished", "postponed", "cancelled",
@@ -39,14 +41,27 @@ export function asNormalizedGame(id: string, data: DocumentData): NormalizedGame
     throw new Error(`Game ${id} has invalid team names`);
   }
   if (!VALID_STATUSES.has(data.status)) throw new Error(`Game ${id} has invalid status`);
+  const competitionKey = data.competitionKey ?? data.sportKey;
+  const competitionCompact = competitionDisplayMetadata(competitionKey)?.compact;
 
   return {
     id,
     kickoffUtc: kickoff.toDate(),
     ...(hasHomeTeamId ? { homeTeamId: data.homeTeamId as string } : {}),
     ...(hasAwayTeamId ? { awayTeamId: data.awayTeamId as string } : {}),
-    homeTeamName: data.homeTeamNameJa,
-    awayTeamName: data.awayTeamNameJa,
+    homeTeamName: displayTeamName(competitionKey, {
+      japanese: data.homeTeamNameJa,
+      english: data.homeTeamNameEn,
+      provider: data.homeTeamProviderName,
+      canonicalTeamId: data.homeTeamId,
+    }),
+    awayTeamName: displayTeamName(competitionKey, {
+      japanese: data.awayTeamNameJa,
+      english: data.awayTeamNameEn,
+      provider: data.awayTeamProviderName,
+      canonicalTeamId: data.awayTeamId,
+    }),
+    ...(competitionCompact ? { competitionCompact } : {}),
     status: data.status,
     venue: typeof data.venue === "string" ? data.venue : undefined,
     broadcastPlatforms: Array.isArray(data.broadcastPlatforms) ?

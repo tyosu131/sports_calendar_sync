@@ -40,6 +40,8 @@ exports.serveCalendar = serveCalendar;
 const functions = __importStar(require("firebase-functions/v1"));
 const firestore_1 = require("firebase-admin/firestore");
 const personalizedCalendar_1 = require("../calendar/personalizedCalendar");
+const teamDisplayNamePolicy_1 = require("../domain/teamDisplayNamePolicy");
+const competitionDisplayPolicy_1 = require("../domain/competitionDisplayPolicy");
 const VALID_STATUSES = new Set([
     "scheduled", "live", "finished", "postponed", "cancelled",
 ]);
@@ -66,13 +68,26 @@ function asNormalizedGame(id, data) {
     }
     if (!VALID_STATUSES.has(data.status))
         throw new Error(`Game ${id} has invalid status`);
+    const competitionKey = data.competitionKey ?? data.sportKey;
+    const competitionCompact = (0, competitionDisplayPolicy_1.competitionDisplayMetadata)(competitionKey)?.compact;
     return {
         id,
         kickoffUtc: kickoff.toDate(),
         ...(hasHomeTeamId ? { homeTeamId: data.homeTeamId } : {}),
         ...(hasAwayTeamId ? { awayTeamId: data.awayTeamId } : {}),
-        homeTeamName: data.homeTeamNameJa,
-        awayTeamName: data.awayTeamNameJa,
+        homeTeamName: (0, teamDisplayNamePolicy_1.displayTeamName)(competitionKey, {
+            japanese: data.homeTeamNameJa,
+            english: data.homeTeamNameEn,
+            provider: data.homeTeamProviderName,
+            canonicalTeamId: data.homeTeamId,
+        }),
+        awayTeamName: (0, teamDisplayNamePolicy_1.displayTeamName)(competitionKey, {
+            japanese: data.awayTeamNameJa,
+            english: data.awayTeamNameEn,
+            provider: data.awayTeamProviderName,
+            canonicalTeamId: data.awayTeamId,
+        }),
+        ...(competitionCompact ? { competitionCompact } : {}),
         status: data.status,
         venue: typeof data.venue === "string" ? data.venue : undefined,
         broadcastPlatforms: Array.isArray(data.broadcastPlatforms) ?

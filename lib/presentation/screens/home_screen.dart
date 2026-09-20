@@ -7,6 +7,7 @@ import '../../data/providers/game_providers.dart';
 import '../../data/providers/repository_providers.dart';
 import '../../data/providers/team_providers.dart';
 import '../../domain/models/team.dart';
+import '../../domain/policies/team_display_name_policy.dart';
 import '../widgets/game_card.dart';
 import '../widgets/calendar_sync_button.dart';
 
@@ -235,20 +236,11 @@ class _FollowedTeamCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        team.nameJa,
+                        teamDisplayNames.teamName(team),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        team.nameEn,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],

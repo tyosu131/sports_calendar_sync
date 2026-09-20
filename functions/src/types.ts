@@ -87,6 +87,8 @@ export interface GameDoc {
   homeTeamNameJa: string;
   /** English team name — used as translation fallback. */
   homeTeamNameEn?: string;
+  /** Original provider label; localization does not imply Team identity. */
+  homeTeamProviderName?: string;
   /** Team logo URL. */
   homeTeamLogoUrl?: string;
   awayTeamId?: string;
@@ -94,6 +96,7 @@ export interface GameDoc {
   awaySourceTeamId?: string;
   awayTeamNameJa: string;
   awayTeamNameEn?: string;
+  awayTeamProviderName?: string;
   awayTeamLogoUrl?: string;
   /** UTC Firestore Timestamp — used for calendar sync. */
   startTimeUTC: Timestamp;
