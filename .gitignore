@@ -124,3 +124,6 @@ functions/node_modules/
 
 # Generated public OAuth branding pages
 hosting/dist/
+
+# Firebase CLI local cache
+.firebase/
