@@ -9,7 +9,8 @@ void main() {
       const MaterialApp(
         home: Scaffold(
           body: CalendarSyncSettingsSection(
-            calendarSyncButton: Icon(Icons.link),
+            appleAction: Icon(Icons.open_in_new),
+            otherAction: Icon(Icons.link),
             googleCalendarTile: ListTile(
               title: Text('Google Calendar'),
               subtitle: Text('直接連携'),
@@ -19,8 +20,11 @@ void main() {
       ),
     );
 
-    expect(find.text('Apple・その他のカレンダー'), findsOneWidget);
-    expect(find.text('購読URLで同期'), findsOneWidget);
+    expect(find.text('Apple Calendar'), findsOneWidget);
+    expect(find.text('Apple Calendarで購読'), findsOneWidget);
+    expect(find.text('その他のカレンダー'), findsOneWidget);
+    expect(find.text('ICS購読URLをコピー・共有'), findsOneWidget);
     expect(find.text('Google Calendar'), findsOneWidget);
+    expect(find.text('連携解除'), findsNothing);
   });
 }

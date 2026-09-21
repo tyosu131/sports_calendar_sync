@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sports_calendar_sync/presentation/widgets/ics_share_sheet.dart';
 
 void main() {
-  testWidgets('offers Apple and generic URL actions without a Google ICS action',
+  testWidgets('offers generic URL actions without rendering the raw URL',
       (tester) async {
     await tester.pumpWidget(
       const MaterialApp(
@@ -15,9 +15,10 @@ void main() {
       ),
     );
 
-    expect(find.text('Appleカレンダーで開く'), findsOneWidget);
-    expect(find.byTooltip('URLをコピー'), findsOneWidget);
+    expect(find.text('その他のカレンダー'), findsOneWidget);
+    expect(find.text('購読URLをコピー'), findsOneWidget);
     expect(find.text('URLをシェア'), findsOneWidget);
+    expect(find.textContaining('https://example.com'), findsNothing);
     expect(find.textContaining('Googleカレンダーに手動登録'), findsNothing);
   });
 

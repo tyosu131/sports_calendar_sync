@@ -39,6 +39,32 @@ void main() {
     expect(find.text('処理中'), findsOneWidget);
   });
 
+  testWidgets('failed browser launch is an error, not connection success',
+      (tester) async {
+    final repository = GoogleCalendarConnectionRepository(call: (name) async {
+      if (name == 'getGoogleCalendarConnectionStatus') {
+        return {'connected': false};
+      }
+      return {
+        'authorizationUrl':
+            'https://accounts.google.com/o/oauth2/v2/auth?state=x'
+      };
+    });
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: GoogleCalendarConnectionTile(
+          repository: repository,
+          launch: (uri, {mode = LaunchMode.platformDefault}) async => false,
+        ),
+      ),
+    ));
+    await tester.pump();
+    await tester.tap(find.text('Google Calendarと連携'));
+    await tester.pump();
+    expect(find.text('エラー（タップして再試行）'), findsOneWidget);
+    expect(find.text('連携済み・同期済み'), findsNothing);
+  });
+
   testWidgets('renders connected and error states from backend status',
       (tester) async {
     await tester.pumpWidget(app(GoogleCalendarConnectionRepository(
