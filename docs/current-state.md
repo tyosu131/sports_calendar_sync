@@ -1,5 +1,24 @@
 # Current State — sports_calendar_sync
 
+## OAuth cancellation and J1 Home presentation logos (2026-09-21)
+
+- A callback with a valid, single-use OAuth state, exactly
+  `error=access_denied`, and no authorization code is treated as expected user
+  cancellation. It returns HTTP 200 with cancellation-specific copy, a manual
+  Sports Calendar link, and the same automatic custom-scheme return as success.
+- Missing, invalid, expired, reused, or malformed state remains a callback
+  failure. Unknown/empty OAuth errors, non-scalar query values, and callbacks
+  containing both code and error are failures as well. Cancellation consumes
+  state but does not exchange tokens or change credentials, calendars,
+  connections, or sync state; backend connection status remains authoritative.
+- Google's unverified-app warning and Google-controlled safe-return screens are
+  not changed by repository code. Branding, Publishing, and Verification work
+  remains a separate Google Cloud configuration phase.
+- Home J1 cards may now resolve a presentation-only logo through confirmed club
+  display evidence and an exact, unique Japanese name in the J1 Team master.
+  Game logos and existing canonical Team logos retain priority. This fallback
+  does not infer a Game Team ID or promote GOAL opponents to canonical identity.
+
 ## Post-OAuth navigation and Home logo resolution (2026-09-21)
 
 - Settings keeps normal stack-based Back navigation, and its Back affordance
@@ -7,9 +26,10 @@
   the Google OAuth completion deep link) and there is no route to pop.
 - Home upcoming-game cards preserve any logo stored on the Game document, then
   fall back to `Team.logoUrl` only for an existing canonical `homeTeamId` or
-  `awayTeamId`. All distinct canonical IDs are fetched together rather than per
-  card. Unmapped provider opponents intentionally keep the existing fallback;
-  names are not used to guess identity.
+  `awayTeamId`. A still-unresolved J1 participant can use unique confirmed
+  display evidence to find an exact Japanese name in the J1 Team master for
+  presentation only. All distinct canonical IDs are fetched together and the
+  J1 master is fetched at most once, never per card.
 - Apple Calendar remains a URL handoff labelled `Apple Calendarで購読`.
   The app does not claim subscribed, synced, or disconnected state because
   subscription ownership and confirmation remain in Apple Calendar.

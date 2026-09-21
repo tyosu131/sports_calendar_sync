@@ -75,5 +75,34 @@ final _japaneseByNormalizedAlias = <String, String>{
     for (final alias in club.aliases) normalizeClubDisplayKey(alias): club.japanese,
 };
 
+final Map<String, Set<String>> _japaneseCandidatesByNormalizedAlias = () {
+  final result = <String, Set<String>>{};
+  for (final club in _clubs) {
+    result.putIfAbsent(club.japanese.trim(), () => <String>{}).add(
+          club.japanese.trim(),
+        );
+    for (final alias in club.aliases) {
+      result
+          .putIfAbsent(normalizeClubDisplayKey(alias), () => <String>{})
+          .add(club.japanese.trim());
+    }
+  }
+  return result;
+}();
+
 String? japaneseClubDisplayName(String value) =>
     _japaneseByNormalizedAlias[normalizeClubDisplayKey(value)];
+
+/// Resolves only unique, repository-confirmed evidence. Japanese master names
+/// use trimmed Unicode equality rather than the ASCII-only alias normalizer.
+String? uniqueConfirmedJapaneseClubName(
+  String value, {
+  Map<String, Set<String>>? evidence,
+}) {
+  final trimmed = value.trim();
+  if (trimmed.isEmpty) return null;
+  final candidates = evidence ?? _japaneseCandidatesByNormalizedAlias;
+  final japaneseExact = candidates[trimmed];
+  final matches = japaneseExact ?? candidates[normalizeClubDisplayKey(trimmed)];
+  return matches?.length == 1 ? matches!.single : null;
+}

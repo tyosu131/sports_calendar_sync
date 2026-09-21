@@ -38,6 +38,34 @@ export class CalendarConnectionError extends Error {
   constructor(readonly code: string) { super(code); }
 }
 
+export type OAuthCallbackInput = {
+  state?: string;
+  code?: string;
+  error?: string;
+};
+
+export type OAuthCallbackOutcome = "success" | "cancelled";
+
+/** Accepts only scalar strings from the untrusted Express query object. */
+export function parseOAuthCallbackQuery(query: unknown): OAuthCallbackInput {
+  if (query === null || typeof query !== "object" || Array.isArray(query)) {
+    throw new CalendarConnectionError("malformed-callback");
+  }
+  const record = query as Record<string, unknown>;
+  if (Object.values(record).some(value => typeof value !== "string")) {
+    throw new CalendarConnectionError("malformed-callback");
+  }
+  const scalar = (key: string): string | undefined => {
+    const value = record[key];
+    if (value === undefined) return undefined;
+    if (typeof value !== "string") {
+      throw new CalendarConnectionError("malformed-callback");
+    }
+    return value;
+  };
+  return {state: scalar("state"), code: scalar("code"), error: scalar("error")};
+}
+
 export function encryptRefreshToken(token: string, base64Key: string): EncryptedCredential {
   const key = Buffer.from(base64Key, "base64");
   if (key.length !== 32) throw new CalendarConnectionError("invalid-encryption-key");
@@ -96,12 +124,16 @@ export class GoogleCalendarConnectionService {
     return `https://accounts.google.com/o/oauth2/v2/auth?${query}`;
   }
 
-  async callback(input: {state?: string; code?: string; error?: string}): Promise<void> {
+  async callback(input: OAuthCallbackInput): Promise<OAuthCallbackOutcome> {
     if (!input.state) throw new CalendarConnectionError("malformed-callback");
     const uid = await this.store.consumeState(hashState(input.state), this.now());
     if (!uid) throw new CalendarConnectionError("invalid-or-expired-state");
-    if (input.error) throw new CalendarConnectionError("oauth-denied");
-    if (!input.code) throw new CalendarConnectionError("malformed-callback");
+    if (input.error === "access_denied" && input.code === undefined) {
+      return "cancelled";
+    }
+    if (input.error !== undefined || !input.code) {
+      throw new CalendarConnectionError("malformed-callback");
+    }
 
     let token;
     try { token = await this.google.exchangeCode(input.code); }
@@ -146,6 +178,7 @@ export class GoogleCalendarConnectionService {
     await this.store.saveConnection(uid, {
       status: "active", calendarId, grantedScopes: token.scopes,
     });
+    return "success";
   }
 
   async status(uid: string): Promise<{connected: boolean; calendarName?: string; reauthRequired?: boolean}> {

@@ -102,7 +102,7 @@ class _HomeContent extends ConsumerWidget {
           error: (e, _) => Center(child: Text('エラー: $e')),
           data: (homeGames) {
             final games = homeGames.games;
-            final logoUrls = homeGames.canonicalLogoUrls;
+            final logoFallbacks = homeGames.logoFallbacks;
             return RefreshIndicator(
               onRefresh: () async {
                 ref.invalidate(followedTeamsProvider);
@@ -119,14 +119,8 @@ class _HomeContent extends ConsumerWidget {
                     ...games.map(
                       (game) => GameCard(
                         game: game,
-                        homeTeamLogoUrlFallback:
-                            game.homeTeamId == null
-                                ? null
-                                : logoUrls[game.homeTeamId],
-                        awayTeamLogoUrlFallback:
-                            game.awayTeamId == null
-                                ? null
-                                : logoUrls[game.awayTeamId],
+                        homeTeamLogoUrlFallback: logoFallbacks[game.id]?.home,
+                        awayTeamLogoUrlFallback: logoFallbacks[game.id]?.away,
                       ),
                     ),
                 ],
