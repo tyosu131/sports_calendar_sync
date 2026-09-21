@@ -44,26 +44,44 @@ void main() {
     expect(feedCalls, 0);
   });
 
-  testWidgets('Google connect and reconnect never issue an ICS feed', (tester) async {
-    for (final reauth in [false, true]) {
-      var feedCalls = 0;
-      var beginCalls = 0;
-      await tester.pumpWidget(app(
-        ensureFeed: () async { feedCalls++; return token; },
-        google: googleRepository((name) async {
-          if (name == 'getGoogleCalendarConnectionStatus') {
-            return {'connected': false, 'reauthRequired': reauth};
-          }
-          beginCalls++;
-          return {'authorizationUrl': 'https://accounts.google.com/oauth'};
-        }),
-      ));
-      await tester.pump();
-      await tester.tap(find.text(reauth ? '再連携' : 'Google Calendarと連携'));
-      await tester.pump();
-      expect(beginCalls, 1);
-      expect(feedCalls, 0);
-    }
+  testWidgets('Google connect does not issue an ICS feed', (tester) async {
+    var feedCalls = 0;
+    var beginCalls = 0;
+    await tester.pumpWidget(app(
+      ensureFeed: () async { feedCalls++; return token; },
+      google: googleRepository((name) async {
+        if (name == 'getGoogleCalendarConnectionStatus') {
+          return {'connected': false};
+        }
+        beginCalls++;
+        return {'authorizationUrl': 'https://accounts.google.com/oauth'};
+      }),
+    ));
+    await tester.pump();
+    await tester.tap(find.text('Google Calendarと連携'));
+    await tester.pump();
+    expect(beginCalls, 1);
+    expect(feedCalls, 0);
+  });
+
+  testWidgets('Google reconnect does not issue an ICS feed', (tester) async {
+    var feedCalls = 0;
+    var beginCalls = 0;
+    await tester.pumpWidget(app(
+      ensureFeed: () async { feedCalls++; return token; },
+      google: googleRepository((name) async {
+        if (name == 'getGoogleCalendarConnectionStatus') {
+          return {'connected': false, 'reauthRequired': true};
+        }
+        beginCalls++;
+        return {'authorizationUrl': 'https://accounts.google.com/oauth'};
+      }),
+    ));
+    await tester.pump();
+    await tester.tap(find.text('再連携'));
+    await tester.pump();
+    expect(beginCalls, 1);
+    expect(feedCalls, 0);
   });
 
   testWidgets('connected Google uses syncNow without issuing an ICS feed', (tester) async {
