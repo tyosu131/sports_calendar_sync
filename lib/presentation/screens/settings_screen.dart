@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../data/providers/auth_providers.dart';
 import '../../data/providers/repository_providers.dart';
-import '../widgets/calendar_sync_button.dart';
+import '../widgets/calendar_sync_sheet.dart';
 import '../widgets/google_calendar_connection_tile.dart';
 
 /// Settings screen: account info, calendar sync URL, sign out.
@@ -155,24 +155,32 @@ class SettingsScreen extends ConsumerWidget {
 class CalendarSyncSettingsSection extends StatelessWidget {
   const CalendarSyncSettingsSection({
     super.key,
-    this.calendarSyncButton = const CalendarSyncButton(),
+    this.appleAction = const CalendarIcsActionButton(action: CalendarIcsAction.apple),
+    this.otherAction = const CalendarIcsActionButton(action: CalendarIcsAction.other),
     this.googleCalendarTile = const GoogleCalendarConnectionTile(),
   });
 
-  final Widget calendarSyncButton;
+  final Widget appleAction;
+  final Widget otherAction;
   final Widget googleCalendarTile;
 
   @override
   Widget build(BuildContext context) => Column(
         children: [
           _SectionHeader(title: 'カレンダー同期'),
+          googleCalendarTile,
+          ListTile(
+            leading: const Icon(Icons.apple),
+            title: const Text('Apple Calendar'),
+            subtitle: const Text('Apple Calendarで購読'),
+            trailing: appleAction,
+          ),
           ListTile(
             leading: const Icon(Icons.calendar_month),
-            title: const Text('Apple・その他のカレンダー'),
-            subtitle: const Text('購読URLで同期'),
-            trailing: calendarSyncButton,
+            title: const Text('その他のカレンダー'),
+            subtitle: const Text('ICS購読URLをコピー・共有'),
+            trailing: otherAction,
           ),
-          googleCalendarTile,
         ],
       );
 }

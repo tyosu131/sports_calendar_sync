@@ -6,8 +6,8 @@ This subsection supersedes the older Google Calendar and deployment-status rows 
 
 - Google Calendar direct API integration is code-complete, deployed, and verified on a real iPhone.
 - Verified behavior includes OAuth connection completion, creation of the app-owned **Sports Calendar**, recreation after that calendar was deleted, initial event population, competition labels, and finished scores.
-- The only normal Google path is the direct API connection in Settings. The ICS subscription UI is for Apple Calendar and other ICS-capable clients (open in Apple Calendar, copy URL, or share URL).
-- Clean standard callback to `sportscalendar://` and automatic app return after removal of the legacy Google ICS route, Android real-device behavior, OAuth denial UX on a real device, terminated-app deep-link return, revoked-credential and quota/rate-limit production behavior, all transient callback failure paths, and Google OAuth app publishing/verification remain pending or unproven.
+- The direct Google API connection is available in both the general sync sheet and Settings. Apple Calendar and other ICS clients are separate actions in both surfaces; feed issuance is lazy and the raw personalized URL is no longer always displayed.
+- Exact `sportscalendar://google-calendar/oauth-complete` routing to `/settings` is implemented in code. Automatic warm-resume and terminated-app callback navigation remain pending post-merge iPhone smoke testing, as do Android real-device behavior, OAuth denial UX, revoked-credential and quota/rate-limit production behavior, transient callback failures, and Google OAuth app publishing/verification.
 - Current next work is production-only verification of those pending cases; implementing Google Calendar direct sync is no longer an active task.
 
 > Generated: 2026-05-08  

@@ -4,16 +4,19 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../data/repositories/google_calendar_connection_repository.dart';
 
 enum GoogleCalendarTileState { loading, disconnected, connecting, syncing, connected, syncError, reauthRequired, error }
+enum GoogleCalendarTileMode { manage, sync }
 
 class GoogleCalendarConnectionTile extends StatefulWidget {
   const GoogleCalendarConnectionTile({
     super.key,
     this.repository,
     this.launch = launchUrl,
+    this.mode = GoogleCalendarTileMode.manage,
   });
 
   final GoogleCalendarConnectionRepository? repository;
   final Future<bool> Function(Uri, {LaunchMode mode}) launch;
+  final GoogleCalendarTileMode mode;
 
   @override
   State<GoogleCalendarConnectionTile> createState() => _GoogleCalendarConnectionTileState();
@@ -123,11 +126,18 @@ class _GoogleCalendarConnectionTileState extends State<GoogleCalendarConnectionT
       leading: const Icon(Icons.event_available),
       title: const Text('Google Calendar'),
       subtitle: Text(subtitle),
-      onTap: _state == GoogleCalendarTileState.error ? _refresh : _state == GoogleCalendarTileState.syncError ? _sync : null,
+      onTap: _state == GoogleCalendarTileState.error
+          ? _refresh
+          : (_state == GoogleCalendarTileState.syncError ||
+                  (widget.mode == GoogleCalendarTileMode.sync && connected))
+              ? _sync
+              : null,
       trailing: busy
           ? const SizedBox.square(dimension: 22, child: CircularProgressIndicator(strokeWidth: 2))
           : connected
-              ? TextButton(onPressed: _disconnect, child: const Text('連携解除'))
+              ? widget.mode == GoogleCalendarTileMode.manage
+                  ? TextButton(onPressed: _disconnect, child: const Text('連携解除'))
+                  : TextButton(onPressed: _sync, child: const Text('今すぐ同期'))
               : FilledButton(onPressed: _connect, child: Text(_state == GoogleCalendarTileState.reauthRequired ? '再連携' : 'Google Calendarと連携')),
     );
   }
