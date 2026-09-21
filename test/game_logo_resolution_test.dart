@@ -1,12 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:sports_calendar_sync/data/providers/game_providers.dart';
 import 'package:sports_calendar_sync/domain/models/game.dart';
 import 'package:sports_calendar_sync/domain/models/team.dart';
 import 'package:sports_calendar_sync/presentation/widgets/game_card.dart';
 
 void main() {
+  setUpAll(() async {
+    await initializeDateFormatting('ja');
+  });
+
   test('game-level logo wins over canonical Team fallback', () {
     expect(
       resolveGameTeamLogoUrl('https://game/logo.png', 'https://team/logo.png'),
