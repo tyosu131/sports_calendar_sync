@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Privacy Policy — Sports Calendar</title><link rel="stylesheet" href="/style.css"></head>
+<body><header><a href="/">Sports Calendar</a><nav><a href="/privacy">Privacy Policy</a><a href="/terms">Terms</a></nav></header><main>
+<h1>Privacy Policy</h1><p>運営者：{{operatorName}}</p>
+<h2>取得する情報と利用目的</h2><p>Sports Calendarは、Firebase Authenticationによるユーザー識別情報、ログインサービスから提供されるメールアドレス・表示名・プロフィール画像、フォローするチーム、表示設定を利用し、アカウントと個人向けの試合予定を提供します。</p>
+<h2>Google Calendarのデータ</h2><p>Google Calendar連携を許可した場合、アプリが作成したカレンダーの識別子、許可された権限、連携・同期の状態と日時、更新用資格情報を保存します。Google Calendar APIでは本アプリが作成したカレンダー内のイベントを取得し、本アプリの管理する試合イベントを追加・更新・削除します。取得したイベント情報は同期処理のために使用します。他の予定表やメインカレンダーへのアクセス権限は要求しません。</p>
+<p>更新用資格情報はサーバー専用の領域に認証付き暗号化で保存します。短時間のアクセストークンは同期処理中のメモリで使用し、アプリ画面へ返しません。</p>
+<h2>共有と外部サービス</h2><p>認証・保存・配信のためGoogle Firebase / Google Cloud、Google Calendar連携のためGoogle Calendar APIを使用します。Appleでのログインやカレンダー購読では選択したサービスにも情報が送信されます。クラブロゴは公開利用の権利を確認できたものだけを表示します。確認できない場合はアプリ内で生成する中立的なバッジや頭文字を表示し、そのロゴの外部画像URLには接続しません。現在、API-SPORTSおよびESPN由来のロゴは公開利用の権利を確認できていないため表示しません。</p>
+<p>Google APIから受け取った情報は、ユーザーが選択したカレンダー機能の提供に使用します。販売、広告ターゲティング、汎用AIモデルの学習には使用しません。Sports CalendarによるGoogle APIから受信した情報の使用および他のアプリへの転送は、Limited Use要件を含む<a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>に従います。</p>
+<h2>保存期間と削除</h2><p>連携中は継続的な同期に必要な情報を保持します。Settingsの連携解除操作では保存した更新用資格情報を削除し、以後の同期を停止します。再連携時のカレンダー再利用に必要な識別子や連携状態は残ります。Google側の既存カレンダー・イベントは削除しません。Googleアカウントの接続管理画面からアクセス許可を取り消すこともできます。</p>
+<p>プロフィール、フォロー情報、残存する連携情報の削除やデータに関する問い合わせは下記窓口へご連絡ください。現在、アプリ内のアカウント完全削除ボタンはありません。サービス運用ログやバックアップに含まれる情報は各システムの保存設定に従い保持される場合があります。</p>
+<h2>個人用ICS URL</h2><p>個人用購読URLを知る人は購読対象の試合予定を取得できます。URLを公開しないでください。</p>
+<h2>お問い合わせと変更</h2><p>問い合わせ・削除依頼：<a href="mailto:{{supportEmail}}">{{supportEmail}}</a>。パスワード、OAuthコード、トークン、個人用ICS URLを送信しないでください。本ポリシーを変更する場合はこのページでお知らせします。</p>
+</main><footer><a href="/">Sports Calendar ホーム</a></footer></body></html>

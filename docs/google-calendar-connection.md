@@ -1,12 +1,23 @@
 # Google Calendar direct synchronization
 
+The current local closure also adds Settings links to homepage/privacy/terms,
+including signed-out Settings, without requiring Google authorization. Hosting
+templates and public values are configured for Taisei Kawakami,
+support@sports-calendar-sync.com and https://sports-calendar-sync.com/
+(with /privacy and /terms). Support forwarding is owner-confirmed. DNS/TLS,
+domain verification, publication and Google Console verification remain required. See [the release worksheet](google-oauth-publishing.md). No
+public endpoint or deployed app behavior is claimed from local tests alone.
+
 Explicit Google `access_denied` is an expected cancellation only when the
 callback has a valid one-time state and no authorization code. That path returns
 HTTP 200 and offers both automatic and manual return to Sports Calendar without
 writing connection state. Invalid/reused/malformed state and all other malformed
 or provider failures remain errors and do not automatically open the app.
-Google's unverified-app and safe-return pages remain Google-controlled; Branding,
-Publishing, and Verification are still separate, incomplete operational work.
+Google's unverified-app and safe-return pages remain Google-controlled. Their
+Branding/Publishing/Verification work is part of the same current delivery
+bundle, with human-only Console actions still pending. See
+[the publishing worksheet](google-oauth-publishing.md) for prepared public pages,
+exact configuration values, scope justification and release checks.
 
 ## Delivery state
 
@@ -15,7 +26,24 @@ Publishing, and Verification are still separate, incomplete operational work.
 - **Production verified on iOS:** yes. A real iPhone completed OAuth, recreated a deleted app-owned **Sports Calendar**, and populated its initial events. Competition labels and finished scores were visible in those events.
 - **Still unverified / pending:** clean standard OAuth callback to `sportscalendar://` automatic app return after removal of the legacy Google ICS route, Android real-device behavior, OAuth denial UX on a real device, terminated-app deep-link return, revoked-credential and quota/rate-limit production behavior, every transient/callback failure path, and Google OAuth app publishing/verification.
 
-The Google OAuth application remains External / Testing. Google's unverified-app warning and OAuth publishing/verification are operational work, not completed by this change. Functions intentionally remain on Node.js 20; its announced decommission must be handled separately.
+Earlier operational evidence recorded External / Testing; the current Console
+Audience/Publishing/Verification values have not been directly inspected. Google's unverified-app warning and OAuth publishing/verification are operational work, not completed by this change. Functions intentionally remain on Node.js 20; its announced decommission must be handled separately.
+
+## Current bundle presentation and public assets
+
+Home, Schedule, Search, Team detail and followed teams now share presentation
+metadata with calendar normalization. Japanese domestic competitions use
+Japanese; English/European V1 competitions use English. Opponent name/logo
+resolution never creates canonical Team IDs or changes follow/calendar filters.
+See [scope and tests](oauth-presentation-closure.md).
+
+The current bundle adds static homepage/privacy/terms templates and Hosting
+configuration. Public values are confirmed: Taisei Kawakami,
+support@sports-calendar-sync.com, https://sports-calendar-sync.com/ with
+/privacy and /terms. The local site build succeeds. Publishing still requires
+release approval and custom-domain DNS/TLS and ownership verification. No production
+secret or redirect URI has been changed. Repository completion does not assert
+Google verification completion or deployment of these changes.
 
 ## Architecture and permission boundary
 

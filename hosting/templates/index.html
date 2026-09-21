@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Sports Calendar — 好きなチームの試合をカレンダーへ</title><meta name="description" content="好きなチームをフォローし、対応する公式戦の予定をGoogle CalendarやApple Calendarで確認できるSports Calendar。"><link rel="stylesheet" href="/style.css"></head>
+<body><header><a href="/">Sports Calendar</a><nav><a href="/privacy">Privacy Policy</a><a href="/terms">Terms</a></nav></header>
+<main><p class="eyebrow">好きなチームの試合を、いつもの予定表へ</p><h1>Sports Calendar</h1>
+<p>チームをフォローすると、対応する公式戦の試合日時・会場・状態・スコアをアプリとカレンダーで確認できます。現在の実データ同期対象は川崎フロンターレとArsenalです。試合の延期・中止や予定変更も更新対象です。</p>
+<section><h2>Google Calendarとの連携</h2><p>連携は任意です。ログイン後、Googleの同意画面で許可すると、本アプリが作成する「Sports Calendar」という専用カレンダーに試合を追加・更新します。アプリを開いていない間の更新のため、連携資格情報をサーバーに暗号化して保存します。</p>
+<p>求めるCalendar権限は <code>calendar.app.created</code> です。本アプリが作成したカレンダーを管理するために使用し、個人のメインカレンダーを読み取る権限は求めません。Google連携はFirebaseへのログイン方法から独立しており、Appleでログインした方も利用できます。</p>
+<p>Settingsから連携解除できます。連携解除後は新たな同期を停止し、保存していた更新用資格情報を削除します。既存のGoogleカレンダーとイベントは残り、必要ならGoogle Calendarからご自身で削除できます。</p></section>
+<section><h2>Apple Calendar・その他のカレンダー</h2><p>ICS購読も利用できます。購読の更新頻度はカレンダーアプリによって異なります。購読URLは個人用のため、他人と共有しないでください。</p></section>
+<section><h2>プライバシーとお問い合わせ</h2><p>データの取得・利用・保存・削除については<a href="{{publicUrl}}/privacy">Privacy Policy（プライバシーポリシー）</a>をご確認ください。<a href="{{publicUrl}}/terms">利用規約</a>も公開しています。</p><p>運営者：{{operatorName}}<br>サポート：<a href="mailto:{{supportEmail}}">{{supportEmail}}</a></p></section>
+</main><footer>Sports CalendarはGoogle、Apple、各リーグ・クラブの公式サービスではありません。</footer></body></html>

@@ -121,3 +121,6 @@ functions/serviceAccountKey.json
 
 functions/serviceAccountKey.json
 functions/node_modules/
+
+# Generated public OAuth branding pages
+hosting/dist/

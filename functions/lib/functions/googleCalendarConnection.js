@@ -298,7 +298,7 @@ function callbackHtml(outcome) {
     const copy = outcome === "success"
         ? { title: "Google Calendarとの連携が完了しました", detail: "アプリに戻ると同期を開始します。" }
         : outcome === "cancelled"
-            ? { title: "Google Calendarとの連携をキャンセルしました", detail: "Google Calendarとの連携は行われていません。アプリに戻ることができます。" }
+            ? { title: "Google Calendarとの連携をキャンセルしました", detail: "今回の連携操作は取り消されました。既存の連携状態は変更されていません。アプリに戻ることができます。" }
             : { title: "Google Calendarとの連携を完了できませんでした", detail: "アプリに戻って、もう一度お試しください。" };
     const autoReturn = outcome !== "failure";
     return `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>${copy.title}</title><style>body{font-family:system-ui;margin:0;background:#f5f7fa;color:#182230}.card{max-width:34rem;margin:12vh auto;padding:2rem;background:white;border-radius:16px;box-shadow:0 4px 24px #0002}a{display:inline-block;margin-top:1rem;padding:.8rem 1.2rem;background:#1769aa;color:white;border-radius:9px;text-decoration:none}</style></head><body><main class="card"><h1>${copy.title}</h1><p>${copy.detail}</p><a href="${APP_RETURN_URL}">Sports Calendarに戻る</a><p><small>自動的に開かない場合は上のボタンを押してください。</small></p></main>${autoReturn ? `<script>setTimeout(function(){location.href=${JSON.stringify(APP_RETURN_URL)}},300)</script>` : ""}</body></html>`;

@@ -6,6 +6,8 @@ import '../../data/providers/game_providers.dart';
 import '../../domain/models/game.dart';
 import '../../domain/policies/competition_display_policy.dart';
 import '../../domain/policies/team_display_name_policy.dart';
+import '../../domain/policies/team_presentation_policy.dart';
+import '../widgets/game_presentation_scope.dart';
 import '../widgets/competition_badge.dart';
 
 /// In-app schedule view for followed-team games.
@@ -41,7 +43,8 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
 
           final gamesByDate = _groupGamesByJstDate(games);
           final visibleMonth =
-              _visibleMonth ?? resolveInitialVisibleMonth(
+              _visibleMonth ??
+              resolveInitialVisibleMonth(
                 gamesByDate.keys,
                 widget.now().toUtc(),
               );
@@ -50,41 +53,49 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
               ? const <Game>[]
               : gamesByDate[selectedDate] ?? const <Game>[];
 
-          return LayoutBuilder(
-            builder: (context, constraints) {
-              return SingleChildScrollView(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                  child: Column(
-                    children: [
-                      ScheduleMonthCalendar(
-                        visibleMonth: visibleMonth,
-                        minMonth: _minMonth(gamesByDate.keys),
-                        maxMonth: _maxMonth(gamesByDate.keys),
-                        selectedDate: selectedDate,
-                        gamesByDate: gamesByDate,
-                        onDateSelected: (date) {
-                          setState(() {
-                            _selectedDate = date;
-                            _visibleMonth = DateTime(date.year, date.month);
-                          });
-                        },
-                        onMonthChanged: (month) {
-                          setState(() => _visibleMonth = month);
-                        },
-                      ),
-                      if (selectedDate == null)
-                        const _SelectDateHint()
-                      else
-                        _SelectedDateDetails(
+          final resolver = ref
+              .watch(gamePresentationProvider(games))
+              .valueOrNull;
+          return GamePresentationScope(
+            resolver: resolver ?? TeamPresentationLogoResolver(const []),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight,
+                    ),
+                    child: Column(
+                      children: [
+                        ScheduleMonthCalendar(
+                          visibleMonth: visibleMonth,
+                          minMonth: _minMonth(gamesByDate.keys),
+                          maxMonth: _maxMonth(gamesByDate.keys),
                           selectedDate: selectedDate,
-                          games: selectedGames,
+                          gamesByDate: gamesByDate,
+                          onDateSelected: (date) {
+                            setState(() {
+                              _selectedDate = date;
+                              _visibleMonth = DateTime(date.year, date.month);
+                            });
+                          },
+                          onMonthChanged: (month) {
+                            setState(() => _visibleMonth = month);
+                          },
                         ),
-                    ],
+                        if (selectedDate == null)
+                          const _SelectDateHint()
+                        else
+                          _SelectedDateDetails(
+                            selectedDate: selectedDate,
+                            games: selectedGames,
+                          ),
+                      ],
+                    ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           );
         },
       ),
@@ -518,15 +529,17 @@ class _CompactGameLine extends StatelessWidget {
       name.isEmpty ? '?' : String.fromCharCode(name.runes.first);
 
   String _compactMeta(Game game) => switch (game.status) {
-        GameStatus.scheduled =>
-          DateTimeUtils.formatTimeOnly(game.startTimeUtcDateTime),
-        GameStatus.live => 'LIVE',
-        GameStatus.finished => game.homeScore != null && game.awayScore != null
-            ? '${game.homeScore}-${game.awayScore}'
-            : '終了',
-        GameStatus.postponed => '延期',
-        GameStatus.cancelled => '中止',
-      };
+    GameStatus.scheduled => DateTimeUtils.formatTimeOnly(
+      game.startTimeUtcDateTime,
+    ),
+    GameStatus.live => 'LIVE',
+    GameStatus.finished =>
+      game.homeScore != null && game.awayScore != null
+          ? '${game.homeScore}-${game.awayScore}'
+          : '終了',
+    GameStatus.postponed => '延期',
+    GameStatus.cancelled => '中止',
+  };
 }
 
 class _CalendarGamePreview extends StatelessWidget {
@@ -556,7 +569,7 @@ class _CalendarGamePreview extends StatelessWidget {
               children: [
                 _MiniTeamIcon(
                   name: teamDisplayNames.homeName(game),
-                  logoUrl: game.homeTeamLogoUrl,
+                  logoUrl: GamePresentationScope.logo(context, game, true),
                   foregroundColor: foregroundColor,
                   selected: selected,
                 ),
@@ -573,7 +586,7 @@ class _CalendarGamePreview extends StatelessWidget {
                 ),
                 _MiniTeamIcon(
                   name: teamDisplayNames.awayName(game),
-                  logoUrl: game.awayTeamLogoUrl,
+                  logoUrl: GamePresentationScope.logo(context, game, false),
                   foregroundColor: foregroundColor,
                   selected: selected,
                 ),
@@ -714,7 +727,7 @@ class ScheduleGameTile extends StatelessWidget {
                 Expanded(
                   child: _TeamSide(
                     name: teamDisplayNames.homeName(game),
-                    logoUrl: game.homeTeamLogoUrl,
+                    logoUrl: GamePresentationScope.logo(context, game, true),
                     alignment: CrossAxisAlignment.start,
                   ),
                 ),
@@ -730,7 +743,7 @@ class ScheduleGameTile extends StatelessWidget {
                 Expanded(
                   child: _TeamSide(
                     name: teamDisplayNames.awayName(game),
-                    logoUrl: game.awayTeamLogoUrl,
+                    logoUrl: GamePresentationScope.logo(context, game, false),
                     alignment: CrossAxisAlignment.end,
                   ),
                 ),

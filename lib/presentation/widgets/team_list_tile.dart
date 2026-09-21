@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../domain/models/team.dart';
 import '../../domain/policies/team_display_name_policy.dart';
+import '../../domain/policies/team_presentation_policy.dart';
 
 /// A list tile for displaying a team with follow/unfollow action.
 class TeamListTile extends StatelessWidget {
@@ -35,7 +36,7 @@ class TeamListTile extends StatelessWidget {
         onTap: onTap,
         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
         leading: _TeamLogo(
-          logoUrl: team.logoUrl,
+          logoUrl: teamPresentationLogo(team),
           nameJa: teamDisplayNames.teamName(team),
         ),
         title: Text(

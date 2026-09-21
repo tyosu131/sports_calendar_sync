@@ -8,7 +8,9 @@ import '../../data/providers/repository_providers.dart';
 import '../../data/providers/team_providers.dart';
 import '../../domain/models/team.dart';
 import '../../domain/policies/team_display_name_policy.dart';
+import '../../domain/policies/team_presentation_policy.dart';
 import '../widgets/game_card.dart';
+import '../widgets/game_presentation_scope.dart';
 import '../widgets/calendar_sync_button.dart';
 
 /// Home screen: shows upcoming games for the user's followed teams.
@@ -102,28 +104,26 @@ class _HomeContent extends ConsumerWidget {
           error: (e, _) => Center(child: Text('エラー: $e')),
           data: (homeGames) {
             final games = homeGames.games;
-            final logoFallbacks = homeGames.logoFallbacks;
-            return RefreshIndicator(
-              onRefresh: () async {
-                ref.invalidate(followedTeamsProvider);
-                ref.invalidate(upcomingGamesForFollowedTeamsProvider);
-                ref.invalidate(homeUpcomingGamesProvider);
-              },
-              child: ListView(
-                padding: const EdgeInsets.only(top: 12, bottom: 100),
-                children: [
-                  _FollowedTeamsSection(teams: teams),
-                  if (games.isEmpty)
-                    const _NoUpcomingGames()
-                  else
-                    ...games.map(
-                      (game) => GameCard(
-                        game: game,
-                        homeTeamLogoUrlFallback: logoFallbacks[game.id]?.home,
-                        awayTeamLogoUrlFallback: logoFallbacks[game.id]?.away,
-                      ),
-                    ),
-                ],
+            return GamePresentationScope(
+              resolver: homeGames.presentation,
+              child: RefreshIndicator(
+                onRefresh: () async {
+                  ref.invalidate(followedTeamsProvider);
+                  ref.invalidate(presentationMasterProvider);
+                  ref.invalidate(gamePresentationProvider);
+                  ref.invalidate(upcomingGamesForFollowedTeamsProvider);
+                  ref.invalidate(homeUpcomingGamesProvider);
+                },
+                child: ListView(
+                  padding: const EdgeInsets.only(top: 12, bottom: 100),
+                  children: [
+                    _FollowedTeamsSection(teams: teams),
+                    if (games.isEmpty)
+                      const _NoUpcomingGames()
+                    else
+                      ...games.map((game) => GameCard(game: game)),
+                  ],
+                ),
               ),
             );
           },
@@ -200,7 +200,7 @@ class _FollowedTeamCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final logoUrl = team.logoUrl;
+    final logoUrl = teamPresentationLogo(team);
 
     return SizedBox(
       width: 196,

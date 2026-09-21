@@ -196,6 +196,29 @@ test("HTTP token exchange failure is 5xx with manual return only", async () => {
   assert.doesNotMatch(response.body, /<script>/);
 });
 
+test("HTTP expired denial and missing callback data remain failures without mutation", async () => {
+  let now = new Date("2026-01-01");
+  const fixture = make(new Store(), new Google(), () => now);
+  const state = await stateFrom(fixture.service);
+  now = new Date("2026-01-02");
+  for (const query of [{state, error: "access_denied"}, {}, {state: "", error: "access_denied"}]) {
+    const response = responseRecorder();
+    await handleGoogleCalendarCallback(query, response, fixture.service);
+    assert.equal(response.statusCode, 400);
+    assert.match(response.body, /Sports Calendarに戻る/);
+    assert.doesNotMatch(response.body, /<script>|連携をキャンセルしました/);
+  }
+  assert.equal(fixture.google.exchanged, 0);
+  assert.equal(fixture.google.created, 0);
+  assert.equal(fixture.store.savedCredentials, 0);
+  assert.equal(fixture.store.savedConnections, 0);
+});
+
+test("cancelling reconnect does not claim an existing connection was removed", () => {
+  assert.match(callbackHtml("cancelled"), /既存の連携状態は変更されていません/);
+  assert.doesNotMatch(callbackHtml("cancelled"), /連携は行われていません/);
+});
+
 test("missing refresh token is rejected without persistence", async () => {
   const fixture = make(); fixture.google.result = {scopes: []};
   const state = await stateFrom(fixture.service);
