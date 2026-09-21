@@ -18,7 +18,7 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userAsync = ref.watch(userProfileProvider);
-    final gamesAsync = ref.watch(upcomingGamesForFollowedTeamsProvider);
+    final gamesAsync = ref.watch(homeUpcomingGamesProvider);
     final followedTeamsAsync = ref.watch(followedTeamsProvider);
 
     return Scaffold(
@@ -78,8 +78,8 @@ class _HomeContent extends ConsumerWidget {
     required this.followedTeamsAsync,
   });
 
-  final AsyncValue gamesAsync;
-  final AsyncValue followedTeamsAsync;
+  final AsyncValue<HomeUpcomingGames> gamesAsync;
+  final AsyncValue<List<Team>> followedTeamsAsync;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -100,11 +100,14 @@ class _HomeContent extends ConsumerWidget {
             ],
           ),
           error: (e, _) => Center(child: Text('エラー: $e')),
-          data: (games) {
+          data: (homeGames) {
+            final games = homeGames.games;
+            final logoUrls = homeGames.canonicalLogoUrls;
             return RefreshIndicator(
               onRefresh: () async {
                 ref.invalidate(followedTeamsProvider);
                 ref.invalidate(upcomingGamesForFollowedTeamsProvider);
+                ref.invalidate(homeUpcomingGamesProvider);
               },
               child: ListView(
                 padding: const EdgeInsets.only(top: 12, bottom: 100),
@@ -113,7 +116,19 @@ class _HomeContent extends ConsumerWidget {
                   if (games.isEmpty)
                     const _NoUpcomingGames()
                   else
-                    ...games.map((game) => GameCard(game: game)),
+                    ...games.map(
+                      (game) => GameCard(
+                        game: game,
+                        homeTeamLogoUrlFallback:
+                            game.homeTeamId == null
+                                ? null
+                                : logoUrls[game.homeTeamId],
+                        awayTeamLogoUrlFallback:
+                            game.awayTeamId == null
+                                ? null
+                                : logoUrls[game.awayTeamId],
+                      ),
+                    ),
                 ],
               ),
             );

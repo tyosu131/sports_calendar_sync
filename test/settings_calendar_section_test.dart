@@ -26,5 +26,7 @@ void main() {
     expect(find.text('ICS購読URLをコピー・共有'), findsOneWidget);
     expect(find.text('Google Calendar'), findsOneWidget);
     expect(find.text('連携解除'), findsNothing);
+    expect(find.text('購読中'), findsNothing);
+    expect(find.text('同期済み'), findsNothing);
   });
 }

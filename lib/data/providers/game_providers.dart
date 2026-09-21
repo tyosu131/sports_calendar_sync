@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/models/game.dart';
+import '../../domain/models/team.dart';
 import 'auth_providers.dart';
 import 'repository_providers.dart';
 
@@ -30,6 +31,50 @@ final upcomingGamesForFollowedTeamsProvider = FutureProvider<List<Game>>((
   if (teamIds.isEmpty) return [];
   return ref.watch(gameRepositoryProvider).fetchUpcomingGamesForTeams(teamIds);
 });
+
+/// Home games plus a bounded canonical Team-logo lookup shared by every card.
+final homeUpcomingGamesProvider = FutureProvider<HomeUpcomingGames>((ref) async {
+  final games = await ref.watch(upcomingGamesForFollowedTeamsProvider.future);
+  final logoUrls = await fetchCanonicalTeamLogoUrls(
+    games,
+    ref.watch(teamRepositoryProvider).fetchTeamsByIds,
+  );
+  return HomeUpcomingGames(games: games, canonicalLogoUrls: logoUrls);
+});
+
+class HomeUpcomingGames {
+  const HomeUpcomingGames({
+    required this.games,
+    required this.canonicalLogoUrls,
+  });
+
+  final List<Game> games;
+  final Map<String, String> canonicalLogoUrls;
+}
+
+/// Resolves all distinct canonical identities in one repository call. A game
+/// without a canonical ID is deliberately ignored rather than name-matched.
+Future<Map<String, String>> fetchCanonicalTeamLogoUrls(
+  List<Game> games,
+  Future<List<Team>> Function(List<String>) fetchTeamsByIds,
+) async {
+  final ids = <String>{};
+  for (final game in games) {
+    final homeTeamId = game.homeTeamId;
+    final awayTeamId = game.awayTeamId;
+    if (homeTeamId != null) ids.add(homeTeamId);
+    if (awayTeamId != null) ids.add(awayTeamId);
+  }
+  if (ids.isEmpty) return const {};
+
+  final teams = await fetchTeamsByIds(ids.toList(growable: false));
+  final logoUrls = <String, String>{};
+  for (final team in teams) {
+    final logoUrl = team.logoUrl;
+    if (logoUrl != null && logoUrl.isNotEmpty) logoUrls[team.id] = logoUrl;
+  }
+  return logoUrls;
+}
 
 /// Schedule games for ALL of the user's followed teams.
 ///
