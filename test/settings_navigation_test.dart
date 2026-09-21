@@ -13,10 +13,10 @@ void main() {
           ),
           GoRoute(
             path: '/settings',
-            builder: (context, state) => const Scaffold(
+            builder: (context, state) => Scaffold(
               appBar: AppBar(
-                leading: SettingsBackButton(),
-                title: Text('設定'),
+                leading: const SettingsBackButton(),
+                title: const Text('設定'),
               ),
             ),
           ),
