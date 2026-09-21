@@ -10,6 +10,8 @@ import {
   EncryptedCredential,
   GoogleCalendarConnectionService,
   GoogleGateway,
+  OAuthCallbackOutcome,
+  parseOAuthCallbackQuery,
 } from "../googleCalendar/connectionService";
 import { GoogleCalendarSyncService, SyncGoogleGateway, SyncStore, CredentialError, syncUsersBounded } from "../googleCalendar/syncService";
 import { GoogleEvent, MANAGED_EVENT_MARKER, ReconcileGateway } from "../googleCalendar/reconciliation";
@@ -272,10 +274,36 @@ export function syncService(secrets: GoogleCalendarSecrets) {
 }
 
 const APP_RETURN_URL = "sportscalendar://google-calendar/oauth-complete";
-export function callbackHtml(success: boolean): string {
-  const title = success ? "Google Calendarとの連携が完了しました" : "Google Calendarとの連携を完了できませんでした";
-  const detail = success ? "アプリに戻ると同期を開始します。" : "アプリに戻って、もう一度お試しください。";
-  return `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>${title}</title><style>body{font-family:system-ui;margin:0;background:#f5f7fa;color:#182230}.card{max-width:34rem;margin:12vh auto;padding:2rem;background:white;border-radius:16px;box-shadow:0 4px 24px #0002}a{display:inline-block;margin-top:1rem;padding:.8rem 1.2rem;background:#1769aa;color:white;border-radius:9px;text-decoration:none}</style></head><body><main class="card"><h1>${title}</h1><p>${detail}</p><a href="${APP_RETURN_URL}">Sports Calendarに戻る</a><p><small>自動的に開かない場合は上のボタンを押してください。</small></p></main>${success ? `<script>setTimeout(function(){location.href=${JSON.stringify(APP_RETURN_URL)}},300)</script>` : ""}</body></html>`;
+export type OAuthCallbackPageOutcome = OAuthCallbackOutcome | "failure";
+
+export function callbackHtml(outcome: OAuthCallbackPageOutcome): string {
+  const copy = outcome === "success"
+    ? {title: "Google Calendarとの連携が完了しました", detail: "アプリに戻ると同期を開始します。"}
+    : outcome === "cancelled"
+      ? {title: "Google Calendarとの連携をキャンセルしました", detail: "Google Calendarとの連携は行われていません。アプリに戻ることができます。"}
+      : {title: "Google Calendarとの連携を完了できませんでした", detail: "アプリに戻って、もう一度お試しください。"};
+  const autoReturn = outcome !== "failure";
+  return `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>${copy.title}</title><style>body{font-family:system-ui;margin:0;background:#f5f7fa;color:#182230}.card{max-width:34rem;margin:12vh auto;padding:2rem;background:white;border-radius:16px;box-shadow:0 4px 24px #0002}a{display:inline-block;margin-top:1rem;padding:.8rem 1.2rem;background:#1769aa;color:white;border-radius:9px;text-decoration:none}</style></head><body><main class="card"><h1>${copy.title}</h1><p>${copy.detail}</p><a href="${APP_RETURN_URL}">Sports Calendarに戻る</a><p><small>自動的に開かない場合は上のボタンを押してください。</small></p></main>${autoReturn ? `<script>setTimeout(function(){location.href=${JSON.stringify(APP_RETURN_URL)}},300)</script>` : ""}</body></html>`;
+}
+
+type CallbackResponse = Pick<functions.Response, "status" | "type" | "send">;
+
+/** Testable HTTP boundary; its service dependency never initializes Firestore. */
+export async function handleGoogleCalendarCallback(
+  query: unknown,
+  response: CallbackResponse,
+  connectionService: Pick<GoogleCalendarConnectionService, "callback">
+): Promise<void> {
+  try {
+    const input = parseOAuthCallbackQuery(query);
+    const outcome = await connectionService.callback(input);
+    response.status(200).type("html").send(callbackHtml(outcome));
+  } catch (error) {
+    const code = error instanceof CalendarConnectionError ? error.code : "connection-failed";
+    const status = ["malformed-callback", "invalid-or-expired-state"].includes(code) ? 400 : 502;
+    console.warn("Google Calendar OAuth callback failed", {code});
+    response.status(status).type("html").send(callbackHtml("failure"));
+  }
 }
 
 function callableError(error: unknown): never {
@@ -302,16 +330,7 @@ export function createGoogleCalendarHandlers(secrets: GoogleCalendarSecrets) {
       return {connected: false};
     },
     callback: async (request: functions.https.Request, response: functions.Response) => {
-      const query = request.query as {state?: string; code?: string; error?: string};
-      try {
-        await service(secrets).callback(query);
-        response.status(200).type("html").send(callbackHtml(true));
-      } catch (error) {
-        const code = error instanceof CalendarConnectionError ? error.code : "connection-failed";
-        const status = ["malformed-callback", "invalid-or-expired-state", "oauth-denied"].includes(code) ? 400 : 502;
-        console.warn("Google Calendar OAuth callback failed", {code});
-        response.status(status).type("html").send(callbackHtml(false));
-      }
+      await handleGoogleCalendarCallback(request.query, response, service(secrets));
     },
     sync: async (_data: unknown, context: functions.https.CallableContext) => {
       const uid = requireAuthenticatedUid(context);

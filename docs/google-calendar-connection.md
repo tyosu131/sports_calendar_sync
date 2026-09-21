@@ -1,5 +1,13 @@
 # Google Calendar direct synchronization
 
+Explicit Google `access_denied` is an expected cancellation only when the
+callback has a valid one-time state and no authorization code. That path returns
+HTTP 200 and offers both automatic and manual return to Sports Calendar without
+writing connection state. Invalid/reused/malformed state and all other malformed
+or provider failures remain errors and do not automatically open the app.
+Google's unverified-app and safe-return pages remain Google-controlled; Branding,
+Publishing, and Verification are still separate, incomplete operational work.
+
 ## Delivery state
 
 - **Code complete:** OAuth connection, direct event reconciliation, triggers, app return, and sanitized UI status are implemented in this repository.

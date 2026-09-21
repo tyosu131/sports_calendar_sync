@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GoogleCalendarConnectionService = exports.CalendarConnectionError = exports.CALENDAR_MARKER = exports.CALENDAR_NAME = exports.GOOGLE_CALENDAR_SCOPE = void 0;
+exports.parseOAuthCallbackQuery = parseOAuthCallbackQuery;
 exports.encryptRefreshToken = encryptRefreshToken;
 exports.decryptRefreshToken = decryptRefreshToken;
 const crypto_1 = require("crypto");
@@ -14,6 +15,26 @@ class CalendarConnectionError extends Error {
     }
 }
 exports.CalendarConnectionError = CalendarConnectionError;
+/** Accepts only scalar strings from the untrusted Express query object. */
+function parseOAuthCallbackQuery(query) {
+    if (query === null || typeof query !== "object" || Array.isArray(query)) {
+        throw new CalendarConnectionError("malformed-callback");
+    }
+    const record = query;
+    if (Object.values(record).some(value => typeof value !== "string")) {
+        throw new CalendarConnectionError("malformed-callback");
+    }
+    const scalar = (key) => {
+        const value = record[key];
+        if (value === undefined)
+            return undefined;
+        if (typeof value !== "string") {
+            throw new CalendarConnectionError("malformed-callback");
+        }
+        return value;
+    };
+    return { state: scalar("state"), code: scalar("code"), error: scalar("error") };
+}
 function encryptRefreshToken(token, base64Key) {
     const key = Buffer.from(base64Key, "base64");
     if (key.length !== 32)
@@ -79,10 +100,12 @@ class GoogleCalendarConnectionService {
         const uid = await this.store.consumeState(hashState(input.state), this.now());
         if (!uid)
             throw new CalendarConnectionError("invalid-or-expired-state");
-        if (input.error)
-            throw new CalendarConnectionError("oauth-denied");
-        if (!input.code)
+        if (input.error === "access_denied" && input.code === undefined) {
+            return "cancelled";
+        }
+        if (input.error !== undefined || !input.code) {
             throw new CalendarConnectionError("malformed-callback");
+        }
         let token;
         try {
             token = await this.google.exchangeCode(input.code);
@@ -126,6 +149,7 @@ class GoogleCalendarConnectionService {
         await this.store.saveConnection(uid, {
             status: "active", calendarId, grantedScopes: token.scopes,
         });
+        return "success";
     }
     async status(uid) {
         const connection = await this.store.getConnection(uid);

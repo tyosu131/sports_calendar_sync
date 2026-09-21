@@ -6,26 +6,28 @@ const {
   CalendarConnectionError,
   encryptRefreshToken,
   decryptRefreshToken,
+  parseOAuthCallbackQuery,
 } = require("../lib/googleCalendar/connectionService");
-const {createGoogleCalendarHandlers, callbackHtml} = require("../lib/functions/googleCalendarConnection");
+const {createGoogleCalendarHandlers, callbackHtml, handleGoogleCalendarCallback} = require("../lib/functions/googleCalendarConnection");
 
 class Store {
-  constructor() { this.states = new Map(); this.connections = new Map(); this.credentials = new Map(); }
+  constructor() { this.states = new Map(); this.connections = new Map(); this.credentials = new Map(); this.consumed = 0; this.savedConnections = 0; this.savedCredentials = 0; }
   async createState(hash, uid, expiresAt) { this.states.set(hash, {uid, expiresAt}); }
   async consumeState(hash, now) {
+    this.consumed++;
     const state = this.states.get(hash);
     this.states.delete(hash);
     return state && state.expiresAt > now ? state.uid : undefined;
   }
   async getConnection(uid) { return this.connections.get(uid); }
-  async saveConnection(uid, value) { this.connections.set(uid, value); }
-  async saveCredential(uid, value) { this.credentials.set(uid, value); }
+  async saveConnection(uid, value) { this.savedConnections++; this.connections.set(uid, value); }
+  async saveCredential(uid, value) { this.savedCredentials++; this.credentials.set(uid, value); }
   async deleteCredential(uid) { this.credentials.delete(uid); }
 }
 
 class Google {
-  constructor() { this.created = 0; this.accessible = true; this.result = {refreshToken: "secret-token", scopes: ["scope"]}; }
-  async exchangeCode() { if (this.failure) throw new Error(); return this.result; }
+  constructor() { this.created = 0; this.exchanged = 0; this.accessible = true; this.result = {refreshToken: "secret-token", scopes: ["scope"]}; }
+  async exchangeCode() { this.exchanged++; if (this.failure) throw new Error(); return this.result; }
   async isCalendarAccessible() {
     if (this.accessFailure) throw new Error("provider unavailable");
     return this.accessible;
@@ -54,11 +56,17 @@ test("AES-GCM credential round trip rejects malformed records", () => {
     error => error.code === "invalid-encrypted-credential");
 });
 
-test("callback HTML has a safe app action and failure never claims success", () => {
-  const success = callbackHtml(true);
+test("callback HTML has explicit semantic outcomes and safe app actions", () => {
+  const success = callbackHtml("success");
   assert.match(success, /sportscalendar:\/\/google-calendar\/oauth-complete/);
   assert.match(success, /Sports Calendarに戻る/);
-  const failure = callbackHtml(false);
+  assert.match(success, /<script>/);
+  const cancelled = callbackHtml("cancelled");
+  assert.match(cancelled, /連携をキャンセルしました/);
+  assert.doesNotMatch(cancelled, /連携が完了しました|連携を完了できませんでした|もう一度お試しください/);
+  assert.match(cancelled, /Sports Calendarに戻る/);
+  assert.match(cancelled, /<script>/);
+  const failure = callbackHtml("failure");
   assert.match(failure, /もう一度お試しください/);
   assert.doesNotMatch(failure, /連携が完了しました/);
   assert.doesNotMatch(failure, /<script>/);
@@ -91,11 +99,101 @@ test("expired and reused states are rejected", async () => {
   await assert.rejects(() => fixture.service.callback({state: used, code: "x"}), error => error.code === "invalid-or-expired-state");
 });
 
-test("malformed callback and OAuth denial have stable errors", async () => {
+test("callback query parser accepts scalar strings only", () => {
+  assert.deepEqual(parseOAuthCallbackQuery({state: "state", error: "access_denied"}), {
+    state: "state", code: undefined, error: "access_denied",
+  });
+  for (const query of [null, [], {state: ["state"]}, {state: {nested: true}}, {code: ["code"]}, {state: "state", extra: ["value"]}]) {
+    assert.throws(() => parseOAuthCallbackQuery(query), error => error.code === "malformed-callback");
+  }
+});
+
+test("malformed callback fails while explicit denial is cancellation", async () => {
   const {service} = make();
   await assert.rejects(() => service.callback({}), error => error.code === "malformed-callback");
   const state = await stateFrom(service);
-  await assert.rejects(() => service.callback({state, error: "access_denied"}), error => error.code === "oauth-denied");
+  assert.equal(await service.callback({state, error: "access_denied"}), "cancelled");
+});
+
+test("cancellation consumes state once and performs no provider or persistence mutation", async () => {
+  const fixture = make();
+  const existing = {status: "active", calendarId: "existing-calendar"};
+  fixture.store.connections.set("uid-1", existing);
+  fixture.store.credentials.set("uid-1", {existing: true});
+  const state = await stateFrom(fixture.service);
+
+  assert.equal(await fixture.service.callback({state, error: "access_denied"}), "cancelled");
+  assert.equal(fixture.store.consumed, 1);
+  assert.equal(fixture.google.exchanged, 0);
+  assert.equal(fixture.google.created, 0);
+  assert.equal(fixture.store.savedCredentials, 0);
+  assert.equal(fixture.store.savedConnections, 0);
+  assert.equal(fixture.store.connections.get("uid-1"), existing);
+  assert.deepEqual(fixture.store.credentials.get("uid-1"), {existing: true});
+  await assert.rejects(
+    () => fixture.service.callback({state, error: "access_denied"}),
+    error => error.code === "invalid-or-expired-state"
+  );
+});
+
+function responseRecorder() {
+  return {
+    statusCode: undefined, contentType: undefined, body: undefined,
+    status(value) { this.statusCode = value; return this; },
+    type(value) { this.contentType = value; return this; },
+    send(value) { this.body = value; return this; },
+  };
+}
+
+test("HTTP callback returns success and cancellation pages with automatic app return", async () => {
+  for (const outcome of ["success", "cancelled"]) {
+    const fixture = make();
+    const state = await stateFrom(fixture.service);
+    const response = responseRecorder();
+    const query = outcome === "success" ? {state, code: "code"} : {state, error: "access_denied"};
+    await handleGoogleCalendarCallback(query, response, fixture.service);
+    assert.equal(response.statusCode, 200);
+    assert.equal(response.contentType, "html");
+    assert.match(response.body, /Sports Calendarに戻る/);
+    assert.match(response.body, /<script>/);
+    assert.match(response.body, outcome === "success" ? /連携が完了しました/ : /連携をキャンセルしました/);
+  }
+});
+
+test("HTTP callback rejects invalid, reused, conflicting, unknown, and malformed inputs", async () => {
+  const cases = [
+    async fixture => ({state: "invalid", error: "access_denied"}),
+    async fixture => ({state: await stateFrom(fixture.service), error: "server_error"}),
+    async fixture => ({state: await stateFrom(fixture.service), code: "code", error: "access_denied"}),
+    async fixture => ({state: [await stateFrom(fixture.service)], error: "access_denied"}),
+    async fixture => ({state: await stateFrom(fixture.service), error: ""}),
+  ];
+  for (const makeQuery of cases) {
+    const fixture = make();
+    const response = responseRecorder();
+    await handleGoogleCalendarCallback(await makeQuery(fixture), response, fixture.service);
+    assert.equal(response.statusCode, 400);
+    assert.doesNotMatch(response.body, /連携をキャンセルしました/);
+    assert.doesNotMatch(response.body, /<script>/);
+  }
+
+  const reused = make();
+  const state = await stateFrom(reused.service);
+  await reused.service.callback({state, error: "access_denied"});
+  const response = responseRecorder();
+  await handleGoogleCalendarCallback({state, error: "access_denied"}, response, reused.service);
+  assert.equal(response.statusCode, 400);
+});
+
+test("HTTP token exchange failure is 5xx with manual return only", async () => {
+  const fixture = make(); fixture.google.failure = true;
+  const response = responseRecorder();
+  await handleGoogleCalendarCallback(
+    {state: await stateFrom(fixture.service), code: "code"}, response, fixture.service
+  );
+  assert.equal(response.statusCode, 502);
+  assert.match(response.body, /Sports Calendarに戻る/);
+  assert.doesNotMatch(response.body, /<script>/);
 });
 
 test("missing refresh token is rejected without persistence", async () => {

@@ -5,6 +5,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:sports_calendar_sync/data/providers/game_providers.dart';
 import 'package:sports_calendar_sync/domain/models/game.dart';
 import 'package:sports_calendar_sync/domain/models/team.dart';
+import 'package:sports_calendar_sync/domain/policies/japanese_club_display_evidence.dart';
 import 'package:sports_calendar_sync/presentation/widgets/game_card.dart';
 
 void main() {
@@ -107,15 +108,189 @@ void main() {
     expect(logos['kawasaki_frontale'], 'https://team/kawasaki.png');
     expect(logos['arsenal'], 'https://team/arsenal.png');
   });
+
+  test('confirmed English and exact Japanese J1 names resolve master logos', () {
+    final resolver = J1PresentationLogoResolver(const [
+      Team(
+        id: 'kashima-master',
+        nameEn: 'Kashima Antlers',
+        nameJa: '鹿島アントラーズ',
+        leagueId: 'j1',
+        logoUrl: 'https://team/kashima.png',
+      ),
+    ]);
+
+    expect(
+      resolver.resolve(
+        competitionKey: 'football_j1',
+        names: const ['Kashima Antlers'],
+      ),
+      'https://team/kashima.png',
+    );
+    expect(
+      resolver.resolve(
+        competitionKey: 'football_j1',
+        names: const ['鹿島アントラーズ'],
+      ),
+      'https://team/kashima.png',
+    );
+  });
+
+  test('unknown, partial, non-J1, conflicting, and missing logos resolve null', () {
+    final resolver = J1PresentationLogoResolver(const [
+      Team(
+        id: 'kashima',
+        nameEn: 'Kashima Antlers',
+        nameJa: '鹿島アントラーズ',
+        leagueId: 'j1',
+        logoUrl: 'https://team/kashima.png',
+      ),
+      Team(
+        id: 'urawa',
+        nameEn: 'Urawa Reds',
+        nameJa: '浦和レッズ',
+        leagueId: 'j1',
+      ),
+    ]);
+
+    expect(resolver.resolve(competitionKey: 'football_j1', names: const ['Unknown']), isNull);
+    expect(resolver.resolve(competitionKey: 'football_j1', names: const ['Kashima Ant']), isNull);
+    expect(resolver.resolve(competitionKey: 'football_j2', names: const ['Kashima Antlers']), isNull);
+    expect(
+      resolver.resolve(
+        competitionKey: 'football_j1',
+        names: const ['Kashima Antlers', 'Urawa Reds'],
+      ),
+      isNull,
+    );
+    expect(resolver.resolve(competitionKey: 'football_j1', names: const ['Urawa Reds']), isNull);
+  });
+
+  test('ambiguous evidence and non-unique Japanese master names resolve null', () {
+    expect(
+      uniqueConfirmedJapaneseClubName(
+        'Collision',
+        evidence: const {
+          'collision': {'鹿島アントラーズ', '浦和レッズ'},
+        },
+      ),
+      isNull,
+    );
+    final resolver = J1PresentationLogoResolver(const [
+      Team(id: 'one', nameEn: 'Kashima', nameJa: '鹿島アントラーズ', leagueId: 'j1', logoUrl: 'one'),
+      Team(id: 'two', nameEn: 'Kashima', nameJa: '鹿島アントラーズ', leagueId: 'j1', logoUrl: 'two'),
+    ]);
+    expect(resolver.resolve(competitionKey: 'football_j1', names: const ['Kashima Antlers']), isNull);
+  });
+
+  test('home enrichment batches canonical IDs and fetches J1 master once', () async {
+    var canonicalReads = 0;
+    var j1Reads = 0;
+    final games = [
+      _game(
+        id: 'one',
+        competitionKey: 'football_j1',
+        homeTeamId: 'kawasaki_frontale',
+        awayTeamId: null,
+        awayNameJa: 'Kashima Antlers',
+        awayProviderName: 'Kashima Antlers',
+        homeSourceTeamId: 'goal-kawasaki',
+        awaySourceTeamId: 'goal-kashima',
+      ),
+      _game(
+        id: 'two',
+        competitionKey: 'football_j1',
+        homeTeamId: 'kawasaki_frontale',
+        awayTeamId: null,
+        awayNameJa: 'Unknown FC',
+      ),
+    ];
+    final beforeIds = games
+        .map((game) => [game.homeTeamId, game.awayTeamId, game.homeSourceTeamId, game.awaySourceTeamId])
+        .toList();
+
+    final result = await fetchHomeGameLogoFallbacks(games, (ids) async {
+      canonicalReads++;
+      expect(ids.toSet(), {'kawasaki_frontale'});
+      return const [
+        Team(id: 'kawasaki_frontale', nameEn: 'Kawasaki', nameJa: '川崎フロンターレ', leagueId: 'j1', logoUrl: 'https://team/kawasaki.png'),
+      ];
+    }, () async {
+      j1Reads++;
+      return const [
+        Team(id: 'kashima', nameEn: 'Kashima', nameJa: '鹿島アントラーズ', leagueId: 'j1', logoUrl: 'https://team/kashima.png'),
+      ];
+    });
+
+    expect(canonicalReads, 1);
+    expect(j1Reads, 1);
+    expect(result['one']?.home, 'https://team/kawasaki.png');
+    expect(result['one']?.away, 'https://team/kashima.png');
+    expect(result['two']?.away, isNull);
+    expect(
+      games.map((game) => [game.homeTeamId, game.awayTeamId, game.homeSourceTeamId, game.awaySourceTeamId]).toList(),
+      beforeIds,
+    );
+  });
+
+  test('fully resolved game logos avoid the J1 master read', () async {
+    var j1Reads = 0;
+    final result = await fetchHomeGameLogoFallbacks(
+      [
+        _game(
+          id: 'resolved',
+          competitionKey: 'football_j1',
+          homeTeamId: null,
+          awayTeamId: null,
+          homeLogoUrl: 'https://game/home.png',
+          awayLogoUrl: 'https://game/away.png',
+        ),
+      ],
+      (_) async => const [],
+      () async { j1Reads++; return const []; },
+    );
+    expect(j1Reads, 0);
+    expect(result['resolved'], isNotNull);
+  });
+
+  test('logo lookup failure preserves loaded games with null fallback', () async {
+    final result = await fetchHomeGameLogoFallbacks(
+      [_game(id: 'game', competitionKey: 'football_j1', homeTeamId: null, awayTeamId: null)],
+      (_) async => throw StateError('canonical unavailable'),
+      () async => throw StateError('master unavailable'),
+    );
+    expect(result['game']?.home, isNull);
+    expect(result['game']?.away, isNull);
+  });
 }
 
-Game _game({required String? homeTeamId, required String? awayTeamId}) => Game(
-      id: 'game',
+Game _game({
+  String id = 'game',
+  required String? homeTeamId,
+  required String? awayTeamId,
+  String? competitionKey,
+  String homeNameJa = 'ホーム',
+  String awayNameJa = 'アウェー',
+  String? homeProviderName,
+  String? awayProviderName,
+  String? homeSourceTeamId,
+  String? awaySourceTeamId,
+  String? homeLogoUrl,
+  String? awayLogoUrl,
+}) => Game(
+      id: id,
       leagueId: 'league',
+      competitionKey: competitionKey,
       homeTeamId: homeTeamId,
-      homeTeamNameJa: 'ホーム',
+      homeSourceTeamId: homeSourceTeamId,
+      homeTeamNameJa: homeNameJa,
+      homeTeamProviderName: homeProviderName,
+      homeTeamLogoUrl: homeLogoUrl,
       awayTeamId: awayTeamId,
-      awayTeamNameJa: 'アウェー',
+      awaySourceTeamId: awaySourceTeamId,
+      awayTeamNameJa: awayNameJa,
+      awayTeamProviderName: awayProviderName,
+      awayTeamLogoUrl: awayLogoUrl,
       startTimeUtc: Timestamp.fromMillisecondsSinceEpoch(0),
       startTimeJst: '1970-01-01 09:00',
       timezone: 'UTC',
