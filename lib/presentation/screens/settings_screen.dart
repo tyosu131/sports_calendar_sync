@@ -17,7 +17,10 @@ class SettingsScreen extends ConsumerWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('設定')),
+      appBar: AppBar(
+        leading: const SettingsBackButton(),
+        title: const Text('設定'),
+      ),
       body: userAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('エラー: $e')),
@@ -149,6 +152,23 @@ class SettingsScreen extends ConsumerWidget {
       if (context.mounted) context.go('/');
     }
   }
+}
+
+/// Keeps the usual pop behavior while giving direct/deep-link entries a
+/// deterministic way back to Home.
+class SettingsBackButton extends StatelessWidget {
+  const SettingsBackButton({super.key});
+
+  @override
+  Widget build(BuildContext context) => BackButton(
+        onPressed: () {
+          if (context.canPop()) {
+            context.pop();
+          } else {
+            context.go('/');
+          }
+        },
+      );
 }
 
 /// Distinguishes URL-based Apple/generic subscriptions from direct Google sync.

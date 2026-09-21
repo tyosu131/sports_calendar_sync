@@ -1,5 +1,19 @@
 # Current State — sports_calendar_sync
 
+## Post-OAuth navigation and Home logo resolution (2026-09-21)
+
+- Settings keeps normal stack-based Back navigation, and its Back affordance
+  explicitly returns to Home when `/settings` was entered directly (including
+  the Google OAuth completion deep link) and there is no route to pop.
+- Home upcoming-game cards preserve any logo stored on the Game document, then
+  fall back to `Team.logoUrl` only for an existing canonical `homeTeamId` or
+  `awayTeamId`. All distinct canonical IDs are fetched together rather than per
+  card. Unmapped provider opponents intentionally keep the existing fallback;
+  names are not used to guess identity.
+- Apple Calendar remains a URL handoff labelled `Apple Calendarで購読`.
+  The app does not claim subscribed, synced, or disconnected state because
+  subscription ownership and confirmation remain in Apple Calendar.
+
 ## Current source of truth — Google Calendar V1 closure (2026-09-20)
 
 This subsection supersedes the older Google Calendar and deployment-status rows in the historical 2026-05-08 snapshot below; those rows are retained as a record of what was true when that snapshot was written.

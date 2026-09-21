@@ -8,9 +8,16 @@ import 'competition_badge.dart';
 
 /// Displays a single game/match as a card.
 class GameCard extends StatelessWidget {
-  const GameCard({super.key, required this.game});
+  const GameCard({
+    super.key,
+    required this.game,
+    this.homeTeamLogoUrlFallback,
+    this.awayTeamLogoUrlFallback,
+  });
 
   final Game game;
+  final String? homeTeamLogoUrlFallback;
+  final String? awayTeamLogoUrlFallback;
 
   @override
   Widget build(BuildContext context) {
@@ -78,7 +85,10 @@ class GameCard extends StatelessWidget {
                 Expanded(
                   child: _TeamSide(
                     name: teamDisplayNames.homeName(game),
-                    logoUrl: game.homeTeamLogoUrl,
+                    logoUrl: resolveGameTeamLogoUrl(
+                      game.homeTeamLogoUrl,
+                      homeTeamLogoUrlFallback,
+                    ),
                   ),
                 ),
                 Padding(
@@ -88,7 +98,10 @@ class GameCard extends StatelessWidget {
                 Expanded(
                   child: _TeamSide(
                     name: teamDisplayNames.awayName(game),
-                    logoUrl: game.awayTeamLogoUrl,
+                    logoUrl: resolveGameTeamLogoUrl(
+                      game.awayTeamLogoUrl,
+                      awayTeamLogoUrlFallback,
+                    ),
                   ),
                 ),
               ],
@@ -132,6 +145,16 @@ class GameCard extends StatelessWidget {
       ),
     );
   }
+}
+
+/// A game-level logo is authoritative (and preserves legacy/sample data).
+/// Canonical Team metadata is only a fallback when that field is absent.
+String? resolveGameTeamLogoUrl(String? gameLogoUrl, String? canonicalLogoUrl) {
+  if (gameLogoUrl != null && gameLogoUrl.isNotEmpty) return gameLogoUrl;
+  if (canonicalLogoUrl != null && canonicalLogoUrl.isNotEmpty) {
+    return canonicalLogoUrl;
+  }
+  return null;
 }
 
 class _TeamSide extends StatelessWidget {
