@@ -57,6 +57,7 @@ class CalendarIcsActionButton extends ConsumerWidget {
           }
         },
       );
+}
 
 /// Provider-neutral sync entry point. ICS feeds are issued only after an ICS
 /// action is selected; opening this sheet or selecting Google never issues one.
