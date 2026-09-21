@@ -1,0 +1,38 @@
+[
+  {
+    "id": "cmril1r9rg5yus107g34hsm6u",
+    "name": "Tokyo",
+    "country": "Japan",
+    "founded": "1935 / 199",
+    "venueName": "Ajinomoto Stadium",
+    "venueAddress": "376-3 Nishi-machi, Chōfu-shi",
+    "venueCity": "Chōfu",
+    "badge": "https://media.goal-api.com/badges/380_tokyo.jpg",
+    "observedAt": "2026-09-21",
+    "source": "https://api.goal-api.com/v1/teams/cmril1r9rg5yus107g34hsm6u"
+  },
+  {
+    "id": "cmrjf0tcy94r1t5075wjsxmv8",
+    "name": "Tochigi",
+    "country": "Japan",
+    "founded": "1953",
+    "venueName": "Tochigi Green Stadium",
+    "venueAddress": "32 Kiyoharakogyodanchi",
+    "venueCity": "Utsunomiya",
+    "badge": "https://media.goal-api.com/badges/5093_tochigi.jpg",
+    "observedAt": "2026-09-21",
+    "source": "https://api.goal-api.com/v1/teams/cmrjf0tcy94r1t5075wjsxmv8"
+  },
+  {
+    "id": "cmri0gkbgbr6mlb07s324klf3",
+    "name": "Sabah",
+    "country": "Azerbaijan",
+    "founded": null,
+    "venueName": "Bank Respublika Arena",
+    "venueAddress": null,
+    "venueCity": "Masazir",
+    "badge": "https://media.goal-api.com/badges/1305_sabah.jpg",
+    "observedAt": "2026-09-21",
+    "source": "https://api.goal-api.com/v1/teams/cmri0gkbgbr6mlb07s324klf3"
+  }
+]

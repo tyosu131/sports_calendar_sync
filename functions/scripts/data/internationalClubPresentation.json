@@ -1,0 +1,247 @@
+[
+  {
+    "nameEn": "AFC Bournemouth",
+    "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/349.png",
+    "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams?limit=100",
+    "reference": "https://www.espn.com/soccer/club/_/id/349/afc-bournemouth",
+    "aliases": [],
+    "observedAt": "2026-09-21"
+  },
+  {
+    "nameEn": "Arsenal",
+    "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/359.png",
+    "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams?limit=100",
+    "reference": "https://www.espn.com/soccer/club/_/id/359/arsenal",
+    "aliases": [
+      "Arsenal FC"
+    ],
+    "observedAt": "2026-09-21"
+  },
+  {
+    "nameEn": "Aston Villa",
+    "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/362.png",
+    "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams?limit=100",
+    "reference": "https://www.espn.com/soccer/club/_/id/362/aston-villa",
+    "aliases": [],
+    "observedAt": "2026-09-21"
+  },
+  {
+    "nameEn": "Brentford",
+    "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/337.png",
+    "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams?limit=100",
+    "reference": "https://www.espn.com/soccer/club/_/id/337/brentford",
+    "aliases": [],
+    "observedAt": "2026-09-21"
+  },
+  {
+    "nameEn": "Brighton & Hove Albion",
+    "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/331.png",
+    "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams?limit=100",
+    "reference": "https://www.espn.com/soccer/club/_/id/331/brighton-hove-albion",
+    "aliases": [],
+    "observedAt": "2026-09-21"
+  },
+  {
+    "nameEn": "Chelsea",
+    "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/363.png",
+    "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams?limit=100",
+    "reference": "https://www.espn.com/soccer/club/_/id/363/chelsea",
+    "aliases": [],
+    "observedAt": "2026-09-21"
+  },
+  {
+    "nameEn": "Coventry City",
+    "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/388.png",
+    "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams?limit=100",
+    "reference": "https://www.espn.com/soccer/club/_/id/388/coventry-city",
+    "aliases": [],
+    "observedAt": "2026-09-21"
+  },
+  {
+    "nameEn": "Crystal Palace",
+    "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/384.png",
+    "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams?limit=100",
+    "reference": "https://www.espn.com/soccer/club/_/id/384/crystal-palace",
+    "aliases": [],
+    "observedAt": "2026-09-21"
+  },
+  {
+    "nameEn": "Everton",
+    "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/368.png",
+    "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams?limit=100",
+    "reference": "https://www.espn.com/soccer/club/_/id/368/everton",
+    "aliases": [],
+    "observedAt": "2026-09-21"
+  },
+  {
+    "nameEn": "Fulham",
+    "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/370.png",
+    "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams?limit=100",
+    "reference": "https://www.espn.com/soccer/club/_/id/370/fulham",
+    "aliases": [],
+    "observedAt": "2026-09-21"
+  },
+  {
+    "nameEn": "Hull City",
+    "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/306.png",
+    "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams?limit=100",
+    "reference": "https://www.espn.com/soccer/club/_/id/306/hull-city",
+    "aliases": [],
+    "observedAt": "2026-09-21"
+  },
+  {
+    "nameEn": "Ipswich Town",
+    "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/373.png",
+    "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams?limit=100",
+    "reference": "https://www.espn.com/soccer/club/_/id/373/ipswich-town",
+    "aliases": [],
+    "observedAt": "2026-09-21"
+  },
+  {
+    "nameEn": "Leeds United",
+    "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/357.png",
+    "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams?limit=100",
+    "reference": "https://www.espn.com/soccer/club/_/id/357/leeds-united",
+    "aliases": [],
+    "observedAt": "2026-09-21"
+  },
+  {
+    "nameEn": "Liverpool",
+    "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/364.png",
+    "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams?limit=100",
+    "reference": "https://www.espn.com/soccer/club/_/id/364/liverpool",
+    "aliases": [],
+    "observedAt": "2026-09-21"
+  },
+  {
+    "nameEn": "Manchester City",
+    "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/382.png",
+    "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams?limit=100",
+    "reference": "https://www.espn.com/soccer/club/_/id/382/manchester-city",
+    "aliases": [],
+    "observedAt": "2026-09-21"
+  },
+  {
+    "nameEn": "Manchester United",
+    "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/360.png",
+    "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams?limit=100",
+    "reference": "https://www.espn.com/soccer/club/_/id/360/manchester-united",
+    "aliases": [],
+    "observedAt": "2026-09-21"
+  },
+  {
+    "nameEn": "Newcastle United",
+    "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/361.png",
+    "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams?limit=100",
+    "reference": "https://www.espn.com/soccer/club/_/id/361/newcastle-united",
+    "aliases": [],
+    "observedAt": "2026-09-21"
+  },
+  {
+    "nameEn": "Nottingham Forest",
+    "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/393.png",
+    "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams?limit=100",
+    "reference": "https://www.espn.com/soccer/club/_/id/393/nottingham-forest",
+    "aliases": [],
+    "observedAt": "2026-09-21"
+  },
+  {
+    "nameEn": "Sunderland",
+    "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/366.png",
+    "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams?limit=100",
+    "reference": "https://www.espn.com/soccer/club/_/id/366/sunderland",
+    "aliases": [],
+    "observedAt": "2026-09-21"
+  },
+  {
+    "nameEn": "Tottenham Hotspur",
+    "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/367.png",
+    "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams?limit=100",
+    "reference": "https://www.espn.com/soccer/club/_/id/367/tottenham-hotspur",
+    "aliases": [
+      "Tottenham"
+    ],
+    "observedAt": "2026-09-21"
+  },
+  {
+    "nameEn": "Fleetwood Town",
+    "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/3891.png",
+    "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.4/teams?limit=100",
+    "reference": "https://www.espn.com/soccer/club/_/id/3891/fleetwood-town",
+    "aliases": [],
+    "observedAt": "2026-09-21"
+  },
+  {
+    "nameEn": "Real Betis",
+    "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/244.png",
+    "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/esp.1/teams?limit=100",
+    "reference": "https://www.espn.com/soccer/club/_/id/244/real-betis",
+    "aliases": [],
+    "observedAt": "2026-09-21"
+  },
+  {
+    "nameEn": "Real Madrid",
+    "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/86.png",
+    "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/esp.1/teams?limit=100",
+    "reference": "https://www.espn.com/soccer/club/_/id/86/real-madrid",
+    "aliases": [],
+    "observedAt": "2026-09-21"
+  },
+  {
+    "nameEn": "Bayern Munich",
+    "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/132.png",
+    "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/ger.1/teams?limit=100",
+    "reference": "https://www.espn.com/soccer/club/_/id/132/bayern-munich",
+    "aliases": [
+      "Bayern München"
+    ],
+    "observedAt": "2026-09-21"
+  },
+  {
+    "nameEn": "Borussia Dortmund",
+    "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/124.png",
+    "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/ger.1/teams?limit=100",
+    "reference": "https://www.espn.com/soccer/club/_/id/124/borussia-dortmund",
+    "aliases": [],
+    "observedAt": "2026-09-21"
+  },
+  {
+    "nameEn": "Lille",
+    "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/166.png",
+    "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/fra.1/teams?limit=100",
+    "reference": "https://www.espn.com/soccer/club/_/id/166/lille",
+    "aliases": [],
+    "observedAt": "2026-09-21"
+  },
+  {
+    "nameEn": "Napoli",
+    "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/114.png",
+    "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/ita.1/teams?limit=100",
+    "reference": "https://www.espn.com/soccer/club/_/id/114/napoli",
+    "aliases": [],
+    "observedAt": "2026-09-21"
+  },
+  {
+    "nameEn": "Slavia Prague",
+    "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/494.png",
+    "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/uefa.champions/teams?limit=100",
+    "reference": "https://www.espn.com/soccer/club/_/id/494/slavia-prague",
+    "aliases": [
+      "Slavia Praha"
+    ],
+    "observedAt": "2026-09-21"
+  },
+  {
+    "nameEn": "Sabah",
+    "aliases": [
+      "Sabah FK"
+    ],
+    "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/21922.png",
+    "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/uefa.champions/teams?limit=100",
+    "reference": "https://www.uefa.com/uefachampionsleague/clubs/2609356--sabah/",
+    "observedAt": "2026-09-21",
+    "competitionKeys": [
+      "football_champions_league"
+    ]
+  }
+]

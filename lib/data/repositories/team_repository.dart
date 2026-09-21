@@ -96,11 +96,9 @@ class FirestoreTeamRepository implements TeamRepository {
 
     final primarySnap = await _teams
         .where('competitionKey', isEqualTo: competitionKey)
-        .limit(AppConstants.defaultPageSize)
         .get();
     final legacySnap = await _teams
         .where('sportKey', isEqualTo: competitionKey)
-        .limit(AppConstants.defaultPageSize)
         .get();
 
     final seen = <String>{};

@@ -1,5 +1,83 @@
 # Current State — sports_calendar_sync
 
+## Unified OAuth / V1 team presentation bundle (2026-09-21, local implementation)
+
+This section supersedes the PR #41 J1-only presentation and “separate publishing
+phase” descriptions below. These changes have **not been deployed**.
+
+- OAuth success/cancel/failure and state validation from PR #41 are retained.
+  Cancellation of a reconnect now explicitly says the existing connection is
+  unchanged; expired-denial HTTP/no-mutation tests are added.
+- Home, Schedule, Team detail, Search and followed teams share reviewed naming
+  and logo data. Japanese domestic/discovery competitions use Japanese;
+  Arsenal's English/European competitions use English. ICS and direct Google
+  event normalization consume the same generated evidence.
+- Post-audit fix: the generated catalog is now the only alias authority. The
+  unused lossy Japanese alias modules (including compiled output) were retired;
+  no rejected match is retried. Raw fallback is provider → English → Japanese,
+  preserving modifiers and conflicts without translating them to senior clubs.
+  A shared 26-case regression oracle tests Dart/TypeScript and local/server
+  ICS/Google output; the 178 captured expected names remain unchanged.
+- Logos resolve Game → existing canonical master → unique presentation master
+  → reviewed catalog → initials/shield. Metadata reads are bounded and shared;
+  no card performs a repository read. No canonical provider mapping, follow,
+  membership, fixture inclusion or Firestore Game is changed.
+- Read-only audit: **89 existing V1 games, 178 participant sides, 52 distinct
+  participant names**, all resolved by the final catalog in actual competition
+  context (candidate metadata, not permission to display). The separately human-authorized GOAL detail checks resolved Tokyo,
+  Tochigi and Sabah; aliases are restricted to their confirmed competition
+  contexts. GOAL's Sabah badge returned 403; an ESPN replacement returned 200.
+- Homepage, Privacy Policy, Terms, static Hosting configuration and a publishing
+  guard are implemented. Taisei Kawakami / support@sports-calendar-sync.com /
+  https://sports-calendar-sync.com are confirmed; privacy and terms use clean
+  /privacy and /terms paths. DNS/TLS, policy review, Google verification and release/device acceptance remain
+  outstanding parts of the same goal, not separate PR scope.
+- Settings now exposes homepage/privacy/terms before any Google authorization,
+  including when signed out. Those links are prepared destinations, not proof
+  the pages are published. Exact URLs and contacts are confirmed; DNS/TLS,
+  Search Console ownership and Google publication still require release actions.
+- Full captured-data tests and the [57-row coverage matrix](v1-presentation-coverage.md)
+  verify 178/178 names and logo URL resolutions, including both domestic cups
+  and European opponents, against actual Flutter/ICS/Google policies.
+  [Logo provenance](logo-provenance.md) inventories 60 existing project URLs
+  and 29 new ESPN references. Their rights remain unconfirmed, so the public
+  UI blocks them before image loading: all 178 slots use neutral badges/monograms.
+  Rights clearance is needed to enable those assets, not to release neutral UI.
+- Read-only Cloud evidence: existing default Hosting site confirmed; Calendar
+  API enabled; callback ACTIVE on Node 20 at its existing HTTPS URL, updated
+  `2026-09-21T02:21:52.489Z`. This does not prove the deployed source matches
+  this uncommitted revision or establish current OAuth Console branding.
+- No commit/push, deployment, production secret change, or Firestore write was
+  performed. The unrelated macOS changes remain untouched.
+
+See [one-bundle scope and evidence](oauth-presentation-closure.md) and
+[public assets / Google verification worksheet](google-oauth-publishing.md).
+The complete goal remains pending domain ownership verification, public-site
+publication, Google final actions and deployed real-device acceptance. Requested nj workflow
+originals also remain unavailable pending their URL/path.
+
+### Local verification of this bundle
+
+Node `v20.20.2`, npm `10.8.2`, Flutter `3.41.4`, Dart `3.11.1`.
+
+| Command | Result |
+|---|---|
+| `PATH="/opt/homebrew/opt/node@20/bin:$PATH" npm --prefix functions run build` | PASS |
+| `PATH="/opt/homebrew/opt/node@20/bin:$PATH" npm --prefix functions test` | PASS, 141 tests |
+| `PATH="/opt/homebrew/opt/node@20/bin:$PATH" npm --prefix functions run validate:config` | PASS, 10 tests |
+| `flutter analyze --no-pub` | PASS, no issues |
+| `flutter test --no-pub` | PASS, 112 tests |
+| `node functions/scripts/generateTeamPresentation.js --check` (Node 20 PATH) | PASS |
+| `node functions/scripts/auditV1Presentation.js` (Node 20 PATH, offline) | PASS: 89 games / 178 names / 52 labels; report unchanged |
+| `git diff --check` | PASS |
+| Public-site build | PASS: confirmed operator/support/domain rendered, no unresolved placeholders |
+
+These are local standard CI-command results, not a claim that GitHub Actions
+ran on an unpublished branch. An iPhone was detected, but the new revision's
+installed UI/OAuth flow was not exercised. SHA-256 of both pre-existing macOS
+xcconfig modifications and the untracked Podfile stayed unchanged.
+
+
 ## OAuth cancellation and J1 Home presentation logos (2026-09-21)
 
 - A callback with a valid, single-use OAuth state, exactly

@@ -6,6 +6,7 @@ import '../../data/providers/auth_providers.dart';
 import '../../data/providers/repository_providers.dart';
 import '../widgets/calendar_sync_sheet.dart';
 import '../widgets/google_calendar_connection_tile.dart';
+import '../widgets/public_policy_links.dart';
 
 /// Settings screen: account info, calendar sync URL, sign out.
 class SettingsScreen extends ConsumerWidget {
@@ -27,9 +28,15 @@ class SettingsScreen extends ConsumerWidget {
         data: (profile) {
           if (profile == null) {
             return Center(
-              child: FilledButton(
-                onPressed: () => context.push('/signin'),
-                child: const Text('サインイン'),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  FilledButton(
+                    onPressed: () => context.push('/signin'),
+                    child: const Text('サインイン'),
+                  ),
+                  const PublicPolicyLinks(),
+                ],
               ),
             );
           }
@@ -65,15 +72,19 @@ class SettingsScreen extends ConsumerWidget {
                   profile.preferredLanguage == 'ja' ? '日本語' : 'English',
                 ),
                 trailing: const Icon(Icons.chevron_right),
-                onTap: () => _showLanguagePicker(context, ref, profile.uid,
-                    profile.preferredLanguage),
+                onTap: () => _showLanguagePicker(
+                  context,
+                  ref,
+                  profile.uid,
+                  profile.preferredLanguage,
+                ),
               ),
               const Divider(),
 
               // Sign out
+              const PublicPolicyLinks(),
               ListTile(
-                leading: Icon(Icons.logout,
-                    color: theme.colorScheme.error),
+                leading: Icon(Icons.logout, color: theme.colorScheme.error),
                 title: Text(
                   'サインアウト',
                   style: TextStyle(color: theme.colorScheme.error),
@@ -122,7 +133,9 @@ class SettingsScreen extends ConsumerWidget {
       ),
     );
     if (selected != null && selected != current) {
-      await ref.read(userRepositoryProvider).upsertProfile(
+      await ref
+          .read(userRepositoryProvider)
+          .upsertProfile(
             (await ref.read(userRepositoryProvider).fetchProfile(uid))!
                 .copyWith(preferredLanguage: selected),
           );
@@ -161,22 +174,26 @@ class SettingsBackButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => BackButton(
-        onPressed: () {
-          if (context.canPop()) {
-            context.pop();
-          } else {
-            context.go('/');
-          }
-        },
-      );
+    onPressed: () {
+      if (context.canPop()) {
+        context.pop();
+      } else {
+        context.go('/');
+      }
+    },
+  );
 }
 
 /// Distinguishes URL-based Apple/generic subscriptions from direct Google sync.
 class CalendarSyncSettingsSection extends StatelessWidget {
   const CalendarSyncSettingsSection({
     super.key,
-    this.appleAction = const CalendarIcsActionButton(action: CalendarIcsAction.apple),
-    this.otherAction = const CalendarIcsActionButton(action: CalendarIcsAction.other),
+    this.appleAction = const CalendarIcsActionButton(
+      action: CalendarIcsAction.apple,
+    ),
+    this.otherAction = const CalendarIcsActionButton(
+      action: CalendarIcsAction.other,
+    ),
     this.googleCalendarTile = const GoogleCalendarConnectionTile(),
   });
 
@@ -186,23 +203,23 @@ class CalendarSyncSettingsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Column(
-        children: [
-          _SectionHeader(title: 'カレンダー同期'),
-          googleCalendarTile,
-          ListTile(
-            leading: const Icon(Icons.apple),
-            title: const Text('Apple Calendar'),
-            subtitle: const Text('Apple Calendarで購読'),
-            trailing: appleAction,
-          ),
-          ListTile(
-            leading: const Icon(Icons.calendar_month),
-            title: const Text('その他のカレンダー'),
-            subtitle: const Text('ICS購読URLをコピー・共有'),
-            trailing: otherAction,
-          ),
-        ],
-      );
+    children: [
+      _SectionHeader(title: 'カレンダー同期'),
+      googleCalendarTile,
+      ListTile(
+        leading: const Icon(Icons.apple),
+        title: const Text('Apple Calendar'),
+        subtitle: const Text('Apple Calendarで購読'),
+        trailing: appleAction,
+      ),
+      ListTile(
+        leading: const Icon(Icons.calendar_month),
+        title: const Text('その他のカレンダー'),
+        subtitle: const Text('ICS購読URLをコピー・共有'),
+        trailing: otherAction,
+      ),
+    ],
+  );
 }
 
 class _SectionHeader extends StatelessWidget {
@@ -216,9 +233,9 @@ class _SectionHeader extends StatelessWidget {
       child: Text(
         title,
         style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: Theme.of(context).colorScheme.primary,
-              fontWeight: FontWeight.bold,
-            ),
+          color: Theme.of(context).colorScheme.primary,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }

@@ -4,7 +4,9 @@ import '../../core/utils/date_time_utils.dart';
 import '../../domain/models/game.dart';
 import '../../domain/policies/competition_display_policy.dart';
 import '../../domain/policies/team_display_name_policy.dart';
+import '../../domain/policies/team_presentation_policy.dart';
 import 'competition_badge.dart';
+import 'game_presentation_scope.dart';
 
 /// Displays a single game/match as a card.
 class GameCard extends StatelessWidget {
@@ -87,7 +89,8 @@ class GameCard extends StatelessWidget {
                     name: teamDisplayNames.homeName(game),
                     logoUrl: resolveGameTeamLogoUrl(
                       game.homeTeamLogoUrl,
-                      homeTeamLogoUrlFallback,
+                      homeTeamLogoUrlFallback ??
+                          GamePresentationScope.logo(context, game, true),
                     ),
                   ),
                 ),
@@ -100,7 +103,8 @@ class GameCard extends StatelessWidget {
                     name: teamDisplayNames.awayName(game),
                     logoUrl: resolveGameTeamLogoUrl(
                       game.awayTeamLogoUrl,
-                      awayTeamLogoUrlFallback,
+                      awayTeamLogoUrlFallback ??
+                          GamePresentationScope.logo(context, game, false),
                     ),
                   ),
                 ),
@@ -147,14 +151,9 @@ class GameCard extends StatelessWidget {
   }
 }
 
-/// A game-level logo is authoritative (and preserves legacy/sample data).
-/// Canonical Team metadata is only a fallback when that field is absent.
+/// Metadata authority never implies permission to display a third-party logo.
 String? resolveGameTeamLogoUrl(String? gameLogoUrl, String? canonicalLogoUrl) {
-  if (gameLogoUrl != null && gameLogoUrl.isNotEmpty) return gameLogoUrl;
-  if (canonicalLogoUrl != null && canonicalLogoUrl.isNotEmpty) {
-    return canonicalLogoUrl;
-  }
-  return null;
+  return publicTeamLogoUrl(gameLogoUrl) ?? publicTeamLogoUrl(canonicalLogoUrl);
 }
 
 class _TeamSide extends StatelessWidget {

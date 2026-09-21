@@ -9,7 +9,9 @@ import '../../data/providers/repository_providers.dart';
 import '../../data/providers/team_providers.dart';
 import '../../domain/models/game.dart';
 import '../../domain/policies/team_display_name_policy.dart';
+import '../../domain/policies/team_presentation_policy.dart';
 import '../widgets/game_card.dart';
+import '../widgets/game_presentation_scope.dart';
 import '../widgets/calendar_sync_button.dart';
 
 /// Detail screen for a single team: shows schedule + follow/sync actions.
@@ -37,114 +39,121 @@ class TeamDetailScreen extends ConsumerWidget {
           if (team == null) {
             return const Center(child: Text('チームが見つかりませんでした'));
           }
-          return CustomScrollView(
-            slivers: [
-              // App bar with team logo
-              SliverAppBar(
-                expandedHeight: 180,
-                pinned: true,
-                flexibleSpace: FlexibleSpaceBar(
-                  title: Text(teamDisplayNames.teamName(team)),
-                  background: _TeamHeaderBackground(
-                    nameJa: teamDisplayNames.teamName(team),
-                    logoUrl: team.logoUrl,
-                  ),
-                ),
-                actions: [
-                  // Follow/unfollow
-                  IconButton(
-                    icon: Icon(
-                      isFollowing ? Icons.favorite : Icons.favorite_border,
-                      color: isFollowing ? Colors.red : null,
+          final games = gamesAsync.valueOrNull;
+          final resolver = games == null
+              ? null
+              : ref.watch(gamePresentationProvider(games)).valueOrNull;
+          return GamePresentationScope(
+            resolver: resolver ?? TeamPresentationLogoResolver(const []),
+            child: CustomScrollView(
+              slivers: [
+                // App bar with team logo
+                SliverAppBar(
+                  expandedHeight: 180,
+                  pinned: true,
+                  flexibleSpace: FlexibleSpaceBar(
+                    title: Text(teamDisplayNames.teamName(team)),
+                    background: _TeamHeaderBackground(
+                      nameJa: teamDisplayNames.teamName(team),
+                      logoUrl: teamPresentationLogo(team),
                     ),
-                    tooltip: isFollowing ? 'フォロー解除' : 'フォローする',
-                    onPressed: () async {
-                      if (userId == null) return;
-                      final repo = ref.read(userRepositoryProvider);
-                      // Pass competitionKey when available so per-competition
-                      // state is updated; legacy followedTeamIds is always
-                      // kept in sync inside the repository.
-                      if (isFollowing) {
-                        await repo.unfollowTeam(
-                          userId,
-                          teamId,
-                          competitionKey: team.competitionKey,
-                        );
-                      } else {
-                        await repo.followTeam(
-                          userId,
-                          teamId,
-                          competitionKey: team.competitionKey,
-                        );
-                      }
-                    },
                   ),
-                  // Calendar sync
-                  if (!useSampleData && userId != null)
-                    const CalendarSyncButton(),
-                  if (useSampleData)
-                    gamesAsync.maybeWhen(
-                      data: (games) => IconButton(
-                        icon: const Icon(Icons.content_copy_outlined),
-                        tooltip: games.isEmpty
-                            ? 'コピーできる試合がありません'
-                            : 'ローカルICSをコピー',
-                        onPressed: games.isEmpty
-                            ? null
-                            : () => _showLocalIcsSheet(
-                                context,
-                                teamDisplayNames.teamName(team),
-                                teamId,
-                                games,
-                              ),
+                  actions: [
+                    // Follow/unfollow
+                    IconButton(
+                      icon: Icon(
+                        isFollowing ? Icons.favorite : Icons.favorite_border,
+                        color: isFollowing ? Colors.red : null,
                       ),
-                      orElse: () => const SizedBox.shrink(),
+                      tooltip: isFollowing ? 'フォロー解除' : 'フォローする',
+                      onPressed: () async {
+                        if (userId == null) return;
+                        final repo = ref.read(userRepositoryProvider);
+                        // Pass competitionKey when available so per-competition
+                        // state is updated; legacy followedTeamIds is always
+                        // kept in sync inside the repository.
+                        if (isFollowing) {
+                          await repo.unfollowTeam(
+                            userId,
+                            teamId,
+                            competitionKey: team.competitionKey,
+                          );
+                        } else {
+                          await repo.followTeam(
+                            userId,
+                            teamId,
+                            competitionKey: team.competitionKey,
+                          );
+                        }
+                      },
                     ),
-                ],
-              ),
-              // Games list
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 18, 16, 8),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.event_note_outlined,
-                        size: 20,
-                        color: Theme.of(context).colorScheme.primary,
+                    // Calendar sync
+                    if (!useSampleData && userId != null)
+                      const CalendarSyncButton(),
+                    if (useSampleData)
+                      gamesAsync.maybeWhen(
+                        data: (games) => IconButton(
+                          icon: const Icon(Icons.content_copy_outlined),
+                          tooltip: games.isEmpty
+                              ? 'コピーできる試合がありません'
+                              : 'ローカルICSをコピー',
+                          onPressed: games.isEmpty
+                              ? null
+                              : () => _showLocalIcsSheet(
+                                  context,
+                                  teamDisplayNames.teamName(team),
+                                  teamId,
+                                  games,
+                                ),
+                        ),
+                        orElse: () => const SizedBox.shrink(),
                       ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '直近の試合',
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(fontWeight: FontWeight.bold),
-                      ),
-                    ],
+                  ],
+                ),
+                // Games list
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 18, 16, 8),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.event_note_outlined,
+                          size: 20,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '直近の試合',
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              gamesAsync.when(
-                loading: () => const SliverToBoxAdapter(
-                  child: Center(child: CircularProgressIndicator()),
-                ),
-                error: (e, _) =>
-                    SliverToBoxAdapter(child: Center(child: Text('エラー: $e'))),
-                data: (games) {
-                  if (games.isEmpty) {
-                    return SliverToBoxAdapter(
-                      child: _TeamDetailEmptyState(message: '直近の試合はありません'),
+                gamesAsync.when(
+                  loading: () => const SliverToBoxAdapter(
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                  error: (e, _) =>
+                      SliverToBoxAdapter(child: Center(child: Text('エラー: $e'))),
+                  data: (games) {
+                    if (games.isEmpty) {
+                      return SliverToBoxAdapter(
+                        child: _TeamDetailEmptyState(message: '直近の試合はありません'),
+                      );
+                    }
+                    return SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) => GameCard(game: games[index]),
+                        childCount: games.length,
+                      ),
                     );
-                  }
-                  return SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) => GameCard(game: games[index]),
-                      childCount: games.length,
-                    ),
-                  );
-                },
-              ),
-              const SliverPadding(padding: EdgeInsets.only(bottom: 32)),
-            ],
+                  },
+                ),
+                const SliverPadding(padding: EdgeInsets.only(bottom: 32)),
+              ],
+            ),
           );
         },
       ),

@@ -3,14 +3,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.defaultDisplayLanguage = defaultDisplayLanguage;
 exports.confirmedJapaneseName = confirmedJapaneseName;
 exports.displayTeamName = displayTeamName;
+const clubPresentation_1 = require("./clubPresentation");
 const JAPANESE_COMPETITIONS = new Set([
-    "football_j1", "football_j_league_cup", "football_emperor_cup",
+    "football_j1", "football_j2", "football_j3", "football_j_league_cup", "football_emperor_cup",
 ]);
 function defaultDisplayLanguage(competitionKey) {
     return JAPANESE_COMPETITIONS.has(competitionKey ?? "") ? "ja" : "en";
 }
 function confirmedJapaneseName(providerName) {
-    return (0, japaneseClubDisplayEvidence_1.japaneseClubDisplayName)(providerName);
+    return (0, clubPresentation_1.clubPresentation)([providerName])?.nameJa || undefined;
 }
 const CANONICAL_NAMES = Object.freeze({
     kawasaki_frontale: { ja: "川崎フロンターレ", en: "Kawasaki Frontale" },
@@ -26,14 +27,14 @@ function displayTeamName(competitionKey, names, languageOverride, teamId) {
     const canonical = teamId === undefined ? undefined : CANONICAL_NAMES[teamId];
     if (canonical)
         return canonical[language];
-    if (language === "en")
-        return en || provider || ja;
-    const confirmed = confirmedJapaneseName(en) ?? confirmedJapaneseName(provider) ?? confirmedJapaneseName(ja);
+    const evidence = competitionKey?.startsWith("football_") ? (0, clubPresentation_1.clubPresentation)([en, provider, ja], competitionKey) : undefined;
+    const confirmed = language === "en" ? evidence?.nameEn : evidence?.nameJa;
     if (confirmed)
         return confirmed;
-    if (/[\u3040-\u30ff\u3400-\u9fff]/u.test(ja))
-        return ja;
+    // A catalog miss/conflict is final. Never retry fields independently with a
+    // lossy normalizer: qualifiers and conflicting evidence must remain intact.
+    // GOAL stores the original participant in provider; En is the legacy copy.
+    // Field precedence is provenance, not a choice between catalog candidates.
     return provider || en || ja;
 }
-const japaneseClubDisplayEvidence_1 = require("./japaneseClubDisplayEvidence");
 //# sourceMappingURL=teamDisplayNamePolicy.js.map

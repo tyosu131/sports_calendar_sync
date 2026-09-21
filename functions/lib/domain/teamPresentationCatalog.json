@@ -1,0 +1,1206 @@
+[
+    {
+        "nameJa": "鹿島アントラーズ",
+        "nameEn": "Kashima",
+        "aliases": [
+            "鹿島アントラーズ",
+            "Kashima",
+            "鹿島",
+            "アントラーズ",
+            "Kashima Antlers",
+            "Antlers"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/290.png",
+        "source": "functions/scripts/data/j1Teams.js"
+    },
+    {
+        "nameJa": "水戸ホーリーホック",
+        "nameEn": "Mito Hollyhock",
+        "aliases": [
+            "水戸ホーリーホック",
+            "Mito Hollyhock",
+            "水戸",
+            "ホーリーホック"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/305.png",
+        "source": "functions/scripts/data/j1Teams.js"
+    },
+    {
+        "nameJa": "浦和レッズ",
+        "nameEn": "Urawa Reds",
+        "aliases": [
+            "浦和レッズ",
+            "Urawa Reds",
+            "浦和",
+            "レッズ"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/287.png",
+        "source": "functions/scripts/data/j1Teams.js"
+    },
+    {
+        "nameJa": "ジェフユナイテッド千葉",
+        "nameEn": "JEF United Chiba",
+        "aliases": [
+            "ジェフユナイテッド千葉",
+            "JEF United Chiba",
+            "千葉",
+            "ジェフ",
+            "ジェフ千葉",
+            "JEF Chiba",
+            "JEF United"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/301.png",
+        "source": "functions/scripts/data/j1Teams.js"
+    },
+    {
+        "nameJa": "柏レイソル",
+        "nameEn": "Kashiwa Reysol",
+        "aliases": [
+            "柏レイソル",
+            "Kashiwa Reysol",
+            "柏",
+            "レイソル"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/281.png",
+        "source": "functions/scripts/data/j1Teams.js"
+    },
+    {
+        "nameJa": "ＦＣ東京",
+        "nameEn": "FC Tokyo",
+        "aliases": [
+            "ＦＣ東京",
+            "FC Tokyo",
+            "FC東京",
+            "東京"
+        ],
+        "scopedAliases": [
+            "Tokyo"
+        ],
+        "competitionKeys": [
+            "football_j1",
+            "football_j2",
+            "football_j3",
+            "football_j_league_cup",
+            "football_emperor_cup"
+        ],
+        "logoUrl": "https://media.api-sports.io/football/teams/292.png",
+        "source": "functions/scripts/data/j1Teams.js"
+    },
+    {
+        "nameJa": "東京ヴェルディ",
+        "nameEn": "Tokyo Verdy",
+        "aliases": [
+            "東京ヴェルディ",
+            "Tokyo Verdy",
+            "東京V",
+            "ヴェルディ"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/306.png",
+        "source": "functions/scripts/data/j1Teams.js"
+    },
+    {
+        "nameJa": "ＦＣ町田ゼルビア",
+        "nameEn": "FC Machida Zelvia",
+        "aliases": [
+            "ＦＣ町田ゼルビア",
+            "FC Machida Zelvia",
+            "町田",
+            "ゼルビア",
+            "Machida Zelvia"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/303.png",
+        "source": "functions/scripts/data/j1Teams.js"
+    },
+    {
+        "nameJa": "川崎フロンターレ",
+        "nameEn": "Kawasaki Frontale",
+        "aliases": [
+            "川崎フロンターレ",
+            "Kawasaki Frontale",
+            "川崎",
+            "フロンターレ"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/294.png",
+        "source": "functions/scripts/data/j1Teams.js"
+    },
+    {
+        "nameJa": "横浜Ｆ・マリノス",
+        "nameEn": "Yokohama F･Marinos",
+        "aliases": [
+            "横浜Ｆ・マリノス",
+            "Yokohama F･Marinos",
+            "横浜FM",
+            "マリノス",
+            "Yokohama F. Marinos",
+            "F. Marinos"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/296.png",
+        "source": "functions/scripts/data/j1Teams.js"
+    },
+    {
+        "nameJa": "清水エスパルス",
+        "nameEn": "Shimizu S-Pulse",
+        "aliases": [
+            "清水エスパルス",
+            "Shimizu S-Pulse",
+            "清水",
+            "エスパルス"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/283.png",
+        "source": "functions/scripts/data/j1Teams.js"
+    },
+    {
+        "nameJa": "名古屋グランパス",
+        "nameEn": "Nagoya Grampus",
+        "aliases": [
+            "名古屋グランパス",
+            "Nagoya Grampus",
+            "名古屋",
+            "グランパス"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/288.png",
+        "source": "functions/scripts/data/j1Teams.js"
+    },
+    {
+        "nameJa": "京都サンガF.C.",
+        "nameEn": "Kyoto Sanga F.C.",
+        "aliases": [
+            "京都サンガF.C.",
+            "Kyoto Sanga F.C.",
+            "京都",
+            "サンガ",
+            "Kyoto Sanga"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/302.png",
+        "source": "functions/scripts/data/j1Teams.js"
+    },
+    {
+        "nameJa": "ガンバ大阪",
+        "nameEn": "Gamba Osaka",
+        "aliases": [
+            "ガンバ大阪",
+            "Gamba Osaka",
+            "G大阪",
+            "ガンバ"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/293.png",
+        "source": "functions/scripts/data/j1Teams.js"
+    },
+    {
+        "nameJa": "セレッソ大阪",
+        "nameEn": "Cerezo Osaka",
+        "aliases": [
+            "セレッソ大阪",
+            "Cerezo Osaka",
+            "C大阪",
+            "セレッソ"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/291.png",
+        "source": "functions/scripts/data/j1Teams.js"
+    },
+    {
+        "nameJa": "ヴィッセル神戸",
+        "nameEn": "Vissel Kobe",
+        "aliases": [
+            "ヴィッセル神戸",
+            "Vissel Kobe",
+            "神戸",
+            "ヴィッセル"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/289.png",
+        "source": "functions/scripts/data/j1Teams.js"
+    },
+    {
+        "nameJa": "ファジアーノ岡山",
+        "nameEn": "Fagiano Okayama",
+        "aliases": [
+            "ファジアーノ岡山",
+            "Fagiano Okayama",
+            "岡山",
+            "ファジアーノ"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/310.png",
+        "source": "functions/scripts/data/j1Teams.js"
+    },
+    {
+        "nameJa": "サンフレッチェ広島",
+        "nameEn": "Sanfrecce Hiroshima",
+        "aliases": [
+            "サンフレッチェ広島",
+            "Sanfrecce Hiroshima",
+            "広島",
+            "サンフレッチェ"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/282.png",
+        "source": "functions/scripts/data/j1Teams.js"
+    },
+    {
+        "nameJa": "アビスパ福岡",
+        "nameEn": "Avispa Fukuoka",
+        "aliases": [
+            "アビスパ福岡",
+            "Avispa Fukuoka",
+            "福岡",
+            "アビスパ"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/316.png",
+        "source": "functions/scripts/data/j1Teams.js"
+    },
+    {
+        "nameJa": "Ｖ・ファーレン長崎",
+        "nameEn": "V-Varen Nagasaki",
+        "aliases": [
+            "Ｖ・ファーレン長崎",
+            "V-Varen Nagasaki",
+            "長崎",
+            "Ｖ・ファーレン",
+            "V. Varen Nagasaki"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/285.png",
+        "source": "functions/scripts/data/j1Teams.js"
+    },
+    {
+        "nameJa": "ベガルタ仙台",
+        "nameEn": "Vegalta Sendai",
+        "aliases": [
+            "ベガルタ仙台",
+            "Vegalta Sendai",
+            "仙台",
+            "ベガルタ"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/286.png",
+        "source": "functions/scripts/data/j2Teams.js"
+    },
+    {
+        "nameJa": "湘南ベルマーレ",
+        "nameEn": "Shonan Bellmare",
+        "aliases": [
+            "湘南ベルマーレ",
+            "Shonan Bellmare",
+            "湘南",
+            "ベルマーレ"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/284.png",
+        "source": "functions/scripts/data/j2Teams.js"
+    },
+    {
+        "nameJa": "ブラウブリッツ秋田",
+        "nameEn": "Blaublitz Akita",
+        "aliases": [
+            "ブラウブリッツ秋田",
+            "Blaublitz Akita",
+            "秋田",
+            "ブラウブリッツ"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/4315.png",
+        "source": "functions/scripts/data/j2Teams.js"
+    },
+    {
+        "nameJa": "横浜ＦＣ",
+        "nameEn": "Yokohama FC",
+        "aliases": [
+            "横浜ＦＣ",
+            "Yokohama FC",
+            "横浜FC",
+            "横浜"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/307.png",
+        "source": "functions/scripts/data/j2Teams.js"
+    },
+    {
+        "nameJa": "モンテディオ山形",
+        "nameEn": "Montedio Yamagata",
+        "aliases": [
+            "モンテディオ山形",
+            "Montedio Yamagata",
+            "山形",
+            "モンテディオ"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/312.png",
+        "source": "functions/scripts/data/j2Teams.js"
+    },
+    {
+        "nameJa": "栃木シティ",
+        "nameEn": "Tochigi City",
+        "aliases": [
+            "栃木シティ",
+            "Tochigi City",
+            "栃木C"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/7145.png",
+        "source": "functions/scripts/data/j2Teams.js"
+    },
+    {
+        "nameJa": "栃木ＳＣ",
+        "nameEn": "Tochigi SC",
+        "aliases": [
+            "栃木ＳＣ",
+            "Tochigi SC",
+            "栃木SC"
+        ],
+        "scopedAliases": [
+            "Tochigi"
+        ],
+        "competitionKeys": [
+            "football_j1",
+            "football_j2",
+            "football_j3",
+            "football_j_league_cup",
+            "football_emperor_cup"
+        ],
+        "logoUrl": "https://media.api-sports.io/football/teams/315.png",
+        "source": "functions/scripts/data/j2Teams.js"
+    },
+    {
+        "nameJa": "ヴァンフォーレ甲府",
+        "nameEn": "Ventforet Kofu",
+        "aliases": [
+            "ヴァンフォーレ甲府",
+            "Ventforet Kofu",
+            "甲府",
+            "ヴァンフォーレ"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/308.png",
+        "source": "functions/scripts/data/j2Teams.js"
+    },
+    {
+        "nameJa": "藤枝ＭＹＦＣ",
+        "nameEn": "Fujieda MYFC",
+        "aliases": [
+            "藤枝ＭＹＦＣ",
+            "Fujieda MYFC",
+            "藤枝",
+            "藤枝MYFC"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/4317.png",
+        "source": "functions/scripts/data/j2Teams.js"
+    },
+    {
+        "nameJa": "ジュビロ磐田",
+        "nameEn": "Jubilo Iwata",
+        "aliases": [
+            "ジュビロ磐田",
+            "Jubilo Iwata",
+            "磐田",
+            "ジュビロ"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/280.png",
+        "source": "functions/scripts/data/j2Teams.js"
+    },
+    {
+        "nameJa": "徳島ヴォルティス",
+        "nameEn": "Tokushima Vortis",
+        "aliases": [
+            "徳島ヴォルティス",
+            "Tokushima Vortis",
+            "徳島",
+            "ヴォルティス"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/299.png",
+        "source": "functions/scripts/data/j2Teams.js"
+    },
+    {
+        "nameJa": "アルビレックス新潟",
+        "nameEn": "Albirex Niigata",
+        "aliases": [
+            "アルビレックス新潟",
+            "Albirex Niigata",
+            "新潟",
+            "アルビレックス"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/311.png",
+        "source": "functions/scripts/data/j2Teams.js"
+    },
+    {
+        "nameJa": "愛媛ＦＣ",
+        "nameEn": "Ehime FC",
+        "aliases": [
+            "愛媛ＦＣ",
+            "Ehime FC",
+            "愛媛",
+            "愛媛FC"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/318.png",
+        "source": "functions/scripts/data/j2Teams.js"
+    },
+    {
+        "nameJa": "ザスパ群馬",
+        "nameEn": "Thespa Gunma",
+        "aliases": [
+            "ザスパ群馬",
+            "Thespa Gunma",
+            "群馬",
+            "ザスパ",
+            "Thespakusatsu Gunma"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/756.png",
+        "source": "functions/scripts/data/j2Teams.js"
+    },
+    {
+        "nameJa": "いわきＦＣ",
+        "nameEn": "Iwaki FC",
+        "aliases": [
+            "いわきＦＣ",
+            "Iwaki FC",
+            "いわき",
+            "いわきFC",
+            "Iwaki"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/7127.png",
+        "source": "functions/scripts/data/j2Teams.js"
+    },
+    {
+        "nameJa": "ＲＢ大宮アルディージャ",
+        "nameEn": "RB Omiya Ardija",
+        "aliases": [
+            "ＲＢ大宮アルディージャ",
+            "RB Omiya Ardija",
+            "大宮",
+            "大宮アルディージャ",
+            "RB大宮",
+            "Omiya Ardija"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/313.png",
+        "source": "functions/scripts/data/j2Teams.js"
+    },
+    {
+        "nameJa": "北海道コンサドーレ札幌",
+        "nameEn": "Hokkaido Consadole Sapporo",
+        "aliases": [
+            "北海道コンサドーレ札幌",
+            "Hokkaido Consadole Sapporo",
+            "札幌",
+            "コンサドーレ",
+            "Consadole Sapporo"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/279.png",
+        "source": "functions/scripts/data/j2Teams.js"
+    },
+    {
+        "nameJa": "サガン鳥栖",
+        "nameEn": "Sagan Tosu",
+        "aliases": [
+            "サガン鳥栖",
+            "Sagan Tosu",
+            "鳥栖"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/295.png",
+        "source": "functions/scripts/data/j2Teams.js"
+    },
+    {
+        "nameJa": "鹿児島ユナイテッドＦＣ",
+        "nameEn": "Kagoshima United",
+        "aliases": [
+            "鹿児島ユナイテッドＦＣ",
+            "Kagoshima United",
+            "鹿児島",
+            "鹿児島ユナイテッド"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/2236.png",
+        "source": "functions/scripts/data/j2Teams.js"
+    },
+    {
+        "nameJa": "レノファ山口ＦＣ",
+        "nameEn": "Renofa Yamaguchi",
+        "aliases": [
+            "レノファ山口ＦＣ",
+            "Renofa Yamaguchi",
+            "山口",
+            "レノファ山口"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/309.png",
+        "source": "functions/scripts/data/j2Teams.js"
+    },
+    {
+        "nameJa": "ロアッソ熊本",
+        "nameEn": "Roasso Kumamoto",
+        "aliases": [
+            "ロアッソ熊本",
+            "Roasso Kumamoto",
+            "熊本",
+            "ロアッソ"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/314.png",
+        "source": "functions/scripts/data/j2Teams.js"
+    },
+    {
+        "nameJa": "大分トリニータ",
+        "nameEn": "Oita Trinita",
+        "aliases": [
+            "大分トリニータ",
+            "Oita Trinita",
+            "大分"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/298.png",
+        "source": "functions/scripts/data/j2Teams.js"
+    },
+    {
+        "nameJa": "ヴァンラーレ八戸",
+        "nameEn": "Vanraure Hachinohe",
+        "aliases": [
+            "ヴァンラーレ八戸",
+            "Vanraure Hachinohe",
+            "八戸",
+            "ヴァンラーレ"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/4326.png",
+        "source": "functions/scripts/data/j3Teams.js"
+    },
+    {
+        "nameJa": "ＦＣ岐阜",
+        "nameEn": "FC Gifu",
+        "aliases": [
+            "ＦＣ岐阜",
+            "FC Gifu",
+            "岐阜",
+            "FC岐阜"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/297.png",
+        "source": "functions/scripts/data/j3Teams.js"
+    },
+    {
+        "nameJa": "松本山雅ＦＣ",
+        "nameEn": "Matsumoto Yamaga",
+        "aliases": [
+            "松本山雅ＦＣ",
+            "Matsumoto Yamaga",
+            "松本",
+            "山雅",
+            "松本山雅"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/304.png",
+        "source": "functions/scripts/data/j3Teams.js"
+    },
+    {
+        "nameJa": "福島ユナイテッドＦＣ",
+        "nameEn": "Fukushima United",
+        "aliases": [
+            "福島ユナイテッドＦＣ",
+            "Fukushima United",
+            "福島",
+            "福島ユナイテッド"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/4318.png",
+        "source": "functions/scripts/data/j3Teams.js"
+    },
+    {
+        "nameJa": "カターレ富山",
+        "nameEn": "Kataller Toyama",
+        "aliases": [
+            "カターレ富山",
+            "Kataller Toyama",
+            "富山",
+            "カターレ"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/4322.png",
+        "source": "functions/scripts/data/j3Teams.js"
+    },
+    {
+        "nameJa": "高知ユナイテッドＳＣ",
+        "nameEn": "Kochi United",
+        "aliases": [
+            "高知ユナイテッドＳＣ",
+            "Kochi United",
+            "高知",
+            "高知ユナイテッド"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/7129.png",
+        "source": "functions/scripts/data/j3Teams.js"
+    },
+    {
+        "nameJa": "奈良クラブ",
+        "nameEn": "Nara Club",
+        "aliases": [
+            "奈良クラブ",
+            "Nara Club",
+            "奈良"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/7135.png",
+        "source": "functions/scripts/data/j3Teams.js"
+    },
+    {
+        "nameJa": "ＳＣ相模原",
+        "nameEn": "SC Sagamihara",
+        "aliases": [
+            "ＳＣ相模原",
+            "SC Sagamihara",
+            "相模原",
+            "SC相模原",
+            "Sagamihara"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/4324.png",
+        "source": "functions/scripts/data/j3Teams.js"
+    },
+    {
+        "nameJa": "ＡＣ長野パルセイロ",
+        "nameEn": "AC Nagano Parceiro",
+        "aliases": [
+            "ＡＣ長野パルセイロ",
+            "AC Nagano Parceiro",
+            "長野",
+            "ＡＣ長野",
+            "AC長野",
+            "パルセイロ",
+            "Parceiro Nagano"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/4323.png",
+        "source": "functions/scripts/data/j3Teams.js"
+    },
+    {
+        "nameJa": "ツエーゲン金沢",
+        "nameEn": "Zweigen Kanazawa",
+        "aliases": [
+            "ツエーゲン金沢",
+            "Zweigen Kanazawa",
+            "金沢",
+            "ツエーゲン",
+            "Kanazawa"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/300.png",
+        "source": "functions/scripts/data/j3Teams.js"
+    },
+    {
+        "nameJa": "ＦＣ大阪",
+        "nameEn": "FC Osaka",
+        "aliases": [
+            "ＦＣ大阪",
+            "FC Osaka",
+            "大阪",
+            "FC大阪",
+            "Osaka"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/7138.png",
+        "source": "functions/scripts/data/j3Teams.js"
+    },
+    {
+        "nameJa": "ＦＣ今治",
+        "nameEn": "FC Imabari",
+        "aliases": [
+            "ＦＣ今治",
+            "FC Imabari",
+            "今治",
+            "FC今治",
+            "Imabari"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/10075.png",
+        "source": "functions/scripts/data/j3Teams.js"
+    },
+    {
+        "nameJa": "カマタマーレ讃岐",
+        "nameEn": "Kamatamare Sanuki",
+        "aliases": [
+            "カマタマーレ讃岐",
+            "Kamatamare Sanuki",
+            "讃岐",
+            "カマタマーレ"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/317.png",
+        "source": "functions/scripts/data/j3Teams.js"
+    },
+    {
+        "nameJa": "テゲバジャーロ宮崎",
+        "nameEn": "Tegevajaro Miyazaki",
+        "aliases": [
+            "テゲバジャーロ宮崎",
+            "Tegevajaro Miyazaki",
+            "宮崎",
+            "テゲバジャーロ"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/10409.png",
+        "source": "functions/scripts/data/j3Teams.js"
+    },
+    {
+        "nameJa": "ガイナーレ鳥取",
+        "nameEn": "Gainare Tottori",
+        "aliases": [
+            "ガイナーレ鳥取",
+            "Gainare Tottori",
+            "鳥取",
+            "ガイナーレ"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/4319.png",
+        "source": "functions/scripts/data/j3Teams.js"
+    },
+    {
+        "nameJa": "ギラヴァンツ北九州",
+        "nameEn": "Giravanz Kitakyushu",
+        "aliases": [
+            "ギラヴァンツ北九州",
+            "Giravanz Kitakyushu",
+            "北九州",
+            "ギラヴァンツ",
+            "Kitakyushu"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/805.png",
+        "source": "functions/scripts/data/j3Teams.js"
+    },
+    {
+        "nameJa": "ＦＣ琉球",
+        "nameEn": "FC Ryukyu",
+        "aliases": [
+            "ＦＣ琉球",
+            "FC Ryukyu",
+            "琉球",
+            "FC琉球",
+            "Ryukyu"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/2235.png",
+        "source": "functions/scripts/data/j3Teams.js"
+    },
+    {
+        "nameJa": "レイラック滋賀FC",
+        "nameEn": "Reilac Shiga FC",
+        "aliases": [
+            "レイラック滋賀FC",
+            "Reilac Shiga FC",
+            "滋賀",
+            "レイラック滋賀",
+            "Reilac Shiga",
+            "Biwako Shiga"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://media.api-sports.io/football/teams/7117.png",
+        "source": "functions/scripts/data/j3Teams.js"
+    },
+    {
+        "nameJa": "",
+        "nameEn": "AFC Bournemouth",
+        "aliases": [
+            "AFC Bournemouth"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/349.png",
+        "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams?limit=100"
+    },
+    {
+        "nameJa": "アーセナル",
+        "nameEn": "Arsenal",
+        "aliases": [
+            "Arsenal",
+            "Arsenal FC"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/359.png",
+        "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams?limit=100"
+    },
+    {
+        "nameJa": "",
+        "nameEn": "Aston Villa",
+        "aliases": [
+            "Aston Villa"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/362.png",
+        "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams?limit=100"
+    },
+    {
+        "nameJa": "",
+        "nameEn": "Brentford",
+        "aliases": [
+            "Brentford"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/337.png",
+        "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams?limit=100"
+    },
+    {
+        "nameJa": "",
+        "nameEn": "Brighton & Hove Albion",
+        "aliases": [
+            "Brighton & Hove Albion"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/331.png",
+        "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams?limit=100"
+    },
+    {
+        "nameJa": "",
+        "nameEn": "Chelsea",
+        "aliases": [
+            "Chelsea"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/363.png",
+        "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams?limit=100"
+    },
+    {
+        "nameJa": "",
+        "nameEn": "Coventry City",
+        "aliases": [
+            "Coventry City"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/388.png",
+        "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams?limit=100"
+    },
+    {
+        "nameJa": "",
+        "nameEn": "Crystal Palace",
+        "aliases": [
+            "Crystal Palace"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/384.png",
+        "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams?limit=100"
+    },
+    {
+        "nameJa": "",
+        "nameEn": "Everton",
+        "aliases": [
+            "Everton"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/368.png",
+        "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams?limit=100"
+    },
+    {
+        "nameJa": "",
+        "nameEn": "Fulham",
+        "aliases": [
+            "Fulham"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/370.png",
+        "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams?limit=100"
+    },
+    {
+        "nameJa": "",
+        "nameEn": "Hull City",
+        "aliases": [
+            "Hull City"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/306.png",
+        "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams?limit=100"
+    },
+    {
+        "nameJa": "",
+        "nameEn": "Ipswich Town",
+        "aliases": [
+            "Ipswich Town"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/373.png",
+        "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams?limit=100"
+    },
+    {
+        "nameJa": "",
+        "nameEn": "Leeds United",
+        "aliases": [
+            "Leeds United"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/357.png",
+        "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams?limit=100"
+    },
+    {
+        "nameJa": "",
+        "nameEn": "Liverpool",
+        "aliases": [
+            "Liverpool"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/364.png",
+        "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams?limit=100"
+    },
+    {
+        "nameJa": "",
+        "nameEn": "Manchester City",
+        "aliases": [
+            "Manchester City"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/382.png",
+        "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams?limit=100"
+    },
+    {
+        "nameJa": "",
+        "nameEn": "Manchester United",
+        "aliases": [
+            "Manchester United"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/360.png",
+        "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams?limit=100"
+    },
+    {
+        "nameJa": "",
+        "nameEn": "Newcastle United",
+        "aliases": [
+            "Newcastle United"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/361.png",
+        "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams?limit=100"
+    },
+    {
+        "nameJa": "",
+        "nameEn": "Nottingham Forest",
+        "aliases": [
+            "Nottingham Forest"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/393.png",
+        "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams?limit=100"
+    },
+    {
+        "nameJa": "",
+        "nameEn": "Sunderland",
+        "aliases": [
+            "Sunderland"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/366.png",
+        "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams?limit=100"
+    },
+    {
+        "nameJa": "",
+        "nameEn": "Tottenham Hotspur",
+        "aliases": [
+            "Tottenham Hotspur",
+            "Tottenham"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/367.png",
+        "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams?limit=100"
+    },
+    {
+        "nameJa": "",
+        "nameEn": "Fleetwood Town",
+        "aliases": [
+            "Fleetwood Town"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/3891.png",
+        "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.4/teams?limit=100"
+    },
+    {
+        "nameJa": "",
+        "nameEn": "Real Betis",
+        "aliases": [
+            "Real Betis"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/244.png",
+        "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/esp.1/teams?limit=100"
+    },
+    {
+        "nameJa": "",
+        "nameEn": "Real Madrid",
+        "aliases": [
+            "Real Madrid"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/86.png",
+        "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/esp.1/teams?limit=100"
+    },
+    {
+        "nameJa": "",
+        "nameEn": "Bayern Munich",
+        "aliases": [
+            "Bayern Munich",
+            "Bayern München"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/132.png",
+        "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/ger.1/teams?limit=100"
+    },
+    {
+        "nameJa": "",
+        "nameEn": "Borussia Dortmund",
+        "aliases": [
+            "Borussia Dortmund"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/124.png",
+        "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/ger.1/teams?limit=100"
+    },
+    {
+        "nameJa": "",
+        "nameEn": "Lille",
+        "aliases": [
+            "Lille"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/166.png",
+        "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/fra.1/teams?limit=100"
+    },
+    {
+        "nameJa": "",
+        "nameEn": "Napoli",
+        "aliases": [
+            "Napoli"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/114.png",
+        "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/ita.1/teams?limit=100"
+    },
+    {
+        "nameJa": "",
+        "nameEn": "Slavia Prague",
+        "aliases": [
+            "Slavia Prague",
+            "Slavia Praha"
+        ],
+        "scopedAliases": [],
+        "competitionKeys": [],
+        "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/494.png",
+        "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/uefa.champions/teams?limit=100"
+    },
+    {
+        "nameJa": "",
+        "nameEn": "Sabah",
+        "aliases": [],
+        "scopedAliases": [
+            "Sabah",
+            "Sabah FK"
+        ],
+        "competitionKeys": [
+            "football_champions_league"
+        ],
+        "logoUrl": "https://a.espncdn.com/i/teamlogos/soccer/500/21922.png",
+        "source": "https://site.api.espn.com/apis/site/v2/sports/soccer/uefa.champions/teams?limit=100"
+    }
+]
