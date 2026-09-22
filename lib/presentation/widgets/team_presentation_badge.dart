@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../domain/policies/team_initial.dart';
+
 /// Renders already-resolved team presentation data without making identity or
 /// logo-rights decisions.
 class TeamPresentationBadge extends StatelessWidget {
@@ -22,16 +24,12 @@ class TeamPresentationBadge extends StatelessWidget {
   final double? fontSize;
   final double imageInset;
 
-  String get _initial => displayName.runes.isEmpty
-      ? '?'
-      : String.fromCharCode(displayName.runes.first);
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final fallback = Center(
       child: Text(
-        _initial,
+        teamInitial(displayName),
         style: TextStyle(
           color: foregroundColor,
           fontSize: fontSize,

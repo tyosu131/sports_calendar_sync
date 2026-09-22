@@ -60,7 +60,7 @@ void main() {
     'V1 examples resolve names and logos identically for Games and Teams',
     () {
       final cases = [
-        ('Tokyo', 'FC Tokyo', 'FC東京', 'football_j1'),
+        ('Tokyo', 'FC Tokyo', 'ＦＣ東京', 'football_j1'),
         ('Tochigi', 'Tochigi SC', '栃木ＳＣ', 'football_emperor_cup'),
         ('Sabah', 'Sabah', 'Sabah', 'football_champions_league'),
         ('JEF United', 'JEF United Chiba', 'ジェフユナイテッド千葉', 'football_j1'),
@@ -131,7 +131,7 @@ void main() {
       }
       expect(
         clubPresentation(['ＦＣ東京'], competitionKey: 'football_j1')?.nameJa,
-        'FC東京',
+        'ＦＣ東京',
       );
     },
   );

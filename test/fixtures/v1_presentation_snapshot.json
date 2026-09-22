@@ -698,7 +698,7 @@
       "homeTeamNameEn": "Tokyo",
       "awayTeamId": "kawasaki_frontale",
       "homeSourceTeamId": "cmril1r9rg5yus107g34hsm6u",
-      "homeExpectedName": "FC東京",
+      "homeExpectedName": "ＦＣ東京",
       "homeExpectedLogo": "https://media.api-sports.io/football/teams/292.png",
       "awayExpectedName": "川崎フロンターレ",
       "awayExpectedLogo": "https://media.api-sports.io/football/teams/294.png"
@@ -1186,7 +1186,7 @@
       "homeSourceTeamId": "cmr7be2nq0qkwrx06zxbqr5ux",
       "homeExpectedName": "川崎フロンターレ",
       "homeExpectedLogo": "https://media.api-sports.io/football/teams/294.png",
-      "awayExpectedName": "FC東京",
+      "awayExpectedName": "ＦＣ東京",
       "awayExpectedLogo": "https://media.api-sports.io/football/teams/292.png"
     },
     {
@@ -1649,7 +1649,7 @@
       "leagueId": "j1_league",
       "nameEn": "FC Tokyo",
       "competitionKey": "football_j1",
-      "nameJa": "FC東京",
+      "nameJa": "ＦＣ東京",
       "logoUrl": "https://media.api-sports.io/football/teams/292.png"
     },
     {
