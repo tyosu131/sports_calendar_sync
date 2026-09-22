@@ -75,12 +75,12 @@
         "source": "functions/scripts/data/j1Teams.js"
     },
     {
-        "nameJa": "ＦＣ東京",
+        "nameJa": "FC東京",
         "nameEn": "FC Tokyo",
         "aliases": [
-            "ＦＣ東京",
-            "FC Tokyo",
             "FC東京",
+            "FC Tokyo",
+            "ＦＣ東京",
             "東京"
         ],
         "scopedAliases": [

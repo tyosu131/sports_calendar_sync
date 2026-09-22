@@ -11,6 +11,7 @@ import '../../domain/policies/team_display_name_policy.dart';
 import '../../domain/policies/team_presentation_policy.dart';
 import '../widgets/game_card.dart';
 import '../widgets/game_presentation_scope.dart';
+import '../widgets/team_presentation_badge.dart';
 import '../widgets/calendar_sync_button.dart';
 
 /// Home screen: shows upcoming games for the user's followed teams.
@@ -201,6 +202,7 @@ class _FollowedTeamCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final logoUrl = teamPresentationLogo(team);
+    final displayName = teamDisplayNames.teamName(team);
 
     return SizedBox(
       width: 196,
@@ -218,30 +220,16 @@ class _FollowedTeamCard extends StatelessWidget {
             ),
             child: Row(
               children: [
-                CircleAvatar(
-                  radius: 24,
+                TeamPresentationBadge(
+                  size: 48,
+                  displayName: displayName,
+                  logoUrl: logoUrl,
                   backgroundColor: Theme.of(context).colorScheme.surface,
-                  child: logoUrl == null || logoUrl.isEmpty
-                      ? const Icon(Icons.shield_outlined, size: 24)
-                      : ClipOval(
-                          child: SizedBox(
-                            width: 38,
-                            height: 38,
-                            child: Image.network(
-                              logoUrl,
-                              fit: BoxFit.contain,
-                              gaplessPlayback: true,
-                              filterQuality: FilterQuality.high,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  const Icon(Icons.shield_outlined, size: 24),
-                            ),
-                          ),
-                        ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    teamDisplayNames.teamName(team),
+                    displayName,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: textTheme.bodyMedium?.copyWith(

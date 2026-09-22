@@ -46,7 +46,7 @@ Source: test/fixtures/v1_presentation_snapshot.json. See [logo provenance](logo-
 | football_j1 | Nagoya Grampus | 名古屋グランパス | 名古屋グランパス | [URL](https://media.api-sports.io/football/teams/288.png) | yes | functions/scripts/data/j1Teams.js |
 | football_j1 | Sanfrecce Hiroshima | サンフレッチェ広島 | サンフレッチェ広島 | [URL](https://media.api-sports.io/football/teams/282.png) | yes | functions/scripts/data/j1Teams.js |
 | football_j1 | Shimizu S-Pulse | 清水エスパルス | 清水エスパルス | [URL](https://media.api-sports.io/football/teams/283.png) | yes | functions/scripts/data/j1Teams.js |
-| football_j1 | Tokyo | ＦＣ東京 | ＦＣ東京 | [URL](https://media.api-sports.io/football/teams/292.png) | yes | functions/scripts/data/j1Teams.js |
+| football_j1 | Tokyo | FC東京 | FC東京 | [URL](https://media.api-sports.io/football/teams/292.png) | yes | functions/scripts/data/j1Teams.js |
 | football_j1 | Tokyo Verdy | 東京ヴェルディ | 東京ヴェルディ | [URL](https://media.api-sports.io/football/teams/306.png) | yes | functions/scripts/data/j1Teams.js |
 | football_j1 | Urawa Reds | 浦和レッズ | 浦和レッズ | [URL](https://media.api-sports.io/football/teams/287.png) | yes | functions/scripts/data/j1Teams.js |
 | football_j1 | V-Varen Nagasaki | Ｖ・ファーレン長崎 | Ｖ・ファーレン長崎 | [URL](https://media.api-sports.io/football/teams/285.png) | yes | functions/scripts/data/j1Teams.js |

@@ -11,7 +11,7 @@ class CalendarSyncButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => IconButton(
-        icon: const Icon(Icons.calendar_month),
+        icon: const Icon(Icons.sync_alt),
         tooltip: 'フォロー中のチームをカレンダーに同期',
         onPressed: () => _openSheet(context, ref),
       );

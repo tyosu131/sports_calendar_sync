@@ -6,7 +6,7 @@ const clubPresentationEntries = <ClubPresentation>[
   ClubPresentation("浦和レッズ", "Urawa Reds", "https://media.api-sports.io/football/teams/287.png", ["浦和レッズ", "Urawa Reds", "浦和", "レッズ"], [], []),
   ClubPresentation("ジェフユナイテッド千葉", "JEF United Chiba", "https://media.api-sports.io/football/teams/301.png", ["ジェフユナイテッド千葉", "JEF United Chiba", "千葉", "ジェフ", "ジェフ千葉", "JEF Chiba", "JEF United"], [], []),
   ClubPresentation("柏レイソル", "Kashiwa Reysol", "https://media.api-sports.io/football/teams/281.png", ["柏レイソル", "Kashiwa Reysol", "柏", "レイソル"], [], []),
-  ClubPresentation("ＦＣ東京", "FC Tokyo", "https://media.api-sports.io/football/teams/292.png", ["ＦＣ東京", "FC Tokyo", "FC東京", "東京"], ["football_j1", "football_j2", "football_j3", "football_j_league_cup", "football_emperor_cup"], ["Tokyo"]),
+  ClubPresentation("FC東京", "FC Tokyo", "https://media.api-sports.io/football/teams/292.png", ["FC東京", "FC Tokyo", "ＦＣ東京", "東京"], ["football_j1", "football_j2", "football_j3", "football_j_league_cup", "football_emperor_cup"], ["Tokyo"]),
   ClubPresentation("東京ヴェルディ", "Tokyo Verdy", "https://media.api-sports.io/football/teams/306.png", ["東京ヴェルディ", "Tokyo Verdy", "東京V", "ヴェルディ"], [], []),
   ClubPresentation("ＦＣ町田ゼルビア", "FC Machida Zelvia", "https://media.api-sports.io/football/teams/303.png", ["ＦＣ町田ゼルビア", "FC Machida Zelvia", "町田", "ゼルビア", "Machida Zelvia"], [], []),
   ClubPresentation("川崎フロンターレ", "Kawasaki Frontale", "https://media.api-sports.io/football/teams/294.png", ["川崎フロンターレ", "Kawasaki Frontale", "川崎", "フロンターレ"], [], []),

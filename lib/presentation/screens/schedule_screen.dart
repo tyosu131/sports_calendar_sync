@@ -8,6 +8,7 @@ import '../../domain/policies/competition_display_policy.dart';
 import '../../domain/policies/team_display_name_policy.dart';
 import '../../domain/policies/team_presentation_policy.dart';
 import '../widgets/game_presentation_scope.dart';
+import '../widgets/team_presentation_badge.dart';
 import '../widgets/competition_badge.dart';
 
 /// In-app schedule view for followed-team games.
@@ -647,42 +648,17 @@ class _MiniTeamIcon extends StatelessWidget {
   final bool selected;
 
   @override
-  Widget build(BuildContext context) {
-    final fallback = Text(
-      name.isEmpty ? '?' : String.fromCharCode(name.runes.first),
-      style: TextStyle(
-        color: foregroundColor,
+  Widget build(BuildContext context) => TeamPresentationBadge(
+        size: 36,
+        displayName: name,
+        logoUrl: logoUrl,
+        foregroundColor: foregroundColor,
         fontSize: 13,
-        fontWeight: FontWeight.bold,
-      ),
-    );
-
-    return CircleAvatar(
-      radius: 18,
-      backgroundColor: selected
-          ? Theme.of(context).colorScheme.primary
-          : Theme.of(context).colorScheme.surfaceContainerHighest,
-      child: logoUrl == null || logoUrl!.isEmpty
-          ? fallback
-          : ClipOval(
-              child: SizedBox(
-                width: 32,
-                height: 32,
-                child: Image.network(
-                  logoUrl!,
-                  fit: BoxFit.contain,
-                  gaplessPlayback: true,
-                  filterQuality: FilterQuality.high,
-                  errorBuilder: (context, error, stackTrace) => Icon(
-                    Icons.shield_outlined,
-                    size: 21,
-                    color: foregroundColor,
-                  ),
-                ),
-              ),
-            ),
-    );
-  }
+        backgroundColor: selected
+            ? Theme.of(context).colorScheme.primary
+            : Theme.of(context).colorScheme.surfaceContainerHighest,
+        imageInset: 2,
+      );
 }
 
 class ScheduleGameTile extends StatelessWidget {
@@ -941,33 +917,12 @@ class _TeamIcon extends StatelessWidget {
   final String? logoUrl;
 
   @override
-  Widget build(BuildContext context) {
-    final fallback = Text(
-      name.isEmpty ? '?' : String.fromCharCode(name.runes.first),
-      style: const TextStyle(fontWeight: FontWeight.bold),
-    );
-
-    return CircleAvatar(
-      radius: 18,
-      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-      child: logoUrl == null || logoUrl!.isEmpty
-          ? fallback
-          : ClipOval(
-              child: SizedBox(
-                width: 28,
-                height: 28,
-                child: Image.network(
-                  logoUrl!,
-                  fit: BoxFit.contain,
-                  gaplessPlayback: true,
-                  filterQuality: FilterQuality.high,
-                  errorBuilder: (context, error, stackTrace) =>
-                      const Icon(Icons.shield_outlined, size: 18),
-                ),
-              ),
-            ),
-    );
-  }
+  Widget build(BuildContext context) => TeamPresentationBadge(
+        size: 36,
+        displayName: name,
+        logoUrl: logoUrl,
+        imageInset: 4,
+      );
 }
 
 class _StatusChip extends StatelessWidget {

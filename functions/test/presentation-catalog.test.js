@@ -39,8 +39,9 @@ test('ambiguous, partial and unconfirmed names stay unresolved', () => {
 
 test('the three authorized GOAL details are presentation evidence with bounded competition context', () => {
   assert.ok(clubPresentation(['FC Tokyo'], 'football_champions_league').logoUrl);
+  assert.equal(clubPresentation(['ＦＣ東京'], 'football_j1').nameJa, 'FC東京');
   assert.ok(clubPresentation(['Tochigi SC'], 'football_champions_league').logoUrl);
-  assert.equal(displayTeamName('football_j1', {provider: 'Tokyo'}), 'ＦＣ東京');
+  assert.equal(displayTeamName('football_j1', {provider: 'Tokyo'}), 'FC東京');
   assert.equal(displayTeamName('football_emperor_cup', {provider: 'Tochigi'}), '栃木ＳＣ');
   assert.ok(clubPresentation(['Sabah'], 'football_champions_league').logoUrl);
   for (const name of ['Tokyo', 'Tochigi', 'Sabah']) {
