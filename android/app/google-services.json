@@ -12,7 +12,20 @@
           "package_name": "com.example.sports_calendar_sync"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "1070492584469-m6j6h2pcb2fsmldljthq5s02i5jdr7gv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.sports_calendar_sync",
+            "certificate_hash": "510f491f05834b96f5e9bcbe5e7a5c21a7c9d5cb"
+          }
+        },
+        {
+          "client_id": "1070492584469-tpvo1i1vjmrim4ucpjn9082tcr6tng3u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCR4edl9E2HfjcGShrCZJtop5dTzWXxa7Y"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1070492584469-kj643vi32dks2edj0ups027a1cr1u63u.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1070492584469-0430dd5848g6pnujglut5h1n2kmlualn.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.sportsCalendarSync"
+              }
+            }
+          ]
         }
       }
     }
