@@ -1,5 +1,23 @@
 # Current State — sports_calendar_sync
 
+## Current operational source of truth — Node 22 migration (2026-09-22)
+
+This section supersedes earlier current-status statements below while retaining
+their dated Node 20 verification results as historical evidence.
+
+- Presentation closure is merged. Production Functions are deployed, OAuth
+  branding and domain publication are complete, and the core Google Calendar
+  flow has been verified on a real iPhone.
+- The repository source of truth now targets Node.js 22 for the existing
+  Firebase Functions 1st Gen deployment: `functions/package.json` declares
+  Node 22, `firebase.json` declares `nodejs22`, and CI uses Node 22.
+- This repository migration does **not** mean Node 22 has been deployed to
+  production. Production deployment and Android real-device E2E are the next
+  operational steps; no deployment or production write is part of this change.
+- Function names, regions, triggers, schedules, secrets, OAuth behavior,
+  Firestore schema, calendar identity, follow behavior, and GOAL sync semantics
+  are unchanged.
+
 ## Unified OAuth / V1 team presentation bundle (2026-09-21, local implementation)
 
 This section supersedes the PR #41 J1-only presentation and “separate publishing
