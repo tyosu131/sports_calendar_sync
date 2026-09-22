@@ -1,22 +1,88 @@
 # Current State — sports_calendar_sync
 
-## Current operational source of truth — Node 22 migration (2026-09-22)
+## Current operational source of truth — mobile authentication / Node 22 (2026-09-22)
 
-This section supersedes earlier current-status statements below while retaining
-their dated Node 20 verification results as historical evidence.
+This section supersedes earlier current-status claims. Dated Node 20 and older
+unverified-device evidence below remains historical, not current status.
 
-- Presentation closure is merged. Production Functions are deployed, OAuth
-  branding and domain publication are complete, and the core Google Calendar
-  flow has been verified on a real iPhone.
-- The repository source of truth now targets Node.js 22 for the existing
-  Firebase Functions 1st Gen deployment: `functions/package.json` declares
-  Node 22, `firebase.json` declares `nodejs22`, and CI uses Node 22.
-- This repository migration does **not** mean Node 22 has been deployed to
-  production. Production deployment and Android real-device E2E are the next
-  operational steps; no deployment or production write is part of this change.
-- Function names, regions, triggers, schedules, secrets, OAuth behavior,
-  Firestore schema, calendar identity, follow behavior, and GOAL sync semantics
-  are unchanged.
+- Repository runtime and production runtime are **Node.js 22, 1st Gen**.
+  package.json, firebase.json and CI already target Node 22.
+- Owner-reported manual deployment: `firebase deploy --only functions --project
+  sports-calendar-sync-a4564` completed all 11 updates successfully:
+  `getCalendar`, `ensureCalendarFeed`, `rotateCalendarFeed`,
+  `beginGoogleCalendarConnection`, `getGoogleCalendarConnectionStatus`,
+  `disconnectGoogleCalendar`, `googleCalendarOAuthCallback`,
+  `syncGoogleCalendarNow`, `syncGoogleCalendarOnFollowChange`,
+  `scheduledSyncFootball`, `triggerFootballSync`.
+  This task did not deploy or independently query production runtime.
+- Existing presentation/domain/OAuth publication and iPhone Google Calendar
+  evidence remains valid; no calendar identity or team/game semantics changed.
+
+### Android device evidence (owner-reported)
+
+- Pixel 9a, ADB device ID `54141JEBF10093`; release build successful.
+- Firebase Android package: `com.example.sports_calendar_sync`.
+- Debug keystore SHA-1 registered in Firebase:
+  `51:0F:49:1F:05:83:4B:96:F5:E9:BC:BE:5E:7A:5C:21:A7:C9:D5:CB`.
+- Refreshed Firebase-generated `android/app/google-services.json` is retained
+  without reconstruction, including Android/Web/iOS OAuth metadata. It is an
+  already-tracked public app configuration, not a server credential.
+- Google Sign-In PASS; Google Calendar OAuth PASS; OAuth cancel → app return
+  PASS; Settings manual sync PASS. These are pre-change owner observations,
+  not a claim that this task performed an authenticated device session.
+- One initial Google sign-in failure, retry succeeded; transient / not
+  reproduced / non-blocking. Monitor during tester usage; no guessed fix added.
+
+### Tester V1 authentication — approved release policy
+
+Android and iOS tester V1: Google only, Apple hidden with no placeholder.
+`APPLE_SIGN_IN_ENABLED` defaults to `false`. iOS Google Sign-In is operational
+from previous owner-reported real-device evidence; no new iPhone session was
+performed in this task.
+
+Apple Sign-In implementation is prepared but intentionally disabled for the tester V1.
+Apple Developer Program enrollment and Apple/Firebase configuration are deferred until App Store release preparation.
+The owner has chosen not to enroll during tester V1. External setup has not been
+performed for this activation, and iPhone Apple-auth E2E is neither claimed nor
+required for tester V1. The prepared entitlement remains disconnected from
+Personal Team/tester signing. Future activation requires the
+[deferred Apple readiness steps](apple-sign-in-readiness.md) before enabling the
+build flag; it is not a current authentication closure blocker.
+
+Apple code uses fresh secure nonce → SHA-256 → Apple identity token → Firebase
+raw nonce, preserves first-consent name, and treats cancellation silently.
+No email/password provider or account-linking UI was added. Web/macOS retain
+their existing default state.
+
+### Store-only deferred work — not tester V1 blockers
+
+Release still signs with the debug keystore. Keep current tester identifiers:
+Android `com.example.sports_calendar_sync`, iOS `com.example.sportsCalendarSync`.
+Before Store publication:
+
+- Apple Developer Program enrollment.
+- Final application ID / bundle ID.
+- Production Android release/upload signing.
+- Firebase registrations/OAuth for final identifiers and signatures.
+- Apple Sign-In external configuration and iPhone Apple-auth E2E.
+- Store metadata and Play Store / App Store submission.
+
+These are explicitly deferred; no signing keys, secrets, Cloud configuration or
+production data were changed. Tester V1 uses the existing Google authentication.
+
+### Local verification of mobile authentication change
+
+- Node 22.23.2 / npm 10.9.8 (official Node archive checksum verified; temporary
+  toolchain only, no global Node modification).
+- `npm --prefix functions run build`: PASS; `npm --prefix functions test`:
+  144 passed; `npm --prefix functions run validate:config`: 10 passed.
+- `flutter analyze --no-pub`: PASS; `flutter test --no-pub`: 132 passed.
+- `flutter build apk --debug`: PASS; this is compilation, not a new device E2E.
+- Apple service/UI tests: 13 passed, no Firebase/Apple network or profile writes.
+- `plutil -lint ios/Runner/AppleSignIn.entitlements`: PASS; the declaration is
+  intentionally inactive until paid-team provisioning is confirmed.
+- `git diff --check`: PASS. Firebase-generated Android config and unrelated
+  macOS files match their initial hashes. No deploy or Console mutation.
 
 ## Unified OAuth / V1 team presentation bundle (2026-09-21, local implementation)
 

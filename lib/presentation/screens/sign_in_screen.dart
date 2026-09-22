@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
-import '../../core/config/auth_readiness.dart';
+import '../../data/auth/apple_sign_in_service.dart';
 import '../../core/utils/auth_failure_message.dart';
 import '../../data/providers/repository_providers.dart';
 
@@ -77,36 +77,28 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
       _errorMessage = null;
     });
     try {
-      final appleCredential = await SignInWithApple.getAppleIDCredential(
-        scopes: [
-          AppleIDAuthorizationScopes.email,
-          AppleIDAuthorizationScopes.fullName,
-        ],
-      );
-      final oauthCredential = OAuthProvider('apple.com').credential(
-        idToken: appleCredential.identityToken,
-        accessToken: appleCredential.authorizationCode,
-      );
-      final userCredential =
-          await FirebaseAuth.instance.signInWithCredential(oauthCredential);
+      final userCredential = await ref
+          .read(appleSignInServiceProvider)
+          .signIn();
+      if (userCredential == null) return;
 
       final repo = ref.read(userRepositoryProvider);
-      final existing =
-          await repo.fetchProfile(userCredential.user!.uid);
+      final existing = await repo.fetchProfile(userCredential.user!.uid);
       if (existing == null) {
         await repo.createProfileFromFirebaseUser(userCredential.user!);
       }
 
       if (mounted) context.go('/');
-    } on SignInWithAppleAuthorizationException catch (e) {
-      debugPrint('Apple sign-in authorization error (${e.code}): ${e.message}');
-      setState(() => _errorMessage = authenticationFailureMessage('Apple'));
-    } on FirebaseAuthException catch (e) {
-      debugPrint('Apple sign-in Firebase error (${e.code}): ${e.message}');
-      setState(() => _errorMessage = authenticationFailureMessage('Apple'));
-    } catch (e) {
-      debugPrint('Apple sign-in error: $e');
-      setState(() => _errorMessage = authenticationFailureMessage('Apple'));
+    } on FirebaseAuthException catch (error) {
+      if (mounted) {
+        setState(
+          () => _errorMessage = appleAuthenticationFailureMessage(error.code),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() => _errorMessage = authenticationFailureMessage('Apple'));
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -115,6 +107,9 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final configured = ref.watch(appleSignInConfiguredProvider);
+    final isAndroid = !kIsWeb && theme.platform == TargetPlatform.android;
+    final isIos = !kIsWeb && theme.platform == TargetPlatform.iOS;
 
     return Scaffold(
       body: SafeArea(
@@ -179,9 +174,17 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 12),
-
-                if (AuthReadiness.appleSignInEnabled)
+                if (!isAndroid && (configured || !isIos))
+                  const SizedBox(height: 12),
+                if (isIos && configured)
+                  SignInWithAppleButton(
+                    onPressed: _signInWithApple,
+                    text: 'Appleでサインイン',
+                    style: theme.brightness == Brightness.dark
+                        ? SignInWithAppleButtonStyle.white
+                        : SignInWithAppleButtonStyle.black,
+                  )
+                else if (!isAndroid && !isIos && configured)
                   OutlinedButton.icon(
                     onPressed: _signInWithApple,
                     icon: const Icon(Icons.apple, size: 24),
@@ -193,7 +196,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                       ),
                     ),
                   )
-                else
+                else if (!isAndroid && !isIos)
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,
