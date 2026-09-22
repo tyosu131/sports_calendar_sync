@@ -33,25 +33,42 @@ unverified-device evidence below remains historical, not current status.
 - One initial Google sign-in failure, retry succeeded; transient / not
   reproduced / non-blocking. Monitor during tester usage; no guessed fix added.
 
-### V1 authentication and external gate
+### Tester V1 authentication — approved release policy
 
-Android: Google only, no Apple placeholder. iOS: Google, plus the standard Apple
-button only with `APPLE_SIGN_IN_ENABLED=true` after external configuration.
+Android and iOS tester V1: Google only, Apple hidden with no placeholder.
+`APPLE_SIGN_IN_ENABLED` defaults to `false`. iOS Google Sign-In is operational
+from previous owner-reported real-device evidence; no new iPhone session was
+performed in this task.
+
+Apple Sign-In implementation is prepared but intentionally disabled for the tester V1.
+Apple Developer Program enrollment and Apple/Firebase configuration are deferred until App Store release preparation.
+The owner has chosen not to enroll during tester V1. External setup has not been
+performed for this activation, and iPhone Apple-auth E2E is neither claimed nor
+required for tester V1. The prepared entitlement remains disconnected from
+Personal Team/tester signing. Future activation requires the
+[deferred Apple readiness steps](apple-sign-in-readiness.md) before enabling the
+build flag; it is not a current authentication closure blocker.
+
 Apple code uses fresh secure nonce → SHA-256 → Apple identity token → Firebase
 raw nonce, preserves first-consent name, and treats cancellation silently.
-Apple/Firebase Console and provisioning state is **UNKNOWN / NEEDS HUMAN
-CONFIGURATION**. No iPhone Apple E2E success is claimed. See the exact
-[Apple readiness steps](apple-sign-in-readiness.md). No email/password provider
-or account-linking UI was added. Web/macOS retain their existing default state.
+No email/password provider or account-linking UI was added. Web/macOS retain
+their existing default state.
 
-### Store blockers
+### Store-only deferred work — not tester V1 blockers
 
 Release still signs with the debug keystore. Keep current tester identifiers:
 Android `com.example.sports_calendar_sync`, iOS `com.example.sportsCalendarSync`.
-Before stores: approved production identifiers, release/upload key and signing,
-Firebase registrations/OAuth fingerprints for final package, store metadata and
-distribution. Identifier/signing migration is explicitly deferred as requested;
-no signing keys, secrets, Cloud configuration or production data were changed.
+Before Store publication:
+
+- Apple Developer Program enrollment.
+- Final application ID / bundle ID.
+- Production Android release/upload signing.
+- Firebase registrations/OAuth for final identifiers and signatures.
+- Apple Sign-In external configuration and iPhone Apple-auth E2E.
+- Store metadata and Play Store / App Store submission.
+
+These are explicitly deferred; no signing keys, secrets, Cloud configuration or
+production data were changed. Tester V1 uses the existing Google authentication.
 
 ### Local verification of mobile authentication change
 

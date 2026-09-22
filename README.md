@@ -54,7 +54,7 @@ Functions tests and configuration validation use local synthetic fixtures and do
 
 ## Current limitations / remaining work
 
-- Apple authentication is implemented with nonce protection but remains disabled pending Apple/Firebase/provisioning configuration and iPhone E2E. Android shows Google only; iOS shows Google plus Apple only in a configured build. No email/password login is added.
+- Tester V1 intentionally enables Google Sign-In only on Android and iOS; Apple is hidden with `APPLE_SIGN_IN_ENABLED=false` by default. The secure Apple implementation is retained for App Store preparation. Apple enrollment, external configuration and Apple-auth E2E are deferred Store work, not tester V1 blockers. No email/password login is added.
 - Terminated-app OAuth return remains pending verification.
 - OAuth denial UX, revoked-credential behavior, quota/rate-limit behavior, and all transient callback failure paths are not fully production-verified.
 - Broader competition/provider coverage, broadcast data, notifications, full-text search, offline caching, and high-resolution local logo assets remain incomplete.
@@ -74,7 +74,7 @@ Functions tests and configuration validation use local synthetic fixtures and do
 
 ## Mobile authentication / Store readiness
 
-See [Apple setup and verification](docs/apple-sign-in-readiness.md) and the
+See [deferred Apple setup and verification](docs/apple-sign-in-readiness.md) and the
 [current operational evidence](docs/current-state.md). Apple Calendar ICS is
 independent from Sign in with Apple; Google Calendar authorization is independent
 from the Firebase login provider.
@@ -82,8 +82,17 @@ from the Firebase login provider.
 Tester IDs stay Android `com.example.sports_calendar_sync` and iOS
 `com.example.sportsCalendarSync`. Android release currently uses debug signing
 (`~/.android/debug.keystore`), acceptable for the reported device test, **not**
-Play Store readiness. Before Store publication: choose production app/bundle IDs,
-register matching Firebase apps and OAuth clients, configure release/upload
-signing (including Play App Signing certificate fingerprints), and prepare store
-metadata/distribution. No production signing key or identifier migration is
-performed here. Web/macOS are not primary acceptance targets.
+Play Store readiness. Android Google Sign-In is operational on Pixel 9a; iOS
+Google Sign-In is operational from previous owner-reported real-device evidence.
+
+Apple Sign-In implementation is prepared but intentionally disabled for the tester V1.
+Apple Developer Program enrollment and Apple/Firebase configuration are deferred until App Store release preparation.
+The prepared entitlement is not connected to Personal Team/tester signing.
+
+Store-only deferred work (not tester V1 blockers): Apple Developer Program
+enrollment; final application ID / bundle ID; production Android release/upload
+signing; Firebase registrations and OAuth configuration for the final identifiers
+and signatures (including Play App Signing); Apple external configuration and
+iPhone Apple-auth E2E; store metadata; Play Store / App Store submission.
+No production signing key or identifier migration is performed here. Web/macOS
+are not primary acceptance targets.

@@ -1,19 +1,26 @@
-# V1 mobile authentication — Apple human configuration gate
+# Apple Sign-In — deferred Store-readiness guide
 
-Status: **NEEDS_HUMAN_CONFIGURATION**. Repository code is ready for configuration
-and deterministic verification; Apple Developer/Firebase Console state and Apple
-real-device E2E have not been verified. Earlier documentation recorded Personal
-Team signing. Membership has not been inferred from a plist or an iPhone build.
+Status: **DEFERRED_STORE_READINESS** (owner decision, 2026-09-22).
+Apple Sign-In implementation is prepared but intentionally disabled for the tester V1.
+Apple Developer Program enrollment and Apple/Firebase configuration are deferred until App Store release preparation.
+The owner will not enroll during tester V1. External setup has not been performed
+for this activation, and no iPhone Apple-auth E2E is claimed or required now.
+This document is the future activation runbook, not a tester release gate.
+Earlier Personal Team evidence remains valid; the entitlement is not attached
+to tester signing. README summarizes policy; current-state records operational
+evidence; this guide preserves the deferred configuration and verification steps.
 
 ## Goal / scope / acceptance
 
 One mobile authentication and operational closure: preserve the Firebase-generated
-Android OAuth config and proven Google flow; hide Apple on Android; prepare secure
-native Apple sign-in on iOS; record Node 22 deployment and Android E2E evidence.
+Android OAuth config and proven Google flow; keep Google only on Android and iOS
+tester V1; retain secure native Apple sign-in for later activation; record Node 22
+deployment and Android E2E evidence.
 No email/password, account merge UI, identifier migration, production keys,
 Console writes, deployment, calendar/domain changes or unrelated macOS changes.
-Acceptance is Google-only Android and secure, configuration-gated Apple on iOS,
-with deterministic tests and explicit human release steps below.
+Acceptance is Google-only Android/iOS by default, with deterministic tests and
+Apple implementation retained but disabled. The future human steps below do not
+block tester V1.
 
 ## Repository evidence and implementation
 
@@ -36,19 +43,25 @@ with deterministic tests and explicit human release steps below.
 - No active `CODE_SIGN_ENTITLEMENTS` exists. `Runner/AppleSignIn.entitlements`
   declares the capability but is intentionally not wired to Personal Team builds.
   Wiring requires a capable signing team/provisioning profile, verified below.
-- Android always hides Apple, including with the Apple build flag. iOS hides it
-  while unconfigured (no 準備中 UI); configured iOS uses SignInWithAppleButton.
+- Android always hides Apple, including with the Apple build flag. iOS tester V1
+  intentionally hides it (no 準備中 UI). `APPLE_SIGN_IN_ENABLED` defaults to
+  `false`; only a future explicitly enabled iOS build uses SignInWithAppleButton.
   `--dart-define=APPLE_SIGN_IN_ENABLED=true` is a non-secret build readiness flag,
   not evidence of Console setup and not a security authorization boundary.
 
-## Exact manual actions (do not copy secrets into Git)
+## Future App Store preparation — deferred manual actions
+
+Do not perform these for tester V1. First approve the final bundle ID and its
+Firebase registration as part of Store preparation. The current tester ID is
+`com.example.sportsCalendarSync`; do not change it in this PR or invent its
+replacement. Never copy secrets into Git.
 
 | Where / menu | Field and expected value | Why / verification |
 |---|---|---|
 | Apple Developer → Account → Membership | Active Apple Developer Program team; use the owner's actual team | Sign in with Apple capability requires program membership. If enrollment is needed, cost/ownership decision stays with the owner. Personal Team is insufficient. |
-| Certificates, Identifiers & Profiles → Identifiers → App IDs | Select exact bundle ID `com.example.sportsCalendarSync`; Capabilities → Sign in with Apple → Enable/Save. Configure as primary App ID unless an existing approved group is used | Native token audience and signed app identity must match. Verify saved capability; do not invent a new bundle ID. If this ID cannot be registered by the team, stop for the separately approved ID migration. |
+| Certificates, Identifiers & Profiles → Identifiers → App IDs | Select the approved final bundle ID after identifier migration; Capabilities → Sign in with Apple → Enable/Save. Configure as primary App ID unless an existing approved group is used | Native token audience and signed app identity must match. Verify saved capability; do not invent a new bundle ID. |
 | Xcode → ios/Runner.xcworkspace → Runner → Signing & Capabilities | Select the actual paid team; add Sign in with Apple; Build Settings → Code Signing Entitlements = `Runner/AppleSignIn.entitlements` for Debug/Profile/Release | Refresh automatic signing or regenerate the manual provisioning profile after enabling the App ID capability. Verify Xcode signs successfully and both profile and signed app include `com.apple.developer.applesignin` = `[Default]`. Keep team certificates/keys/profile files out of Git. Review resulting project wiring before sharing it. |
-| Firebase Console → sports-calendar-sync-a4564 → Project settings → Your apps → iOS | Existing bundle ID `com.example.sportsCalendarSync` | Must match the native App ID; existing plist is not proof of provider enablement. |
+| Firebase Console → sports-calendar-sync-a4564 → Project settings → Your apps → iOS | Registration for the approved final bundle ID | Must match the native App ID after migration; the existing tester plist is not proof of provider enablement. |
 | Firebase Console → Authentication → Sign-in method → Apple | Enable provider and Save | Required to exchange native Apple ID tokens. Native code does not launch a Services-ID web flow. Do not invent a Services ID or treat an empty optional field as a known error. Record whether the console requires OAuth code flow fields for this project; use the conditional steps below if required/configured. |
 | Local configured iOS build | `flutter run --dart-define=APPLE_SIGN_IN_ENABLED=true` after signing/provider setup | Verify Google and standard Apple buttons, success → Firebase user/profile → Home, repeat sign-in, cancel without error, Share Email and Hide My Email. Use an iCloud account with 2FA. Do not distribute the Apple-enabled build before this passes. |
 
@@ -76,9 +89,13 @@ or if that flow is configured, complete it as one consistent Apple/Firebase setu
    This task adds no email/password or email-link flow. Verify relay only if used.
 
 No production key or Console setting is created by this PR. The entitlement
-source is prepared, but actual signing/provisioning remains a human dependency.
+source is prepared, but actual signing/provisioning remains a deferred Store
+dependency, not a tester V1 blocker.
 
 ## Account identity / collisions
+
+The Apple-specific checks below apply before future activation, not to the
+current Google-only tester release.
 
 Profiles remain keyed by Firebase UID, not by email. The app never calls
 `linkWithCredential` or merges users by email. Firebase itself can auto-link
