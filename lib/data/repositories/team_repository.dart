@@ -4,6 +4,9 @@ import '../../core/utils/app_constants.dart';
 import '../../domain/models/sport.dart';
 import '../../domain/models/team.dart';
 
+const maxTeamSearchWidthVariants = 2;
+const maxTeamSearchRepositoryReads = 16;
+
 /// Read API for teams and leagues.
 abstract class TeamRepository {
   Future<List<League>> fetchLeagues({String? competitionKey});
@@ -167,14 +170,16 @@ class FirestoreTeamRepository implements TeamRepository {
     }
 
     const maxUnicodeSuffix = '\uDBFF\uDFFF';
-    final endQuery = '$trimmedQuery$maxUnicodeSuffix';
-
+    final widthQueries = teamSearchWidthVariants(trimmedQuery);
     final keywordQueries = _searchKeywordQueries(trimmedQuery);
 
-    Query<Map<String, dynamic>> nameFilter(Query<Map<String, dynamic>> base) =>
+    Query<Map<String, dynamic>> nameFilter(
+      Query<Map<String, dynamic>> base,
+      String candidate,
+    ) =>
         base
-            .where('nameJa', isGreaterThanOrEqualTo: trimmedQuery)
-            .where('nameJa', isLessThan: endQuery);
+            .where('nameJa', isGreaterThanOrEqualTo: candidate)
+            .where('nameJa', isLessThan: '$candidate$maxUnicodeSuffix');
 
     // Helper: merge docs from multiple snapshots, deduplicate by doc ID,
     // and honour the overall page size limit.
@@ -198,9 +203,14 @@ class FirestoreTeamRepository implements TeamRepository {
       // No competition filter — search across all teams ("すべて" tab).
 
       // 1. nameJa prefix search.
-      final prefixSnap = await nameFilter(
-        _teams,
-      ).limit(AppConstants.defaultPageSize).get();
+      final prefixSnaps = await Future.wait(
+        widthQueries.map(
+          (candidate) => nameFilter(
+            _teams,
+            candidate,
+          ).limit(AppConstants.defaultPageSize).get(),
+        ),
+      );
 
       // 2. searchKeywords array-contains search (no composite index needed).
       final kwSnaps = await Future.wait(
@@ -213,7 +223,7 @@ class FirestoreTeamRepository implements TeamRepository {
       );
 
       return mergeSnapshots([
-        prefixSnap.docs,
+        ...prefixSnaps.map((snap) => snap.docs),
         ...kwSnaps.map((snap) => snap.docs),
       ]);
     }
@@ -221,16 +231,24 @@ class FirestoreTeamRepository implements TeamRepository {
     // Competition-filtered search.
 
     // 1a. nameJa prefix — primary (competitionKey field).
-    final prefixPrimarySnap = await nameFilter(_teams)
-        .where('competitionKey', isEqualTo: competitionKey)
-        .limit(AppConstants.defaultPageSize)
-        .get();
+    final prefixPrimarySnaps = await Future.wait(
+      widthQueries.map(
+        (candidate) => nameFilter(_teams, candidate)
+            .where('competitionKey', isEqualTo: competitionKey)
+            .limit(AppConstants.defaultPageSize)
+            .get(),
+      ),
+    );
 
     // 1b. nameJa prefix — legacy fallback (sportKey field).
-    final prefixLegacySnap = await nameFilter(_teams)
-        .where('sportKey', isEqualTo: competitionKey)
-        .limit(AppConstants.defaultPageSize)
-        .get();
+    final prefixLegacySnaps = await Future.wait(
+      widthQueries.map(
+        (candidate) => nameFilter(_teams, candidate)
+            .where('sportKey', isEqualTo: competitionKey)
+            .limit(AppConstants.defaultPageSize)
+            .get(),
+      ),
+    );
 
     // 2. searchKeywords — primary and legacy fallback.
     final kwPrimarySnaps = await Future.wait(
@@ -253,38 +271,49 @@ class FirestoreTeamRepository implements TeamRepository {
     );
 
     return mergeSnapshots([
-      prefixPrimarySnap.docs,
-      prefixLegacySnap.docs,
+      ...prefixPrimarySnaps.map((snap) => snap.docs),
+      ...prefixLegacySnaps.map((snap) => snap.docs),
       ...kwPrimarySnaps.map((snap) => snap.docs),
       ...kwLegacySnaps.map((snap) => snap.docs),
     ]);
   }
 
   List<String> _searchKeywordQueries(String query) {
-    final asciiNormalized = _normalizeAsciiWidth(query);
+    final widthVariants = teamSearchWidthVariants(query);
     return {
-      query,
-      query.toLowerCase(),
-      query.toUpperCase(),
-      asciiNormalized,
-      asciiNormalized.toLowerCase(),
-      asciiNormalized.toUpperCase(),
+      for (final variant in widthVariants) ...{
+        variant,
+        variant.toLowerCase(),
+        variant.toUpperCase(),
+      },
     }.where((value) => value.isNotEmpty).toList();
   }
 
-  String _normalizeAsciiWidth(String value) {
-    final buffer = StringBuffer();
-    for (final codePoint in value.runes) {
-      if (codePoint == 0x3000) {
-        buffer.writeCharCode(0x20);
-      } else if (codePoint >= 0xFF01 && codePoint <= 0xFF5E) {
-        buffer.writeCharCode(codePoint - 0xFEE0);
-      } else {
-        buffer.writeCharCode(codePoint);
+}
+
+/// At most two reviewed search spellings: original and the opposite ASCII
+/// width. It does not resolve team identity or alter stored presentation.
+List<String> teamSearchWidthVariants(String value) {
+  String convert(bool fullWidth) => String.fromCharCodes(
+    value.runes.map((rune) {
+      if (fullWidth && rune >= 0x21 && rune <= 0x7e) return rune + 0xfee0;
+      if (!fullWidth && rune == 0x3000) return 0x20;
+      if (!fullWidth && rune >= 0xff01 && rune <= 0xff5e) {
+        return rune - 0xfee0;
       }
-    }
-    return buffer.toString();
+      return rune;
+    }),
+  );
+  final hasFullWidthAscii = value.runes.any(
+    (rune) => rune == 0x3000 || (rune >= 0xff01 && rune <= 0xff5e),
+  );
+  return {
+    value,
+    convert(!hasFullWidthAscii),
   }
+      .where((candidate) => candidate.isNotEmpty)
+      .take(maxTeamSearchWidthVariants)
+      .toList();
 }
 
 /// In-memory sample implementation for the free MVP mode.

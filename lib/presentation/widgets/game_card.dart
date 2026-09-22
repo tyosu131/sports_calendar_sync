@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import '../../core/utils/date_time_utils.dart';
 import '../../domain/models/game.dart';
 import '../../domain/policies/competition_display_policy.dart';
+import '../../domain/policies/game_presentation_policy.dart';
 import '../../domain/policies/team_display_name_policy.dart';
 import '../../domain/policies/team_presentation_policy.dart';
 import 'competition_badge.dart';
 import 'game_presentation_scope.dart';
+import 'game_status_chip.dart';
 import 'team_presentation_badge.dart';
 
 /// Displays a single game/match as a card.
@@ -78,7 +80,7 @@ class GameCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                _StatusChip(status: game.status),
+                GameStatusChip(status: game.status),
               ],
             ),
             const SizedBox(height: 12),
@@ -112,7 +114,7 @@ class GameCard extends StatelessWidget {
               ],
             ),
             // Venue
-            if (game.venue != null) ...[
+            if (visibleVenue(game.venue) case final venue?) ...[
               const SizedBox(height: 8),
               Row(
                 children: [
@@ -124,7 +126,7 @@ class GameCard extends StatelessWidget {
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
-                      game.venue!,
+                      venue,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodySmall?.copyWith(
@@ -216,7 +218,7 @@ class _ScoreOrVs extends StatelessWidget {
 
     if (shouldShowScore) {
       return Text(
-        '${game.homeScore} - ${game.awayScore}',
+        formatScore(game.homeScore, game.awayScore)!,
         style: theme.textTheme.headlineSmall?.copyWith(
           fontWeight: FontWeight.bold,
         ),
@@ -226,48 +228,6 @@ class _ScoreOrVs extends StatelessWidget {
       'vs',
       style: theme.textTheme.titleMedium?.copyWith(
         color: theme.colorScheme.onSurfaceVariant,
-      ),
-    );
-  }
-}
-
-class _StatusChip extends StatelessWidget {
-  const _StatusChip({required this.status});
-  final GameStatus status;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    Color color;
-    String label;
-    switch (status) {
-      case GameStatus.live:
-        color = Colors.red;
-        label = 'LIVE';
-      case GameStatus.finished:
-        color = theme.colorScheme.secondary;
-        label = '終了';
-      case GameStatus.postponed:
-        color = theme.colorScheme.tertiary;
-        label = '延期';
-      case GameStatus.cancelled:
-        color = theme.colorScheme.outline;
-        label = '中止';
-      case GameStatus.scheduled:
-        return const SizedBox.shrink();
-    }
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        label,
-        style: theme.textTheme.labelSmall?.copyWith(
-          color: color,
-          fontWeight: FontWeight.bold,
-        ),
       ),
     );
   }

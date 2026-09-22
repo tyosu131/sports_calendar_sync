@@ -60,8 +60,8 @@ function generateSearchKeywords({ nameJa = '', nameEn = '', aliases = [] } = {})
 
   // Helper: add all prefixes of a string to the set.
   function addPrefixes(str) {
-    for (const p of prefixes(str)) {
-      set.add(p);
+    for (const candidate of widthVariants(str)) {
+      for (const p of prefixes(candidate)) set.add(p);
     }
   }
 
@@ -107,4 +107,21 @@ function generateSearchKeywords({ nameJa = '', nameEn = '', aliases = [] } = {})
   return Array.from(set);
 }
 
-module.exports = { generateSearchKeywords };
+// The two variants are deliberately bounded: only ASCII printable characters
+// change width. This is search compatibility, never an identity decision.
+function widthVariants(value) {
+  let ascii = '';
+  let full = '';
+  for (const character of value) {
+    const code = character.codePointAt(0);
+    if (code === 0x3000) ascii += ' ';
+    else if (code >= 0xff01 && code <= 0xff5e) ascii += String.fromCodePoint(code - 0xfee0);
+    else ascii += character;
+    if (code === 0x20) full += String.fromCodePoint(0x3000);
+    else if (code >= 0x21 && code <= 0x7e) full += String.fromCodePoint(code + 0xfee0);
+    else full += character;
+  }
+  return [...new Set([value, ascii, full])].slice(0, 2);
+}
+
+module.exports = { generateSearchKeywords, widthVariants };

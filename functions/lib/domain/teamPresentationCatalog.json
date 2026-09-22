@@ -75,12 +75,12 @@
         "source": "functions/scripts/data/j1Teams.js"
     },
     {
-        "nameJa": "FC東京",
+        "nameJa": "ＦＣ東京",
         "nameEn": "FC Tokyo",
         "aliases": [
-            "FC東京",
-            "FC Tokyo",
             "ＦＣ東京",
+            "FC Tokyo",
+            "FC東京",
             "東京"
         ],
         "scopedAliases": [
@@ -118,6 +118,8 @@
             "FC Machida Zelvia",
             "町田",
             "ゼルビア",
+            "FC町田",
+            "FC町田ゼルビア",
             "Machida Zelvia"
         ],
         "scopedAliases": [],
@@ -146,6 +148,7 @@
             "横浜Ｆ・マリノス",
             "Yokohama F･Marinos",
             "横浜FM",
+            "横浜F・マリノス",
             "マリノス",
             "Yokohama F. Marinos",
             "F. Marinos"
@@ -290,6 +293,7 @@
             "V-Varen Nagasaki",
             "長崎",
             "Ｖ・ファーレン",
+            "V・ファーレン長崎",
             "V. Varen Nagasaki"
         ],
         "scopedAliases": [],
@@ -524,6 +528,8 @@
             "大宮",
             "大宮アルディージャ",
             "RB大宮",
+            "RB大宮アルディージャ",
+            "ＲＢ大宮",
             "Omiya Ardija"
         ],
         "scopedAliases": [],
@@ -566,7 +572,8 @@
             "鹿児島ユナイテッドＦＣ",
             "Kagoshima United",
             "鹿児島",
-            "鹿児島ユナイテッド"
+            "鹿児島ユナイテッド",
+            "鹿児島ユナイテッドFC"
         ],
         "scopedAliases": [],
         "competitionKeys": [],
@@ -580,7 +587,8 @@
             "レノファ山口ＦＣ",
             "Renofa Yamaguchi",
             "山口",
-            "レノファ山口"
+            "レノファ山口",
+            "レノファ山口FC"
         ],
         "scopedAliases": [],
         "competitionKeys": [],
@@ -650,7 +658,8 @@
             "Matsumoto Yamaga",
             "松本",
             "山雅",
-            "松本山雅"
+            "松本山雅",
+            "松本山雅FC"
         ],
         "scopedAliases": [],
         "competitionKeys": [],
@@ -664,7 +673,8 @@
             "福島ユナイテッドＦＣ",
             "Fukushima United",
             "福島",
-            "福島ユナイテッド"
+            "福島ユナイテッド",
+            "福島ユナイテッドFC"
         ],
         "scopedAliases": [],
         "competitionKeys": [],
@@ -692,7 +702,8 @@
             "高知ユナイテッドＳＣ",
             "Kochi United",
             "高知",
-            "高知ユナイテッド"
+            "高知ユナイテッド",
+            "高知ユナイテッドSC"
         ],
         "scopedAliases": [],
         "competitionKeys": [],

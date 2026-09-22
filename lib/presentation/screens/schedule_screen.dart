@@ -5,11 +5,14 @@ import '../../core/utils/date_time_utils.dart';
 import '../../data/providers/game_providers.dart';
 import '../../domain/models/game.dart';
 import '../../domain/policies/competition_display_policy.dart';
+import '../../domain/policies/game_presentation_policy.dart';
 import '../../domain/policies/team_display_name_policy.dart';
+import '../../domain/policies/team_initial.dart';
 import '../../domain/policies/team_presentation_policy.dart';
-import '../widgets/game_presentation_scope.dart';
-import '../widgets/team_presentation_badge.dart';
 import '../widgets/competition_badge.dart';
+import '../widgets/game_presentation_scope.dart';
+import '../widgets/game_status_chip.dart';
+import '../widgets/team_presentation_badge.dart';
 
 /// In-app schedule view for followed-team games.
 ///
@@ -498,7 +501,7 @@ class _CompactGameLine extends StatelessWidget {
   Widget build(BuildContext context) {
     final home = teamDisplayNames.homeName(game);
     final away = teamDisplayNames.awayName(game);
-    final marker = '${_initial(home)}/${_initial(away)}';
+    final marker = '${teamInitial(home)}/${teamInitial(away)}';
     final meta = _compactMeta(game);
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -526,9 +529,6 @@ class _CompactGameLine extends StatelessWidget {
     );
   }
 
-  String _initial(String name) =>
-      name.isEmpty ? '?' : String.fromCharCode(name.runes.first);
-
   String _compactMeta(Game game) => switch (game.status) {
     GameStatus.scheduled => DateTimeUtils.formatTimeOnly(
       game.startTimeUtcDateTime,
@@ -536,7 +536,11 @@ class _CompactGameLine extends StatelessWidget {
     GameStatus.live => 'LIVE',
     GameStatus.finished =>
       game.homeScore != null && game.awayScore != null
-          ? '${game.homeScore}-${game.awayScore}'
+          ? formatScore(
+              game.homeScore,
+              game.awayScore,
+              format: ScoreFormat.compact,
+            )!
           : '終了',
     GameStatus.postponed => '延期',
     GameStatus.cancelled => '中止',
@@ -611,7 +615,7 @@ class _CalendarGamePreview extends StatelessWidget {
   }
 
   String _calendarMeta(Game game) {
-    final score = _scoreText(game);
+    final score = formatScore(game.homeScore, game.awayScore);
     switch (game.status) {
       case GameStatus.scheduled:
         return DateTimeUtils.formatTimeOnly(game.startTimeUtcDateTime);
@@ -624,13 +628,6 @@ class _CalendarGamePreview extends StatelessWidget {
       case GameStatus.cancelled:
         return '中止';
     }
-  }
-
-  String? _scoreText(Game game) {
-    final homeScore = game.homeScore;
-    final awayScore = game.awayScore;
-    if (homeScore == null || awayScore == null) return null;
-    return '$homeScore - $awayScore';
   }
 }
 
@@ -669,7 +666,6 @@ class ScheduleGameTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final statusText = _statusText(game);
     final scoreText = _scoreOrVs(game);
     final competition = CompetitionDisplayPolicy.forKey(game.competitionKey);
 
@@ -693,8 +689,7 @@ class ScheduleGameTile extends StatelessWidget {
                   ),
                 ),
                 const Spacer(),
-                if (statusText != null)
-                  _StatusChip(statusText: statusText, status: game.status),
+                GameStatusChip(status: game.status),
               ],
             ),
             const SizedBox(height: 10),
@@ -725,7 +720,7 @@ class ScheduleGameTile extends StatelessWidget {
                 ),
               ],
             ),
-            if (game.venue != null && game.venue!.isNotEmpty) ...[
+            if (visibleVenue(game.venue) case final venue?) ...[
               const SizedBox(height: 10),
               Row(
                 children: [
@@ -737,7 +732,7 @@ class ScheduleGameTile extends StatelessWidget {
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
-                      game.venue!,
+                      venue,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -757,25 +752,10 @@ class ScheduleGameTile extends StatelessWidget {
       final homeScore = game.homeScore;
       final awayScore = game.awayScore;
       if (homeScore != null && awayScore != null) {
-        return '$homeScore - $awayScore';
+        return formatScore(homeScore, awayScore)!;
       }
     }
     return 'vs';
-  }
-
-  String? _statusText(Game game) {
-    switch (game.status) {
-      case GameStatus.scheduled:
-        return null;
-      case GameStatus.live:
-        return 'LIVE';
-      case GameStatus.finished:
-        return '終了';
-      case GameStatus.postponed:
-        return '延期';
-      case GameStatus.cancelled:
-        return '中止';
-    }
   }
 }
 
@@ -923,40 +903,6 @@ class _TeamIcon extends StatelessWidget {
         logoUrl: logoUrl,
         imageInset: 4,
       );
-}
-
-class _StatusChip extends StatelessWidget {
-  const _StatusChip({required this.statusText, required this.status});
-
-  final String statusText;
-  final GameStatus status;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final color = switch (status) {
-      GameStatus.live => colorScheme.error,
-      GameStatus.finished => colorScheme.secondary,
-      GameStatus.postponed || GameStatus.cancelled => colorScheme.tertiary,
-      GameStatus.scheduled => colorScheme.primary,
-    };
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        statusText,
-        style: TextStyle(
-          color: color,
-          fontWeight: FontWeight.bold,
-          fontSize: 12,
-        ),
-      ),
-    );
-  }
 }
 
 class _ScheduleEmptyState extends StatelessWidget {
