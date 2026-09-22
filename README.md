@@ -7,9 +7,11 @@ A Flutter + Firebase sports calendar app for following teams and synchronizing t
 The production path is implemented and deployed:
 
 - Cloud Functions and the GOAL V1 football synchronization path are deployed and have populated canonical real games in Firestore.
+- Presentation closure is merged, and the public domain and OAuth branding are published.
 - Personalized ICS feeds are deployed; Apple Calendar production behavior has been verified. ICS remains the integration path for Apple Calendar and other ICS-capable clients.
-- Google Calendar direct API synchronization is deployed and is the only normal Google Calendar path. On a real iPhone, OAuth connection, app-owned **Sports Calendar** creation/recreation, initial event population, competition labels, and finished scores have been verified.
-- Clean automatic OAuth callback return after removal of the legacy Google ICS route still requires a post-PR-38 smoke test. Android real-device behavior, terminated-app return, revoked credentials, quota/rate-limit behavior, transient callback failures, and Google OAuth publishing/verification also remain unverified or incomplete.
+- Google Calendar direct API synchronization is deployed and is the only normal Google Calendar path. On a real iPhone, the core flow—including OAuth connection and return, app-owned **Sports Calendar** creation/recreation, initial event population, competition labels, and finished scores—has been verified.
+- The repository now targets Node.js 22 for the existing 1st Gen Functions. That runtime change is not production-deployed yet; the currently deployed Functions remain the pre-migration production release.
+- Android real-device behavior, terminated-app return, revoked credentials, quota/rate-limit behavior, and transient callback failures remain unverified or incomplete.
 
 The repository also retains sample mode as a local development and UI-test option. Sample mode is not the overall production state.
 
@@ -26,7 +28,7 @@ When sample mode is off, the app uses Firebase Auth, Firestore-backed repositori
 
 ## Validation
 
-Run the deterministic repository gates (Node 20, Flutter 3.41.4):
+Run the deterministic repository gates (Node 22, Flutter 3.41.4):
 
 ```shell
 npm --prefix functions ci
@@ -38,7 +40,7 @@ flutter analyze --no-pub
 flutter test --no-pub
 ```
 
-Functions tests and configuration validation use local synthetic fixtures and do not require provider API calls, Firebase credentials, or Firestore writes. Functions currently target Node.js 20; runtime decommission/migration is separate operational work.
+Functions tests and configuration validation use local synthetic fixtures and do not require provider API calls, Firebase credentials, or Firestore writes. Functions currently target Node.js 22 in the repository; deploying that runtime is separate operational work.
 
 ## Architecture summary
 
@@ -53,9 +55,8 @@ Functions tests and configuration validation use local synthetic fixtures and do
 ## Current limitations / remaining work
 
 - Android Google Calendar connection and return have not been verified on a real device.
-- Clean standard OAuth callback → `sportscalendar://` → automatic app return must be re-verified after removal of the legacy Google ICS route; terminated-app return is also pending.
+- Terminated-app OAuth return remains pending verification.
 - OAuth denial UX, revoked-credential behavior, quota/rate-limit behavior, and all transient callback failure paths are not fully production-verified.
-- Google OAuth application publishing/verification is not complete.
 - Broader competition/provider coverage, broadcast data, notifications, full-text search, offline caching, and high-resolution local logo assets remain incomplete.
 
 ## Safety notes
