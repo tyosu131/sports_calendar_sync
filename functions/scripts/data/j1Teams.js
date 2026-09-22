@@ -93,9 +93,9 @@ const j1Teams = [
   },
   {
     id: 'fc_tokyo',
-    nameJa: 'ＦＣ東京',
+    nameJa: 'FC東京',
     nameEn: 'FC Tokyo',
-    aliases: ['FC東京', '東京', 'FC Tokyo'],
+    aliases: ['ＦＣ東京', '東京', 'FC Tokyo'],
     externalTeamId: 292,
     logoUrl: 'https://media.api-sports.io/football/teams/292.png',
     source: 'J.LEAGUE official 2026 J1 list + API-SPORTS 2024 J1 output reference',

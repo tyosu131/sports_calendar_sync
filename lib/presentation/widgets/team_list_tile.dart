@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../domain/models/team.dart';
 import '../../domain/policies/team_display_name_policy.dart';
 import '../../domain/policies/team_presentation_policy.dart';
+import 'team_presentation_badge.dart';
 
 /// A list tile for displaying a team with follow/unfollow action.
 class TeamListTile extends StatelessWidget {
@@ -35,9 +36,10 @@ class TeamListTile extends StatelessWidget {
       child: ListTile(
         onTap: onTap,
         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-        leading: _TeamLogo(
+        leading: TeamPresentationBadge(
+          size: 52,
           logoUrl: teamPresentationLogo(team),
-          nameJa: teamDisplayNames.teamName(team),
+          displayName: teamDisplayNames.teamName(team),
         ),
         title: Text(
           teamDisplayNames.teamName(team),
@@ -54,46 +56,6 @@ class TeamListTile extends StatelessWidget {
           onPressed: onFollowToggle,
         ),
       ),
-    );
-  }
-}
-
-class _TeamLogo extends StatelessWidget {
-  const _TeamLogo({this.logoUrl, required this.nameJa});
-  final String? logoUrl;
-  final String nameJa;
-
-  @override
-  Widget build(BuildContext context) {
-    final fallback = Text(
-      nameJa.isNotEmpty ? nameJa[0] : '?',
-      style: const TextStyle(fontWeight: FontWeight.bold),
-    );
-
-    if (logoUrl != null && logoUrl!.isNotEmpty) {
-      return CircleAvatar(
-        radius: 26,
-        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-        child: ClipOval(
-          child: SizedBox(
-            width: 46,
-            height: 46,
-            child: Image.network(
-              logoUrl!,
-              fit: BoxFit.contain,
-              gaplessPlayback: true,
-              filterQuality: FilterQuality.high,
-              errorBuilder: (context, error, stackTrace) =>
-                  Center(child: fallback),
-            ),
-          ),
-        ),
-      );
-    }
-    return CircleAvatar(
-      radius: 26,
-      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-      child: fallback,
     );
   }
 }

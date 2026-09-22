@@ -7,6 +7,7 @@ import '../../domain/policies/team_display_name_policy.dart';
 import '../../domain/policies/team_presentation_policy.dart';
 import 'competition_badge.dart';
 import 'game_presentation_scope.dart';
+import 'team_presentation_badge.dart';
 
 /// Displays a single game/match as a card.
 class GameCard extends StatelessWidget {
@@ -192,33 +193,12 @@ class _GameTeamLogo extends StatelessWidget {
   final String? logoUrl;
 
   @override
-  Widget build(BuildContext context) {
-    final fallback = Text(
-      name.isEmpty ? '?' : String.fromCharCode(name.runes.first),
-      style: const TextStyle(fontWeight: FontWeight.bold),
-    );
-
-    return CircleAvatar(
-      radius: 24,
-      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
-      child: logoUrl == null || logoUrl!.isEmpty
-          ? fallback
-          : ClipOval(
-              child: SizedBox(
-                width: 40,
-                height: 40,
-                child: Image.network(
-                  logoUrl!,
-                  fit: BoxFit.contain,
-                  gaplessPlayback: true,
-                  filterQuality: FilterQuality.high,
-                  errorBuilder: (context, error, stackTrace) =>
-                      const Icon(Icons.shield_outlined, size: 24),
-                ),
-              ),
-            ),
-    );
-  }
+  Widget build(BuildContext context) => TeamPresentationBadge(
+        size: 48,
+        displayName: name,
+        logoUrl: logoUrl,
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+      );
 }
 
 class _ScoreOrVs extends StatelessWidget {

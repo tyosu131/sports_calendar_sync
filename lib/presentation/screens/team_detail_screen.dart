@@ -10,6 +10,7 @@ import '../../data/providers/team_providers.dart';
 import '../../domain/models/game.dart';
 import '../../domain/policies/team_display_name_policy.dart';
 import '../../domain/policies/team_presentation_policy.dart';
+import '../widgets/team_presentation_badge.dart';
 import '../widgets/game_card.dart';
 import '../widgets/game_presentation_scope.dart';
 import '../widgets/calendar_sync_button.dart';
@@ -302,33 +303,15 @@ class _TeamHeaderBackground extends StatelessWidget {
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 140, maxHeight: 96),
-            child: logoUrl == null || logoUrl!.isEmpty
-                ? CircleAvatar(
-                    radius: 46,
-                    backgroundColor: colorScheme.surface,
-                    child: Text(
-                      nameJa.isNotEmpty ? nameJa[0] : '?',
-                      style: const TextStyle(
-                        fontSize: 38,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  )
-                : Image.network(
-                    logoUrl!,
-                    fit: BoxFit.contain,
-                    gaplessPlayback: true,
-                    filterQuality: FilterQuality.high,
-                    errorBuilder: (context, error, stackTrace) => CircleAvatar(
-                      radius: 46,
-                      backgroundColor: colorScheme.surface,
-                      child: Icon(
-                        Icons.shield_outlined,
-                        size: 44,
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
+            child: TeamPresentationBadge(
+              size: 92,
+              displayName: nameJa,
+              logoUrl: logoUrl,
+              backgroundColor: colorScheme.surface,
+              foregroundColor: colorScheme.onSurfaceVariant,
+              fontSize: 38,
+              imageInset: 0,
+            ),
           ),
         ),
       ),

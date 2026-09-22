@@ -18,7 +18,7 @@
   {"id":"kawasaki","competition":"football_j1","names":{"provider":"Kawasaki Frontale"},"expected":"川崎フロンターレ"},
   {"id":"vissel","competition":"football_j1","names":{"provider":"Vissel Kobe"},"expected":"ヴィッセル神戸"},
   {"id":"jef","competition":"football_j1","names":{"provider":"JEF United"},"expected":"ジェフユナイテッド千葉"},
-  {"id":"tokyo","competition":"football_j1","names":{"provider":"Tokyo"},"expected":"ＦＣ東京"},
+  {"id":"tokyo","competition":"football_j1","names":{"provider":"Tokyo"},"expected":"FC東京"},
   {"id":"roasso","competition":"football_emperor_cup","names":{"provider":"Roasso Kumamoto"},"expected":"ロアッソ熊本"},
   {"id":"tegevajaro","competition":"football_j_league_cup","names":{"provider":"Tegevajaro Miyazaki"},"expected":"テゲバジャーロ宮崎"},
   {"id":"arsenal","competition":"football_premier","names":{"provider":"Arsenal"},"expected":"Arsenal"},
