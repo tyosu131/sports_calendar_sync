@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/models/sport.dart';
 import '../../domain/models/team.dart';
 import '../../domain/policies/home_sport_navigation.dart';
+import '../services/sport_team_search.dart';
 import 'auth_providers.dart';
 import 'repository_providers.dart';
 
@@ -66,10 +67,11 @@ final teamSearchActiveSportTabIdProvider = StateProvider.autoDispose<String?>(
 
 /// Search results scoped to the current query and active sport tab.
 ///
-/// Sport-home discovery still filters team-master `competitionKey` into a
-/// Home sport category. That is a temporary compatibility path, not canonical
-/// season membership. Multi-competition membership (one team in Premier League
-/// and Champions League) needs a later listing redesign.
+/// Sport-home discovery queries each enabled registry competition for that
+/// sport, then merges by team id. That is a temporary compatibility path, not
+/// canonical season membership. Do not call `searchTeams` with a null
+/// competition key here: the unscoped path is capped at the default page size
+/// across every sport.
 final teamSearchResultsProvider = FutureProvider.autoDispose<List<Team>>((
   ref,
 ) async {
@@ -91,14 +93,11 @@ final teamSearchResultsProvider = FutureProvider.autoDispose<List<Team>>((
     (tab) => tab.id == activeSportTabId,
     orElse: () => throw StateError('Unknown sport tab: $activeSportTabId'),
   );
-  final teams = await repository.searchTeams(query, competitionKey: null);
-  return teams
-      .where(
-        (team) => sportTab.acceptsCategory(
-          sportCategoryForCompetitionKey(team.competitionKey),
-        ),
-      )
-      .toList();
+  return searchTeamsForSportTab(
+    repository: repository,
+    tab: sportTab,
+    query: query,
+  );
 });
 
 String _teamSearchText(Team team) {

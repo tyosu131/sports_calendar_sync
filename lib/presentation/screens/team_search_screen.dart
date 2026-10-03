@@ -99,90 +99,108 @@ class _TeamSearchScaffoldState extends ConsumerState<_TeamSearchScaffold> {
     final tabIndex = _controller?.index ?? defaultHomeSportTabIndex(tabs);
     final showSubNav = homeTabShowsSportSubNav(tabs[tabIndex]);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('チームを探す'),
-        bottom: TabBar(
-          key: const ValueKey('team-search-sport-tabs'),
-          isScrollable: false,
-          tabAlignment: TabAlignment.fill,
-          padding: EdgeInsets.zero,
-          labelPadding: EdgeInsets.zero,
-          indicatorSize: TabBarIndicatorSize.label,
-          labelStyle: theme.textTheme.titleSmall?.copyWith(
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0,
-          ),
-          unselectedLabelStyle: theme.textTheme.titleSmall?.copyWith(
-            fontSize: 13,
-            letterSpacing: 0,
-          ),
-          tabs: [
-            for (final tab in tabs)
-              Tab(key: ValueKey('team-search-tab-${tab.id}'), text: tab.label),
-          ],
-        ),
-      ),
-      body: Column(
-        children: [
-          if (!tabs[tabIndex].showsAllSports)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-              child: SearchBar(
-                key: ValueKey('team-search-query-${tabs[tabIndex].id}'),
-                controller: _searchController,
-                hintText: 'チーム名で検索...',
-                leading: const Icon(Icons.search),
-                elevation: const WidgetStatePropertyAll(0),
-                backgroundColor: WidgetStatePropertyAll(
-                  colorScheme.surfaceContainerHighest.withValues(alpha: 0.55),
-                ),
-                shape: WidgetStatePropertyAll(
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                ),
-                trailing: [
-                  if (_searchController.text.isNotEmpty)
-                    IconButton(
-                      icon: const Icon(Icons.clear),
-                      tooltip: '検索をクリア',
-                      onPressed: () {
-                        _searchController.clear();
-                        ref.read(teamSearchQueryProvider.notifier).state = '';
-                      },
-                    ),
-                ],
-                onChanged: (value) {
-                  ref.read(teamSearchQueryProvider.notifier).state = value;
-                },
+    return ValueListenableBuilder<int>(
+      valueListenable: _subNavIndex,
+      builder: (context, subIndex, _) {
+        final showingLeagues =
+            showSubNav &&
+            subIndex == sportSubNavIndexFor(SportSubNavIds.leagues);
+        final showTeamSearchBar =
+            !tabs[tabIndex].showsAllSports && !showingLeagues;
+
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('チームを探す'),
+            bottom: TabBar(
+              key: const ValueKey('team-search-sport-tabs'),
+              isScrollable: false,
+              tabAlignment: TabAlignment.fill,
+              padding: EdgeInsets.zero,
+              labelPadding: EdgeInsets.zero,
+              indicatorSize: TabBarIndicatorSize.label,
+              labelStyle: theme.textTheme.titleSmall?.copyWith(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0,
               ),
-            ),
-          Expanded(
-            child: TabBarView(
-              children: [
+              unselectedLabelStyle: theme.textTheme.titleSmall?.copyWith(
+                fontSize: 13,
+                letterSpacing: 0,
+              ),
+              tabs: [
                 for (final tab in tabs)
-                  SizedBox.expand(
-                    key: ValueKey('team-search-page-${tab.id}'),
-                    child: _TeamSearchPage(
-                      tab: tab,
-                      subNavIndex: homeTabShowsSportSubNav(tab)
-                          ? _subNavIndex
-                          : null,
-                      searchController: tab.showsAllSports
-                          ? _searchController
-                          : null,
-                    ),
+                  Tab(
+                    key: ValueKey('team-search-tab-${tab.id}'),
+                    text: tab.label,
                   ),
               ],
             ),
           ),
-        ],
-      ),
-      bottomNavigationBar: showSubNav
-          ? SportSubNavBar(selectedIndex: _subNavIndex)
-          : null,
+          body: Column(
+            children: [
+              if (showTeamSearchBar)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                  child: SearchBar(
+                    key: ValueKey('team-search-query-${tabs[tabIndex].id}'),
+                    controller: _searchController,
+                    hintText: 'チーム名で検索...',
+                    leading: const Icon(Icons.search),
+                    elevation: const WidgetStatePropertyAll(0),
+                    backgroundColor: WidgetStatePropertyAll(
+                      colorScheme.surfaceContainerHighest.withValues(
+                        alpha: 0.55,
+                      ),
+                    ),
+                    shape: WidgetStatePropertyAll(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                    ),
+                    trailing: [
+                      if (_searchController.text.isNotEmpty)
+                        IconButton(
+                          icon: const Icon(Icons.clear),
+                          tooltip: '検索をクリア',
+                          onPressed: () {
+                            _searchController.clear();
+                            ref.read(teamSearchQueryProvider.notifier).state =
+                                '';
+                          },
+                        ),
+                    ],
+                    onChanged: (value) {
+                      ref.read(teamSearchQueryProvider.notifier).state = value;
+                    },
+                  ),
+                ),
+              Expanded(
+                child: TabBarView(
+                  children: [
+                    for (final tab in tabs)
+                      SizedBox.expand(
+                        key: ValueKey('team-search-page-${tab.id}'),
+                        child: _TeamSearchPage(
+                          tab: tab,
+                          isActive: tab.id == tabs[tabIndex].id,
+                          subNavIndex: homeTabShowsSportSubNav(tab)
+                              ? _subNavIndex
+                              : null,
+                          searchController: tab.showsAllSports
+                              ? _searchController
+                              : null,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          bottomNavigationBar: showSubNav
+              ? SportSubNavBar(selectedIndex: _subNavIndex)
+              : null,
+        );
+      },
     );
   }
 }
@@ -190,11 +208,13 @@ class _TeamSearchScaffoldState extends ConsumerState<_TeamSearchScaffold> {
 class _TeamSearchPage extends ConsumerWidget {
   const _TeamSearchPage({
     required this.tab,
+    required this.isActive,
     required this.subNavIndex,
     required this.searchController,
   });
 
   final HomeSportTab tab;
+  final bool isActive;
   final ValueNotifier<int>? subNavIndex;
   final TextEditingController? searchController;
 
@@ -207,7 +227,7 @@ class _TeamSearchPage extends ConsumerWidget {
     return ValueListenableBuilder<int>(
       valueListenable: notifier,
       builder: (context, index, child) {
-        if (index == sportSubNavIndexFor(SportSubNavIds.leagues)) {
+        if (isActive && index == sportSubNavIndexFor(SportSubNavIds.leagues)) {
           return SportLeagueBrowser(tab: tab);
         }
         return child!;
