@@ -261,6 +261,7 @@ class _HomeContent extends ConsumerWidget {
           error: (e, _) => Center(child: Text('エラー: $e')),
           data: (homeGames) {
             final games = gamesForHomeSportTab(homeGames.games, tab);
+            final followedIds = ref.watch(followedTeamIdsProvider);
             return GamePresentationScope(
               resolver: homeGames.presentation,
               child: RefreshIndicator(
@@ -278,7 +279,12 @@ class _HomeContent extends ConsumerWidget {
                     if (games.isEmpty)
                       const _NoUpcomingGames()
                     else
-                      ...games.map((game) => GameCard(game: game)),
+                      ...games.map(
+                        (game) => GameCard(
+                          game: game,
+                          perspectiveTeamIds: followedIds,
+                        ),
+                      ),
                   ],
                 ),
               ),

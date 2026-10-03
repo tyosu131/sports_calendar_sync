@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/utils/date_time_utils.dart';
 import '../../domain/models/game.dart';
 import '../../domain/policies/competition_display_policy.dart';
+import '../../domain/policies/followed_fixture_place.dart';
 import '../../domain/policies/game_presentation_policy.dart';
 import '../../domain/policies/team_display_name_policy.dart';
 import '../../domain/policies/team_presentation_policy.dart';
@@ -18,17 +19,30 @@ class GameCard extends StatelessWidget {
     required this.game,
     this.homeTeamLogoUrlFallback,
     this.awayTeamLogoUrlFallback,
+    this.perspectiveTeamIds = const [],
   });
 
   final Game game;
   final String? homeTeamLogoUrlFallback;
   final String? awayTeamLogoUrlFallback;
 
+  /// Canonical team ids used to place the stadium / travel cue.
+  ///
+  /// Home and sport-home pass followed team ids. A team schedule passes
+  /// that one team. Empty, or more than one matching side, hides the cue.
+  final List<String> perspectiveTeamIds;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isToday = DateTimeUtils.isToday(game.startTimeUtcDateTime);
     final competition = CompetitionDisplayPolicy.forKey(game.competitionKey);
+    final place = fixturePlaceForPerspective(
+      homeTeamId: game.homeTeamId,
+      awayTeamId: game.awayTeamId,
+      perspectiveTeamIds: perspectiveTeamIds,
+    );
+    final showStatus = GameStatusPresentation.forStatus(game.status) != null;
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -71,18 +85,37 @@ class GameCard extends StatelessWidget {
                 if (isToday) const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    DateTimeUtils.formatJst(game.startTimeUtcDateTime),
+                    DateTimeUtils.formatJstDate(game.startTimeUtcDateTime),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurface,
                     ),
                   ),
                 ),
                 const SizedBox(width: 8),
-                GameStatusChip(status: game.status),
+                Text(
+                  DateTimeUtils.formatTimeOnly(game.startTimeUtcDateTime),
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: theme.colorScheme.onSurface,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                if (showStatus) ...[
+                  const SizedBox(width: 8),
+                  GameStatusChip(status: game.status),
+                ],
               ],
             ),
+            if (place != null) ...[
+              const SizedBox(height: 10),
+              Align(
+                alignment: place == FollowedFixturePlace.stadium
+                    ? Alignment.centerLeft
+                    : Alignment.centerRight,
+                child: _FollowedPlaceChip(place: place),
+              ),
+            ],
             const SizedBox(height: 12),
             // Teams row
             Row(
@@ -196,11 +229,64 @@ class _GameTeamLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => TeamPresentationBadge(
-        size: 48,
-        displayName: name,
-        logoUrl: logoUrl,
-        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
-      );
+    size: 48,
+    displayName: name,
+    logoUrl: logoUrl,
+    backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+  );
+}
+
+class _FollowedPlaceChip extends StatelessWidget {
+  const _FollowedPlaceChip({required this.place});
+
+  final FollowedFixturePlace place;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final stadium = place == FollowedFixturePlace.stadium;
+    final background = stadium
+        ? scheme.primaryContainer
+        : scheme.tertiaryContainer;
+    final foreground = stadium
+        ? scheme.onPrimaryContainer
+        : scheme.onTertiaryContainer;
+    final label = followedFixturePlaceLabel(place);
+
+    return Semantics(
+      container: true,
+      label: stadium ? 'フォロー中のチームはスタジアム' : 'フォロー中のチームは移動',
+      excludeSemantics: true,
+      child: Container(
+        key: const Key('followed-fixture-place'),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: background,
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: foreground.withValues(alpha: 0.72)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              stadium ? Icons.stadium : Icons.directions_transit,
+              size: 18,
+              color: foreground,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: foreground,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _ScoreOrVs extends StatelessWidget {

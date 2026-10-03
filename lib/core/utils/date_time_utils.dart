@@ -36,6 +36,15 @@ class DateTimeUtils {
     return jst.subtract(_jstOffset);
   }
 
+  /// JST calendar date, including the year. Same clock as [formatJst].
+  static String formatJstDate(DateTime utc, {String locale = 'ja'}) {
+    final jst = toJst(utc);
+    if (locale == 'ja') {
+      return DateFormat('yyyy年M月d日(E)', 'ja').format(jst);
+    }
+    return DateFormat('MMM d, yyyy').format(jst);
+  }
+
   /// Format date only (for grouping games by day)
   static String formatDateOnly(DateTime utc, {String locale = 'ja'}) {
     final jst = toJst(utc);

@@ -1,5 +1,26 @@
 # Current State — sports_calendar_sync
 
+## Match-card stadium / travel cue (2026-10-03)
+
+In-app presentation only. No deploy, no Firestore write, no Apple Sign-In,
+no store or signing change.
+
+- Home (お気に入り) and each sport ホーム use the same `GameCard`. A fixture
+  shows スタジアム or 移動 only when exactly one perspective team id equals
+  `homeTeamId` or `awayTeamId`.
+- スタジアム uses a stadium icon and sits on the home side of the card.
+  移動 uses a transit icon and sits on the away side. The word is always
+  visible. Away is not drawn as an airplane.
+- Both sides followed, neither side matched, or the same id on both sides:
+  no cue. Canonical ids only. Source ids, names, and `timezone` are not
+  used. There is still no `isNeutralVenue` and no stadium master, so the
+  cue is the stored home/away side, not a confirmed club ground or a flight.
+- Kickoff stays JST derived from `startTimeUTC` via `DateTimeUtils`. The
+  date and the time are separate; venue-local time is not invented.
+- Team detail passes that team's id into the same card. Schedule tiles,
+  league lists, follow/search IA, and sample games are unchanged.
+- Real-device confirmation is pending.
+
 ## Home sport sub-navigation (2026-10-03)
 
 In-app navigation only. This does not change the authentication status below,
