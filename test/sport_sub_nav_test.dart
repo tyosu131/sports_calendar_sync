@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui' as ui;
 
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -13,6 +14,7 @@ import 'package:sports_calendar_sync/data/providers/auth_providers.dart';
 import 'package:sports_calendar_sync/data/providers/game_providers.dart';
 import 'package:sports_calendar_sync/data/providers/repository_providers.dart';
 import 'package:sports_calendar_sync/data/providers/team_providers.dart';
+import 'package:sports_calendar_sync/data/repositories/game_repository.dart';
 import 'package:sports_calendar_sync/data/repositories/team_repository.dart';
 import 'package:sports_calendar_sync/data/repositories/user_repository.dart';
 import 'package:sports_calendar_sync/domain/models/game.dart';
@@ -21,7 +23,6 @@ import 'package:sports_calendar_sync/domain/models/user_profile.dart';
 import 'package:sports_calendar_sync/domain/policies/home_sport_navigation.dart';
 import 'package:sports_calendar_sync/domain/policies/team_presentation_policy.dart';
 import 'package:sports_calendar_sync/presentation/screens/league_teams_screen.dart';
-import 'package:sports_calendar_sync/presentation/widgets/team_list_tile.dart';
 
 const _screenshotDir = String.fromEnvironment(
   'CAPTURE_SPORT_SUBNAV_SCREENSHOTS',
@@ -35,6 +36,7 @@ Future<void> _loadCjkFont() async {
   final bytes = await File(path).readAsBytes();
   await ui.loadFontFromList(bytes, fontFamily: 'DroidSansFallback');
   _fontFamily = 'DroidSansFallback';
+  await initializeDateFormatting('ja');
 }
 
 Game _kashimaGame() {
@@ -162,6 +164,7 @@ Future<ProviderContainer> _pumpRoutedHome(
     overrides: [
       userRepositoryProvider.overrideWith((ref) => users),
       teamRepositoryProvider.overrideWith((ref) => SampleTeamRepository()),
+      gameRepositoryProvider.overrideWith((ref) => SampleGameRepository()),
       userProfileProvider.overrideWith(
         (ref) => users.watchProfile(SampleUserRepository.sampleUid),
       ),
@@ -192,8 +195,20 @@ Future<ProviderContainer> _pumpRoutedHome(
         theme: ThemeData(
           useMaterial3: true,
           fontFamily: _fontFamily,
-          colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF1565C0)),
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: const Color(0xFF1565C0),
+            brightness: Brightness.dark,
+          ),
         ),
+        darkTheme: ThemeData(
+          useMaterial3: true,
+          fontFamily: _fontFamily,
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: const Color(0xFF1565C0),
+            brightness: Brightness.dark,
+          ),
+        ),
+        themeMode: ThemeMode.dark,
       ),
     ),
   );
@@ -289,13 +304,25 @@ void main() {
 
       await tester.tap(_inPage(HomeSportTabIds.football, find.text('Jリーグ')));
       await tester.pumpAndSettle();
-      expect(find.text('鹿島アントラーズ'), findsOneWidget);
-      expect(find.text('浦和レッズ'), findsOneWidget);
+      final kashima = find.byKey(
+        const ValueKey('league-team-card-kashima_antlers'),
+      );
+      final urawa = find.byKey(const ValueKey('league-team-card-urawa_reds'));
+      expect(
+        find.descendant(of: kashima, matching: find.text('鹿島')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: kashima, matching: find.text('vs 浦和')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: urawa, matching: find.text('浦和')),
+        findsOneWidget,
+      );
       expect(find.byType(NavigationBar), findsNothing);
       expect(find.byType(Image), findsNothing);
       await _capture(tester, 'football-jleague-teams');
-
-      final urawa = find.widgetWithText(TeamListTile, '浦和レッズ');
       expect(
         find.descendant(
           of: urawa,
@@ -422,6 +449,7 @@ void main() {
             (ref) => Stream<UserProfile?>.value(null),
           ),
           teamRepositoryProvider.overrideWith((ref) => SampleTeamRepository()),
+          gameRepositoryProvider.overrideWith((ref) => SampleGameRepository()),
           followedTeamsProvider.overrideWith((ref) async => const <Team>[]),
           homeUpcomingGamesProvider.overrideWith(
             (ref) async => HomeUpcomingGames(
@@ -485,13 +513,17 @@ void main() {
         find.byKey(const ValueKey('sport-league-baseball_npb')),
       );
       await tester.ensureVisible(npbRow);
-      await tester.tap(
-        find.descendant(of: npbRow, matching: find.byType(ListTile)),
-      );
+      await tester.tap(npbRow);
       await tester.pumpAndSettle();
-      // NPB is outside the Japanese domestic-football name set, so the existing
-      // display policy uses the English team name.
-      expect(find.text('Yomiuri Giants'), findsOneWidget);
+      // NPB is outside the Japanese domestic-football catalog, so the card
+      // keeps the trailing English token instead of an invented short label.
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey('league-team-card-yomiuri_giants')),
+          matching: find.text('Giants'),
+        ),
+        findsOneWidget,
+      );
       await tester.tap(find.byTooltip('フォローする').first);
       await tester.pumpAndSettle();
       expect(find.text('Googleでサインイン'), findsOneWidget);

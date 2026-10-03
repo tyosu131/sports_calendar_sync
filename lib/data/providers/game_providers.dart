@@ -8,6 +8,26 @@ import 'repository_providers.dart';
 
 // ── Game providers ────────────────────────────────────────────────────────────
 
+/// Upcoming games for an explicit set of team ids.
+///
+/// [teamIdsKey] is a unit-separator-joined, sorted id list from
+/// [leagueTeamIdsKey]. The league team cards use one read for the whole list.
+final upcomingGamesForTeamIdsProvider = FutureProvider.autoDispose
+    .family<List<Game>, String>((ref, teamIdsKey) async {
+      final ids = teamIdsKey
+          .split('\u001f')
+          .where((id) => id.isNotEmpty)
+          .toList();
+      if (ids.isEmpty) return const [];
+      return ref.watch(gameRepositoryProvider).fetchUpcomingGamesForTeams(ids);
+    });
+
+/// Stable provider key for [upcomingGamesForTeamIdsProvider].
+String leagueTeamIdsKey(Iterable<String> teamIds) {
+  final ids = teamIds.toList()..sort();
+  return ids.join('\u001f');
+}
+
 /// Upcoming games for a specific team.
 final upcomingGamesForTeamProvider = FutureProvider.family<List<Game>, String>((
   ref,

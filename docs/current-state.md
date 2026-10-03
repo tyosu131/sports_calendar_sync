@@ -8,8 +8,9 @@ and it does not deploy, write Firestore, or clear logo rights.
 - Top tabs stay お気に入り, 野球, サッカー, その他スポーツ. Individual leagues are not tabs and are not bottom-nav destinations.
 - お気に入り is cross-sport and does not show ホーム | リーグ.
 - Each sport tab shows a bottom `NavigationBar` with exactly two items. Selection uses a filled icon, a heavier label, and the indicator.
-- ホーム keeps the existing client-side sport filter. リーグ lists enabled `SportsRegistry` competitions for that sport and pushes `/league/:competitionKey`.
-- Follow uses the existing user repository. Search remains a flat competition browser; `sportLeagueGroups()` is the reuse hook.
+- ホーム keeps the existing client-side sport filter. リーグ lists enabled `SportsRegistry` competitions for that sport as rounded rows (search, monogram, disclosure) and pushes `/league/:competitionKey`.
+- The team list uses two-column cards. Fills are eight stable non-gray accents keyed by team id. The model has no kit color. Short labels come from an existing catalog prefix when one fits; next opponent and kickoff come from the existing game repository. No flags, crests, or stadium/airplane marks.
+- Follow uses the existing user repository. Search remains a flat competition browser; `sportLeagueGroups()` is the reuse hook. Home game cards are unchanged.
 - Real-device confirmation of this slice is pending.
 
 ## Current operational source of truth — mobile authentication / Node 22 (2026-09-22)

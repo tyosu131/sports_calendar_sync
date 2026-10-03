@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../domain/models/sport_definition.dart';
 import '../../domain/policies/home_sport_navigation.dart';
+import '../theme/league_browse_accents.dart';
 
 /// League list for the current sport tab.
 ///
@@ -44,15 +45,9 @@ class _SportLeagueBrowserState extends State<SportLeagueBrowser> {
         Text(
           'リーグ',
           key: ValueKey('sport-league-title-${widget.tab.id}'),
-          style: theme.textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          '${widget.tab.label}の大会',
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: colorScheme.onSurfaceVariant,
+          style: theme.textTheme.headlineLarge?.copyWith(
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0,
           ),
         ),
         const SizedBox(height: 16),
@@ -66,7 +61,7 @@ class _SportLeagueBrowserState extends State<SportLeagueBrowser> {
             colorScheme.surfaceContainerHighest.withValues(alpha: 0.55),
           ),
           shape: WidgetStatePropertyAll(
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
           ),
           trailing: [
             if (_query.isNotEmpty)
@@ -108,54 +103,65 @@ class _LeagueRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final badge = competitionBadgeLabel(competition);
-    final showEnglish = competition.displayNameEn != competition.displayNameJa;
-    return Card(
+    final accent = leagueBrowseAccent(competition.competitionKey);
+    return Padding(
       key: ValueKey('sport-league-${competition.competitionKey}'),
-      margin: const EdgeInsets.only(bottom: 10),
-      elevation: 0,
-      color: theme.colorScheme.surface,
-      shape: RoundedRectangleBorder(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Material(
+        color: theme.colorScheme.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(18),
-        side: BorderSide(color: theme.colorScheme.outlineVariant),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: ListTile(
-        onTap: onTap,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-        leading: _NeutralCompetitionBadge(label: badge),
-        title: Text(
-          competition.displayNameJa,
-          style: theme.textTheme.bodyLarge?.copyWith(
-            fontWeight: FontWeight.w700,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            child: Row(
+              children: [
+                _NeutralCompetitionBadge(label: badge, color: accent),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Text(
+                    competition.displayNameJa,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ],
+            ),
           ),
         ),
-        subtitle: showEnglish ? Text(competition.displayNameEn) : null,
-        trailing: const Icon(Icons.chevron_right),
       ),
     );
   }
 }
 
 class _NeutralCompetitionBadge extends StatelessWidget {
-  const _NeutralCompetitionBadge({required this.label});
+  const _NeutralCompetitionBadge({required this.label, required this.color});
 
   final String label;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return CircleAvatar(
-      radius: 22,
-      backgroundColor: theme.colorScheme.surfaceContainerHighest,
+      radius: 18,
+      backgroundColor: color,
       child: FittedBox(
         fit: BoxFit.scaleDown,
         child: Padding(
           padding: const EdgeInsets.all(6),
           child: Text(
             label,
-            style: theme.textTheme.labelMedium?.copyWith(
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
               fontWeight: FontWeight.w800,
-              color: theme.colorScheme.onSurface,
+              color: Colors.white,
             ),
           ),
         ),
