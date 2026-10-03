@@ -8,6 +8,7 @@ import '../../domain/policies/game_presentation_policy.dart';
 import '../../domain/policies/team_display_name_policy.dart';
 import '../../domain/policies/team_presentation_policy.dart';
 import 'competition_badge.dart';
+import 'drawn_place_icons.dart';
 import 'game_presentation_scope.dart';
 import 'game_status_chip.dart';
 import 'team_presentation_badge.dart';
@@ -151,10 +152,9 @@ class GameCard extends StatelessWidget {
               const SizedBox(height: 8),
               Row(
                 children: [
-                  Icon(
-                    Icons.location_on_outlined,
-                    size: 14,
+                  VenuePinMark(
                     color: theme.colorScheme.onSurfaceVariant,
+                    hole: theme.colorScheme.surface,
                   ),
                   const SizedBox(width: 4),
                   Expanded(
@@ -252,7 +252,6 @@ class _FollowedPlaceChip extends StatelessWidget {
     final foreground = stadium
         ? scheme.onPrimaryContainer
         : scheme.onTertiaryContainer;
-    final icon = stadium ? Icons.stadium : Icons.directions_transit;
 
     return Semantics(
       key: const Key('followed-fixture-place'),
@@ -268,7 +267,9 @@ class _FollowedPlaceChip extends StatelessWidget {
             shape: BoxShape.circle,
             border: Border.all(color: foreground.withValues(alpha: 0.72)),
           ),
-          child: Icon(icon, size: 22, color: foreground),
+          child: stadium
+              ? StadiumCueMark(color: foreground)
+              : TransitCueMark(color: foreground, cutout: background),
         ),
       ),
     );

@@ -8,11 +8,13 @@ no store or signing change.
 - Home (お気に入り) and each sport ホーム use the same `GameCard`. A fixture
   shows a place icon only when exactly one perspective team id equals
   `homeTeamId` or `awayTeamId`.
-- The home side uses a stadium icon on the left of the card. The away side
-  uses a transit icon on the right. The two icons are different shapes.
-  The chip does not draw 「スタジアム」 or 「移動」. Screen readers still hear
+- The home side uses a drawn stadium bowl on the left of the card. The away
+  side uses a drawn rail car (windows, wheels, pantograph) on the right.
+  These are CustomPaint shapes, not Material icon glyphs, so they stay
+  visible when the icon font is missing. The chip does not draw
+  「スタジアム」 or 「移動」. Screen readers still hear
   「フォロー中のチームはスタジアム」 or 「フォロー中のチームは移動」. Away is
-  not drawn as an airplane.
+  not drawn as an airplane. The venue row uses a drawn map pin.
 - Both sides followed, neither side matched, or the same id on both sides:
   no cue. Canonical ids only. Source ids, names, and `timezone` are not
   used. There is still no `isNeutralVenue` and no stadium master, so the

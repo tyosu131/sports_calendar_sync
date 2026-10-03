@@ -128,9 +128,6 @@ void main() {
       followedFixturePlaceSemanticsLabel(FollowedFixturePlace.travel),
       'フォロー中のチームは移動',
     );
-    expect(Icons.stadium, isNot(Icons.directions_transit));
-    expect(Icons.stadium, isNot(Icons.flight));
-    expect(Icons.directions_transit, isNot(Icons.flight));
   });
 
   testWidgets('home card shows a stadium icon on the home side', (
@@ -143,11 +140,17 @@ void main() {
       perspectiveTeamIds: const ['kashima_antlers'],
     );
 
-    expect(find.byIcon(Icons.stadium), findsOneWidget);
+    expect(find.byKey(const Key('stadium-cue-icon')), findsOneWidget);
+    expect(find.byKey(const Key('transit-cue-icon')), findsNothing);
+    expect(find.byKey(const Key('venue-pin-mark')), findsOneWidget);
+    expect(find.byIcon(Icons.stadium), findsNothing);
     expect(find.byIcon(Icons.directions_transit), findsNothing);
+    expect(find.byIcon(Icons.location_on_outlined), findsNothing);
     expect(find.text('スタジアム'), findsNothing);
     expect(find.text('移動'), findsNothing);
     expect(find.byIcon(Icons.flight), findsNothing);
+    await _expectPaintedMark(tester, const Key('stadium-cue-icon'));
+    await _expectPaintedMark(tester, const Key('venue-pin-mark'));
     expect(
       tester.getSemantics(find.byKey(const Key('followed-fixture-place'))),
       isSemantics(label: 'フォロー中のチームはスタジアム'),
@@ -175,12 +178,17 @@ void main() {
       perspectiveTeamIds: const ['kashima_antlers'],
     );
 
-    expect(find.byIcon(Icons.directions_transit), findsOneWidget);
+    expect(find.byKey(const Key('transit-cue-icon')), findsOneWidget);
+    expect(find.byKey(const Key('stadium-cue-icon')), findsNothing);
+    expect(find.byKey(const Key('venue-pin-mark')), findsOneWidget);
+    expect(find.byIcon(Icons.directions_transit), findsNothing);
     expect(find.byIcon(Icons.stadium), findsNothing);
+    expect(find.byIcon(Icons.location_on_outlined), findsNothing);
     expect(find.text('スタジアム'), findsNothing);
     expect(find.text('移動'), findsNothing);
     expect(find.byIcon(Icons.flight), findsNothing);
     expect(find.byIcon(Icons.airplanemode_active), findsNothing);
+    await _expectPaintedMark(tester, const Key('transit-cue-icon'));
     expect(
       tester.getSemantics(find.byKey(const Key('followed-fixture-place'))),
       isSemantics(label: 'フォロー中のチームは移動'),
@@ -276,14 +284,14 @@ void main() {
     expect(
       find.descendant(
         of: find.byKey(const ValueKey('home-sport-page-favorites')),
-        matching: find.byIcon(Icons.stadium),
+        matching: find.byKey(const Key('stadium-cue-icon')),
       ),
       findsOneWidget,
     );
     expect(
       find.descendant(
         of: find.byKey(const ValueKey('home-sport-page-favorites')),
-        matching: find.byIcon(Icons.directions_transit),
+        matching: find.byKey(const Key('transit-cue-icon')),
       ),
       findsOneWidget,
     );
@@ -293,14 +301,14 @@ void main() {
     expect(
       find.descendant(
         of: find.byKey(const ValueKey('home-sport-page-football')),
-        matching: find.byIcon(Icons.stadium),
+        matching: find.byKey(const Key('stadium-cue-icon')),
       ),
       findsOneWidget,
     );
     expect(
       find.descendant(
         of: find.byKey(const ValueKey('home-sport-page-football')),
-        matching: find.byIcon(Icons.directions_transit),
+        matching: find.byKey(const Key('transit-cue-icon')),
       ),
       findsOneWidget,
     );
@@ -410,6 +418,38 @@ void _expectCueOnAwaySide(WidgetTester tester) {
   final cue = tester.getCenter(find.byKey(const Key('followed-fixture-place')));
   final card = tester.getCenter(find.byType(Card));
   expect(cue.dx, greaterThan(card.dx));
+}
+
+/// Fails when a mark is an empty box (missing glyph) instead of a painted shape.
+Future<void> _expectPaintedMark(WidgetTester tester, Key key) async {
+  final boundary = tester.renderObject<RenderRepaintBoundary>(find.byKey(key));
+  final sample = await tester.runAsync(() async {
+    final image = await boundary.toImage(pixelRatio: 3);
+    final data = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+    return (image.width, image.height, data!.buffer.asUint8List());
+  });
+  final width = sample!.$1;
+  final height = sample.$2;
+  final pixels = sample.$3;
+  var ink = 0;
+  var centerInk = 0;
+  final left = (width * 0.28).floor();
+  final right = (width * 0.72).ceil();
+  final top = (height * 0.28).floor();
+  final bottom = (height * 0.72).ceil();
+  for (var y = 0; y < height; y++) {
+    for (var x = 0; x < width; x++) {
+      final index = (y * width + x) * 4;
+      final alpha = pixels[index + 3];
+      if (alpha < 40) continue;
+      final luminance = pixels[index] + pixels[index + 1] + pixels[index + 2];
+      if (luminance < 180) continue;
+      ink++;
+      if (x >= left && x < right && y >= top && y < bottom) centerInk++;
+    }
+  }
+  expect(ink, greaterThan(40), reason: '$key did not paint a shape');
+  expect(centerInk, greaterThan(12), reason: '$key is an empty square');
 }
 
 Future<void> _capture(WidgetTester tester, String name) async {
