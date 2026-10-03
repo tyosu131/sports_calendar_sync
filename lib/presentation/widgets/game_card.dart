@@ -252,37 +252,23 @@ class _FollowedPlaceChip extends StatelessWidget {
     final foreground = stadium
         ? scheme.onPrimaryContainer
         : scheme.onTertiaryContainer;
-    final label = followedFixturePlaceLabel(place);
+    final icon = stadium ? Icons.stadium : Icons.directions_transit;
 
     return Semantics(
+      key: const Key('followed-fixture-place'),
       container: true,
-      label: stadium ? 'フォロー中のチームはスタジアム' : 'フォロー中のチームは移動',
-      excludeSemantics: true,
-      child: Container(
-        key: const Key('followed-fixture-place'),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        decoration: BoxDecoration(
-          color: background,
-          borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: foreground.withValues(alpha: 0.72)),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              stadium ? Icons.stadium : Icons.directions_transit,
-              size: 18,
-              color: foreground,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: foreground,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ],
+      label: followedFixturePlaceSemanticsLabel(place),
+      child: ExcludeSemantics(
+        child: Container(
+          width: 36,
+          height: 36,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: background,
+            shape: BoxShape.circle,
+            border: Border.all(color: foreground.withValues(alpha: 0.72)),
+          ),
+          child: Icon(icon, size: 22, color: foreground),
         ),
       ),
     );

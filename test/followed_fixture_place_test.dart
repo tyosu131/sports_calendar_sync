@@ -119,29 +119,50 @@ void main() {
     );
   });
 
-  test('labels stay short and do not call travel a flight', () {
-    expect(followedFixturePlaceLabel(FollowedFixturePlace.stadium), 'スタジアム');
-    expect(followedFixturePlaceLabel(FollowedFixturePlace.travel), '移動');
+  test('spoken labels name the place and do not call travel a flight', () {
+    expect(
+      followedFixturePlaceSemanticsLabel(FollowedFixturePlace.stadium),
+      'フォロー中のチームはスタジアム',
+    );
+    expect(
+      followedFixturePlaceSemanticsLabel(FollowedFixturePlace.travel),
+      'フォロー中のチームは移動',
+    );
+    expect(Icons.stadium, isNot(Icons.directions_transit));
+    expect(Icons.stadium, isNot(Icons.flight));
+    expect(Icons.directions_transit, isNot(Icons.flight));
   });
 
-  testWidgets('home card shows a stadium cue on the home side', (tester) async {
+  testWidgets('home card shows a stadium icon on the home side', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
     await _pumpCard(
       tester,
       game: _game(homeTeamId: 'kashima_antlers', awayTeamId: 'urawa_reds'),
       perspectiveTeamIds: const ['kashima_antlers'],
     );
 
-    expect(find.text('スタジアム'), findsOneWidget);
     expect(find.byIcon(Icons.stadium), findsOneWidget);
+    expect(find.byIcon(Icons.directions_transit), findsNothing);
+    expect(find.text('スタジアム'), findsNothing);
     expect(find.text('移動'), findsNothing);
     expect(find.byIcon(Icons.flight), findsNothing);
+    expect(
+      tester.getSemantics(find.byKey(const Key('followed-fixture-place'))),
+      isSemantics(label: 'フォロー中のチームはスタジアム'),
+    );
     expect(find.text('2026年10月17日(土)'), findsOneWidget);
     expect(find.text('19:00'), findsOneWidget);
     _expectCueOnHomeSide(tester);
     await _capture(tester, 'home-stadium-card');
+    semantics.dispose();
   });
 
-  testWidgets('away card shows a transit cue on the away side', (tester) async {
+  testWidgets('away card shows a transit icon on the away side', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
     await _pumpCard(
       tester,
       game: _game(
@@ -154,13 +175,19 @@ void main() {
       perspectiveTeamIds: const ['kashima_antlers'],
     );
 
-    expect(find.text('移動'), findsOneWidget);
     expect(find.byIcon(Icons.directions_transit), findsOneWidget);
+    expect(find.byIcon(Icons.stadium), findsNothing);
     expect(find.text('スタジアム'), findsNothing);
+    expect(find.text('移動'), findsNothing);
     expect(find.byIcon(Icons.flight), findsNothing);
     expect(find.byIcon(Icons.airplanemode_active), findsNothing);
+    expect(
+      tester.getSemantics(find.byKey(const Key('followed-fixture-place'))),
+      isSemantics(label: 'フォロー中のチームは移動'),
+    );
     _expectCueOnAwaySide(tester);
     await _capture(tester, 'away-travel-card');
+    semantics.dispose();
   });
 
   testWidgets('ambiguous and unmatched fixtures hide the cue', (tester) async {
@@ -249,14 +276,14 @@ void main() {
     expect(
       find.descendant(
         of: find.byKey(const ValueKey('home-sport-page-favorites')),
-        matching: find.text('スタジアム'),
+        matching: find.byIcon(Icons.stadium),
       ),
       findsOneWidget,
     );
     expect(
       find.descendant(
         of: find.byKey(const ValueKey('home-sport-page-favorites')),
-        matching: find.text('移動'),
+        matching: find.byIcon(Icons.directions_transit),
       ),
       findsOneWidget,
     );
@@ -266,14 +293,14 @@ void main() {
     expect(
       find.descendant(
         of: find.byKey(const ValueKey('home-sport-page-football')),
-        matching: find.text('スタジアム'),
+        matching: find.byIcon(Icons.stadium),
       ),
       findsOneWidget,
     );
     expect(
       find.descendant(
         of: find.byKey(const ValueKey('home-sport-page-football')),
-        matching: find.text('移動'),
+        matching: find.byIcon(Icons.directions_transit),
       ),
       findsOneWidget,
     );

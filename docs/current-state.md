@@ -6,11 +6,13 @@ In-app presentation only. No deploy, no Firestore write, no Apple Sign-In,
 no store or signing change.
 
 - Home (お気に入り) and each sport ホーム use the same `GameCard`. A fixture
-  shows スタジアム or 移動 only when exactly one perspective team id equals
+  shows a place icon only when exactly one perspective team id equals
   `homeTeamId` or `awayTeamId`.
-- スタジアム uses a stadium icon and sits on the home side of the card.
-  移動 uses a transit icon and sits on the away side. The word is always
-  visible. Away is not drawn as an airplane.
+- The home side uses a stadium icon on the left of the card. The away side
+  uses a transit icon on the right. The two icons are different shapes.
+  The chip does not draw 「スタジアム」 or 「移動」. Screen readers still hear
+  「フォロー中のチームはスタジアム」 or 「フォロー中のチームは移動」. Away is
+  not drawn as an airplane.
 - Both sides followed, neither side matched, or the same id on both sides:
   no cue. Canonical ids only. Source ids, names, and `timezone` are not
   used. There is still no `isNeutralVenue` and no stadium master, so the

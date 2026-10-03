@@ -9,11 +9,12 @@
 /// cue, not a flight.
 enum FollowedFixturePlace { stadium, travel }
 
-/// Short Japanese label. The icon is never the only signal.
-String followedFixturePlaceLabel(FollowedFixturePlace place) => switch (place) {
-  FollowedFixturePlace.stadium => 'スタジアム',
-  FollowedFixturePlace.travel => '移動',
-};
+/// Spoken label. The chip shows an icon only; this is not drawn on the card.
+String followedFixturePlaceSemanticsLabel(FollowedFixturePlace place) =>
+    switch (place) {
+      FollowedFixturePlace.stadium => 'フォロー中のチームはスタジアム',
+      FollowedFixturePlace.travel => 'フォロー中のチームは移動',
+    };
 
 /// Venue cue for the cards a person actually scans.
 ///
