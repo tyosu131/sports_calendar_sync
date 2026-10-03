@@ -68,5 +68,24 @@ void main() {
       ),
       '読売ジャイアンツ',
     );
+    expect(
+      leagueTeamCardLabelForTeam(
+        const Team(
+          id: 'kawasaki_frontale',
+          nameEn: 'Kawasaki Frontale',
+          nameJa: '川崎フロンターレ',
+          leagueId: 'league',
+          competitionKey: 'football_j1',
+        ),
+      ),
+      '川崎',
+    );
+    expect(
+      leagueTeamCardLabel(
+        displayName: 'とても長い架空のクラブ名テスト',
+        language: DisplayLanguage.japanese,
+      ),
+      'とても長い架空のクラブ名テスト',
+    );
   });
 }

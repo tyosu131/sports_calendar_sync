@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../domain/models/sport_definition.dart';
 import '../../domain/policies/home_sport_navigation.dart';
-import '../theme/league_browse_accents.dart';
+import '../theme/presentation_decoration.dart';
 
 /// League list for the current sport tab.
 ///
@@ -103,7 +103,7 @@ class _LeagueRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final badge = competitionBadgeLabel(competition);
-    final accent = leagueBrowseAccent(competition.competitionKey);
+    final accent = competitionBrowseAccent(competition.competitionKey);
     return Padding(
       key: ValueKey('sport-league-${competition.competitionKey}'),
       padding: const EdgeInsets.only(bottom: 10),

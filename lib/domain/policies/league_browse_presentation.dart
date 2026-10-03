@@ -64,11 +64,18 @@ class LeagueTeamNextMatch {
   final String when;
 }
 
-LeagueTeamNextMatch? nextMatchForTeam(Team team, List<Game> games) {
+LeagueTeamNextMatch? nextMatchForTeam(
+  Team team,
+  List<Game> games, {
+  required String competitionContextKey,
+}) {
+  final contextKey = competitionContextKey.trim();
   final upcoming =
       games
           .where(
-            (game) => game.homeTeamId == team.id || game.awayTeamId == team.id,
+            (game) =>
+                (game.homeTeamId == team.id || game.awayTeamId == team.id) &&
+                game.competitionKey == contextKey,
           )
           .toList()
         ..sort((a, b) => a.startTimeUtc.compareTo(b.startTimeUtc));
@@ -139,8 +146,7 @@ String _fallbackShortLabel(String full) {
     final last = parts.last;
     if (last.runes.length <= 10) return last;
   }
-  if (full.runes.length <= 8) return full;
-  return String.fromCharCodes(full.runes.take(6));
+  return full;
 }
 
 bool _hasKanaOrKanji(String value) {

@@ -14,6 +14,7 @@ import 'package:sports_calendar_sync/data/providers/auth_providers.dart';
 import 'package:sports_calendar_sync/data/providers/game_providers.dart';
 import 'package:sports_calendar_sync/data/providers/repository_providers.dart';
 import 'package:sports_calendar_sync/data/providers/team_providers.dart';
+import 'package:sports_calendar_sync/data/repositories/competition_membership_repository.dart';
 import 'package:sports_calendar_sync/data/repositories/game_repository.dart';
 import 'package:sports_calendar_sync/data/repositories/team_repository.dart';
 import 'package:sports_calendar_sync/data/repositories/user_repository.dart';
@@ -164,6 +165,9 @@ Future<ProviderContainer> _pumpRoutedHome(
     overrides: [
       userRepositoryProvider.overrideWith((ref) => users),
       teamRepositoryProvider.overrideWith((ref) => SampleTeamRepository()),
+      competitionMembershipRepositoryProvider.overrideWith(
+        (ref) => SampleCompetitionMembershipRepository(),
+      ),
       gameRepositoryProvider.overrideWith((ref) => SampleGameRepository()),
       userProfileProvider.overrideWith(
         (ref) => users.watchProfile(SampleUserRepository.sampleUid),
@@ -387,27 +391,36 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('野球'));
       await tester.pumpAndSettle();
+      _expectSelectedIcons(tester, leagues: false);
       expect(
         _inPage(
           HomeSportTabIds.baseball,
           find.byKey(const ValueKey('sport-league-baseball_npb')),
         ),
-        findsOneWidget,
-      );
-      expect(
-        _inPage(
-          HomeSportTabIds.baseball,
-          find.byKey(const ValueKey('sport-league-baseball_mlb')),
-        ),
-        findsOneWidget,
-      );
-      expect(
-        _inPage(HomeSportTabIds.baseball, find.text('Jリーグ')),
         findsNothing,
+      );
+      expect(
+        _inPage(HomeSportTabIds.baseball, find.text('野球でフォローしているチームがありません')),
+        findsOneWidget,
       );
       _expectTwoDestinations(tester);
 
       await tester.tap(find.text('その他スポーツ'));
+      await tester.pumpAndSettle();
+      _expectSelectedIcons(tester, leagues: false);
+      expect(
+        _inPage(
+          HomeSportTabIds.other,
+          find.byKey(const ValueKey('sport-league-basketball_nba')),
+        ),
+        findsNothing,
+      );
+      await tester.tap(
+        find.descendant(
+          of: find.byKey(const ValueKey('sport-sub-nav')),
+          matching: find.text('リーグ'),
+        ),
+      );
       await tester.pumpAndSettle();
       expect(
         _inPage(
@@ -449,6 +462,9 @@ void main() {
             (ref) => Stream<UserProfile?>.value(null),
           ),
           teamRepositoryProvider.overrideWith((ref) => SampleTeamRepository()),
+          competitionMembershipRepositoryProvider.overrideWith(
+            (ref) => SampleCompetitionMembershipRepository(),
+          ),
           gameRepositoryProvider.overrideWith((ref) => SampleGameRepository()),
           followedTeamsProvider.overrideWith((ref) async => const <Team>[]),
           homeUpcomingGamesProvider.overrideWith(
@@ -598,6 +614,9 @@ void main() {
       competitionKey: 'football_premier',
       overrides: [
         teamRepositoryProvider.overrideWith((ref) => SampleTeamRepository()),
+        competitionMembershipRepositoryProvider.overrideWith(
+          (ref) => SampleCompetitionMembershipRepository(),
+        ),
       ],
     );
     expect(find.text('このリーグのチームはまだありません'), findsOneWidget);

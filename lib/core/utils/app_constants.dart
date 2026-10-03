@@ -7,6 +7,8 @@ class AppConstants {
   static const String teamsCollection = 'teams';
   static const String leaguesCollection = 'leagues';
   static const String gamesCollection = 'games';
+  static const String competitionSeasonMembershipsCollection =
+      'competitionSeasonMemberships';
   static const String subscriptionsCollection = 'subscriptions';
   static const String translationMapsCollection = 'translationMaps';
 

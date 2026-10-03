@@ -30,6 +30,13 @@ Game _game(String id, String? competitionKey) {
 }
 
 void main() {
+  test('follow discovery tabs label cross-sport row as フォロー中', () {
+    final tabs = followDiscoverySportTabs();
+    expect(tabs.first.label, 'フォロー中');
+    expect(tabs.first.showsAllSports, isTrue);
+    expect(tabs.map((tab) => tab.label), ['フォロー中', '野球', 'サッカー', 'その他スポーツ']);
+  });
+
   test('home tabs are favorites, baseball, football, then other sports', () {
     final tabs = homeSportTabs();
 

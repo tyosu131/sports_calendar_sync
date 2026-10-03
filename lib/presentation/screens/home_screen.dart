@@ -70,6 +70,10 @@ class _HomeScaffoldState extends State<_HomeScaffold> {
   void _onTabsChanged() {
     final index = _controller?.index;
     if (!mounted || index == null || index == _observedIndex) return;
+    final tabs = widget.tabs;
+    if (homeTabShowsSportSubNav(tabs[index]) && _subNavIndex.value != 0) {
+      _subNavIndex.value = 0;
+    }
     _observedIndex = index;
     setState(() {});
   }

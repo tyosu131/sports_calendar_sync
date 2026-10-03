@@ -12,7 +12,7 @@ import '../../domain/models/team.dart';
 import '../../domain/policies/league_browse_presentation.dart';
 import '../../domain/policies/team_display_name_policy.dart';
 import '../../domain/policies/team_initial.dart';
-import '../theme/league_browse_accents.dart';
+import '../theme/presentation_decoration.dart';
 
 /// Teams for one registry competition, opened from the in-sport league list.
 ///
@@ -92,7 +92,13 @@ class _LeagueTeamGrid extends ConsumerWidget {
       itemBuilder: (context, index) {
         final team = teams[index];
         final isFollowing = followedIds.contains(team.id);
-        final next = games == null ? null : nextMatchForTeam(team, games);
+        final next = games == null
+            ? null
+            : nextMatchForTeam(
+                team,
+                games,
+                competitionContextKey: definition.competitionKey,
+              );
         return _LeagueTeamCard(
           team: team,
           isFollowing: isFollowing,
@@ -149,7 +155,7 @@ class _LeagueTeamCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final fullName = teamDisplayNames.teamName(team);
     final shortName = leagueTeamCardLabelForTeam(team);
-    final accent = leagueBrowseAccent(team.id);
+    final accent = teamBrowseCardFill(team.id);
     final followLabel = isFollowing ? 'フォロー中' : 'フォロー';
     final matchLine = !gamesSettled
         ? null

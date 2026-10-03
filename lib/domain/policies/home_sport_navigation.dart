@@ -170,9 +170,18 @@ int sportSubNavIndexFor(String id) {
 
 /// Enabled competitions for a set of [SportDefinition.sportCategory] values.
 ///
-/// Search and Follow still list [SportsRegistry.enabled] as flat tabs. They
-/// can group that list with this function later without adding leagues to the
-/// bottom navigation.
+/// Top tabs for team search / follow discovery. Same sport grouping as Home,
+/// with フォロー中 instead of お気に入り.
+List<HomeSportTab> followDiscoverySportTabs({List<String>? enabledCategories}) {
+  return [
+    for (final tab in homeSportTabs(enabledCategories: enabledCategories))
+      if (tab.showsAllSports)
+        const HomeSportTab(id: HomeSportTabIds.favorites, label: 'フォロー中')
+      else
+        tab,
+  ];
+}
+
 List<SportDefinition> competitionsForSportCategories(Set<String> categories) {
   if (categories.isEmpty) return const [];
   return List<SportDefinition>.unmodifiable([

@@ -9,8 +9,11 @@ and it does not deploy, write Firestore, or clear logo rights.
 - お気に入り is cross-sport and does not show ホーム | リーグ.
 - Each sport tab shows a bottom `NavigationBar` with exactly two items. Selection uses a filled icon, a heavier label, and the indicator.
 - ホーム keeps the existing client-side sport filter. リーグ lists enabled `SportsRegistry` competitions for that sport as rounded rows (search, monogram, disclosure) and pushes `/league/:competitionKey`.
-- The team list uses two-column cards. Fills are eight stable non-gray accents keyed by team id. The model has no kit color. Short labels come from an existing catalog prefix when one fits; next opponent and kickoff come from the existing game repository. No flags, crests, or stadium/airplane marks.
-- Follow uses the existing user repository. Search remains a flat competition browser; `sportLeagueGroups()` is the reuse hook. Home game cards are unchanged.
+- Switching sport tabs resets sub-navigation to ホーム so リーグ does not leak across sports.
+- Team search / follow discovery mirrors the same top sport tabs (フォロー中 instead of お気に入り) and ホーム | リーグ inside each sport. Flat per-league top tabs are removed.
+- League team lists resolve through readable `competitionSeasonMemberships` when present (`memberTeamIds` or `groups[].teamIds`). Otherwise they use an explicit temporary fallback to legacy team-master `competitionKey` / `sportKey` queries. Only `football_j2_j3_special` has local sample membership today; J1 / Premier / NPB still use the fallback until membership is seeded.
+- The team list uses two-column cards. Fills are decorative palette entries, not official kit colors (reviewed `presentationColor` is not in the model yet). Short labels use the reviewed catalog when an alias is a safe prefix; otherwise the full display name. Next opponent and kickoff filter by the opened league’s `competitionKey`. No flags, crests, or stadium/airplane marks.
+- Follow uses the existing user repository. Home game cards are unchanged.
 - Real-device confirmation of this slice is pending.
 
 ## Current operational source of truth — mobile authentication / Node 22 (2026-09-22)
