@@ -64,7 +64,12 @@ final teamSearchActiveSportTabIdProvider = StateProvider.autoDispose<String?>(
   (ref) => null,
 );
 
-/// Search results scoped to the current query and active competition tab.
+/// Search results scoped to the current query and active sport tab.
+///
+/// Sport-home discovery still filters team-master `competitionKey` into a
+/// Home sport category. That is a temporary compatibility path, not canonical
+/// season membership. Multi-competition membership (one team in Premier League
+/// and Champions League) needs a later listing redesign.
 final teamSearchResultsProvider = FutureProvider.autoDispose<List<Team>>((
   ref,
 ) async {

@@ -54,6 +54,14 @@ service cloud.firestore {
       allow write: if false; // admin SDK only
     }
 
+    // ── competitionSeasonMemberships/{membershipId} ──────────────────────────
+    // Public competition/team membership metadata. Client read-only.
+    // Cloud Functions / Admin SDK writes are not blocked by these rules.
+    match /competitionSeasonMemberships/{membershipId} {
+      allow read: if true;
+      allow write: if false; // admin SDK only
+    }
+
     // ── subscriptions/{subId} ────────────────────────────────────────────────
     // Users can read/write only their own subscriptions.
     match /subscriptions/{subId} {

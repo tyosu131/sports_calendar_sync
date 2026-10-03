@@ -29,6 +29,8 @@ class FirestoreCompetitionMembershipRepository
     final key = competitionKey.trim();
     if (key.isEmpty) return null;
 
+    // Query errors, including permission-denied, must propagate. A rules
+    // failure is not the same as "no readable membership".
     final snapshot = await _memberships
         .where('competitionKey', isEqualTo: key)
         .get();
