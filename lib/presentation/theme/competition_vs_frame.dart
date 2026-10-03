@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import 'presentation_decoration.dart';
@@ -49,3 +51,41 @@ Color competitionVsFrameFill(Color base) =>
 /// Stroke and side mark. Lighter than the fill so the shape reads on it.
 Color competitionVsFrameInk(Color base) =>
     Color.lerp(base, Colors.white, 0.72)!;
+
+/// Team-name color for one side panel.
+///
+/// The background is the painted fill, not the palette entry. White and
+/// black are compared with the WCAG contrast ratio, and the higher one
+/// is used. Home and away are chosen independently.
+Color competitionVsFrameTextColor(Color base) {
+  final background = competitionVsFrameFill(base);
+  final onWhite = contrastRatio(Colors.white, background);
+  final onBlack = contrastRatio(Colors.black, background);
+  return onWhite >= onBlack ? Colors.white : Colors.black;
+}
+
+/// WCAG 2 contrast ratio. Channels are the sRGB values in 0–1.
+double contrastRatio(Color foreground, Color background) {
+  final lighter = math.max(
+    relativeLuminance(foreground),
+    relativeLuminance(background),
+  );
+  final darker = math.min(
+    relativeLuminance(foreground),
+    relativeLuminance(background),
+  );
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
+/// WCAG 2 relative luminance for an sRGB color.
+double relativeLuminance(Color color) {
+  final red = _srgbChannelToLinear(color.r);
+  final green = _srgbChannelToLinear(color.g);
+  final blue = _srgbChannelToLinear(color.b);
+  return 0.2126 * red + 0.7152 * green + 0.0722 * blue;
+}
+
+double _srgbChannelToLinear(double channel) {
+  if (channel <= 0.04045) return channel / 12.92;
+  return math.pow((channel + 0.055) / 1.055, 2.4).toDouble();
+}

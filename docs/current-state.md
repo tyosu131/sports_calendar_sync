@@ -13,8 +13,10 @@ no store or signing change, no UFC feed.
   a chevron. Followed-team stadium and transit cues are unchanged. Screen
   readers hear 「ホーム側」 and 「アウェイ側」.
 - The card fill stays the theme surface. Frames are saturated palette
-  colors. GameCard monograms stay on the neutral badge. Home chips, team
-  detail, and schedule tiles were not switched off the initial.
+  colors. Each team name is white or black, whichever has the higher WCAG
+  contrast against that side's painted fill. GameCard monograms stay on
+  the neutral badge. Home chips, team detail, and schedule tiles were not
+  switched off the initial.
 - Kickoff stays JST from `startTimeUTC`. No authoritative venue timezone
   is stored. `timezone` remains the provider clock: GOAL writes `UTC`,
   API-Football writes the request timezone, and J1 sample rows write

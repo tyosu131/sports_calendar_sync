@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:sports_calendar_sync/core/config/sports_registry.dart';
 import 'package:sports_calendar_sync/core/utils/date_time_utils.dart';
 import 'package:sports_calendar_sync/domain/models/game.dart';
 import 'package:sports_calendar_sync/presentation/theme/competition_vs_frame.dart';
@@ -54,6 +55,16 @@ void main() {
     expect(
       competitionVsFrameColors('football_j1').home,
       isNot(competitionVsFrameColors('football_premier').home),
+    );
+  });
+
+  test('contrast ratio matches WCAG reference pairs', () {
+    expect(contrastRatio(Colors.white, Colors.black), closeTo(21, 0.05));
+    expect(contrastRatio(Colors.black, Colors.white), closeTo(21, 0.05));
+    expect(contrastRatio(Colors.white, Colors.white), closeTo(1, 0.01));
+    expect(
+      contrastRatio(Colors.white, const Color(0xFF767676)),
+      closeTo(4.54, 0.06),
     );
   });
 
@@ -139,6 +150,13 @@ void main() {
       );
       expect(date.style?.fontSize, resolved.textTheme.bodyLarge?.fontSize);
       expect(date.style!.fontSize!, lessThan(time.style!.fontSize!));
+      _expectTeamNameContrast(
+        tester,
+        homeName: '鹿島アントラーズ',
+        awayName: '浦和レッズ',
+        frames: frames,
+        bodyLarge: resolved.textTheme.bodyLarge?.fontSize,
+      );
 
       await _capture(tester, 'home-vs-frame', 'vs-frame-shot');
     },
@@ -195,7 +213,113 @@ void main() {
     expect(find.text('川'), findsOneWidget);
     expect(find.text('横'), findsOneWidget);
     expect(find.byKey(const Key('neutral-team-mark')), findsNothing);
+    final resolved = Theme.of(tester.element(find.byType(GameCard)));
+    _expectTeamNameContrast(
+      tester,
+      homeName: '川崎フロンターレ',
+      awayName: '横浜Ｆ・マリノス',
+      frames: frames,
+      bodyLarge: resolved.textTheme.bodyLarge?.fontSize,
+    );
   });
+
+  testWidgets(
+    'every enabled competition keeps team-name contrast on the painted fill',
+    (tester) async {
+      final theme = _darkTheme();
+      final enabled = SportsRegistry.enabled;
+      expect(enabled, isNotEmpty);
+
+      var lightestKey = enabled.first.competitionKey;
+      var darkestKey = enabled.first.competitionKey;
+      var lightest = -1.0;
+      var darkest = 2.0;
+      for (final competition in enabled) {
+        final frames = competitionVsFrameColors(competition.competitionKey);
+        for (final base in [frames.home, frames.away]) {
+          final luminance = relativeLuminance(competitionVsFrameFill(base));
+          if (luminance > lightest) {
+            lightest = luminance;
+            lightestKey = competition.competitionKey;
+          }
+          if (luminance < darkest) {
+            darkest = luminance;
+            darkestKey = competition.competitionKey;
+          }
+        }
+      }
+
+      for (final competition in enabled) {
+        final key = competition.competitionKey;
+        final homeName = 'Home $key';
+        final awayName = 'Away $key';
+        await _pumpCard(
+          tester,
+          theme: theme,
+          game: _game(
+            competitionKey: key,
+            homeTeamId: 'home-side',
+            homeName: homeName,
+            awayName: awayName,
+          ),
+          perspectiveTeamIds: const ['home-side'],
+          boundaryKey: 'vs-frame-contrast',
+        );
+        final frames = competitionVsFrameColors(key);
+        expect(frames.home, isNot(frames.away));
+        expect(
+          _painter(tester, 'vs-frame-home-paint').side,
+          CompetitionVsSideKind.home,
+        );
+        expect(
+          _painter(tester, 'vs-frame-away-paint').side,
+          CompetitionVsSideKind.away,
+        );
+        final resolved = Theme.of(tester.element(find.byType(GameCard)));
+        _expectTeamNameContrast(
+          tester,
+          homeName: homeName,
+          awayName: awayName,
+          frames: frames,
+          bodyLarge: resolved.textTheme.bodyLarge?.fontSize,
+        );
+        if (key == lightestKey) {
+          await _capture(tester, 'light-frame', 'vs-frame-contrast');
+        }
+        if (key == darkestKey) {
+          await _capture(tester, 'dark-frame', 'vs-frame-contrast');
+        }
+      }
+    },
+  );
+}
+
+void _expectTeamNameContrast(
+  WidgetTester tester, {
+  required String homeName,
+  required String awayName,
+  required CompetitionVsFrameColors frames,
+  required double? bodyLarge,
+}) {
+  final homeText = tester.widget<Text>(find.text(homeName));
+  final awayText = tester.widget<Text>(find.text(awayName));
+  final homeFill = competitionVsFrameFill(frames.home);
+  final awayFill = competitionVsFrameFill(frames.away);
+  expect(homeText.style?.color, competitionVsFrameTextColor(frames.home));
+  expect(awayText.style?.color, competitionVsFrameTextColor(frames.away));
+  expect(homeText.style?.color, anyOf(Colors.white, Colors.black));
+  expect(awayText.style?.color, anyOf(Colors.white, Colors.black));
+  expect(
+    contrastRatio(homeText.style!.color!, homeFill),
+    greaterThanOrEqualTo(4.5),
+  );
+  expect(
+    contrastRatio(awayText.style!.color!, awayFill),
+    greaterThanOrEqualTo(4.5),
+  );
+  expect(homeText.style?.fontSize, bodyLarge);
+  expect(awayText.style?.fontSize, bodyLarge);
+  expect(homeText.style?.fontWeight, FontWeight.bold);
 }
 
 CompetitionVsFramePainter _painter(WidgetTester tester, String key) {
@@ -280,6 +404,7 @@ Future<void> _capture(
 
 Game _game({
   String timezone = 'UTC',
+  String competitionKey = 'football_j1',
   String homeTeamId = 'kashima_antlers',
   String homeName = '鹿島アントラーズ',
   String awayTeamId = 'urawa_reds',
@@ -288,7 +413,7 @@ Game _game({
   return Game(
     id: 'vs-frame',
     leagueId: 'j1',
-    competitionKey: 'football_j1',
+    competitionKey: competitionKey,
     homeTeamId: homeTeamId,
     homeTeamNameJa: homeName,
     homeTeamNameEn: homeName,

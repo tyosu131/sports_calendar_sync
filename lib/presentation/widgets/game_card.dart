@@ -162,6 +162,7 @@ class GameCard extends StatelessWidget {
                       color: frames.home,
                       child: _TeamSide(
                         name: teamDisplayNames.homeName(game),
+                        nameColor: competitionVsFrameTextColor(frames.home),
                         logoUrl: resolveGameTeamLogoUrl(
                           game.homeTeamLogoUrl,
                           homeTeamLogoUrlFallback ??
@@ -180,6 +181,7 @@ class GameCard extends StatelessWidget {
                       color: frames.away,
                       child: _TeamSide(
                         name: teamDisplayNames.awayName(game),
+                        nameColor: competitionVsFrameTextColor(frames.away),
                         logoUrl: resolveGameTeamLogoUrl(
                           game.awayTeamLogoUrl,
                           awayTeamLogoUrlFallback ??
@@ -237,9 +239,14 @@ String? resolveGameTeamLogoUrl(String? gameLogoUrl, String? canonicalLogoUrl) {
 }
 
 class _TeamSide extends StatelessWidget {
-  const _TeamSide({required this.name, required this.logoUrl});
+  const _TeamSide({
+    required this.name,
+    required this.nameColor,
+    required this.logoUrl,
+  });
 
   final String name;
+  final Color nameColor;
   final String? logoUrl;
 
   @override
@@ -256,7 +263,7 @@ class _TeamSide extends StatelessWidget {
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           style: theme.textTheme.bodyLarge?.copyWith(
-            color: Colors.white,
+            color: nameColor,
             fontWeight: FontWeight.bold,
           ),
           textAlign: TextAlign.center,
