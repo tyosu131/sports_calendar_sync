@@ -7,6 +7,8 @@ import '../../data/providers/game_providers.dart';
 import '../../data/providers/repository_providers.dart';
 import '../../data/providers/team_providers.dart';
 import '../../domain/models/team.dart';
+import '../../domain/models/user_profile.dart';
+import '../../domain/policies/home_sport_navigation.dart';
 import '../../domain/policies/team_display_name_policy.dart';
 import '../../domain/policies/team_presentation_policy.dart';
 import '../widgets/game_card.dart';
@@ -14,73 +16,116 @@ import '../widgets/game_presentation_scope.dart';
 import '../widgets/team_presentation_badge.dart';
 import '../widgets/calendar_sync_button.dart';
 
-/// Home screen: shows upcoming games for the user's followed teams.
+/// Home screen: upcoming games for followed teams, grouped by sport.
+///
+/// [TabBar] and [TabBarView] share the [DefaultTabController], so a tap and a
+/// horizontal swipe update one index.
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userAsync = ref.watch(userProfileProvider);
-    final gamesAsync = ref.watch(homeUpcomingGamesProvider);
-    final followedTeamsAsync = ref.watch(followedTeamsProvider);
+    final tabs = homeSportTabs();
+    final theme = Theme.of(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('スポーツカレンダー'),
-        actions: [
-          // In-app calendar view (not iCalendar sync).
-          userAsync.whenOrNull(
-                data: (profile) => profile != null
-                    ? IconButton(
-                        icon: const Icon(Icons.event_note_outlined),
-                        tooltip: 'スケジュールを表示',
-                        onPressed: () => context.push('/schedule'),
-                      )
-                    : null,
-              ) ??
-              const SizedBox.shrink(),
-          // Calendar sync button
-          userAsync.whenOrNull(
-                data: (profile) => !useSampleData && profile != null
-                    ? const CalendarSyncButton()
-                    : null,
-              ) ??
-              const SizedBox.shrink(),
-          // Settings
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () => context.push('/settings'),
+    return DefaultTabController(
+      length: tabs.length,
+      initialIndex: defaultHomeSportTabIndex(tabs),
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('スポーツカレンダー'),
+          actions: [
+            // In-app calendar view (not iCalendar sync).
+            userAsync.whenOrNull(
+                  data: (profile) => profile != null
+                      ? IconButton(
+                          icon: const Icon(Icons.event_note_outlined),
+                          tooltip: 'スケジュールを表示',
+                          onPressed: () => context.push('/schedule'),
+                        )
+                      : null,
+                ) ??
+                const SizedBox.shrink(),
+            // Calendar sync button
+            userAsync.whenOrNull(
+                  data: (profile) => !useSampleData && profile != null
+                      ? const CalendarSyncButton()
+                      : null,
+                ) ??
+                const SizedBox.shrink(),
+            // Settings
+            IconButton(
+              icon: const Icon(Icons.settings_outlined),
+              onPressed: () => context.push('/settings'),
+            ),
+          ],
+          bottom: TabBar(
+            key: const ValueKey('home-sport-tabs'),
+            isScrollable: true,
+            indicatorSize: TabBarIndicatorSize.label,
+            labelStyle: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+            unselectedLabelStyle: theme.textTheme.titleSmall,
+            tabs: [
+              for (final tab in tabs)
+                Tab(key: ValueKey('home-sport-tab-${tab.id}'), text: tab.label),
+            ],
           ),
-        ],
+        ),
+        body: TabBarView(
+          children: [
+            for (final tab in tabs)
+              SizedBox.expand(
+                key: ValueKey('home-sport-page-${tab.id}'),
+                child: _HomeSportPage(tab: tab, userAsync: userAsync),
+              ),
+          ],
+        ),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () => context.push('/search'),
+          icon: const Icon(Icons.add),
+          label: const Text('チームを追加'),
+        ),
       ),
-      body: userAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('エラー: $e')),
-        data: (profile) {
-          if (profile == null) {
-            return const _SignInPrompt();
-          }
-          return _HomeContent(
-            gamesAsync: gamesAsync,
-            followedTeamsAsync: followedTeamsAsync,
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push('/search'),
-        icon: const Icon(Icons.add),
-        label: const Text('チームを追加'),
-      ),
+    );
+  }
+}
+
+class _HomeSportPage extends ConsumerWidget {
+  const _HomeSportPage({required this.tab, required this.userAsync});
+
+  final HomeSportTab tab;
+  final AsyncValue<UserProfile?> userAsync;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return userAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Center(child: Text('エラー: $e')),
+      data: (profile) {
+        if (profile == null) {
+          return const _SignInPrompt();
+        }
+        return _HomeContent(
+          tab: tab,
+          gamesAsync: ref.watch(homeUpcomingGamesProvider),
+          followedTeamsAsync: ref.watch(followedTeamsProvider),
+        );
+      },
     );
   }
 }
 
 class _HomeContent extends ConsumerWidget {
   const _HomeContent({
+    required this.tab,
     required this.gamesAsync,
     required this.followedTeamsAsync,
   });
 
+  final HomeSportTab tab;
   final AsyncValue<HomeUpcomingGames> gamesAsync;
   final AsyncValue<List<Team>> followedTeamsAsync;
 
@@ -93,18 +138,22 @@ class _HomeContent extends ConsumerWidget {
         if (teams.isEmpty) {
           return const _EmptyFollowedTeams();
         }
+        final visibleTeams = teamsForHomeSportTab(teams, tab);
+        if (visibleTeams.isEmpty) {
+          return _EmptySportFollow(label: tab.label);
+        }
         return gamesAsync.when(
           loading: () => ListView(
             padding: const EdgeInsets.only(top: 12, bottom: 100),
             children: [
-              _FollowedTeamsSection(teams: teams),
+              _FollowedTeamsSection(teams: visibleTeams),
               const SizedBox(height: 80),
               const Center(child: CircularProgressIndicator()),
             ],
           ),
           error: (e, _) => Center(child: Text('エラー: $e')),
           data: (homeGames) {
-            final games = homeGames.games;
+            final games = gamesForHomeSportTab(homeGames.games, tab);
             return GamePresentationScope(
               resolver: homeGames.presentation,
               child: RefreshIndicator(
@@ -118,7 +167,7 @@ class _HomeContent extends ConsumerWidget {
                 child: ListView(
                   padding: const EdgeInsets.only(top: 12, bottom: 100),
                   children: [
-                    _FollowedTeamsSection(teams: teams),
+                    _FollowedTeamsSection(teams: visibleTeams),
                     if (games.isEmpty)
                       const _NoUpcomingGames()
                     else
@@ -321,6 +370,58 @@ class _EmptyFollowedTeams extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 '「チームを追加」からお気に入りのチームを登録してください。',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              FilledButton.icon(
+                onPressed: () => context.push('/search'),
+                icon: const Icon(Icons.search),
+                label: const Text('チームを探す'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _EmptySportFollow extends StatelessWidget {
+  const _EmptySportFollow({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Container(
+          padding: const EdgeInsets.all(28),
+          decoration: BoxDecoration(
+            color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.42),
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.sports, size: 72, color: colorScheme.outline),
+              const SizedBox(height: 16),
+              Text(
+                '$labelでフォローしているチームがありません',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '「チームを追加」から、このスポーツのチームを登録できます。',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
