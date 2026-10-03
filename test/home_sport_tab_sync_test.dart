@@ -88,6 +88,40 @@ double _pageLeft(WidgetTester tester, String id) {
   return tester.getTopLeft(find.byKey(ValueKey('home-sport-page-$id'))).dx;
 }
 
+const _sportTabLabels = ['お気に入り', '野球', 'サッカー', 'その他スポーツ'];
+
+void _expectSportTabLabelsFit(WidgetTester tester) {
+  final bar = find.byType(TabBar);
+  final barRect = tester.getRect(bar);
+  final tabBar = tester.widget<TabBar>(bar);
+  expect(tabBar.isScrollable, isFalse);
+  expect(tester.getSize(bar).width, 390);
+
+  for (final label in _sportTabLabels) {
+    final finder = find.descendant(of: bar, matching: find.text(label));
+    expect(finder, findsOneWidget);
+    final text = tester.widget<Text>(finder);
+    expect(text.data, label);
+    expect(text.overflow, isNot(TextOverflow.ellipsis));
+
+    final rect = tester.getRect(finder);
+    expect(rect.left, greaterThanOrEqualTo(barRect.left - 0.5));
+    expect(rect.right, lessThanOrEqualTo(barRect.right + 0.5));
+
+    final paragraph = tester.renderObject<RenderParagraph>(finder);
+    final painter = TextPainter(
+      text: paragraph.text,
+      textDirection: TextDirection.ltr,
+      textScaler: paragraph.textScaler,
+    )..layout();
+    expect(
+      paragraph.size.width,
+      greaterThanOrEqualTo(painter.width - 0.5),
+      reason: '$label is clipped inside the tab',
+    );
+  }
+}
+
 Future<void> _pumpHome(
   WidgetTester tester, {
   UserProfile? profile,
@@ -186,10 +220,7 @@ void main() {
     expect(_pageLeft(tester, HomeSportTabIds.favorites), closeTo(0, 1));
     expect(find.byType(NavigationBar), findsNothing);
     expect(find.byType(BottomNavigationBar), findsNothing);
-    expect(find.text('お気に入り'), findsOneWidget);
-    expect(find.text('野球'), findsOneWidget);
-    expect(find.text('サッカー'), findsOneWidget);
-    expect(find.text('その他スポーツ'), findsOneWidget);
+    _expectSportTabLabelsFit(tester);
 
     await tester.tap(find.text('サッカー'));
     await tester.pumpAndSettle();
@@ -218,6 +249,18 @@ void main() {
     await tester.pumpAndSettle();
     expect(controller.index, 0);
     expect(_pageLeft(tester, HomeSportTabIds.favorites), closeTo(0, 1));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('sport tab labels stay fully visible at phone width 390', (
+    tester,
+  ) async {
+    await _pumpHome(tester, profile: _profile(const []));
+    _expectSportTabLabelsFit(tester);
+
+    await tester.tap(find.text('その他スポーツ'));
+    await tester.pumpAndSettle();
+    _expectSportTabLabelsFit(tester);
     expect(tester.takeException(), isNull);
   });
 
@@ -294,15 +337,8 @@ void main() {
       ),
       findsWidgets,
     );
+    _expectSportTabLabelsFit(tester);
     await _capture(tester, 'home-favorites');
-
-    for (final label in ['お気に入り', '野球', 'サッカー', 'その他スポーツ']) {
-      await tester.ensureVisible(find.text(label));
-      final labelRect = tester.getRect(find.text(label));
-      final barRect = tester.getRect(find.byType(TabBar));
-      expect(labelRect.left, greaterThanOrEqualTo(barRect.left - 1));
-      expect(labelRect.right, lessThanOrEqualTo(barRect.right + 1));
-    }
 
     await tester.tap(find.text('サッカー'));
     await tester.pumpAndSettle();

@@ -62,12 +62,23 @@ class HomeScreen extends ConsumerWidget {
           ],
           bottom: TabBar(
             key: const ValueKey('home-sport-tabs'),
-            isScrollable: true,
+            // Four sport labels share the phone width. A scrollable Material 3
+            // tab bar adds a 52px start offset plus 16px label padding, which
+            // clips 「その他スポーツ」 at 390px.
+            isScrollable: false,
+            tabAlignment: TabAlignment.fill,
+            padding: EdgeInsets.zero,
+            labelPadding: EdgeInsets.zero,
             indicatorSize: TabBarIndicatorSize.label,
             labelStyle: theme.textTheme.titleSmall?.copyWith(
+              fontSize: 13,
               fontWeight: FontWeight.w700,
+              letterSpacing: 0,
             ),
-            unselectedLabelStyle: theme.textTheme.titleSmall,
+            unselectedLabelStyle: theme.textTheme.titleSmall?.copyWith(
+              fontSize: 13,
+              letterSpacing: 0,
+            ),
             tabs: [
               for (final tab in tabs)
                 Tab(key: ValueKey('home-sport-tab-${tab.id}'), text: tab.label),
