@@ -1,6 +1,8 @@
 import '../../core/config/sports_registry.dart';
 import '../models/game.dart';
+import '../models/sport_definition.dart';
 import '../models/team.dart';
+import 'competition_display_policy.dart';
 
 /// Identifiers for the Home sport navigation.
 ///
@@ -134,4 +136,117 @@ List<Game> gamesForHomeSportTab(List<Game> games, HomeSportTab tab) {
       ))
         game,
   ];
+}
+
+/// Identifiers for the two destinations inside a sport tab.
+///
+/// お気に入り has neither. League names are never destinations.
+abstract final class SportSubNavIds {
+  static const home = 'home';
+  static const leagues = 'leagues';
+}
+
+/// One fixed bottom destination. [label] is always visible with the icon.
+class SportSubNavDestination {
+  const SportSubNavDestination({required this.id, required this.label});
+
+  final String id;
+  final String label;
+}
+
+/// Exactly ホーム and リーグ. Do not append competitions here.
+const sportSubNavDestinations = <SportSubNavDestination>[
+  SportSubNavDestination(id: SportSubNavIds.home, label: 'ホーム'),
+  SportSubNavDestination(id: SportSubNavIds.leagues, label: 'リーグ'),
+];
+
+/// Favorites is cross-sport, so it does not show ホーム | リーグ.
+bool homeTabShowsSportSubNav(HomeSportTab tab) => !tab.showsAllSports;
+
+int sportSubNavIndexFor(String id) {
+  final index = sportSubNavDestinations.indexWhere((item) => item.id == id);
+  return index < 0 ? 0 : index;
+}
+
+/// Enabled competitions for a set of [SportDefinition.sportCategory] values.
+///
+/// Search and Follow still list [SportsRegistry.enabled] as flat tabs. They
+/// can group that list with this function later without adding leagues to the
+/// bottom navigation.
+List<SportDefinition> competitionsForSportCategories(Set<String> categories) {
+  if (categories.isEmpty) return const [];
+  return List<SportDefinition>.unmodifiable([
+    for (final competition in SportsRegistry.enabled)
+      if (categories.contains(competition.sportCategory)) competition,
+  ]);
+}
+
+/// Registry competitions that belong to [tab]. Favorites returns an empty list.
+List<SportDefinition> competitionsForHomeSportTab(HomeSportTab tab) {
+  final categories = tab.sportCategories;
+  if (categories == null) return const [];
+  return competitionsForSportCategories(categories);
+}
+
+/// Sport tabs paired with their registry competitions, favorites omitted.
+///
+/// This is the sport → league model Search can reuse. It is not a list of
+/// bottom-nav destinations.
+class SportLeagueGroup {
+  const SportLeagueGroup({required this.tab, required this.competitions});
+
+  final HomeSportTab tab;
+  final List<SportDefinition> competitions;
+}
+
+List<SportLeagueGroup> sportLeagueGroups({List<HomeSportTab>? tabs}) {
+  return List<SportLeagueGroup>.unmodifiable([
+    for (final tab in tabs ?? homeSportTabs())
+      if (homeTabShowsSportSubNav(tab))
+        SportLeagueGroup(
+          tab: tab,
+          competitions: competitionsForHomeSportTab(tab),
+        ),
+  ]);
+}
+
+/// Client-side filter over registry display names. No network request.
+List<SportDefinition> filterSportCompetitions(
+  List<SportDefinition> competitions,
+  String query,
+) {
+  final normalized = query.trim().toLowerCase();
+  if (normalized.isEmpty) {
+    return List<SportDefinition>.unmodifiable(competitions);
+  }
+  return List<SportDefinition>.unmodifiable([
+    for (final competition in competitions)
+      if (_competitionMatches(competition, normalized)) competition,
+  ]);
+}
+
+bool _competitionMatches(SportDefinition competition, String normalizedQuery) {
+  final display = CompetitionDisplayPolicy.forKey(competition.competitionKey);
+  final haystack = [
+    competition.displayNameJa,
+    competition.displayNameEn,
+    if (display != null) ...[
+      display.compact,
+      display.nameJa,
+      display.nameEn,
+      display.label,
+    ],
+  ].join('\n').toLowerCase();
+  return haystack.contains(normalizedQuery);
+}
+
+/// Short neutral label for a competition row. Not a flag or crest.
+String competitionBadgeLabel(SportDefinition competition) {
+  final compact = CompetitionDisplayPolicy.forKey(
+    competition.competitionKey,
+  )?.compact.trim();
+  if (compact != null && compact.isNotEmpty) return compact;
+  final name = competition.displayNameJa.trim();
+  if (name.runes.length <= 4) return name;
+  return String.fromCharCodes(name.runes.take(2));
 }

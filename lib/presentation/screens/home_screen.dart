@@ -13,13 +13,16 @@ import '../../domain/policies/team_display_name_policy.dart';
 import '../../domain/policies/team_presentation_policy.dart';
 import '../widgets/game_card.dart';
 import '../widgets/game_presentation_scope.dart';
+import '../widgets/sport_sub_nav_bar.dart';
 import '../widgets/team_presentation_badge.dart';
 import '../widgets/calendar_sync_button.dart';
+import 'sport_league_browser.dart';
 
 /// Home screen: upcoming games for followed teams, grouped by sport.
 ///
 /// [TabBar] and [TabBarView] share the [DefaultTabController], so a tap and a
-/// horizontal swipe update one index.
+/// horizontal swipe update one index. Sport tabs add a separate bottom bar
+/// with ホーム and リーグ. お気に入り does not.
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
@@ -27,85 +30,174 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final userAsync = ref.watch(userProfileProvider);
     final tabs = homeSportTabs();
-    final theme = Theme.of(context);
 
     return DefaultTabController(
       length: tabs.length,
       initialIndex: defaultHomeSportTabIndex(tabs),
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('スポーツカレンダー'),
-          actions: [
-            // In-app calendar view (not iCalendar sync).
-            userAsync.whenOrNull(
-                  data: (profile) => profile != null
-                      ? IconButton(
-                          icon: const Icon(Icons.event_note_outlined),
-                          tooltip: 'スケジュールを表示',
-                          onPressed: () => context.push('/schedule'),
-                        )
-                      : null,
-                ) ??
-                const SizedBox.shrink(),
-            // Calendar sync button
-            userAsync.whenOrNull(
-                  data: (profile) => !useSampleData && profile != null
-                      ? const CalendarSyncButton()
-                      : null,
-                ) ??
-                const SizedBox.shrink(),
-            // Settings
-            IconButton(
-              icon: const Icon(Icons.settings_outlined),
-              onPressed: () => context.push('/settings'),
-            ),
-          ],
-          bottom: TabBar(
-            key: const ValueKey('home-sport-tabs'),
-            // Four sport labels share the phone width. A scrollable Material 3
-            // tab bar adds a 52px start offset plus 16px label padding, which
-            // clips 「その他スポーツ」 at 390px.
-            isScrollable: false,
-            tabAlignment: TabAlignment.fill,
-            padding: EdgeInsets.zero,
-            labelPadding: EdgeInsets.zero,
-            indicatorSize: TabBarIndicatorSize.label,
-            labelStyle: theme.textTheme.titleSmall?.copyWith(
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0,
-            ),
-            unselectedLabelStyle: theme.textTheme.titleSmall?.copyWith(
-              fontSize: 13,
-              letterSpacing: 0,
-            ),
-            tabs: [
-              for (final tab in tabs)
-                Tab(key: ValueKey('home-sport-tab-${tab.id}'), text: tab.label),
-            ],
+      child: _HomeScaffold(tabs: tabs, userAsync: userAsync),
+    );
+  }
+}
+
+class _HomeScaffold extends StatefulWidget {
+  const _HomeScaffold({required this.tabs, required this.userAsync});
+
+  final List<HomeSportTab> tabs;
+  final AsyncValue<UserProfile?> userAsync;
+
+  @override
+  State<_HomeScaffold> createState() => _HomeScaffoldState();
+}
+
+class _HomeScaffoldState extends State<_HomeScaffold> {
+  final _subNavIndex = ValueNotifier<int>(0);
+  TabController? _controller;
+  int? _observedIndex;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final next = DefaultTabController.of(context);
+    if (identical(_controller, next)) return;
+    _controller?.removeListener(_onTabsChanged);
+    _controller = next;
+    _observedIndex = next.index;
+    next.addListener(_onTabsChanged);
+  }
+
+  /// Rebuild only after the sport tab index commits, so a swipe is not
+  /// interrupted by a new [TabBarView].
+  void _onTabsChanged() {
+    final index = _controller?.index;
+    if (!mounted || index == null || index == _observedIndex) return;
+    _observedIndex = index;
+    setState(() {});
+  }
+
+  @override
+  void dispose() {
+    _controller?.removeListener(_onTabsChanged);
+    _subNavIndex.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tabs = widget.tabs;
+    final userAsync = widget.userAsync;
+    final tabIndex = _controller?.index ?? defaultHomeSportTabIndex(tabs);
+    final showSubNav = homeTabShowsSportSubNav(tabs[tabIndex]);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('スポーツカレンダー'),
+        actions: [
+          // In-app calendar view (not iCalendar sync).
+          userAsync.whenOrNull(
+                data: (profile) => profile != null
+                    ? IconButton(
+                        icon: const Icon(Icons.event_note_outlined),
+                        tooltip: 'スケジュールを表示',
+                        onPressed: () => context.push('/schedule'),
+                      )
+                    : null,
+              ) ??
+              const SizedBox.shrink(),
+          // Calendar sync button
+          userAsync.whenOrNull(
+                data: (profile) => !useSampleData && profile != null
+                    ? const CalendarSyncButton()
+                    : null,
+              ) ??
+              const SizedBox.shrink(),
+          // Settings
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            onPressed: () => context.push('/settings'),
           ),
-        ),
-        body: TabBarView(
-          children: [
+        ],
+        bottom: TabBar(
+          key: const ValueKey('home-sport-tabs'),
+          // Four sport labels share the phone width. A scrollable Material 3
+          // tab bar adds a 52px start offset plus 16px label padding, which
+          // clips 「その他スポーツ」 at 390px.
+          isScrollable: false,
+          tabAlignment: TabAlignment.fill,
+          padding: EdgeInsets.zero,
+          labelPadding: EdgeInsets.zero,
+          indicatorSize: TabBarIndicatorSize.label,
+          labelStyle: theme.textTheme.titleSmall?.copyWith(
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0,
+          ),
+          unselectedLabelStyle: theme.textTheme.titleSmall?.copyWith(
+            fontSize: 13,
+            letterSpacing: 0,
+          ),
+          tabs: [
             for (final tab in tabs)
-              SizedBox.expand(
-                key: ValueKey('home-sport-page-${tab.id}'),
-                child: _HomeSportPage(tab: tab, userAsync: userAsync),
-              ),
+              Tab(key: ValueKey('home-sport-tab-${tab.id}'), text: tab.label),
           ],
         ),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: () => context.push('/search'),
-          icon: const Icon(Icons.add),
-          label: const Text('チームを追加'),
-        ),
+      ),
+      body: TabBarView(
+        children: [
+          for (final tab in tabs)
+            SizedBox.expand(
+              key: ValueKey('home-sport-page-${tab.id}'),
+              child: _HomeSportPage(
+                tab: tab,
+                userAsync: userAsync,
+                subNavIndex: homeTabShowsSportSubNav(tab) ? _subNavIndex : null,
+              ),
+            ),
+        ],
+      ),
+      bottomNavigationBar: showSubNav
+          ? SportSubNavBar(selectedIndex: _subNavIndex)
+          : null,
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => context.push('/search'),
+        icon: const Icon(Icons.add),
+        label: const Text('チームを追加'),
       ),
     );
   }
 }
 
-class _HomeSportPage extends ConsumerWidget {
-  const _HomeSportPage({required this.tab, required this.userAsync});
+class _HomeSportPage extends StatelessWidget {
+  const _HomeSportPage({
+    required this.tab,
+    required this.userAsync,
+    required this.subNavIndex,
+  });
+
+  final HomeSportTab tab;
+  final AsyncValue<UserProfile?> userAsync;
+  final ValueNotifier<int>? subNavIndex;
+
+  @override
+  Widget build(BuildContext context) {
+    final feed = _HomeSportFeed(tab: tab, userAsync: userAsync);
+    final notifier = subNavIndex;
+    if (notifier == null) return feed;
+    return ValueListenableBuilder<int>(
+      valueListenable: notifier,
+      builder: (context, index, child) {
+        if (index == sportSubNavIndexFor(SportSubNavIds.leagues)) {
+          return SportLeagueBrowser(tab: tab);
+        }
+        return child!;
+      },
+      child: feed,
+    );
+  }
+}
+
+class _HomeSportFeed extends ConsumerWidget {
+  const _HomeSportFeed({required this.tab, required this.userAsync});
 
   final HomeSportTab tab;
   final AsyncValue<UserProfile?> userAsync;

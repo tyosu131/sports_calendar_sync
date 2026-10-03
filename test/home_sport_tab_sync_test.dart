@@ -226,6 +226,13 @@ void main() {
     await tester.pumpAndSettle();
     expect(controller.index, 2);
     expect(_pageLeft(tester, HomeSportTabIds.football), closeTo(0, 1));
+    expect(find.byKey(const ValueKey('sport-sub-nav')), findsOneWidget);
+    expect(
+      tester
+          .widget<NavigationBar>(find.byKey(const ValueKey('sport-sub-nav')))
+          .destinations,
+      hasLength(2),
+    );
 
     await tester.timedDrag(
       find.byType(TabBarView),
@@ -249,6 +256,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(controller.index, 0);
     expect(_pageLeft(tester, HomeSportTabIds.favorites), closeTo(0, 1));
+    expect(find.byKey(const ValueKey('sport-sub-nav')), findsNothing);
+    expect(find.byType(NavigationBar), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
@@ -261,6 +270,13 @@ void main() {
     await tester.tap(find.text('その他スポーツ'));
     await tester.pumpAndSettle();
     _expectSportTabLabelsFit(tester);
+    expect(find.byKey(const ValueKey('sport-sub-nav')), findsOneWidget);
+    expect(
+      tester
+          .widget<NavigationBar>(find.byKey(const ValueKey('sport-sub-nav')))
+          .destinations,
+      hasLength(2),
+    );
     expect(tester.takeException(), isNull);
   });
 

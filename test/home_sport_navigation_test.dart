@@ -150,4 +150,103 @@ void main() {
       expect(sportCategoryForCompetitionKey('   '), isNull);
     },
   );
+
+  test('sport sub-nav is exactly home and leagues', () {
+    expect(sportSubNavDestinations, hasLength(2));
+    expect(sportSubNavDestinations.map((item) => item.id), [
+      SportSubNavIds.home,
+      SportSubNavIds.leagues,
+    ]);
+    expect(sportSubNavDestinations.map((item) => item.label), ['ホーム', 'リーグ']);
+    expect(sportSubNavIndexFor(SportSubNavIds.home), 0);
+    expect(sportSubNavIndexFor(SportSubNavIds.leagues), 1);
+    expect(sportSubNavIndexFor('missing'), 0);
+
+    final tabs = homeSportTabs();
+    expect(homeTabShowsSportSubNav(tabs.first), isFalse);
+    expect(tabs.skip(1).every(homeTabShowsSportSubNav), isTrue);
+
+    const leagueLabels = {
+      'Jリーグ',
+      'プレミアリーグ',
+      'NPB',
+      'MLB',
+      'NBA',
+      'NFL',
+      'NHL',
+      'Bリーグ',
+    };
+    expect(
+      sportSubNavDestinations
+          .map((item) => item.label)
+          .toSet()
+          .intersection(leagueLabels),
+      isEmpty,
+    );
+  });
+
+  test('league groups follow the sport tab and stay out of favorites', () {
+    final groups = sportLeagueGroups();
+    expect(groups.map((group) => group.tab.id), [
+      HomeSportTabIds.baseball,
+      HomeSportTabIds.football,
+      HomeSportTabIds.other,
+    ]);
+    expect(groups[0].competitions.map((item) => item.competitionKey), [
+      'baseball_npb',
+      'baseball_mlb',
+    ]);
+    expect(groups[1].competitions.map((item) => item.competitionKey), [
+      'football_j1',
+      'football_premier',
+    ]);
+    expect(groups[2].competitions.map((item) => item.competitionKey), [
+      'basketball_nba',
+      'americanfootball_nfl',
+      'hockey_nhl',
+      'basketball_b_league',
+    ]);
+    expect(competitionsForHomeSportTab(homeSportTabs().first), isEmpty);
+    expect(
+      competitionsForSportCategories(const {
+        'football',
+      }).map((item) => item.competitionKey),
+      ['football_j1', 'football_premier'],
+    );
+    expect(competitionsForSportCategories(const {}), isEmpty);
+
+    final football = groups[1].competitions;
+    expect(
+      filterSportCompetitions(
+        football,
+        '  ',
+      ).map((item) => item.competitionKey),
+      ['football_j1', 'football_premier'],
+    );
+    expect(
+      filterSportCompetitions(
+        football,
+        'j1',
+      ).map((item) => item.competitionKey),
+      ['football_j1'],
+    );
+    expect(
+      filterSportCompetitions(
+        football,
+        'premier',
+      ).map((item) => item.displayNameJa),
+      ['プレミアリーグ'],
+    );
+    expect(filterSportCompetitions(football, '存在しない'), isEmpty);
+    expect(competitionBadgeLabel(football.first), 'J1');
+    expect(competitionBadgeLabel(football.last), 'PL');
+    expect(
+      competitionBadgeLabel(
+        groups[0].competitions.firstWhere(
+          (item) => item.competitionKey == 'baseball_npb',
+        ),
+      ),
+      'NPB',
+    );
+  });
 }

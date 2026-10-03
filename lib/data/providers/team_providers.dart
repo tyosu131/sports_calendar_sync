@@ -26,6 +26,16 @@ final teamsByLeagueProvider = FutureProvider.family<List<Team>, String>((
   return ref.watch(teamRepositoryProvider).fetchTeamsByLeague(leagueId);
 });
 
+/// Teams for one SportsRegistry competition key.
+///
+/// The in-sport league browser uses this existing read. It does not add an API.
+final teamsByCompetitionProvider = FutureProvider.autoDispose
+    .family<List<Team>, String>((ref, competitionKey) async {
+      return ref
+          .watch(teamRepositoryProvider)
+          .fetchTeams(competitionKey: competitionKey);
+    });
+
 /// A single team by ID.
 final teamByIdProvider = FutureProvider.family<Team?, String>((
   ref,

@@ -21,6 +21,8 @@ class _TeamSearchScreenState extends ConsumerState<TeamSearchScreen>
   late final TabController _tabController;
   final _searchController = TextEditingController();
 
+  // Flat competition tabs stay until Search adopts the Home sport → league
+  // model. Groupings live in sportLeagueGroups / competitionsForSportCategories.
   // Competitions sourced from SportsRegistry — single source of truth.
   static final _competitions = SportsRegistry.enabled;
 
