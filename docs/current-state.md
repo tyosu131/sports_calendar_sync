@@ -1,5 +1,32 @@
 # Current State — sports_calendar_sync
 
+## Match-card vs-frame and venue clock (2026-10-03)
+
+In-app presentation only. No deploy, no Firestore write, no Apple Sign-In,
+no store or signing change, no UFC feed.
+
+- Home and away sides of `GameCard` use different decorative frame colors
+  from the existing palette, keyed by `competitionKey`. The colors are not
+  club kits. The same competition keeps the same pair for every club.
+- Color is not the only side signal. Home stays on the left as a rounded
+  panel with a ground bar. Away stays on the right as a pointed panel with
+  a chevron. Followed-team stadium and transit cues are unchanged. Screen
+  readers hear 「ホーム側」 and 「アウェイ側」.
+- The card fill stays the theme surface. Frames are saturated palette
+  colors. Each team name is white or black, whichever has the higher WCAG
+  contrast against that side's painted fill. GameCard monograms stay on
+  the neutral badge. Home chips, team detail, and schedule tiles were not
+  switched off the initial.
+- Kickoff stays JST from `startTimeUTC`. No authoritative venue timezone
+  is stored. `timezone` remains the provider clock: GOAL writes `UTC`,
+  API-Football writes the request timezone, and J1 sample rows write
+  `Asia/Tokyo` without a venue-zone source. A venue name is not a zone.
+- UFC is not feasible as a read-only path here. The repo has no UFC
+  competition, adapter, sample fixture, or offline file. Existing football
+  providers require API keys. API-Sports MMA is a separate keyed live API.
+  No production UFC client was added.
+- Real-device confirmation is pending.
+
 ## Follow/Search scope and short team labels (2026-10-03)
 
 In-app presentation only. No deploy, no Firestore write, no Apple Sign-In.
