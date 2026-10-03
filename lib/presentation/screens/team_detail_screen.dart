@@ -146,7 +146,10 @@ class TeamDetailScreen extends ConsumerWidget {
                     }
                     return SliverList(
                       delegate: SliverChildBuilderDelegate(
-                        (context, index) => GameCard(game: games[index]),
+                        (context, index) => GameCard(
+                          game: games[index],
+                          perspectiveTeamIds: [team.id],
+                        ),
                         childCount: games.length,
                       ),
                     );
