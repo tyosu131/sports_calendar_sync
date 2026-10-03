@@ -121,9 +121,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('compact labels use a place alias or the full name', (
-    tester,
-  ) async {
+  testWidgets('compact labels use the full display name', (tester) async {
     await pumpCalendar(tester, const Size(390, 844), [
       Game(
         id: 'frontale',
@@ -139,8 +137,12 @@ void main() {
         status: GameStatus.scheduled,
       ),
     ]);
-    expect(find.text('川崎/浦和'), findsOneWidget);
+    final frontale = tester.widget<Text>(find.text('川崎フロンターレ/浦和レッズ'));
+    expect(frontale.maxLines, 1);
+    expect(frontale.overflow, TextOverflow.ellipsis);
+    expect(find.text('川崎/浦和'), findsNothing);
     expect(find.text('川/浦'), findsNothing);
+    expect(find.text('川崎F'), findsNothing);
 
     await pumpCalendar(tester, const Size(390, 844), [
       Game(

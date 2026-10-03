@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:sports_calendar_sync/domain/models/team.dart';
 import 'package:sports_calendar_sync/domain/policies/league_browse_presentation.dart';
-import 'package:sports_calendar_sync/domain/policies/team_display_name_policy.dart';
 import 'package:sports_calendar_sync/presentation/theme/league_browse_accents.dart';
 
 void main() {
@@ -29,8 +28,15 @@ void main() {
     expect(leagueBrowseAccents, contains(leagueBrowseAccent('football_j1')));
   });
 
-  test('card label uses a catalog prefix, else the full name', () {
-    expect(
+  test('card label is the canonical name, not a search alias', () {
+    const forbidden = ['川崎', '横浜', '町田', '鹿島', 'Giants'];
+
+    void expectFull(String actual, String full) {
+      expect(actual, full);
+      expect(forbidden, isNot(contains(actual)));
+    }
+
+    expectFull(
       leagueTeamCardLabelForTeam(
         const Team(
           id: 'kashima_antlers',
@@ -40,9 +46,9 @@ void main() {
           competitionKey: 'football_j1',
         ),
       ),
-      '鹿島',
+      '鹿島アントラーズ',
     );
-    expect(
+    expectFull(
       leagueTeamCardLabelForTeam(
         const Team(
           id: 'urawa_reds',
@@ -52,9 +58,9 @@ void main() {
           competitionKey: 'football_j1',
         ),
       ),
-      '浦和',
+      '浦和レッズ',
     );
-    expect(
+    expectFull(
       leagueTeamCardLabelForTeam(
         const Team(
           id: 'kawasaki_frontale',
@@ -64,9 +70,9 @@ void main() {
           competitionKey: 'football_j1',
         ),
       ),
-      '川崎',
+      '川崎フロンターレ',
     );
-    expect(
+    expectFull(
       leagueTeamCardLabelForTeam(
         const Team(
           id: 'kawasaki_frontale',
@@ -78,25 +84,16 @@ void main() {
       ),
       'Kawasaki Frontale',
     );
-    expect(
-      leagueTeamCardLabelForName(
-        'Kashima Antlers',
-        competitionKey: 'football_premier',
-      ),
-      'Kashima',
+    expectFull(
+      leagueTeamCardLabelForName('Kashima Antlers'),
+      'Kashima Antlers',
     );
-    expect(
-      leagueTeamCardLabelForName(
-        'Tottenham Hotspur',
-        competitionKey: 'football_premier',
-      ),
-      'Tottenham',
+    expectFull(
+      leagueTeamCardLabelForName('Tottenham Hotspur'),
+      'Tottenham Hotspur',
     );
-    expect(
-      leagueTeamCardLabelForName('Tochigi SC', competitionKey: 'football_j2'),
-      'Tochigi SC',
-    );
-    expect(
+    expectFull(leagueTeamCardLabelForName('Tochigi SC'), 'Tochigi SC');
+    expectFull(
       leagueTeamCardLabelForTeam(
         const Team(
           id: 'fc_machida_zelvia',
@@ -108,7 +105,7 @@ void main() {
       ),
       'ＦＣ町田ゼルビア',
     );
-    expect(
+    expectFull(
       leagueTeamCardLabelForTeam(
         const Team(
           id: 'yokohama_f_marinos',
@@ -120,7 +117,7 @@ void main() {
       ),
       '横浜Ｆ・マリノス',
     );
-    expect(
+    expectFull(
       leagueTeamCardLabelForTeam(
         const Team(
           id: 'tochigi_sc',
@@ -132,7 +129,7 @@ void main() {
       ),
       '栃木ＳＣ',
     );
-    expect(
+    expectFull(
       leagueTeamCardLabelForTeam(
         const Team(
           id: 'yomiuri_giants',
@@ -144,26 +141,8 @@ void main() {
       ),
       'Yomiuri Giants',
     );
-    expect(
-      leagueTeamCardLabel(
-        displayName: 'Yomiuri Giants',
-        language: DisplayLanguage.english,
-      ),
-      'Yomiuri Giants',
-    );
-    expect(
-      leagueTeamCardLabel(
-        displayName: '読売ジャイアンツ',
-        language: DisplayLanguage.japanese,
-      ),
-      '読売ジャイアンツ',
-    );
-    expect(
-      leagueTeamCardLabel(
-        displayName: 'とても長い架空のクラブ名テスト',
-        language: DisplayLanguage.japanese,
-      ),
-      'とても長い架空のクラブ名テスト',
-    );
+    expectFull(leagueTeamCardLabel('Yomiuri Giants'), 'Yomiuri Giants');
+    expectFull(leagueTeamCardLabel('読売ジャイアンツ'), '読売ジャイアンツ');
+    expectFull(leagueTeamCardLabel('とても長い架空のクラブ名テスト'), 'とても長い架空のクラブ名テスト');
   });
 }

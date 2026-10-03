@@ -12,6 +12,7 @@ import 'package:sports_calendar_sync/data/repositories/competition_membership_re
 import 'package:sports_calendar_sync/data/repositories/team_repository.dart';
 import 'package:sports_calendar_sync/data/repositories/user_repository.dart';
 import 'package:sports_calendar_sync/presentation/screens/team_search_screen.dart';
+import 'package:sports_calendar_sync/presentation/widgets/team_presentation_badge.dart';
 
 const _screenshotDir = String.fromEnvironment(
   'CAPTURE_TEAM_SEARCH_SCREENSHOTS',
@@ -105,6 +106,20 @@ void main() {
     expect(find.text('鹿島アントラーズ'), findsOneWidget);
     expect(find.text('ガンバ大阪'), findsOneWidget);
     expect(find.text('Yomiuri Giants'), findsNothing);
+    expect(find.text('鹿'), findsNothing);
+    expect(find.text('ガ'), findsNothing);
+    expect(find.byKey(const Key('neutral-team-mark')), findsWidgets);
+    expect(
+      tester
+          .getSemantics(
+            find.descendant(
+              of: find.widgetWithText(ListTile, '鹿島アントラーズ'),
+              matching: find.byType(TeamPresentationBadge),
+            ),
+          )
+          .label,
+      '鹿島アントラーズ',
+    );
     expect(tester.takeException(), isNull);
     await _capture(tester, 'search-following');
 
@@ -165,6 +180,20 @@ void main() {
       ),
       findsOneWidget,
     );
+    expect(find.text('鹿'), findsNothing);
+    expect(find.text('浦'), findsNothing);
+    expect(find.text('川'), findsNothing);
+    expect(
+      tester
+          .getSemantics(
+            find.descendant(
+              of: urawaTile,
+              matching: find.byType(TeamPresentationBadge),
+            ),
+          )
+          .label,
+      '浦和レッズ',
+    );
     expect(tester.takeException(), isNull);
     await _capture(tester, 'search-football-home');
 
@@ -212,6 +241,19 @@ void main() {
         matching: find.text('Yomiuri Giants'),
       ),
       findsOneWidget,
+    );
+    expect(find.text('Giants'), findsNothing);
+    expect(find.text('Y'), findsNothing);
+    expect(
+      tester
+          .getSemantics(
+            find.descendant(
+              of: find.widgetWithText(ListTile, 'Yomiuri Giants'),
+              matching: find.byType(TeamPresentationBadge),
+            ),
+          )
+          .label,
+      'Yomiuri Giants',
     );
     expect(
       find.descendant(

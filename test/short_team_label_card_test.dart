@@ -14,6 +14,7 @@ import 'package:sports_calendar_sync/data/repositories/user_repository.dart';
 import 'package:sports_calendar_sync/domain/models/game.dart';
 import 'package:sports_calendar_sync/domain/models/team.dart';
 import 'package:sports_calendar_sync/presentation/screens/league_teams_screen.dart';
+import 'package:sports_calendar_sync/presentation/widgets/team_presentation_badge.dart';
 
 const _screenshotDir = String.fromEnvironment(
   'CAPTURE_SHORT_LABEL_SCREENSHOTS',
@@ -60,7 +61,7 @@ Team _team({
 void main() {
   setUpAll(_loadCjkFont);
 
-  testWidgets('league cards use a place alias or the full name', (
+  testWidgets('league cards show the canonical name and a neutral mark', (
     tester,
   ) async {
     await tester.binding.setSurfaceSize(const Size(390, 844));
@@ -124,21 +125,46 @@ void main() {
     final marinosCard = find.byKey(
       const ValueKey('league-team-card-yokohama_f_marinos'),
     );
-    expect(
-      find.descendant(of: kawasakiCard, matching: find.text('川崎')),
-      findsOneWidget,
+    final kawasakiName = tester.widget<Text>(
+      find.descendant(of: kawasakiCard, matching: find.text('川崎フロンターレ')),
     );
-    expect(
-      find.descendant(of: kawasakiCard, matching: find.text('川')),
-      findsOneWidget,
-    );
+    expect(kawasakiName.maxLines, 2);
+    expect(kawasakiName.overflow, TextOverflow.ellipsis);
+    expect(find.text('川崎'), findsNothing);
+    expect(find.text('川'), findsNothing);
     expect(find.text('川崎F'), findsNothing);
+    expect(
+      find.descendant(
+        of: kawasakiCard,
+        matching: find.byKey(const Key('neutral-team-mark')),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      tester
+          .getSemantics(
+            find.descendant(
+              of: kawasakiCard,
+              matching: find.byType(TeamPresentationBadge),
+            ),
+          )
+          .label,
+      '川崎フロンターレ',
+    );
     final fullName = tester.widget<Text>(
       find.descendant(of: marinosCard, matching: find.text('横浜Ｆ・マリノス')),
     );
     expect(fullName.maxLines, 2);
     expect(fullName.overflow, TextOverflow.ellipsis);
+    expect(find.text('横浜'), findsNothing);
     expect(find.text('マリノス'), findsNothing);
+    expect(
+      find.descendant(
+        of: marinosCard,
+        matching: find.byKey(const Key('neutral-team-mark')),
+      ),
+      findsOneWidget,
+    );
     expect(find.text('フォロー中'), findsNWidgets(2));
     expect(find.text('次の試合は未定'), findsNWidgets(2));
     expect(tester.takeException(), isNull);
