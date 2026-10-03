@@ -6,8 +6,8 @@ import '../../data/providers/game_providers.dart';
 import '../../domain/models/game.dart';
 import '../../domain/policies/competition_display_policy.dart';
 import '../../domain/policies/game_presentation_policy.dart';
+import '../../domain/policies/league_browse_presentation.dart';
 import '../../domain/policies/team_display_name_policy.dart';
-import '../../domain/policies/team_initial.dart';
 import '../../domain/policies/team_presentation_policy.dart';
 import '../widgets/competition_badge.dart';
 import '../widgets/game_presentation_scope.dart';
@@ -501,7 +501,9 @@ class _CompactGameLine extends StatelessWidget {
   Widget build(BuildContext context) {
     final home = teamDisplayNames.homeName(game);
     final away = teamDisplayNames.awayName(game);
-    final marker = '${teamInitial(home)}/${teamInitial(away)}';
+    final marker =
+        '${leagueTeamCardLabelForName(home, competitionKey: game.competitionKey)}'
+        '/${leagueTeamCardLabelForName(away, competitionKey: game.competitionKey)}';
     final meta = _compactMeta(game);
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,

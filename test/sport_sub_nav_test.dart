@@ -531,15 +531,16 @@ void main() {
       await tester.ensureVisible(npbRow);
       await tester.tap(npbRow);
       await tester.pumpAndSettle();
-      // NPB is outside the Japanese domestic-football catalog, so the card
-      // keeps the trailing English token instead of an invented short label.
+      // NPB is outside the reviewed football catalog, so the card keeps the
+      // full display name instead of a trailing token or an initial.
       expect(
         find.descendant(
           of: find.byKey(const ValueKey('league-team-card-yomiuri_giants')),
-          matching: find.text('Giants'),
+          matching: find.text('Yomiuri Giants'),
         ),
         findsOneWidget,
       );
+      expect(find.text('Giants'), findsNothing);
       await tester.tap(find.byTooltip('フォローする').first);
       await tester.pumpAndSettle();
       expect(find.text('Googleでサインイン'), findsOneWidget);

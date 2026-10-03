@@ -7,6 +7,19 @@ import '../../domain/models/team.dart';
 const maxTeamSearchWidthVariants = 2;
 const maxTeamSearchRepositoryReads = 16;
 
+/// Whether [team] belongs in a competition-scoped team read.
+///
+/// A blank [competitionKey] is an unscoped read and keeps every team.
+/// A scoped read keeps a team only when its resolved `competitionKey` is that
+/// competition. Legacy `sportKey` queries can return a document whose resolved
+/// key already names a different competition; that team belongs to the other
+/// league.
+bool teamMatchesCompetitionScope(Team team, String? competitionKey) {
+  final key = competitionKey?.trim();
+  if (key == null || key.isEmpty) return true;
+  return team.competitionKey == key;
+}
+
 /// Read API for teams and leagues.
 abstract class TeamRepository {
   Future<List<League>> fetchLeagues({String? competitionKey});
@@ -107,9 +120,10 @@ class FirestoreTeamRepository implements TeamRepository {
     final seen = <String>{};
     final results = <Team>[];
     for (final doc in [...primarySnap.docs, ...legacySnap.docs]) {
-      if (seen.add(doc.id)) {
-        results.add(Team.fromFirestore(doc.data(), doc.id));
-      }
+      if (!seen.add(doc.id)) continue;
+      final team = Team.fromFirestore(doc.data(), doc.id);
+      if (!teamMatchesCompetitionScope(team, competitionKey)) continue;
+      results.add(team);
     }
     results.sort((a, b) => a.nameJa.compareTo(b.nameJa));
     return results;
@@ -176,10 +190,9 @@ class FirestoreTeamRepository implements TeamRepository {
     Query<Map<String, dynamic>> nameFilter(
       Query<Map<String, dynamic>> base,
       String candidate,
-    ) =>
-        base
-            .where('nameJa', isGreaterThanOrEqualTo: candidate)
-            .where('nameJa', isLessThan: '$candidate$maxUnicodeSuffix');
+    ) => base
+        .where('nameJa', isGreaterThanOrEqualTo: candidate)
+        .where('nameJa', isLessThan: '$candidate$maxUnicodeSuffix');
 
     // Helper: merge docs from multiple snapshots, deduplicate by doc ID,
     // and honour the overall page size limit.
@@ -190,10 +203,11 @@ class FirestoreTeamRepository implements TeamRepository {
       final results = <Team>[];
       for (final docs in snapshots) {
         for (final doc in docs) {
-          if (seen.add(doc.id)) {
-            results.add(Team.fromFirestore(doc.data(), doc.id));
-            if (results.length >= AppConstants.defaultPageSize) return results;
-          }
+          if (!seen.add(doc.id)) continue;
+          final team = Team.fromFirestore(doc.data(), doc.id);
+          if (!teamMatchesCompetitionScope(team, competitionKey)) continue;
+          results.add(team);
+          if (results.length >= AppConstants.defaultPageSize) return results;
         }
       }
       return results;
@@ -288,7 +302,6 @@ class FirestoreTeamRepository implements TeamRepository {
       },
     }.where((value) => value.isNotEmpty).toList();
   }
-
 }
 
 /// At most two reviewed search spellings: original and the opposite ASCII
@@ -307,10 +320,7 @@ List<String> teamSearchWidthVariants(String value) {
   final hasFullWidthAscii = value.runes.any(
     (rune) => rune == 0x3000 || (rune >= 0xff01 && rune <= 0xff5e),
   );
-  return {
-    value,
-    convert(!hasFullWidthAscii),
-  }
+  return {value, convert(!hasFullWidthAscii)}
       .where((candidate) => candidate.isNotEmpty)
       .take(maxTeamSearchWidthVariants)
       .toList();

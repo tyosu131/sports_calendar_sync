@@ -60,45 +60,44 @@ final followedTeamsProvider = FutureProvider<List<Team>>((ref) async {
 /// Search query state
 final teamSearchQueryProvider = StateProvider.autoDispose<String>((ref) => '');
 
-/// Active sport tab on team search. null = フォロー中 (cross-sport).
-final teamSearchActiveSportTabIdProvider = StateProvider.autoDispose<String?>(
-  (ref) => null,
-);
-
-/// Search results scoped to the current query and active sport tab.
+/// Search results for one follow-discovery tab.
+///
+/// [sportTabId] is a [HomeSportTab.id]. [HomeSportTabIds.favorites] is
+/// フォロー中 and lists followed teams across sports. Each sport tab queries
+/// only that sport, so a tab animation cannot replace フォロー中 with another
+/// sport's teams.
 ///
 /// Sport-home discovery queries each enabled registry competition for that
 /// sport, then merges by team id. That is a temporary compatibility path, not
 /// canonical season membership. Do not call `searchTeams` with a null
 /// competition key here: the unscoped path is capped at the default page size
 /// across every sport.
-final teamSearchResultsProvider = FutureProvider.autoDispose<List<Team>>((
-  ref,
-) async {
-  final query = ref.watch(teamSearchQueryProvider);
-  final activeSportTabId = ref.watch(teamSearchActiveSportTabIdProvider);
-  final repository = ref.watch(teamRepositoryProvider);
+final teamSearchResultsProvider = FutureProvider.autoDispose
+    .family<List<Team>, String>((ref, sportTabId) async {
+      final query = ref.watch(teamSearchQueryProvider);
+      final repository = ref.watch(teamRepositoryProvider);
 
-  if (activeSportTabId == null) {
-    final teamIds = ref.watch(followedTeamIdsProvider);
-    final teams = await repository.fetchTeamsByIds(teamIds);
-    final normalizedQuery = _normalizeSearchText(query);
-    if (normalizedQuery.isEmpty) return teams;
-    return teams
-        .where((team) => _teamSearchText(team).contains(normalizedQuery))
-        .toList();
-  }
+      if (sportTabId == HomeSportTabIds.favorites) {
+        final teamIds = ref.watch(followedTeamIdsProvider);
+        final teams = await repository.fetchTeamsByIds(teamIds);
+        final normalizedQuery = _normalizeSearchText(query);
+        if (normalizedQuery.isEmpty) return teams;
+        return [
+          for (final team in teams)
+            if (_teamSearchText(team).contains(normalizedQuery)) team,
+        ];
+      }
 
-  final sportTab = followDiscoverySportTabs().firstWhere(
-    (tab) => tab.id == activeSportTabId,
-    orElse: () => throw StateError('Unknown sport tab: $activeSportTabId'),
-  );
-  return searchTeamsForSportTab(
-    repository: repository,
-    tab: sportTab,
-    query: query,
-  );
-});
+      final sportTab = followDiscoverySportTabs().firstWhere(
+        (tab) => tab.id == sportTabId,
+        orElse: () => throw StateError('Unknown sport tab: $sportTabId'),
+      );
+      return searchTeamsForSportTab(
+        repository: repository,
+        tab: sportTab,
+        query: query,
+      );
+    });
 
 String _teamSearchText(Team team) {
   return [

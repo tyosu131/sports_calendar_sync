@@ -1,5 +1,15 @@
 # Current State — sports_calendar_sync
 
+## Follow/Search scope and short team labels (2026-10-03)
+
+In-app presentation only. No deploy, no Firestore write, no Apple Sign-In.
+
+- Follow/Search already used フォロー中 | 野球 | サッカー | その他スポーツ, with ホーム | リーグ only inside a sport and no sub-nav on フォロー中. That structure was left in place.
+- Search results are now loaded per tab. Switching sports cannot replace the フォロー中 list with another sport's teams. The clear button tracks the field text.
+- League-card and compact-schedule labels use a reviewed catalog alias only when it matches the start of the display name and is shorter than that name (川崎, Kashima, Tottenham). Otherwise the full display name is kept and ellipsized. Trailing tokens, non-prefix aliases, and a fixed character cap are not used. Monogram badges stay initials. GameCard names, colors, and place cues are unchanged.
+- A legacy competition read drops a team whose resolved `competitionKey` is a different league. Canonical season membership is not filtered that way, so one club can still appear in each membership that lists it.
+- Real-device confirmation is pending.
+
 ## Match-card stadium / travel cue (2026-10-03)
 
 In-app presentation only. No deploy, no Firestore write, no Apple Sign-In,

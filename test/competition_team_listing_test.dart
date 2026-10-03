@@ -59,6 +59,34 @@ class _FakeTeamRepository implements TeamRepository {
   }) async => [];
 }
 
+class _MismatchedLegacyRepository implements TeamRepository {
+  @override
+  Future<List<Team>> fetchTeams({String? competitionKey}) async {
+    return [
+      _team('kashima_antlers', 'football_j1'),
+      _team('vegalta_sendai', 'football_j2'),
+    ];
+  }
+
+  @override
+  Future<List<Team>> fetchTeamsByIds(List<String> teamIds) async => [];
+
+  @override
+  Future<Team?> fetchTeam(String teamId) async => null;
+
+  @override
+  Future<List<Team>> fetchTeamsByLeague(String leagueId) async => [];
+
+  @override
+  Future<List<League>> fetchLeagues({String? competitionKey}) async => [];
+
+  @override
+  Future<List<Team>> searchTeams(
+    String query, {
+    String? competitionKey,
+  }) async => [];
+}
+
 Team _team(String id, String competitionKey) {
   return Team(
     id: id,
@@ -148,6 +176,34 @@ void main() {
     );
     expect(result.teams.single.id, 'giants');
   });
+
+  test(
+    'legacy fallback hides a team whose resolved competition is another league',
+    () async {
+      final service = CompetitionTeamListingService(
+        teamRepository: _MismatchedLegacyRepository(),
+        membershipRepository: SampleCompetitionMembershipRepository(),
+      );
+
+      final result = await service.listTeams('football_j1');
+      expect(
+        result.source,
+        CompetitionTeamListingSource.legacyTeamDocumentCompatibility,
+      );
+      expect(result.teams.map((team) => team.id), ['kashima_antlers']);
+      expect(
+        teamMatchesCompetitionScope(result.teams.single, 'football_j1'),
+        isTrue,
+      );
+      expect(
+        teamMatchesCompetitionScope(
+          _team('vegalta_sendai', 'football_j2'),
+          'football_j1',
+        ),
+        isFalse,
+      );
+    },
+  );
 
   test('sample repository exposes J2/J3 special membership only', () async {
     final repo = SampleCompetitionMembershipRepository();

@@ -29,7 +29,7 @@ void main() {
     expect(leagueBrowseAccents, contains(leagueBrowseAccent('football_j1')));
   });
 
-  test('card label uses a short catalog prefix, else a trailing token', () {
+  test('card label uses a catalog prefix, else the full name', () {
     expect(
       leagueTeamCardLabelForTeam(
         const Team(
@@ -55,20 +55,6 @@ void main() {
       '浦和',
     );
     expect(
-      leagueTeamCardLabel(
-        displayName: 'Yomiuri Giants',
-        language: DisplayLanguage.english,
-      ),
-      'Giants',
-    );
-    expect(
-      leagueTeamCardLabel(
-        displayName: '読売ジャイアンツ',
-        language: DisplayLanguage.japanese,
-      ),
-      '読売ジャイアンツ',
-    );
-    expect(
       leagueTeamCardLabelForTeam(
         const Team(
           id: 'kawasaki_frontale',
@@ -79,6 +65,98 @@ void main() {
         ),
       ),
       '川崎',
+    );
+    expect(
+      leagueTeamCardLabelForTeam(
+        const Team(
+          id: 'kawasaki_frontale',
+          nameEn: 'Kawasaki Frontale',
+          nameJa: '川崎フロンターレ',
+          leagueId: 'league',
+          competitionKey: 'football_premier',
+        ),
+      ),
+      'Kawasaki Frontale',
+    );
+    expect(
+      leagueTeamCardLabelForName(
+        'Kashima Antlers',
+        competitionKey: 'football_premier',
+      ),
+      'Kashima',
+    );
+    expect(
+      leagueTeamCardLabelForName(
+        'Tottenham Hotspur',
+        competitionKey: 'football_premier',
+      ),
+      'Tottenham',
+    );
+    expect(
+      leagueTeamCardLabelForName('Tochigi SC', competitionKey: 'football_j2'),
+      'Tochigi SC',
+    );
+    expect(
+      leagueTeamCardLabelForTeam(
+        const Team(
+          id: 'fc_machida_zelvia',
+          nameEn: 'FC Machida Zelvia',
+          nameJa: 'ＦＣ町田ゼルビア',
+          leagueId: 'league',
+          competitionKey: 'football_j1',
+        ),
+      ),
+      'ＦＣ町田ゼルビア',
+    );
+    expect(
+      leagueTeamCardLabelForTeam(
+        const Team(
+          id: 'yokohama_f_marinos',
+          nameEn: 'Yokohama F. Marinos',
+          nameJa: '横浜Ｆ・マリノス',
+          leagueId: 'league',
+          competitionKey: 'football_j1',
+        ),
+      ),
+      '横浜Ｆ・マリノス',
+    );
+    expect(
+      leagueTeamCardLabelForTeam(
+        const Team(
+          id: 'tochigi_sc',
+          nameEn: 'Tochigi SC',
+          nameJa: '栃木ＳＣ',
+          leagueId: 'league',
+          competitionKey: 'football_j2',
+        ),
+      ),
+      '栃木ＳＣ',
+    );
+    expect(
+      leagueTeamCardLabelForTeam(
+        const Team(
+          id: 'yomiuri_giants',
+          nameEn: 'Yomiuri Giants',
+          nameJa: '読売ジャイアンツ',
+          leagueId: 'league',
+          competitionKey: 'baseball_npb',
+        ),
+      ),
+      'Yomiuri Giants',
+    );
+    expect(
+      leagueTeamCardLabel(
+        displayName: 'Yomiuri Giants',
+        language: DisplayLanguage.english,
+      ),
+      'Yomiuri Giants',
+    );
+    expect(
+      leagueTeamCardLabel(
+        displayName: '読売ジャイアンツ',
+        language: DisplayLanguage.japanese,
+      ),
+      '読売ジャイアンツ',
     );
     expect(
       leagueTeamCardLabel(

@@ -61,7 +61,6 @@ class _TeamSearchScaffoldState extends ConsumerState<_TeamSearchScaffold> {
     _controller = next;
     _observedIndex = next.index;
     next.addListener(_onTabsChanged);
-    _syncScopeForIndex(next.index);
   }
 
   void _onTabsChanged() {
@@ -72,14 +71,7 @@ class _TeamSearchScaffoldState extends ConsumerState<_TeamSearchScaffold> {
       _subNavIndex.value = 0;
     }
     _observedIndex = index;
-    _syncScopeForIndex(index);
     setState(() {});
-  }
-
-  void _syncScopeForIndex(int index) {
-    final tab = widget.tabs[index];
-    ref.read(teamSearchActiveSportTabIdProvider.notifier).state =
-        tab.showsAllSports ? null : tab.id;
   }
 
   @override
@@ -94,7 +86,6 @@ class _TeamSearchScaffoldState extends ConsumerState<_TeamSearchScaffold> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final tabs = widget.tabs;
     final tabIndex = _controller?.index ?? defaultHomeSportTabIndex(tabs);
     final showSubNav = homeTabShowsSportSubNav(tabs[tabIndex]);
@@ -141,37 +132,11 @@ class _TeamSearchScaffoldState extends ConsumerState<_TeamSearchScaffold> {
               if (showTeamSearchBar)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                  child: SearchBar(
-                    key: ValueKey('team-search-query-${tabs[tabIndex].id}'),
+                  child: _TeamNameSearchBar(
                     controller: _searchController,
-                    hintText: 'チーム名で検索...',
-                    leading: const Icon(Icons.search),
-                    elevation: const WidgetStatePropertyAll(0),
-                    backgroundColor: WidgetStatePropertyAll(
-                      colorScheme.surfaceContainerHighest.withValues(
-                        alpha: 0.55,
-                      ),
+                    fieldKey: ValueKey(
+                      'team-search-query-${tabs[tabIndex].id}',
                     ),
-                    shape: WidgetStatePropertyAll(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                    ),
-                    trailing: [
-                      if (_searchController.text.isNotEmpty)
-                        IconButton(
-                          icon: const Icon(Icons.clear),
-                          tooltip: '検索をクリア',
-                          onPressed: () {
-                            _searchController.clear();
-                            ref.read(teamSearchQueryProvider.notifier).state =
-                                '';
-                          },
-                        ),
-                    ],
-                    onChanged: (value) {
-                      ref.read(teamSearchQueryProvider.notifier).state = value;
-                    },
                   ),
                 ),
               Expanded(
@@ -232,65 +197,81 @@ class _TeamSearchPage extends ConsumerWidget {
         }
         return child!;
       },
-      child: const _SportTeamSearchResults(),
+      child: _SportTeamSearchResults(sportTabId: tab.id),
     );
   }
 }
 
-class _FollowingSearchBody extends ConsumerWidget {
+class _FollowingSearchBody extends StatelessWidget {
   const _FollowingSearchBody({required this.searchController});
 
   final TextEditingController searchController;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = Theme.of(context).colorScheme;
-
+  Widget build(BuildContext context) {
     return Column(
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-          child: SearchBar(
-            key: const ValueKey('team-search-query-following'),
+          child: _TeamNameSearchBar(
             controller: searchController,
-            hintText: 'チーム名で検索...',
-            leading: const Icon(Icons.search),
-            elevation: const WidgetStatePropertyAll(0),
-            backgroundColor: WidgetStatePropertyAll(
-              colorScheme.surfaceContainerHighest.withValues(alpha: 0.55),
-            ),
-            shape: WidgetStatePropertyAll(
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-            ),
-            trailing: [
-              if (searchController.text.isNotEmpty)
-                IconButton(
-                  icon: const Icon(Icons.clear),
-                  tooltip: '検索をクリア',
-                  onPressed: () {
-                    searchController.clear();
-                    ref.read(teamSearchQueryProvider.notifier).state = '';
-                  },
-                ),
-            ],
-            onChanged: (value) {
-              ref.read(teamSearchQueryProvider.notifier).state = value;
-            },
+            fieldKey: const ValueKey('team-search-query-following'),
           ),
         ),
-        const Expanded(child: _SportTeamSearchResults()),
+        const Expanded(
+          child: _SportTeamSearchResults(sportTabId: HomeSportTabIds.favorites),
+        ),
       ],
     );
   }
 }
 
+class _TeamNameSearchBar extends StatelessWidget {
+  const _TeamNameSearchBar({required this.controller, required this.fieldKey});
+
+  final TextEditingController controller;
+  final Key fieldKey;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return ValueListenableBuilder<TextEditingValue>(
+      valueListenable: controller,
+      builder: (context, value, _) {
+        return SearchBar(
+          key: fieldKey,
+          controller: controller,
+          hintText: 'チーム名で検索...',
+          leading: const Icon(Icons.search),
+          elevation: const WidgetStatePropertyAll(0),
+          backgroundColor: WidgetStatePropertyAll(
+            colorScheme.surfaceContainerHighest.withValues(alpha: 0.55),
+          ),
+          shape: WidgetStatePropertyAll(
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          ),
+          trailing: [
+            if (value.text.isNotEmpty)
+              IconButton(
+                icon: const Icon(Icons.clear),
+                tooltip: '検索をクリア',
+                onPressed: controller.clear,
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
+
 class _SportTeamSearchResults extends ConsumerWidget {
-  const _SportTeamSearchResults();
+  const _SportTeamSearchResults({required this.sportTabId});
+
+  final String sportTabId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final resultsAsync = ref.watch(teamSearchResultsProvider);
-    final activeSportTabId = ref.watch(teamSearchActiveSportTabIdProvider);
+    final resultsAsync = ref.watch(teamSearchResultsProvider(sportTabId));
     final searchQuery = ref.watch(teamSearchQueryProvider);
     final followedIds = ref.watch(followedTeamIdsProvider);
     final user = ref.watch(currentUserProvider);
@@ -302,7 +283,7 @@ class _SportTeamSearchResults extends ConsumerWidget {
       error: (e, _) => Center(child: Text('エラー: $e')),
       data: (teams) {
         if (teams.isEmpty) {
-          final followedOnly = activeSportTabId == null;
+          final followedOnly = sportTabId == HomeSportTabIds.favorites;
           final emptyMessage = followedOnly
               ? (searchQuery.trim().isEmpty
                     ? 'フォロー中のチームはありません'

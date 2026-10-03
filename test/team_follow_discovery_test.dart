@@ -102,7 +102,24 @@ void main() {
     );
     expect(find.text('チーム名で検索...'), findsOneWidget);
     expect(find.text('リーグを検索'), findsNothing);
+    expect(find.text('鹿島アントラーズ'), findsOneWidget);
+    expect(find.text('ガンバ大阪'), findsOneWidget);
+    expect(find.text('Yomiuri Giants'), findsNothing);
+    expect(tester.takeException(), isNull);
     await _capture(tester, 'search-following');
+
+    await tester.enterText(
+      find.byKey(const ValueKey('team-search-query-following')),
+      '存在しないチーム',
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('条件に合うフォロー中のチームはありません'), findsOneWidget);
+    expect(find.byTooltip('検索をクリア'), findsOneWidget);
+    await tester.tap(find.byTooltip('検索をクリア'));
+    await tester.pumpAndSettle();
+    expect(find.text('鹿島アントラーズ'), findsOneWidget);
+    expect(find.byTooltip('検索をクリア'), findsNothing);
+    expect(tester.takeException(), isNull);
 
     await tester.tap(find.text('サッカー'));
     await tester.pumpAndSettle();
@@ -114,6 +131,41 @@ void main() {
     );
     expect(find.text('チーム名で検索...'), findsOneWidget);
     expect(find.text('リーグを検索'), findsNothing);
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('team-search-page-football')),
+        matching: find.text('鹿島アントラーズ'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('team-search-page-football')),
+        matching: find.text('Yomiuri Giants'),
+      ),
+      findsNothing,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('team-search-page-football')),
+        matching: find.text('ベガルタ仙台'),
+      ),
+      findsNothing,
+    );
+    final kashimaTile = find.widgetWithText(ListTile, '鹿島アントラーズ');
+    expect(
+      find.descendant(of: kashimaTile, matching: find.byIcon(Icons.favorite)),
+      findsOneWidget,
+    );
+    final urawaTile = find.widgetWithText(ListTile, '浦和レッズ');
+    expect(
+      find.descendant(
+        of: urawaTile,
+        matching: find.byIcon(Icons.favorite_border),
+      ),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
     await _capture(tester, 'search-football-home');
 
     await tester.tap(
@@ -154,6 +206,79 @@ void main() {
     );
     expect(find.text('チーム名で検索...'), findsOneWidget);
     expect(find.text('リーグを検索'), findsNothing);
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('team-search-page-baseball')),
+        matching: find.text('Yomiuri Giants'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('team-search-page-baseball')),
+        matching: find.text('鹿島アントラーズ'),
+      ),
+      findsNothing,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('following tab stays empty without follows and does not throw', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final users = SampleUserRepository();
+    await users.unfollowTeam(SampleUserRepository.sampleUid, 'kashima_antlers');
+    await users.unfollowTeam(SampleUserRepository.sampleUid, 'gamba_osaka');
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          userRepositoryProvider.overrideWith((ref) => users),
+          teamRepositoryProvider.overrideWith((ref) => SampleTeamRepository()),
+          competitionMembershipRepositoryProvider.overrideWith(
+            (ref) => SampleCompetitionMembershipRepository(),
+          ),
+          userProfileProvider.overrideWith(
+            (ref) => users.watchProfile(SampleUserRepository.sampleUid),
+          ),
+        ],
+        child: RepaintBoundary(
+          child: MaterialApp(
+            locale: const Locale('ja', 'JP'),
+            localizationsDelegates: const [
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: const [Locale('ja', 'JP'), Locale('en', 'US')],
+            theme: ThemeData(
+              useMaterial3: true,
+              fontFamily: _fontFamily,
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: const Color(0xFF1565C0),
+                brightness: Brightness.dark,
+              ),
+            ),
+            home: const TeamSearchScreen(),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('フォロー中のチームはありません'), findsOneWidget);
+    expect(find.byType(NavigationBar), findsNothing);
+    expect(tester.takeException(), isNull);
+    await _capture(tester, 'search-following-empty');
+
+    await tester.tap(find.text('サッカー'));
+    await tester.pumpAndSettle();
+    expect(find.text('鹿島アントラーズ'), findsOneWidget);
+    expect(find.text('フォロー中のチームはありません'), findsNothing);
+    expect(tester.takeException(), isNull);
   });
 }
 

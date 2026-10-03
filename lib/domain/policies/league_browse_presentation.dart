@@ -5,9 +5,13 @@ import 'club_presentation_data.dart';
 import 'team_display_name_policy.dart';
 import 'team_presentation_policy.dart';
 
-/// Short card title. Uses an existing catalog alias when one is a short
-/// prefix of the display name. Otherwise keeps a short trailing token, or the
-/// full name when cutting it would invent a label.
+/// Short card title.
+///
+/// A reviewed catalog alias is used only when it matches the start of
+/// [displayName], contains at least two characters, and is shorter than that
+/// name. Otherwise the full display name is returned and the card ellipsizes
+/// it. Names are not cut to a fixed length, and missing aliases are not
+/// invented.
 String leagueTeamCardLabel({
   required String displayName,
   required DisplayLanguage language,
@@ -15,13 +19,12 @@ String leagueTeamCardLabel({
 }) {
   final full = displayName.trim();
   if (full.isEmpty) return full;
-  final fromCatalog = _catalogShortLabel(
-    full: full,
-    language: language,
-    presentation: presentation,
-  );
-  if (fromCatalog != null) return fromCatalog;
-  return _fallbackShortLabel(full);
+  return _catalogPrefixLabel(
+        full: full,
+        language: language,
+        presentation: presentation,
+      ) ??
+      full;
 }
 
 String leagueTeamCardLabelForTeam(Team team) {
@@ -95,7 +98,7 @@ LeagueTeamNextMatch? nextMatchForTeam(
   return LeagueTeamNextMatch(opponent: 'vs $short', when: when);
 }
 
-String? _catalogShortLabel({
+String? _catalogPrefixLabel({
   required String full,
   required DisplayLanguage language,
   required ClubPresentation? presentation,
@@ -109,44 +112,31 @@ String? _catalogShortLabel({
         presentation.nameEn.trim().isNotEmpty)
       presentation.nameEn,
     ...presentation.aliases,
+    ...presentation.scopedAliases,
   ];
-  final shorts = <String>[];
+  String? best;
   final seen = <String>{};
   for (final raw in pool) {
     final name = raw.trim();
-    if (!seen.add(name)) continue;
+    if (name.isEmpty || !seen.add(name)) continue;
     final length = name.runes.length;
-    if (length < 2 || length > 6) continue;
+    // One character is an initial, not a place name. The full name is not a
+    // shorter label.
+    if (length < 2 || length >= full.runes.length) continue;
+    if (!full.startsWith(name)) continue;
     final japanese = _hasKanaOrKanji(name);
     if (language == DisplayLanguage.japanese && !japanese) continue;
     if (language == DisplayLanguage.english && japanese) continue;
-    shorts.add(name);
+    if (best == null) {
+      best = name;
+      continue;
+    }
+    final byLength = length.compareTo(best.runes.length);
+    if (byLength < 0 || (byLength == 0 && name.compareTo(best) < 0)) {
+      best = name;
+    }
   }
-  if (shorts.isEmpty) return null;
-  shorts.sort((a, b) {
-    final aPrefix = full.startsWith(a) ? 0 : 1;
-    final bPrefix = full.startsWith(b) ? 0 : 1;
-    final byPrefix = aPrefix.compareTo(bPrefix);
-    if (byPrefix != 0) return byPrefix;
-    final byLength = a.runes.length.compareTo(b.runes.length);
-    if (byLength != 0) return byLength;
-    return a.compareTo(b);
-  });
-  final best = shorts.first;
-  if (!full.startsWith(best) && best.runes.length > 4) return null;
   return best;
-}
-
-String _fallbackShortLabel(String full) {
-  final parts = full
-      .split(RegExp(r'[\s・･]+'))
-      .where((part) => part.isNotEmpty)
-      .toList();
-  if (parts.length >= 2) {
-    final last = parts.last;
-    if (last.runes.length <= 10) return last;
-  }
-  return full;
 }
 
 bool _hasKanaOrKanji(String value) {
