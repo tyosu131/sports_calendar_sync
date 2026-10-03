@@ -62,44 +62,63 @@ class GameCard extends StatelessWidget {
               CompetitionBadge(competition: competition),
               const SizedBox(height: 8),
             ],
-            // Date/time row
+            // Kickoff is JST from startTimeUTC. game.timezone is the source
+            // clock (GOAL writes UTC; API-Football writes the request
+            // timezone) and is not an authoritative venue time.
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (isToday)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primary,
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: Text(
-                      '今日',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: theme.colorScheme.onPrimary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                if (isToday) const SizedBox(width: 8),
                 Expanded(
-                  child: Text(
-                    DateTimeUtils.formatJstDate(game.startTimeUtcDateTime),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurface,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  DateTimeUtils.formatTimeOnly(game.startTimeUtcDateTime),
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: theme.colorScheme.onSurface,
-                    fontWeight: FontWeight.w800,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        DateTimeUtils.formatTimeOnly(game.startTimeUtcDateTime),
+                        style: theme.textTheme.headlineMedium?.copyWith(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.w800,
+                          height: 1,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          if (isToday) ...[
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.primary,
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                              child: Text(
+                                '今日',
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: theme.colorScheme.onPrimary,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                          ],
+                          Expanded(
+                            child: Text(
+                              DateTimeUtils.formatJstDate(
+                                game.startTimeUtcDateTime,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                color: theme.colorScheme.onSurface,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
                 if (showStatus) ...[

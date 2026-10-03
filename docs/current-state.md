@@ -20,7 +20,9 @@ no store or signing change.
   used. There is still no `isNeutralVenue` and no stadium master, so the
   cue is the stored home/away side, not a confirmed club ground or a flight.
 - Kickoff stays JST derived from `startTimeUTC` via `DateTimeUtils`. The
-  date and the time are separate; venue-local time is not invented.
+  time is the largest text on the card; the date sits under it. `timezone`
+  is not shown: GOAL stores `UTC`, and API-Football stores the request
+  timezone. Neither is an authoritative venue clock.
 - Team detail passes that team's id into the same card. Schedule tiles,
   league lists, follow/search IA, and sample games are unchanged.
 - Real-device confirmation is pending.

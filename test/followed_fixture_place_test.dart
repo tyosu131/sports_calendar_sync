@@ -157,6 +157,15 @@ void main() {
     );
     expect(find.text('2026年10月17日(土)'), findsOneWidget);
     expect(find.text('19:00'), findsOneWidget);
+    expect(find.text('UTC'), findsNothing);
+    expect(find.text('JST'), findsNothing);
+    final time = tester.widget<Text>(find.text('19:00'));
+    final date = tester.widget<Text>(find.text('2026年10月17日(土)'));
+    expect(time.style!.fontSize!, greaterThan(date.style!.fontSize!));
+    expect(
+      time.style!.color,
+      Theme.of(tester.element(find.text('19:00'))).colorScheme.primary,
+    );
     _expectCueOnHomeSide(tester);
     await _capture(tester, 'home-stadium-card');
     semantics.dispose();
