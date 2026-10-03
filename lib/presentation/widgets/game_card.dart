@@ -30,7 +30,7 @@ class GameCard extends StatelessWidget {
   /// Canonical team ids used to place the stadium / travel cue.
   ///
   /// Home and sport-home pass followed team ids. A team schedule passes
-  /// that one team. Empty, or more than one matching side, hides the cue.
+  /// that one team. Each matching side shows its own cue.
   final List<String> perspectiveTeamIds;
 
   @override
@@ -38,7 +38,7 @@ class GameCard extends StatelessWidget {
     final theme = Theme.of(context);
     final isToday = DateTimeUtils.isToday(game.startTimeUtcDateTime);
     final competition = CompetitionDisplayPolicy.forKey(game.competitionKey);
-    final place = fixturePlaceForPerspective(
+    final places = fixturePlaceForPerspective(
       homeTeamId: game.homeTeamId,
       awayTeamId: game.awayTeamId,
       perspectiveTeamIds: perspectiveTeamIds,
@@ -110,7 +110,7 @@ class GameCard extends StatelessWidget {
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.titleSmall?.copyWith(
+                              style: theme.textTheme.bodyLarge?.copyWith(
                                 color: theme.colorScheme.onSurface,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -127,13 +127,22 @@ class GameCard extends StatelessWidget {
                 ],
               ],
             ),
-            if (place != null) ...[
+            if (places.isNotEmpty) ...[
               const SizedBox(height: 10),
-              Align(
-                alignment: place == FollowedFixturePlace.stadium
-                    ? Alignment.centerLeft
-                    : Alignment.centerRight,
-                child: _FollowedPlaceChip(place: place),
+              Row(
+                children: [
+                  if (places.contains(FollowedFixturePlace.stadium))
+                    const _FollowedPlaceChip(
+                      place: FollowedFixturePlace.stadium,
+                    )
+                  else
+                    const SizedBox.shrink(),
+                  const Spacer(),
+                  if (places.contains(FollowedFixturePlace.travel))
+                    const _FollowedPlaceChip(
+                      place: FollowedFixturePlace.travel,
+                    ),
+                ],
               ),
             ],
             const SizedBox(height: 12),
@@ -273,7 +282,11 @@ class _FollowedPlaceChip extends StatelessWidget {
         : scheme.onTertiaryContainer;
 
     return Semantics(
-      key: const Key('followed-fixture-place'),
+      key: Key(
+        stadium
+            ? 'followed-fixture-place-stadium'
+            : 'followed-fixture-place-travel',
+      ),
       container: true,
       label: followedFixturePlaceSemanticsLabel(place),
       child: ExcludeSemantics(

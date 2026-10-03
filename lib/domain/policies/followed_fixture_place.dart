@@ -9,41 +9,38 @@
 /// cue, not a flight.
 enum FollowedFixturePlace { stadium, travel }
 
-/// Spoken label. The chip shows an icon only; this is not drawn on the card.
+/// Spoken side fact. The chip shows an icon only; this is not drawn on the card.
 String followedFixturePlaceSemanticsLabel(FollowedFixturePlace place) =>
     switch (place) {
-      FollowedFixturePlace.stadium => 'フォロー中のチームはスタジアム',
-      FollowedFixturePlace.travel => 'フォロー中のチームは移動',
+      FollowedFixturePlace.stadium => 'フォロー中のチームはホーム側',
+      FollowedFixturePlace.travel => 'フォロー中のチームはアウェイ側',
     };
 
-/// Venue cue for the cards a person actually scans.
+/// Venue cues for the cards a person actually scans.
 ///
-/// Returns null when the cue would be a guess:
-/// - no perspective id matches either side
-/// - both sides contain a perspective id (a single label would be wrong
-///   for one of them)
-/// - both sides are the same id
+/// Each side is independent: a followed home id adds [FollowedFixturePlace.stadium],
+/// a followed away id adds [FollowedFixturePlace.travel]. Both can be present.
+/// The set is empty when neither side matches, or both sides are the same id.
 ///
 /// Matching is exact on canonical team ids. Source ids and display names
 /// are not consulted.
-FollowedFixturePlace? fixturePlaceForPerspective({
+Set<FollowedFixturePlace> fixturePlaceForPerspective({
   required String? homeTeamId,
   required String? awayTeamId,
   required Iterable<String> perspectiveTeamIds,
 }) {
   final home = _canonicalId(homeTeamId);
   final away = _canonicalId(awayTeamId);
-  if (home != null && away != null && home == away) return null;
+  if (home != null && away != null && home == away) return const {};
 
   final perspective = {for (final id in perspectiveTeamIds) ?_canonicalId(id)};
-  if (perspective.isEmpty) return null;
+  if (perspective.isEmpty) return const {};
 
-  final homeListed = home != null && perspective.contains(home);
-  final awayListed = away != null && perspective.contains(away);
-  if (homeListed == awayListed) return null;
-  return homeListed
-      ? FollowedFixturePlace.stadium
-      : FollowedFixturePlace.travel;
+  return {
+    if (home != null && perspective.contains(home))
+      FollowedFixturePlace.stadium,
+    if (away != null && perspective.contains(away)) FollowedFixturePlace.travel,
+  };
 }
 
 String? _canonicalId(String? value) {

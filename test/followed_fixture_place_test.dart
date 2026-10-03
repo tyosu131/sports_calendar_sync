@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -17,6 +18,7 @@ import 'package:sports_calendar_sync/domain/models/user_profile.dart';
 import 'package:sports_calendar_sync/domain/policies/followed_fixture_place.dart';
 import 'package:sports_calendar_sync/domain/policies/team_presentation_policy.dart';
 import 'package:sports_calendar_sync/presentation/screens/home_screen.dart';
+import 'package:sports_calendar_sync/presentation/screens/team_detail_screen.dart';
 import 'package:sports_calendar_sync/presentation/widgets/game_card.dart';
 
 const _captureDir = String.fromEnvironment('CAPTURE_PLACE_CUE');
@@ -37,41 +39,41 @@ void main() {
     await _loadCjkFont();
   });
 
-  test('stadium when the only perspective id is the home side', () {
+  test('HOME only followed returns the stadium cue', () {
     expect(
       fixturePlaceForPerspective(
         homeTeamId: 'kashima_antlers',
         awayTeamId: 'urawa_reds',
         perspectiveTeamIds: const ['kashima_antlers'],
       ),
-      FollowedFixturePlace.stadium,
+      {FollowedFixturePlace.stadium},
     );
   });
 
-  test('travel when the only perspective id is the away side', () {
+  test('AWAY only followed returns the transit cue', () {
     expect(
       fixturePlaceForPerspective(
         homeTeamId: 'urawa_reds',
         awayTeamId: 'kashima_antlers',
         perspectiveTeamIds: const ['kashima_antlers'],
       ),
-      FollowedFixturePlace.travel,
+      {FollowedFixturePlace.travel},
     );
   });
 
-  test('no cue when both sides are perspective teams', () {
+  test('BOTH followed returns stadium and transit', () {
     expect(
       fixturePlaceForPerspective(
         homeTeamId: 'kashima_antlers',
         awayTeamId: 'gamba_osaka',
         perspectiveTeamIds: const ['gamba_osaka', 'kashima_antlers'],
       ),
-      isNull,
+      {FollowedFixturePlace.stadium, FollowedFixturePlace.travel},
     );
   });
 
   test(
-    'no cue when neither side matches, including source-id-only opponents',
+    'NEITHER followed returns no cue, including source-id-only opponents',
     () {
       expect(
         fixturePlaceForPerspective(
@@ -79,7 +81,15 @@ void main() {
           awayTeamId: null,
           perspectiveTeamIds: const ['goal-opponent'],
         ),
-        isNull,
+        isEmpty,
+      );
+      expect(
+        fixturePlaceForPerspective(
+          homeTeamId: 'kashima_antlers',
+          awayTeamId: 'urawa_reds',
+          perspectiveTeamIds: const [],
+        ),
+        isEmpty,
       );
       expect(
         fixturePlaceForPerspective(
@@ -87,19 +97,19 @@ void main() {
           awayTeamId: null,
           perspectiveTeamIds: const ['kashima_antlers'],
         ),
-        isNull,
+        isEmpty,
       );
     },
   );
 
-  test('blank ids and a duplicated side do not invent a cue', () {
+  test('canonical ids only: trim, same id on both sides, and case', () {
     expect(
       fixturePlaceForPerspective(
         homeTeamId: '  ',
         awayTeamId: 'kashima_antlers',
         perspectiveTeamIds: const ['', ' kashima_antlers '],
       ),
-      FollowedFixturePlace.travel,
+      {FollowedFixturePlace.travel},
     );
     expect(
       fixturePlaceForPerspective(
@@ -107,7 +117,7 @@ void main() {
         awayTeamId: 'kashima_antlers',
         perspectiveTeamIds: const ['kashima_antlers'],
       ),
-      isNull,
+      isEmpty,
     );
     expect(
       fixturePlaceForPerspective(
@@ -115,19 +125,23 @@ void main() {
         awayTeamId: 'urawa_reds',
         perspectiveTeamIds: const ['kashima'],
       ),
-      isNull,
+      isEmpty,
     );
   });
 
-  test('spoken labels name the place and do not call travel a flight', () {
-    expect(
-      followedFixturePlaceSemanticsLabel(FollowedFixturePlace.stadium),
-      'フォロー中のチームはスタジアム',
+  test('spoken labels state the side and do not name the metaphor', () {
+    final home = followedFixturePlaceSemanticsLabel(
+      FollowedFixturePlace.stadium,
     );
-    expect(
-      followedFixturePlaceSemanticsLabel(FollowedFixturePlace.travel),
-      'フォロー中のチームは移動',
+    final away = followedFixturePlaceSemanticsLabel(
+      FollowedFixturePlace.travel,
     );
+    expect(home, 'フォロー中のチームはホーム側');
+    expect(away, 'フォロー中のチームはアウェイ側');
+    expect(home.contains('スタジアム'), isFalse);
+    expect(home.contains('移動'), isFalse);
+    expect(away.contains('スタジアム'), isFalse);
+    expect(away.contains('移動'), isFalse);
   });
 
   testWidgets('home card shows a stadium icon on the home side', (
@@ -152,20 +166,24 @@ void main() {
     await _expectPaintedMark(tester, const Key('stadium-cue-icon'));
     await _expectPaintedMark(tester, const Key('venue-pin-mark'));
     expect(
-      tester.getSemantics(find.byKey(const Key('followed-fixture-place'))),
-      isSemantics(label: 'フォロー中のチームはスタジアム'),
+      tester.getSemantics(
+        find.byKey(const Key('followed-fixture-place-stadium')),
+      ),
+      isSemantics(label: 'フォロー中のチームはホーム側'),
     );
     expect(find.text('2026年10月17日(土)'), findsOneWidget);
     expect(find.text('19:00'), findsOneWidget);
     expect(find.text('UTC'), findsNothing);
     expect(find.text('JST'), findsNothing);
+    final theme = Theme.of(tester.element(find.text('19:00')));
     final time = tester.widget<Text>(find.text('19:00'));
     final date = tester.widget<Text>(find.text('2026年10月17日(土)'));
+    final teamName = tester.widget<Text>(find.text('鹿島アントラーズ'));
+    expect(time.style!.fontSize, theme.textTheme.headlineMedium!.fontSize);
+    expect(date.style!.fontSize, theme.textTheme.bodyLarge!.fontSize);
+    expect(date.style!.fontSize, teamName.style!.fontSize);
     expect(time.style!.fontSize!, greaterThan(date.style!.fontSize!));
-    expect(
-      time.style!.color,
-      Theme.of(tester.element(find.text('19:00'))).colorScheme.primary,
-    );
+    expect(time.style!.color, theme.colorScheme.primary);
     _expectCueOnHomeSide(tester);
     await _capture(tester, 'home-stadium-card');
     semantics.dispose();
@@ -199,29 +217,136 @@ void main() {
     expect(find.byIcon(Icons.airplanemode_active), findsNothing);
     await _expectPaintedMark(tester, const Key('transit-cue-icon'));
     expect(
-      tester.getSemantics(find.byKey(const Key('followed-fixture-place'))),
-      isSemantics(label: 'フォロー中のチームは移動'),
+      tester.getSemantics(
+        find.byKey(const Key('followed-fixture-place-travel')),
+      ),
+      isSemantics(label: 'フォロー中のチームはアウェイ側'),
     );
     _expectCueOnAwaySide(tester);
     await _capture(tester, 'away-travel-card');
     semantics.dispose();
   });
 
-  testWidgets('ambiguous and unmatched fixtures hide the cue', (tester) async {
+  testWidgets(
+    'BOTH followed shows stadium on the home side and transit on the away side',
+    (tester) async {
+      final semantics = tester.ensureSemantics();
+      await _pumpCard(
+        tester,
+        game: _game(
+          homeTeamId: 'kashima_antlers',
+          awayTeamId: 'gamba_osaka',
+          homeName: '鹿島アントラーズ',
+          awayName: 'ガンバ大阪',
+        ),
+        perspectiveTeamIds: const ['kashima_antlers', 'gamba_osaka'],
+      );
+
+      expect(find.byKey(const Key('stadium-cue-icon')), findsOneWidget);
+      expect(find.byKey(const Key('transit-cue-icon')), findsOneWidget);
+      expect(find.text('スタジアム'), findsNothing);
+      expect(find.text('移動'), findsNothing);
+      expect(
+        tester.getSemantics(
+          find.byKey(const Key('followed-fixture-place-stadium')),
+        ),
+        isSemantics(label: 'フォロー中のチームはホーム側'),
+      );
+      expect(
+        tester.getSemantics(
+          find.byKey(const Key('followed-fixture-place-travel')),
+        ),
+        isSemantics(label: 'フォロー中のチームはアウェイ側'),
+      );
+      _expectCueOnHomeSide(tester);
+      _expectCueOnAwaySide(tester);
+      await _capture(tester, 'both-followed-card');
+      semantics.dispose();
+    },
+  );
+
+  testWidgets('NEITHER followed and a source id hide the cue', (tester) async {
     await _pumpCard(
       tester,
-      game: _game(homeTeamId: 'kashima_antlers', awayTeamId: 'gamba_osaka'),
-      perspectiveTeamIds: const ['kashima_antlers', 'gamba_osaka'],
+      game: _game(homeTeamId: 'arsenal', awayTeamId: 'chelsea'),
+      perspectiveTeamIds: const [],
     );
-    expect(find.byKey(const Key('followed-fixture-place')), findsNothing);
+    expect(find.byKey(const Key('stadium-cue-icon')), findsNothing);
+    expect(find.byKey(const Key('transit-cue-icon')), findsNothing);
 
     await _pumpCard(
       tester,
       game: _game(homeTeamId: 'kashima_antlers', awayTeamId: null),
       perspectiveTeamIds: const ['goal-opponent'],
     );
+    expect(find.byKey(const Key('stadium-cue-icon')), findsNothing);
+    expect(find.byKey(const Key('transit-cue-icon')), findsNothing);
     expect(find.text('スタジアム'), findsNothing);
     expect(find.text('移動'), findsNothing);
+  });
+
+  testWidgets('team detail GameCard uses that one team id', (tester) async {
+    final semantics = tester.ensureSemantics();
+    const teamId = 'kashima_antlers';
+    await tester.binding.setSurfaceSize(const Size(390, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authStateProvider.overrideWith((ref) => Stream<User?>.value(null)),
+          userProfileProvider.overrideWith(
+            (ref) => Stream<UserProfile?>.value(
+              UserProfile(
+                uid: 'user',
+                email: 'user@example.com',
+                followedTeamIds: const ['kashima_antlers', 'gamba_osaka'],
+              ),
+            ),
+          ),
+          teamByIdProvider(teamId).overrideWith(
+            (ref) async => _team(teamId, '鹿島アントラーズ', 'football_j1'),
+          ),
+          upcomingGamesForTeamProvider(teamId).overrideWith(
+            (ref) async => [
+              _game(
+                homeTeamId: 'kashima_antlers',
+                awayTeamId: 'gamba_osaka',
+                homeName: '鹿島アントラーズ',
+                awayName: 'ガンバ大阪',
+              ),
+            ],
+          ),
+          gamePresentationProvider.overrideWith(
+            (ref, games) async => TeamPresentationLogoResolver(const []),
+          ),
+        ],
+        child: MaterialApp(
+          locale: const Locale('ja', 'JP'),
+          localizationsDelegates: const [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [Locale('ja', 'JP'), Locale('en', 'US')],
+          theme: _darkTheme(),
+          home: const TeamDetailScreen(teamId: teamId),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(GameCard), findsOneWidget);
+    expect(find.byKey(const Key('stadium-cue-icon')), findsOneWidget);
+    expect(find.byKey(const Key('transit-cue-icon')), findsNothing);
+    expect(
+      tester.getSemantics(
+        find.byKey(const Key('followed-fixture-place-stadium')),
+      ),
+      isSemantics(label: 'フォロー中のチームはホーム側'),
+    );
+    expect(find.text('19:00'), findsOneWidget);
+    expect(find.text('2026年10月17日(土)'), findsOneWidget);
+    semantics.dispose();
   });
 
   testWidgets('home and sport-home cards use followed team ids', (
@@ -295,14 +420,14 @@ void main() {
         of: find.byKey(const ValueKey('home-sport-page-favorites')),
         matching: find.byKey(const Key('stadium-cue-icon')),
       ),
-      findsOneWidget,
+      findsNWidgets(2),
     );
     expect(
       find.descendant(
         of: find.byKey(const ValueKey('home-sport-page-favorites')),
         matching: find.byKey(const Key('transit-cue-icon')),
       ),
-      findsOneWidget,
+      findsNWidgets(2),
     );
 
     await tester.tap(find.text('サッカー'));
@@ -312,19 +437,26 @@ void main() {
         of: find.byKey(const ValueKey('home-sport-page-football')),
         matching: find.byKey(const Key('stadium-cue-icon')),
       ),
-      findsOneWidget,
+      findsNWidgets(2),
     );
     expect(
       find.descendant(
         of: find.byKey(const ValueKey('home-sport-page-football')),
         matching: find.byKey(const Key('transit-cue-icon')),
       ),
-      findsOneWidget,
+      findsNWidgets(2),
     );
     expect(
       find.descendant(
         of: find.byKey(const ValueKey('home-sport-page-football')),
-        matching: find.byKey(const Key('followed-fixture-place')),
+        matching: find.byKey(const Key('followed-fixture-place-stadium')),
+      ),
+      findsNWidgets(2),
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('home-sport-page-football')),
+        matching: find.byKey(const Key('followed-fixture-place-travel')),
       ),
       findsNWidgets(2),
     );
@@ -418,13 +550,13 @@ Future<void> _pumpCard(
 }
 
 void _expectCueOnHomeSide(WidgetTester tester) {
-  final cue = tester.getCenter(find.byKey(const Key('followed-fixture-place')));
+  final cue = tester.getCenter(find.byKey(const Key('stadium-cue-icon')));
   final card = tester.getCenter(find.byType(Card));
   expect(cue.dx, lessThan(card.dx));
 }
 
 void _expectCueOnAwaySide(WidgetTester tester) {
-  final cue = tester.getCenter(find.byKey(const Key('followed-fixture-place')));
+  final cue = tester.getCenter(find.byKey(const Key('transit-cue-icon')));
   final card = tester.getCenter(find.byType(Card));
   expect(cue.dx, greaterThan(card.dx));
 }
