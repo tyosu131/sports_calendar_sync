@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 
-import '../../core/utils/date_time_utils.dart';
 import '../../domain/models/game.dart';
 import '../../domain/policies/competition_display_policy.dart';
 import '../../domain/policies/followed_fixture_place.dart';
 import '../../domain/policies/game_presentation_policy.dart';
+import '../../domain/policies/kickoff_clock.dart';
 import '../../domain/policies/team_display_name_policy.dart';
 import '../../domain/policies/team_presentation_policy.dart';
+import '../theme/competition_vs_frame.dart';
 import 'competition_badge.dart';
+import 'competition_vs_frame.dart';
 import 'drawn_place_icons.dart';
 import 'game_presentation_scope.dart';
 import 'game_status_chip.dart';
@@ -36,7 +38,6 @@ class GameCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isToday = DateTimeUtils.isToday(game.startTimeUtcDateTime);
     final competition = CompetitionDisplayPolicy.forKey(game.competitionKey);
     final places = fixturePlaceForPerspective(
       homeTeamId: game.homeTeamId,
@@ -44,6 +45,12 @@ class GameCard extends StatelessWidget {
       perspectiveTeamIds: perspectiveTeamIds,
     );
     final showStatus = GameStatusPresentation.forStatus(game.status) != null;
+    final kickoff = displayedKickoff(
+      startTimeUtc: game.startTimeUtcDateTime,
+      providerTimezone: game.timezone,
+      venueName: game.venue,
+    );
+    final frames = competitionVsFrameColors(game.competitionKey);
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -62,9 +69,8 @@ class GameCard extends StatelessWidget {
               CompetitionBadge(competition: competition),
               const SizedBox(height: 8),
             ],
-            // Kickoff is JST from startTimeUTC. game.timezone is the source
-            // clock (GOAL writes UTC; API-Football writes the request
-            // timezone) and is not an authoritative venue time.
+            // Kickoff is JST from startTimeUTC. No authoritative venue
+            // timezone is stored, so provider `timezone` is not displayed.
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -73,7 +79,7 @@ class GameCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        DateTimeUtils.formatTimeOnly(game.startTimeUtcDateTime),
+                        kickoff.time,
                         style: theme.textTheme.headlineMedium?.copyWith(
                           color: theme.colorScheme.primary,
                           fontWeight: FontWeight.w800,
@@ -83,7 +89,7 @@ class GameCard extends StatelessWidget {
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          if (isToday) ...[
+                          if (kickoff.isToday) ...[
                             Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 8,
@@ -105,9 +111,7 @@ class GameCard extends StatelessWidget {
                           ],
                           Expanded(
                             child: Text(
-                              DateTimeUtils.formatJstDate(
-                                game.startTimeUtcDateTime,
-                              ),
+                              kickoff.date,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: theme.textTheme.bodyLarge?.copyWith(
@@ -146,34 +150,46 @@ class GameCard extends StatelessWidget {
               ),
             ],
             const SizedBox(height: 12),
-            // Teams row
-            Row(
-              children: [
-                Expanded(
-                  child: _TeamSide(
-                    name: teamDisplayNames.homeName(game),
-                    logoUrl: resolveGameTeamLogoUrl(
-                      game.homeTeamLogoUrl,
-                      homeTeamLogoUrlFallback ??
-                          GamePresentationScope.logo(context, game, true),
+            // Teams row. Home and away frames differ in color and shape.
+            // The card surface stays the theme surface.
+            IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    child: CompetitionVsSide(
+                      side: CompetitionVsSideKind.home,
+                      color: frames.home,
+                      child: _TeamSide(
+                        name: teamDisplayNames.homeName(game),
+                        logoUrl: resolveGameTeamLogoUrl(
+                          game.homeTeamLogoUrl,
+                          homeTeamLogoUrlFallback ??
+                              GamePresentationScope.logo(context, game, true),
+                        ),
+                      ),
                     ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: _ScoreOrVs(game: game),
-                ),
-                Expanded(
-                  child: _TeamSide(
-                    name: teamDisplayNames.awayName(game),
-                    logoUrl: resolveGameTeamLogoUrl(
-                      game.awayTeamLogoUrl,
-                      awayTeamLogoUrlFallback ??
-                          GamePresentationScope.logo(context, game, false),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: Center(child: _ScoreOrVs(game: game)),
+                  ),
+                  Expanded(
+                    child: CompetitionVsSide(
+                      side: CompetitionVsSideKind.away,
+                      color: frames.away,
+                      child: _TeamSide(
+                        name: teamDisplayNames.awayName(game),
+                        logoUrl: resolveGameTeamLogoUrl(
+                          game.awayTeamLogoUrl,
+                          awayTeamLogoUrlFallback ??
+                              GamePresentationScope.logo(context, game, false),
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             // Venue
             if (visibleVenue(game.venue) case final venue?) ...[
@@ -240,6 +256,7 @@ class _TeamSide extends StatelessWidget {
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           style: theme.textTheme.bodyLarge?.copyWith(
+            color: Colors.white,
             fontWeight: FontWeight.bold,
           ),
           textAlign: TextAlign.center,

@@ -2,11 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// Broadcast platform info attached to a game.
 class BroadcastInfo {
-  const BroadcastInfo({
-    required this.platform,
-    this.url,
-    this.note,
-  });
+  const BroadcastInfo({required this.platform, this.url, this.note});
 
   /// Platform name, e.g. "DAZN", "U-NEXT", "ABEMA", "NHK".
   final String platform;
@@ -31,13 +27,7 @@ class BroadcastInfo {
 }
 
 /// Game / match status.
-enum GameStatus {
-  scheduled,
-  live,
-  finished,
-  postponed,
-  cancelled,
-}
+enum GameStatus { scheduled, live, finished, postponed, cancelled }
 
 /// A single game / match stored in Firestore under /games/{id}.
 ///
@@ -123,7 +113,11 @@ class Game {
   /// JST display string, e.g. "2025-07-15 19:00".
   final String startTimeJst;
 
-  /// Venue timezone, e.g. "Asia/Tokyo", "America/New_York".
+  /// Provider clock stored with the fixture. Not a venue timezone.
+  ///
+  /// GOAL writes `UTC`. API-Football writes the request timezone (the
+  /// sync asks for `UTC`). Sample rows may say `Asia/Tokyo` without a
+  /// venue-zone source. Kickoff display uses `startTimeUTC` as JST.
   final String timezone;
 
   final GameStatus status;
@@ -183,7 +177,8 @@ class Game {
       homeScore: data['homeScore'] as int?,
       awayScore: data['awayScore'] as int?,
       broadcastPlatforms: broadcastList,
-      externalFixtureId: data['externalFixtureId'] as int? ??
+      externalFixtureId:
+          data['externalFixtureId'] as int? ??
           data['rapidApiFixtureId'] as int?,
       // ignore: deprecated_member_use_from_same_package
       rapidApiFixtureId: data['rapidApiFixtureId'] as int?,

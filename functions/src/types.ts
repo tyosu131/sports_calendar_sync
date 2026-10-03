@@ -102,7 +102,10 @@ export interface GameDoc {
   startTimeUTC: Timestamp;
   /** JST display string, e.g. "2025-07-15 19:00". */
   startTimeJST: string;
-  /** Venue timezone, e.g. "Asia/Tokyo". */
+  /**
+   * Provider clock, not the venue's IANA zone.
+   * GOAL writes "UTC". API-Football writes the request timezone.
+   */
   timezone: string;
   status: GameStatus;
   venue?: string;
