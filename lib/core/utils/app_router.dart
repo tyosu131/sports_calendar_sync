@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../presentation/screens/home_screen.dart';
+import '../../presentation/screens/league_teams_screen.dart';
 import '../../presentation/screens/schedule_screen.dart';
 import '../../presentation/screens/settings_screen.dart';
 import '../../presentation/screens/sign_in_screen.dart';
@@ -37,6 +38,12 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/team/:teamId',
         builder: (context, state) =>
             TeamDetailScreen(teamId: state.pathParameters['teamId']!),
+      ),
+      GoRoute(
+        path: '/league/:competitionKey',
+        builder: (context, state) => LeagueTeamsScreen(
+          competitionKey: state.pathParameters['competitionKey']!,
+        ),
       ),
       GoRoute(
         path: '/settings',

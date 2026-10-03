@@ -45,6 +45,7 @@ Functions tests and configuration validation use local synthetic fixtures and do
 ## Architecture summary
 
 - Flutter app using Material 3, Riverpod, and GoRouter
+- Home top tabs are お気に入り, 野球, サッカー, and その他スポーツ. League names are not top tabs. お気に入り is cross-sport and has no bottom bar. Each sport tab has a bottom bar with exactly two items, ホーム and リーグ. リーグ lists that sport's `SportsRegistry` competitions and pushes a team list that uses the existing follow API. Search still uses flat competition tabs; `sportLeagueGroups()` is the shared sport-to-league hook.
 - Firebase Auth and Firestore-backed production repositories
 - Cloud Functions serving personalized ICS and orchestrating real GOAL V1 synchronization
 - Canonical Firestore games shared by in-app views, personalized ICS, and Google Calendar presentation
@@ -58,6 +59,7 @@ Functions tests and configuration validation use local synthetic fixtures and do
 - Terminated-app OAuth return remains pending verification.
 - OAuth denial UX, revoked-credential behavior, quota/rate-limit behavior, and all transient callback failure paths are not fully production-verified.
 - Broader competition/provider coverage, broadcast data, notifications, full-text search, offline caching, and high-resolution local logo assets remain incomplete.
+- Search and Follow have not moved onto the sport → league browser. They can reuse `competitionsForSportCategories()` / `sportLeagueGroups()` without listing every league in the bottom bar.
 
 ## Safety notes
 

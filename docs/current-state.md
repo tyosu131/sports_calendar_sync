@@ -1,5 +1,24 @@
 # Current State — sports_calendar_sync
 
+## Home sport sub-navigation (2026-10-03)
+
+In-app navigation only. This does not change the authentication status below,
+and it does not deploy, write Firestore, or clear logo rights.
+
+- Top tabs stay お気に入り, 野球, サッカー, その他スポーツ. Individual leagues are not tabs and are not bottom-nav destinations.
+- お気に入り is cross-sport and does not show ホーム | リーグ.
+- Each sport tab shows a bottom `NavigationBar` with exactly two items. Selection uses a filled icon, a heavier label, and the indicator.
+- ホーム keeps the existing client-side sport filter. リーグ lists enabled `SportsRegistry` competitions for that sport as rounded rows (search, monogram, disclosure) and pushes `/league/:competitionKey`.
+- Switching sport tabs resets sub-navigation to ホーム so リーグ does not leak across sports.
+- Team search / follow discovery mirrors the same top sport tabs (フォロー中 instead of お気に入り) and ホーム | リーグ inside each sport. Flat per-league top tabs are removed.
+- Search sport-home queries each enabled `SportsRegistry` competition for that sport (`searchTeams` with that `competitionKey`), then merges by team id. It does not take a global first-20 page and then filter by sport. That is still a temporary compatibility path, not canonical season membership. A later redesign is required before one team can appear in multiple competitions from that list.
+- On Search, the outer team search bar is shown for フォロー中 and sport ホーム only. Sport リーグ hides it so the only search field is `リーグを検索`.
+- League team lists resolve through readable `competitionSeasonMemberships` when present (`memberTeamIds` or `groups[].teamIds`). Otherwise they use an explicit temporary fallback to legacy team-master `competitionKey` / `sportKey` queries. Only `football_j2_j3_special` has local sample membership today; J1 / Premier / NPB still use the fallback until membership is seeded. A Firestore client read of this collection that fails (including permission-denied) is not treated as “no membership”.
+- `firestore.rules` grants public client read of `competitionSeasonMemberships/{membershipId}` and denies client write. Admin SDK writes remain allowed. There is no rules-unit-testing harness in this repo.
+- The team list uses two-column cards. Fills are decorative palette entries, not official kit colors (reviewed `presentationColor` is not in the model yet). Short labels use the reviewed catalog when an alias is a safe prefix; otherwise the full display name. Next opponent and kickoff filter by the opened league’s `competitionKey`. No flags, crests, or stadium/airplane marks.
+- Follow uses the existing user repository. Home game cards are unchanged.
+- Real-device confirmation of this slice is pending.
+
 ## Current operational source of truth — mobile authentication / Node 22 (2026-09-22)
 
 This section supersedes earlier current-status claims. Dated Node 20 and older

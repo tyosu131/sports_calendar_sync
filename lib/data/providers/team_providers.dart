@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/models/sport.dart';
 import '../../domain/models/team.dart';
+import '../../domain/policies/home_sport_navigation.dart';
+import '../services/sport_team_search.dart';
 import 'auth_providers.dart';
 import 'repository_providers.dart';
 
@@ -26,6 +28,18 @@ final teamsByLeagueProvider = FutureProvider.family<List<Team>, String>((
   return ref.watch(teamRepositoryProvider).fetchTeamsByLeague(leagueId);
 });
 
+/// Teams for one SportsRegistry competition key.
+///
+/// Prefer readable competition-season membership when present. Otherwise fall
+/// back to legacy team-master `competitionKey` queries (documented temporary).
+final teamsByCompetitionProvider = FutureProvider.autoDispose
+    .family<List<Team>, String>((ref, competitionKey) async {
+      final listing = await ref
+          .watch(competitionTeamListingServiceProvider)
+          .listTeams(competitionKey);
+      return listing.teams;
+    });
+
 /// A single team by ID.
 final teamByIdProvider = FutureProvider.family<Team?, String>((
   ref,
@@ -46,27 +60,26 @@ final followedTeamsProvider = FutureProvider<List<Team>>((ref) async {
 /// Search query state
 final teamSearchQueryProvider = StateProvider.autoDispose<String>((ref) => '');
 
-/// Active competition filter for search.
-/// null = no active competition tab (used by the "Followed" tab).
-final teamSearchCompetitionKeyProvider = StateProvider.autoDispose<String?>(
+/// Active sport tab on team search. null = フォロー中 (cross-sport).
+final teamSearchActiveSportTabIdProvider = StateProvider.autoDispose<String?>(
   (ref) => null,
 );
 
-/// Whether the search screen is scoped to the current user's followed teams.
-final teamSearchFollowedOnlyProvider = StateProvider.autoDispose<bool>(
-  (ref) => true,
-);
-
-/// Search results scoped to the current query and active competition tab.
+/// Search results scoped to the current query and active sport tab.
+///
+/// Sport-home discovery queries each enabled registry competition for that
+/// sport, then merges by team id. That is a temporary compatibility path, not
+/// canonical season membership. Do not call `searchTeams` with a null
+/// competition key here: the unscoped path is capped at the default page size
+/// across every sport.
 final teamSearchResultsProvider = FutureProvider.autoDispose<List<Team>>((
   ref,
 ) async {
   final query = ref.watch(teamSearchQueryProvider);
-  final followedOnly = ref.watch(teamSearchFollowedOnlyProvider);
-  final competitionKey = ref.watch(teamSearchCompetitionKeyProvider);
+  final activeSportTabId = ref.watch(teamSearchActiveSportTabIdProvider);
   final repository = ref.watch(teamRepositoryProvider);
 
-  if (followedOnly) {
+  if (activeSportTabId == null) {
     final teamIds = ref.watch(followedTeamIdsProvider);
     final teams = await repository.fetchTeamsByIds(teamIds);
     final normalizedQuery = _normalizeSearchText(query);
@@ -76,7 +89,15 @@ final teamSearchResultsProvider = FutureProvider.autoDispose<List<Team>>((
         .toList();
   }
 
-  return repository.searchTeams(query, competitionKey: competitionKey);
+  final sportTab = followDiscoverySportTabs().firstWhere(
+    (tab) => tab.id == activeSportTabId,
+    orElse: () => throw StateError('Unknown sport tab: $activeSportTabId'),
+  );
+  return searchTeamsForSportTab(
+    repository: repository,
+    tab: sportTab,
+    query: query,
+  );
 });
 
 String _teamSearchText(Team team) {
