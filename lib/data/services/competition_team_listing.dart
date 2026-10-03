@@ -64,8 +64,12 @@ class CompetitionTeamListingService {
     }
 
     final legacy = await _teams.fetchTeams(competitionKey: key);
+    final scoped = [
+      for (final team in legacy)
+        if (teamMatchesCompetitionScope(team, key)) team,
+    ];
     return CompetitionTeamListingResult(
-      teams: legacy,
+      teams: scoped,
       source: CompetitionTeamListingSource.legacyTeamDocumentCompatibility,
     );
   }

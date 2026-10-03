@@ -7,7 +7,6 @@ import '../../domain/models/game.dart';
 import '../../domain/policies/competition_display_policy.dart';
 import '../../domain/policies/game_presentation_policy.dart';
 import '../../domain/policies/team_display_name_policy.dart';
-import '../../domain/policies/team_initial.dart';
 import '../../domain/policies/team_presentation_policy.dart';
 import '../widgets/competition_badge.dart';
 import '../widgets/game_presentation_scope.dart';
@@ -501,7 +500,7 @@ class _CompactGameLine extends StatelessWidget {
   Widget build(BuildContext context) {
     final home = teamDisplayNames.homeName(game);
     final away = teamDisplayNames.awayName(game);
-    final marker = '${teamInitial(home)}/${teamInitial(away)}';
+    final marker = '$home/$away';
     final meta = _compactMeta(game);
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -646,16 +645,16 @@ class _MiniTeamIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => TeamPresentationBadge(
-        size: 36,
-        displayName: name,
-        logoUrl: logoUrl,
-        foregroundColor: foregroundColor,
-        fontSize: 13,
-        backgroundColor: selected
-            ? Theme.of(context).colorScheme.primary
-            : Theme.of(context).colorScheme.surfaceContainerHighest,
-        imageInset: 2,
-      );
+    size: 36,
+    displayName: name,
+    logoUrl: logoUrl,
+    foregroundColor: foregroundColor,
+    fontSize: 13,
+    backgroundColor: selected
+        ? Theme.of(context).colorScheme.primary
+        : Theme.of(context).colorScheme.surfaceContainerHighest,
+    imageInset: 2,
+  );
 }
 
 class ScheduleGameTile extends StatelessWidget {
@@ -898,11 +897,11 @@ class _TeamIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => TeamPresentationBadge(
-        size: 36,
-        displayName: name,
-        logoUrl: logoUrl,
-        imageInset: 4,
-      );
+    size: 36,
+    displayName: name,
+    logoUrl: logoUrl,
+    imageInset: 4,
+  );
 }
 
 class _ScheduleEmptyState extends StatelessWidget {

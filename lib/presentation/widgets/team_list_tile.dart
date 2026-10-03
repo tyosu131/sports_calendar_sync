@@ -40,6 +40,7 @@ class TeamListTile extends StatelessWidget {
           size: 52,
           logoUrl: teamPresentationLogo(team),
           displayName: teamDisplayNames.teamName(team),
+          fallback: TeamBadgeFallback.neutralMark,
         ),
         title: Text(
           teamDisplayNames.teamName(team),

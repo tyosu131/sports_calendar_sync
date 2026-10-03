@@ -313,17 +313,22 @@ void main() {
       );
       final urawa = find.byKey(const ValueKey('league-team-card-urawa_reds'));
       expect(
-        find.descendant(of: kashima, matching: find.text('鹿島')),
+        find.descendant(of: kashima, matching: find.text('鹿島アントラーズ')),
         findsOneWidget,
       );
       expect(
-        find.descendant(of: kashima, matching: find.text('vs 浦和')),
+        find.descendant(of: kashima, matching: find.text('vs 浦和レッズ')),
         findsOneWidget,
       );
       expect(
-        find.descendant(of: urawa, matching: find.text('浦和')),
+        find.descendant(of: urawa, matching: find.text('浦和レッズ')),
         findsOneWidget,
       );
+      expect(find.text('鹿島'), findsNothing);
+      expect(find.text('浦和'), findsNothing);
+      expect(find.text('鹿'), findsNothing);
+      expect(find.text('浦'), findsNothing);
+      expect(find.byKey(const Key('neutral-team-mark')), findsWidgets);
       expect(find.byType(NavigationBar), findsNothing);
       expect(find.byType(Image), findsNothing);
       await _capture(tester, 'football-jleague-teams');
@@ -531,12 +536,19 @@ void main() {
       await tester.ensureVisible(npbRow);
       await tester.tap(npbRow);
       await tester.pumpAndSettle();
-      // NPB is outside the Japanese domestic-football catalog, so the card
-      // keeps the trailing English token instead of an invented short label.
       expect(
         find.descendant(
           of: find.byKey(const ValueKey('league-team-card-yomiuri_giants')),
-          matching: find.text('Giants'),
+          matching: find.text('Yomiuri Giants'),
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Giants'), findsNothing);
+      expect(find.text('Y'), findsNothing);
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey('league-team-card-yomiuri_giants')),
+          matching: find.byKey(const Key('neutral-team-mark')),
         ),
         findsOneWidget,
       );

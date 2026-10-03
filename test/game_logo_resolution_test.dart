@@ -67,7 +67,7 @@ void main() {
   });
 
   testWidgets(
-    'Home and Search agree on JEF name and neutral fallback without logo rights',
+    'Home and Search share the JEF name and block an unapproved logo',
     (tester) async {
       const team = Team(
         id: 'jef_united_chiba',
@@ -107,7 +107,21 @@ void main() {
       expect(find.text('ジェフユナイテッド千葉'), findsNWidgets(2));
       expect(find.text('JEF United'), findsNothing);
       expect(find.byType(Image), findsNothing);
-      expect(find.text('ジ'), findsNWidgets(2));
+      expect(find.text('ジ'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(TeamListTile),
+          matching: find.byKey(const Key('neutral-team-mark')),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byType(TeamListTile),
+          matching: find.text('ジ'),
+        ),
+        findsNothing,
+      );
     },
   );
 

@@ -11,8 +11,9 @@ import '../../domain/models/sport_definition.dart';
 import '../../domain/models/team.dart';
 import '../../domain/policies/league_browse_presentation.dart';
 import '../../domain/policies/team_display_name_policy.dart';
-import '../../domain/policies/team_initial.dart';
+import '../../domain/policies/team_presentation_policy.dart';
 import '../theme/presentation_decoration.dart';
+import '../widgets/team_presentation_badge.dart';
 
 /// Teams for one registry competition, opened from the in-sport league list.
 ///
@@ -154,7 +155,6 @@ class _LeagueTeamCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final fullName = teamDisplayNames.teamName(team);
-    final shortName = leagueTeamCardLabelForTeam(team);
     final accent = teamBrowseCardFill(team.id);
     final followLabel = isFollowing ? 'フォロー中' : 'フォロー';
     final matchLine = !gamesSettled
@@ -177,17 +177,13 @@ class _LeagueTeamCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  CircleAvatar(
-                    radius: 16,
+                  TeamPresentationBadge(
+                    size: 32,
+                    logoUrl: teamPresentationLogo(team),
+                    displayName: fullName,
                     backgroundColor: Colors.white,
-                    child: Text(
-                      teamInitial(fullName),
-                      style: TextStyle(
-                        color: accent,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 14,
-                      ),
-                    ),
+                    foregroundColor: accent,
+                    fallback: TeamBadgeFallback.neutralMark,
                   ),
                   const Spacer(),
                   _FollowPill(
@@ -200,7 +196,7 @@ class _LeagueTeamCard extends StatelessWidget {
               ),
               const Spacer(),
               Text(
-                shortName,
+                fullName,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
