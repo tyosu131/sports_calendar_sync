@@ -361,11 +361,17 @@ void main() {
       await tester.tap(find.text('野球'));
       await tester.pumpAndSettle();
       expect(
-        _inPage(HomeSportTabIds.baseball, find.text('NPB')),
+        _inPage(
+          HomeSportTabIds.baseball,
+          find.byKey(const ValueKey('sport-league-baseball_npb')),
+        ),
         findsOneWidget,
       );
       expect(
-        _inPage(HomeSportTabIds.baseball, find.text('MLB')),
+        _inPage(
+          HomeSportTabIds.baseball,
+          find.byKey(const ValueKey('sport-league-baseball_mlb')),
+        ),
         findsOneWidget,
       );
       expect(
@@ -376,8 +382,20 @@ void main() {
 
       await tester.tap(find.text('その他スポーツ'));
       await tester.pumpAndSettle();
-      expect(_inPage(HomeSportTabIds.other, find.text('NBA')), findsOneWidget);
-      expect(_inPage(HomeSportTabIds.other, find.text('Bリーグ')), findsOneWidget);
+      expect(
+        _inPage(
+          HomeSportTabIds.other,
+          find.byKey(const ValueKey('sport-league-basketball_nba')),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        _inPage(
+          HomeSportTabIds.other,
+          find.byKey(const ValueKey('sport-league-basketball_b_league')),
+        ),
+        findsOneWidget,
+      );
       expect(_inPage(HomeSportTabIds.other, find.text('NPB')), findsNothing);
       _expectTwoDestinations(tester);
 
@@ -454,14 +472,26 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(
-        _inPage(HomeSportTabIds.baseball, find.text('NPB')),
+        _inPage(
+          HomeSportTabIds.baseball,
+          find.byKey(const ValueKey('sport-league-baseball_npb')),
+        ),
         findsOneWidget,
       );
       expect(find.text('サインインが必要です'), findsNothing);
 
-      await tester.tap(_inPage(HomeSportTabIds.baseball, find.text('NPB')));
+      final npbRow = _inPage(
+        HomeSportTabIds.baseball,
+        find.byKey(const ValueKey('sport-league-baseball_npb')),
+      );
+      await tester.ensureVisible(npbRow);
+      await tester.tap(
+        find.descendant(of: npbRow, matching: find.byType(ListTile)),
+      );
       await tester.pumpAndSettle();
-      expect(find.text('読売ジャイアンツ'), findsOneWidget);
+      // NPB is outside the Japanese domestic-football name set, so the existing
+      // display policy uses the English team name.
+      expect(find.text('Yomiuri Giants'), findsOneWidget);
       await tester.tap(find.byTooltip('フォローする').first);
       await tester.pumpAndSettle();
       expect(find.text('Googleでサインイン'), findsOneWidget);

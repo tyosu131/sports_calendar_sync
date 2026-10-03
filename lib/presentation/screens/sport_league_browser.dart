@@ -108,6 +108,7 @@ class _LeagueRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final badge = competitionBadgeLabel(competition);
+    final showEnglish = competition.displayNameEn != competition.displayNameJa;
     return Card(
       key: ValueKey('sport-league-${competition.competitionKey}'),
       margin: const EdgeInsets.only(bottom: 10),
@@ -128,7 +129,7 @@ class _LeagueRow extends StatelessWidget {
             fontWeight: FontWeight.w700,
           ),
         ),
-        subtitle: Text(competition.displayNameEn),
+        subtitle: showEnglish ? Text(competition.displayNameEn) : null,
         trailing: const Icon(Icons.chevron_right),
       ),
     );
