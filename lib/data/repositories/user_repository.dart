@@ -33,12 +33,22 @@ abstract class UserRepository {
 
 /// Handles all Firestore operations for user profiles.
 class FirestoreUserRepository implements UserRepository {
+  /// Firebase is resolved on first use.
+  ///
+  /// Follow screens read this type to tell a sample repository from production.
+  /// Resolving [FirebaseFirestore.instance] in the constructor throws in widget
+  /// tests that never initialize Firebase and never write a follow.
   FirestoreUserRepository({FirebaseFirestore? firestore, FirebaseAuth? auth})
-    : _firestore = firestore ?? FirebaseFirestore.instance,
-      _auth = auth ?? FirebaseAuth.instance;
+    : _firestoreOverride = firestore,
+      _authOverride = auth;
 
-  final FirebaseFirestore _firestore;
-  final FirebaseAuth _auth;
+  final FirebaseFirestore? _firestoreOverride;
+  final FirebaseAuth? _authOverride;
+
+  FirebaseFirestore get _firestore =>
+      _firestoreOverride ?? FirebaseFirestore.instance;
+
+  FirebaseAuth get _auth => _authOverride ?? FirebaseAuth.instance;
 
   CollectionReference<Map<String, dynamic>> get _users =>
       _firestore.collection(AppConstants.usersCollection);
