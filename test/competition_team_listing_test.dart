@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sports_calendar_sync/data/repositories/competition_membership_repository.dart';
 import 'package:sports_calendar_sync/data/repositories/team_repository.dart';
@@ -57,6 +58,19 @@ class _FakeTeamRepository implements TeamRepository {
     String query, {
     String? competitionKey,
   }) async => [];
+}
+
+class _DeniedMembershipRepository implements CompetitionMembershipRepository {
+  @override
+  Future<CompetitionSeasonMembership?> findReadableMembershipForCompetition(
+    String competitionKey,
+  ) {
+    throw FirebaseException(
+      plugin: 'cloud_firestore',
+      code: 'permission-denied',
+      message: 'Missing or insufficient permissions.',
+    );
+  }
 }
 
 class _MismatchedLegacyRepository implements TeamRepository {
@@ -161,6 +175,26 @@ void main() {
     final ucl = await service.listTeams('football_champions_league');
     expect(premier.teams.single.id, shared);
     expect(ucl.teams.single.id, shared);
+  });
+
+  test('membership permission-denied stays an error', () {
+    final service = CompetitionTeamListingService(
+      teamRepository: _FakeTeamRepository([
+        _team('kashima_antlers', 'football_j1'),
+      ]),
+      membershipRepository: _DeniedMembershipRepository(),
+    );
+
+    expect(
+      service.listTeams('football_j1'),
+      throwsA(
+        isA<FirebaseException>().having(
+          (error) => error.code,
+          'code',
+          'permission-denied',
+        ),
+      ),
+    );
   });
 
   test('legacy fallback when no readable membership exists', () async {
