@@ -1,5 +1,6 @@
 import '../models/game.dart';
 import '../models/team.dart';
+import 'japanese_domestic_football.dart';
 import 'team_presentation_policy.dart';
 
 /// Optional override point for a future explicit user language preference.
@@ -14,17 +15,9 @@ class TeamDisplayNamePolicy {
 
   final DisplayLanguage? languageOverride;
 
-  static const _japaneseCompetitions = {
-    'football_j1',
-    'football_j2',
-    'football_j3',
-    'football_j_league_cup',
-    'football_emperor_cup',
-  };
-
   DisplayLanguage languageFor(String? competitionKey) =>
       languageOverride ??
-      (_japaneseCompetitions.contains(competitionKey)
+      (isJapaneseDomesticFootballCompetition(competitionKey)
           ? DisplayLanguage.japanese
           : DisplayLanguage.english);
 

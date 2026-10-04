@@ -6,7 +6,17 @@ const fs = require('node:fs');
 const path = require('node:path');
 const root = path.resolve(__dirname, '../..');
 const international = require('./data/internationalClubPresentation.json');
-const japaneseCompetitions = ['football_j1', 'football_j2', 'football_j3', 'football_j_league_cup', 'football_emperor_cup'];
+// Reviewed snapshot stored on Japanese scoped aliases. Match time also accepts
+// any other Japanese domestic football key (`football_j*` or the Emperor's Cup),
+// including football_j2_j3_special, via isJapaneseDomesticFootballCompetition.
+const japaneseCompetitions = [
+  'football_j1',
+  'football_j2',
+  'football_j3',
+  'football_j_league_cup',
+  'football_emperor_cup',
+  'football_j2_j3_special',
+];
 // GOAL detail + official club history/stadium evidence, documented in the
 // closure packet. These broad labels are only usable in Japanese competitions.
 const scopedAliases = {'FC Tokyo': ['Tokyo'], 'Tochigi SC': ['Tochigi']};

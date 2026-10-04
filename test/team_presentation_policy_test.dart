@@ -143,6 +143,7 @@ void main() {
       'football_j3',
       'football_j_league_cup',
       'football_emperor_cup',
+      'football_j2_j3_special',
     ]) {
       expect(
         teamDisplayNames.homeName(fixture('JEF United', competition)),
@@ -220,9 +221,8 @@ void main() {
         'Tokyo unknown',
       ]) {
         expect(
-          TeamPresentationLogoResolver(
-            const [],
-          ).side(fixture(name, 'football_j1'), true),
+          TeamPresentationLogoResolver(const [])
+              .side(fixture(name, 'football_j1'), true),
           isNull,
         );
       }
@@ -251,9 +251,8 @@ void main() {
         isNull,
       );
       expect(
-        TeamPresentationLogoResolver(
-          const [],
-        ).side(fixture('Fulham', 'baseball_npb'), true),
+        TeamPresentationLogoResolver(const [])
+            .side(fixture('Fulham', 'baseball_npb'), true),
         isNull,
       );
     },
