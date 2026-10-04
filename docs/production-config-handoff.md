@@ -68,7 +68,7 @@ rules の SHA は、`competitionSeasonMemberships` の `allow read: if true` を
 | --- | --- | --- | --- | --- | --- | --- |
 | サインイン | Firebase Auth。プロフィールは `users/{uid}` の get / set | ドキュメント get。複合クエリなし | create は `email`、`followedTeamIds`、`preferredLanguage`（`ja` / `en`）が必要 | 不要 | 不要 | Auth 設定または users rules が古いとプロフィール作成が失敗 |
 | ホーム | `followedTeamsProvider`、`fetchUpcomingGamesForTeams` | チームは `documentId whereIn`（30件）。試合は `homeTeamId` / `awayTeamId` の `whereIn` + `startTimeUTC` 範囲 + `orderBy` | teams / games は公開 read。users は本人 | 試合の2フィールド索引。チーム ID は単一フィールド | 不要 | 試合索引が無いとホームは `エラー: $e`。チーム索引の欠落ではこのクエリは落ちない |
-| フォロー / 解除 | `followTeam` / `unfollowTeam` | `users/{uid}` の update。書くのは `followedTeamIds` の arrayUnion / arrayRemove だけ | update 後のドキュメントが `email`、`followedTeamIds`、`preferredLanguage` を持つこと | 不要 | フォロー変更の Google 同期は `syncGoogleCalendarOnFollowChange`。未デプロイでもフォロー自体は成功し、カレンダーだけ追従しない | 既存ユーザーに `preferredLanguage` が無いと update が拒否される。検索一覧の読み取りとは別 |
+| フォロー / 解除 | `followTeam` / `unfollowTeam` | `users/{uid}` を読んでから update。`followedTeamIds` の arrayUnion / arrayRemove に加え、キーが無いときだけ `preferredLanguage: ja` と、Auth に email があるときだけ `email` を同じ update に足す。既存の値は上書きしない | update 後のドキュメントが `email`、`followedTeamIds`、`preferredLanguage` を持つこと | 不要 | フォロー変更の Google 同期は `syncGoogleCalendarOnFollowChange`。未デプロイでもフォロー自体は成功し、カレンダーだけ追従しない | キーが無いレガシー文書は、次のフォロー操作で不足キーを足す。本番の一括移行はしない。Auth email も無い文書は update が拒否され得る。検索一覧の読み取りとは別 |
 | チームを探す / 競技ホーム | `searchTeamsForSportTab` → `searchTeams` | 空文字は `fetchTeams`。`competitionKey` と legacy `sportKey` の等価。文字ありは `nameJa` 範囲、または `searchKeywords` array-contains を、その等価と組み合わせる | teams 公開 read | 空文字は不要。文字ありは `competitionKey`/`sportKey` + `nameJa`、および + `searchKeywords` | 不要 | 文字ありで索引が無いと `failed-precondition` が `エラー: $e`。空文字ではその索引は使わない |
 | 競技のリーグ一覧 | `SportLeagueBrowser` | Firestore なし。`SportsRegistry` の有効な競技だけ | 不要 | 不要 | 不要 | この画面単独では本番設定で落ちない |
 | リーグのチーム一覧 | `CompetitionTeamListingService` | `competitionSeasonMemberships` を `competitionKey` 等価。ID があれば `documentId whereIn`。無ければ `fetchTeams` | membership の公開 read が本番に無いと default deny | membership と ID 取得は単一フィールド。カードの次戦はホームと同じ試合索引 | 不要 | rules 未反映は `エラー: $error` で止まり、空一覧にしない。ドキュメント欠如は legacy へ落ち、それも空なら「このリーグのチームはまだありません」 |
@@ -120,7 +120,7 @@ PR #53 の表示名は、上の Firestore クエリを変えていない。ア�
 | 最新 rules + 最新 indexes | ID があればチーム。無ければ「フォロー中のチームはありません」 |
 | 古い rules + 最新アプリ | users の本人 read が残っていれば同じ。teams の `whereIn` も公開 read なら通る |
 | 最新 rules + 古い indexes | このクエリは複合索引を使わない |
-| プロフィールが読めない | `followedTeamIdsProvider` は `valueOrNull` のため空一覧になる。`エラー: $e` にはならない |
+| プロフィールが読めない | `followedTeamIdsProvider` はエラーのままなので、フォロー中は空一覧にせず `エラー: $e` になる。未サインインは空一覧のまま |
 | 未サインイン | プロフィール stream は null。空メッセージ。エラーではない |
 
 開いた直後の「チームを探す」は初期タブがフォロー中で、隣接タブは野球である。サッカーのホームと Jリーグは、そこへ移動するまでクエリされない。直後の `エラー` から、membership 未反映と、文字あり検索の複合索引は外せる。残るのは teams の read 拒否、通信失敗、チーム文書の型不一致（`nameEn` / `nameJa` / `leagueId` のキャスト）である。本番文書は読んでいないので、型不一致は未確認である。

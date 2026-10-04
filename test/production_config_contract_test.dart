@@ -136,13 +136,15 @@ void main() {
     );
     expect(data['preferredLanguage'], 'ja');
 
-    final follow = _between(
-      _firestoreRepository(userRepository),
-      'Future<void> followTeam',
-      'Future<void> unfollowTeam',
+    expect(userRepository, contains('followFieldUpdates('));
+    expect(
+      userRepository,
+      contains("if (!data.containsKey('preferredLanguage'))"),
     );
-    expect(follow, contains("'followedTeamIds': FieldValue.arrayUnion"));
-    expect(follow, isNot(contains('preferredLanguage')));
+    expect(userRepository, contains("updates['preferredLanguage'] = 'ja'"));
+    expect(userRepository, contains("if (!data.containsKey('email'))"));
+    expect(userRepository, contains('FieldValue.arrayUnion'));
+    expect(userRepository, contains('FieldValue.arrayRemove'));
     expect(userProfile, contains("'preferredLanguage': preferredLanguage"));
   });
 
@@ -249,12 +251,6 @@ void main() {
 }
 
 String _squash(String value) => value.replaceAll(RegExp(r'\s+'), ' ');
-
-String _between(String source, String start, String end) {
-  final from = source.indexOf(start);
-  final to = source.indexOf(end, from + start.length);
-  return source.substring(from, to);
-}
 
 String _firestoreRepository(String source) {
   final start = source.indexOf('class Firestore');

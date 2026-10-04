@@ -50,7 +50,7 @@ final teamByIdProvider = FutureProvider.family<Team?, String>((
 
 /// The current user's followed teams (full Team objects).
 final followedTeamsProvider = FutureProvider<List<Team>>((ref) async {
-  final teamIds = ref.watch(followedTeamIdsProvider);
+  final teamIds = await ref.watch(followedTeamIdsProvider.future);
   if (teamIds.isEmpty) return [];
   return ref.watch(teamRepositoryProvider).fetchTeamsByIds(teamIds);
 });
@@ -78,7 +78,7 @@ final teamSearchResultsProvider = FutureProvider.autoDispose
       final repository = ref.watch(teamRepositoryProvider);
 
       if (sportTabId == HomeSportTabIds.favorites) {
-        final teamIds = ref.watch(followedTeamIdsProvider);
+        final teamIds = await ref.watch(followedTeamIdsProvider.future);
         final teams = await repository.fetchTeamsByIds(teamIds);
         final normalizedQuery = _normalizeSearchText(query);
         if (normalizedQuery.isEmpty) return teams;

@@ -217,6 +217,7 @@ class _HomeSportFeed extends ConsumerWidget {
         }
         return _HomeContent(
           tab: tab,
+          followedIds: profile.followedTeamIds,
           gamesAsync: ref.watch(homeUpcomingGamesProvider),
           followedTeamsAsync: ref.watch(followedTeamsProvider),
         );
@@ -228,11 +229,13 @@ class _HomeSportFeed extends ConsumerWidget {
 class _HomeContent extends ConsumerWidget {
   const _HomeContent({
     required this.tab,
+    required this.followedIds,
     required this.gamesAsync,
     required this.followedTeamsAsync,
   });
 
   final HomeSportTab tab;
+  final List<String> followedIds;
   final AsyncValue<HomeUpcomingGames> gamesAsync;
   final AsyncValue<List<Team>> followedTeamsAsync;
 
@@ -261,7 +264,6 @@ class _HomeContent extends ConsumerWidget {
           error: (e, _) => Center(child: Text('エラー: $e')),
           data: (homeGames) {
             final games = gamesForHomeSportTab(homeGames.games, tab);
-            final followedIds = ref.watch(followedTeamIdsProvider);
             return GamePresentationScope(
               resolver: homeGames.presentation,
               child: RefreshIndicator(

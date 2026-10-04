@@ -95,16 +95,8 @@ class FirestoreUserRepository implements UserRepository {
   /// [competitionKey] is retained only for call-site compatibility. It does
   /// not affect the canonical, global follow state.
   @override
-  Future<void> followTeam(
-    String uid,
-    String teamId, {
-    String? competitionKey,
-  }) async {
-    final updates = <String, dynamic>{
-      'followedTeamIds': FieldValue.arrayUnion([teamId]),
-    };
-
-    await _users.doc(uid).update(updates);
+  Future<void> followTeam(String uid, String teamId, {String? competitionKey}) {
+    return _writeFollow(uid, teamId, follow: true);
   }
 
   /// Remove a team from the user's followed list.
@@ -116,12 +108,28 @@ class FirestoreUserRepository implements UserRepository {
     String uid,
     String teamId, {
     String? competitionKey,
-  }) async {
-    final updates = <String, dynamic>{
-      'followedTeamIds': FieldValue.arrayRemove([teamId]),
-    };
+  }) {
+    return _writeFollow(uid, teamId, follow: false);
+  }
 
-    await _users.doc(uid).update(updates);
+  /// One update so a legacy document gains the keys rules require after write.
+  Future<void> _writeFollow(
+    String uid,
+    String teamId, {
+    required bool follow,
+  }) async {
+    await _firestore.runTransaction((transaction) async {
+      final snapshot = await transaction.get(_users.doc(uid));
+      transaction.update(
+        _users.doc(uid),
+        followFieldUpdates(
+          existing: snapshot.data(),
+          teamId: teamId,
+          follow: follow,
+          authEmail: _auth.currentUser?.email,
+        ),
+      );
+    });
   }
 
   /// Sign out the current user.
@@ -129,6 +137,38 @@ class FirestoreUserRepository implements UserRepository {
   Future<void> signOut() async {
     await _auth.signOut();
   }
+}
+
+/// Fields for a follow or unfollow update.
+///
+/// Rules require `email`, `followedTeamIds`, and `preferredLanguage` on the
+/// document after the update. [FieldValue.arrayUnion] alone leaves a legacy
+/// document missing those keys, and the update is permission-denied.
+/// Existing values are not overwritten. `preferredLanguage` is filled with
+/// `ja` only when the key is absent, matching the read fallback. `email` is
+/// filled only from the signed-in Auth user when the key is absent.
+Map<String, dynamic> followFieldUpdates({
+  required Map<String, dynamic>? existing,
+  required String teamId,
+  required bool follow,
+  String? authEmail,
+}) {
+  final data = existing ?? const <String, dynamic>{};
+  final updates = <String, dynamic>{
+    'followedTeamIds': follow
+        ? FieldValue.arrayUnion([teamId])
+        : FieldValue.arrayRemove([teamId]),
+  };
+  if (!data.containsKey('preferredLanguage')) {
+    updates['preferredLanguage'] = 'ja';
+  }
+  if (!data.containsKey('email')) {
+    final email = authEmail?.trim();
+    if (email != null && email.isNotEmpty) {
+      updates['email'] = email;
+    }
+  }
+  return updates;
 }
 
 /// In-memory user repository for free MVP sample mode.
@@ -202,9 +242,7 @@ class SampleUserRepository implements UserRepository {
     // makes follow state global regardless of discovery context.
     final followedTeamIds = {..._profile.followedTeamIds, teamId}.toList();
 
-    _profile = _profile.copyWith(
-      followedTeamIds: followedTeamIds,
-    );
+    _profile = _profile.copyWith(followedTeamIds: followedTeamIds);
     _profileUpdates.add(_profile);
   }
 
@@ -221,9 +259,7 @@ class SampleUserRepository implements UserRepository {
         .where((id) => id != teamId)
         .toList();
 
-    _profile = _profile.copyWith(
-      followedTeamIds: followedTeamIds,
-    );
+    _profile = _profile.copyWith(followedTeamIds: followedTeamIds);
     _profileUpdates.add(_profile);
   }
 

@@ -37,8 +37,13 @@ class FirestoreCompetitionMembershipRepository
 
     CompetitionSeasonMembership? best;
     for (final doc in snapshot.docs) {
-      final parsed = _fromFirestore(doc.data(), doc.id);
-      if (parsed == null || !membershipIsReadable(parsed)) continue;
+      // A malformed document fails the read. Skipping it would look like
+      // "no membership" and fall through to the legacy team query.
+      final parsed = CompetitionSeasonMembership.fromFirestore(
+        doc.data(),
+        doc.id,
+      );
+      if (!membershipIsReadable(parsed)) continue;
       if (best == null || parsed.seasonYear > best.seasonYear) {
         best = parsed;
       } else if (parsed.seasonYear == best.seasonYear &&
@@ -48,67 +53,6 @@ class FirestoreCompetitionMembershipRepository
       }
     }
     return best;
-  }
-
-  CompetitionSeasonMembership? _fromFirestore(
-    Map<String, dynamic> data,
-    String docId,
-  ) {
-    final competitionKey = data['competitionKey'] as String?;
-    final seasonYear = data['seasonYear'];
-    final displayNameJa = data['displayNameJa'] as String?;
-    final membershipType = data['membershipType'] as String?;
-    final status = data['status'] as String?;
-    final seedable = data['seedable'];
-    if (competitionKey == null ||
-        seasonYear is! num ||
-        displayNameJa == null ||
-        membershipType == null ||
-        status == null ||
-        seedable is! bool) {
-      return null;
-    }
-
-    List<String>? memberTeamIds;
-    final rawIds = data['memberTeamIds'];
-    if (rawIds is List) {
-      memberTeamIds = rawIds.whereType<String>().toList(growable: false);
-    }
-
-    List<CompetitionSeasonMembershipGroup>? groups;
-    final rawGroups = data['groups'];
-    if (rawGroups is List) {
-      final parsed = <CompetitionSeasonMembershipGroup>[];
-      for (final entry in rawGroups) {
-        if (entry is! Map) continue;
-        final groupKey = entry['groupKey'];
-        final nameJa = entry['displayNameJa'];
-        final teamIds = entry['teamIds'];
-        if (groupKey is! String || nameJa is! String || teamIds is! List) {
-          continue;
-        }
-        parsed.add(
-          CompetitionSeasonMembershipGroup(
-            groupKey: groupKey,
-            displayNameJa: nameJa,
-            teamIds: teamIds.whereType<String>().toList(growable: false),
-          ),
-        );
-      }
-      if (parsed.isNotEmpty) groups = parsed;
-    }
-
-    return CompetitionSeasonMembership(
-      competitionSeasonKey: data['competitionSeasonKey'] as String? ?? docId,
-      competitionKey: competitionKey,
-      seasonYear: seasonYear.toInt(),
-      displayNameJa: displayNameJa,
-      membershipType: membershipType,
-      status: status,
-      seedable: seedable,
-      memberTeamIds: memberTeamIds,
-      groups: groups,
-    );
   }
 }
 

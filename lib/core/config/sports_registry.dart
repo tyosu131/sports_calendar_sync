@@ -116,17 +116,16 @@ class SportsRegistry {
 
   /// Enabled competitions only, sorted by [SportDefinition.sortOrder] ascending.
   static List<SportDefinition> get enabled => List.unmodifiable(
-        _definitions.where((s) => s.enabled).toList()
-          ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder)),
-      );
+    _definitions.where((s) => s.enabled).toList()
+      ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder)),
+  );
 
   /// Returns the [SportDefinition] for [competitionKey], or null if not found.
   static SportDefinition? findByKey(String competitionKey) {
-    try {
-      return _definitions.firstWhere((s) => s.competitionKey == competitionKey);
-    } catch (_) {
-      return null;
+    for (final definition in _definitions) {
+      if (definition.competitionKey == competitionKey) return definition;
     }
+    return null;
   }
 
   /// Returns enabled competitions whose [SportDefinition.sportCategory] matches.

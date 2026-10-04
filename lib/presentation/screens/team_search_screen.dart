@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../data/providers/auth_providers.dart';
-import '../../data/providers/repository_providers.dart';
 import '../../data/providers/team_providers.dart';
 import '../../domain/policies/home_sport_navigation.dart';
+import '../widgets/follow_toggle.dart';
 import '../widgets/sport_sub_nav_bar.dart';
 import '../widgets/team_list_tile.dart';
 import 'sport_league_browser.dart';
@@ -273,10 +273,7 @@ class _SportTeamSearchResults extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final resultsAsync = ref.watch(teamSearchResultsProvider(sportTabId));
     final searchQuery = ref.watch(teamSearchQueryProvider);
-    final followedIds = ref.watch(followedTeamIdsProvider);
-    final user = ref.watch(currentUserProvider);
-    final profile = ref.watch(userProfileProvider).valueOrNull;
-    final userId = user?.uid ?? profile?.uid;
+    final session = watchFollowInteraction(ref);
 
     return resultsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -296,31 +293,18 @@ class _SportTeamSearchResults extends ConsumerWidget {
           itemCount: teams.length,
           itemBuilder: (context, index) {
             final team = teams[index];
-            final isFollowing = followedIds.contains(team.id);
+            final isFollowing = session.isFollowing(team.id);
             return TeamListTile(
               team: team,
               isFollowing: isFollowing,
               onTap: () => context.push('/team/${team.id}'),
-              onFollowToggle: () async {
-                if (userId == null) {
-                  context.push('/signin');
-                  return;
-                }
-                final repo = ref.read(userRepositoryProvider);
-                if (isFollowing) {
-                  await repo.unfollowTeam(
-                    userId,
-                    team.id,
-                    competitionKey: team.competitionKey,
-                  );
-                } else {
-                  await repo.followTeam(
-                    userId,
-                    team.id,
-                    competitionKey: team.competitionKey,
-                  );
-                }
-              },
+              onFollowToggle: () => toggleFollow(
+                context,
+                ref,
+                session,
+                team.id,
+                team.competitionKey,
+              ),
             );
           },
         );
