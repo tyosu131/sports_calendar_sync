@@ -91,7 +91,8 @@
             "football_j2",
             "football_j3",
             "football_j_league_cup",
-            "football_emperor_cup"
+            "football_emperor_cup",
+            "football_j2_j3_special"
         ],
         "logoUrl": "https://media.api-sports.io/football/teams/292.png",
         "source": "functions/scripts/data/j1Teams.js"
@@ -400,7 +401,8 @@
             "football_j2",
             "football_j3",
             "football_j_league_cup",
-            "football_emperor_cup"
+            "football_emperor_cup",
+            "football_j2_j3_special"
         ],
         "logoUrl": "https://media.api-sports.io/football/teams/315.png",
         "source": "functions/scripts/data/j2Teams.js"

@@ -1,6 +1,7 @@
 import '../models/game.dart';
 import '../models/team.dart';
 import 'club_presentation_data.dart';
+import 'japanese_domestic_football.dart';
 
 /// Exact, presentation-only matching. Width, case, spaces and punctuation are
 /// normalized; substrings, edit distance and provider IDs are never used.
@@ -27,7 +28,7 @@ List<ClubPresentation> matchingClubPresentations(
             entry.aliases.any(
               (alias) => keys.contains(presentationNameKey(alias)),
             ) ||
-            (entry.competitionKeys.contains(competitionKey) &&
+            (_acceptsScopedAlias(entry, competitionKey) &&
                 entry.scopedAliases.any(
                   (alias) => keys.contains(presentationNameKey(alias)),
                 )),
@@ -46,6 +47,21 @@ ClubPresentation? clubPresentation(
     competitionKey: competitionKey,
   );
   return matches.length == 1 ? matches.single : null;
+}
+
+/// Scoped aliases stay inside the competitions stored on the entry.
+///
+/// An entry whose stored keys are all Japanese domestic football also matches
+/// any other Japanese domestic key, including `football_j2_j3_special` and a
+/// future `football_j*` competition. International scopes such as Champions
+/// League stay exact.
+bool _acceptsScopedAlias(ClubPresentation entry, String? competitionKey) {
+  final key = competitionKey?.trim();
+  if (key == null || key.isEmpty) return false;
+  if (entry.competitionKeys.contains(key)) return true;
+  if (!isJapaneseDomesticFootballCompetition(key)) return false;
+  return entry.competitionKeys.isNotEmpty &&
+      entry.competitionKeys.every(isJapaneseDomesticFootballCompetition);
 }
 
 bool hasPresentationLogo(String? logo) =>

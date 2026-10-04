@@ -4,11 +4,9 @@ exports.defaultDisplayLanguage = defaultDisplayLanguage;
 exports.confirmedJapaneseName = confirmedJapaneseName;
 exports.displayTeamName = displayTeamName;
 const clubPresentation_1 = require("./clubPresentation");
-const JAPANESE_COMPETITIONS = new Set([
-    "football_j1", "football_j2", "football_j3", "football_j_league_cup", "football_emperor_cup",
-]);
+const japaneseDomesticFootball_1 = require("./japaneseDomesticFootball");
 function defaultDisplayLanguage(competitionKey) {
-    return JAPANESE_COMPETITIONS.has(competitionKey ?? "") ? "ja" : "en";
+    return (0, japaneseDomesticFootball_1.isJapaneseDomesticFootballCompetition)(competitionKey) ? "ja" : "en";
 }
 function confirmedJapaneseName(providerName) {
     return (0, clubPresentation_1.clubPresentation)([providerName])?.nameJa || undefined;

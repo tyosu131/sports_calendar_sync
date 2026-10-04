@@ -20,7 +20,7 @@ test('presentation data never adds a canonical/provider identity or membership',
 });
 
 test('calendar names share Japanese domestic / English international presentation', () => {
-  for (const key of ['football_j1', 'football_j2', 'football_j3', 'football_j_league_cup', 'football_emperor_cup']) {
+  for (const key of ['football_j1', 'football_j2', 'football_j3', 'football_j_league_cup', 'football_emperor_cup', 'football_j2_j3_special']) {
     assert.equal(displayTeamName(key, {provider: 'JEF United'}), 'ジェフユナイテッド千葉');
   }
   for (const key of ['football_premier', 'football_champions_league', 'football_league_cup']) {

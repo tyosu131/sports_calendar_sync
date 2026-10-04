@@ -1,12 +1,9 @@
 export type DisplayLanguage = "ja" | "en";
 import { clubPresentation } from "./clubPresentation";
-
-const JAPANESE_COMPETITIONS = new Set([
-  "football_j1", "football_j2", "football_j3", "football_j_league_cup", "football_emperor_cup",
-]);
+import { isJapaneseDomesticFootballCompetition } from "./japaneseDomesticFootball";
 
 export function defaultDisplayLanguage(competitionKey: string | undefined): DisplayLanguage {
-  return JAPANESE_COMPETITIONS.has(competitionKey ?? "") ? "ja" : "en";
+  return isJapaneseDomesticFootballCompetition(competitionKey) ? "ja" : "en";
 }
 
 export function confirmedJapaneseName(providerName: string): string | undefined {

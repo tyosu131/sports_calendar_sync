@@ -1,0 +1,140 @@
+{
+  "japanese": [
+    "football_j1",
+    "football_j2",
+    "football_j3",
+    "football_j_league_cup",
+    "football_emperor_cup",
+    "football_j2_j3_special",
+    "football_j_future_domestic"
+  ],
+  "english": [
+    "football_premier",
+    "football_champions_league",
+    "football_league_cup",
+    "baseball_npb",
+    "baseball_mlb",
+    "basketball_nba",
+    "basketball_b_league",
+    ""
+  ],
+  "names": [
+    {
+      "id": "jubilo-j2",
+      "competition": "football_j2",
+      "teamId": "jubilo_iwata",
+      "japanese": "ジュビロ磐田",
+      "english": "Jubilo Iwata",
+      "provider": "Jubilo Iwata",
+      "expected": "ジュビロ磐田"
+    },
+    {
+      "id": "jubilo-special",
+      "competition": "football_j2_j3_special",
+      "teamId": "jubilo_iwata",
+      "japanese": "ジュビロ磐田",
+      "english": "Jubilo Iwata",
+      "provider": "Jubilo Iwata",
+      "expected": "ジュビロ磐田"
+    },
+    {
+      "id": "vegalta-j2",
+      "competition": "football_j2",
+      "teamId": "vegalta_sendai",
+      "japanese": "ベガルタ仙台",
+      "english": "Vegalta Sendai",
+      "provider": "Vegalta Sendai",
+      "expected": "ベガルタ仙台"
+    },
+    {
+      "id": "gifu-j3",
+      "competition": "football_j3",
+      "teamId": "fc_gifu",
+      "japanese": "ＦＣ岐阜",
+      "english": "FC Gifu",
+      "provider": "FC Gifu",
+      "expected": "ＦＣ岐阜"
+    },
+    {
+      "id": "yamaga-special",
+      "competition": "football_j2_j3_special",
+      "teamId": "matsumoto_yamaga",
+      "japanese": "松本山雅ＦＣ",
+      "english": "Matsumoto Yamaga",
+      "provider": "Matsumoto Yamaga",
+      "expected": "松本山雅ＦＣ"
+    },
+    {
+      "id": "fukushima-j3",
+      "competition": "football_j3",
+      "teamId": "fukushima_united",
+      "japanese": "福島ユナイテッドＦＣ",
+      "english": "Fukushima United",
+      "provider": "Fukushima United",
+      "expected": "福島ユナイテッドＦＣ"
+    },
+    {
+      "id": "arsenal-premier",
+      "competition": "football_premier",
+      "teamId": "arsenal",
+      "japanese": "アーセナル",
+      "english": "Arsenal",
+      "provider": "Arsenal",
+      "expected": "Arsenal"
+    },
+    {
+      "id": "jubilo-future-j-league",
+      "competition": "football_j_future_domestic",
+      "teamId": "jubilo_iwata",
+      "japanese": "ジュビロ磐田",
+      "english": "Jubilo Iwata",
+      "provider": "Jubilo Iwata",
+      "expected": "ジュビロ磐田"
+    },
+    {
+      "id": "jubilo-missing-key",
+      "competition": null,
+      "teamId": "jubilo_iwata",
+      "japanese": "ジュビロ磐田",
+      "english": "Jubilo Iwata",
+      "provider": "Jubilo Iwata",
+      "expected": "Jubilo Iwata"
+    },
+    {
+      "id": "npb-unchanged",
+      "competition": "baseball_npb",
+      "teamId": "yomiuri_giants",
+      "japanese": "読売ジャイアンツ",
+      "english": "Yomiuri Giants",
+      "provider": "Yomiuri Giants",
+      "expected": "Yomiuri Giants"
+    },
+    {
+      "id": "mlb-unchanged",
+      "competition": "baseball_mlb",
+      "teamId": "los_angeles_dodgers",
+      "japanese": "ロサンゼルス・ドジャース",
+      "english": "Los Angeles Dodgers",
+      "provider": "Los Angeles Dodgers",
+      "expected": "Los Angeles Dodgers"
+    },
+    {
+      "id": "nba-unchanged",
+      "competition": "basketball_nba",
+      "teamId": "los_angeles_lakers",
+      "japanese": "ロサンゼルス・レイカーズ",
+      "english": "Los Angeles Lakers",
+      "provider": "Los Angeles Lakers",
+      "expected": "Los Angeles Lakers"
+    },
+    {
+      "id": "b-league-unchanged",
+      "competition": "basketball_b_league",
+      "teamId": "ryukyu_golden_kings",
+      "japanese": "琉球ゴールデンキングス",
+      "english": "Ryukyu Golden Kings",
+      "provider": "Ryukyu Golden Kings",
+      "expected": "Ryukyu Golden Kings"
+    }
+  ]
+}
