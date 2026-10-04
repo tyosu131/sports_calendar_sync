@@ -26,4 +26,26 @@ void main() {
     expect(find.text('サインインが必要です'), findsNothing);
     expect(find.text('サインイン'), findsNothing);
   });
+
+  testWidgets('a signed-in profile read error is the home error, not sign-in', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authSessionProvider.overrideWith((ref) => const AsyncData('uid')),
+          userProfileProvider.overrideWith(
+            (ref) =>
+                Stream<UserProfile?>.error(StateError('permission-denied')),
+          ),
+        ],
+        child: const MaterialApp(home: HomeScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('エラー:'), findsWidgets);
+    expect(find.text('サインインが必要です'), findsNothing);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+  });
 }

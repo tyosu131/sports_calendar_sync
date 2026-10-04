@@ -214,13 +214,15 @@ FollowListDecision settleFollowList({
   }
   if (expectedUid == _uidPending) return const FollowListPending();
 
-  if (profile.isLoading || !profile.hasValue) return const FollowListPending();
+  // AsyncError has no value. Checking !hasValue first would hide the error
+  // as loading.
   if (profile.hasError) {
     return FollowListFailed(
       profile.error!,
       profile.stackTrace ?? StackTrace.empty,
     );
   }
+  if (profile.isLoading || !profile.hasValue) return const FollowListPending();
 
   final value = profile.value;
   if (expectedUid == null) {

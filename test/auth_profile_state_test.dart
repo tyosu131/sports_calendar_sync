@@ -163,6 +163,53 @@ void main() {
     expect(session.signedOut, isFalse);
   });
 
+  test('settleFollowList turns a profile AsyncError into a failure', () {
+    final decision = settleFollowList(
+      sampleSession: false,
+      session: const AsyncData('uid'),
+      profile: AsyncError<UserProfile?>(
+        StateError('permission-denied'),
+        StackTrace.empty,
+      ),
+    );
+
+    expect(decision, isA<FollowListFailed>());
+    expect((decision as FollowListFailed).error, isA<StateError>());
+  });
+
+  test(
+    'followInteractionFrom does not treat a profile AsyncError as signed-out',
+    () {
+      final interaction = followInteractionFrom(
+        sampleSession: false,
+        session: const AsyncData('uid'),
+        profile: AsyncError<UserProfile?>(
+          StateError('permission-denied'),
+          StackTrace.empty,
+        ),
+      );
+
+      expect(interaction.profileFailed, isTrue);
+      expect(interaction.userId, isNull);
+      expect(interaction.followedIds, isNull);
+      expect(interaction.signedOut, isFalse);
+    },
+  );
+
+  test('accountGate turns a profile AsyncError into a failed gate', () {
+    final gate = accountGate(
+      sampleSession: false,
+      session: const AsyncData('uid'),
+      profile: AsyncError<UserProfile?>(
+        StateError('permission-denied'),
+        StackTrace.empty,
+      ),
+    );
+
+    expect(gate.kind, AccountGateKind.failed);
+    expect(gate.error, isA<StateError>());
+  });
+
   test('a profile read error is not an empty follow list', () async {
     final container = _signedIn(
       Stream<UserProfile?>.error(StateError('permission-denied')),
