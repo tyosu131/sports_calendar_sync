@@ -128,7 +128,7 @@ void main() {
     expect(data['preferredLanguage'], 'ja');
 
     final follow = _between(
-      userRepository,
+      _firestoreRepository(userRepository),
       'Future<void> followTeam',
       'Future<void> unfollowTeam',
     );
