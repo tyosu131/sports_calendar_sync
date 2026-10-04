@@ -1,3 +1,6 @@
+import '../../core/utils/app_constants.dart';
+import 'firestore_decode.dart';
+
 /// A sports team stored in Firestore under /teams/{id}.
 ///
 /// [id] is the stable team identity across competitions and seasons. Canonical
@@ -32,6 +35,7 @@ class Team {
   final String id;
   final String nameEn;
   final String nameJa;
+
   /// Legacy/default league used by existing queries; not canonical membership.
   final String leagueId;
 
@@ -51,23 +55,35 @@ class Team {
   final int? rapidApiId;
 
   factory Team.fromFirestore(Map<String, dynamic> data, String docId) {
+    final decoder = FirestoreDecoder(
+      collection: AppConstants.teamsCollection,
+      documentId: docId,
+    );
     // Prefer the new `competitionKey` field; fall back to legacy `sportKey`.
     // Do NOT infer from `sportType` — ambiguous inference is worse than null.
-    final competitionKey =
-        data['competitionKey'] as String? ?? data['sportKey'] as String?;
+    final competitionKey = readLegacyCompetitionKey(decoder, data);
+    final externalTeamId = decoder.optional<int>(
+      data,
+      'externalTeamId',
+      expected: 'int',
+    );
+    final rapidApiId = decoder.optional<int>(
+      data,
+      'rapidApiId',
+      expected: 'int',
+    );
 
     return Team(
       id: docId,
-      nameEn: data['nameEn'] as String,
-      nameJa: data['nameJa'] as String,
-      leagueId: data['leagueId'] as String,
+      nameEn: decoder.require<String>(data, 'nameEn', expected: 'String'),
+      nameJa: decoder.require<String>(data, 'nameJa', expected: 'String'),
+      leagueId: decoder.require<String>(data, 'leagueId', expected: 'String'),
       competitionKey: competitionKey,
-      logoUrl: data['logoUrl'] as String?,
-      country: data['country'] as String?,
-      externalTeamId: data['externalTeamId'] as int? ??
-          data['rapidApiId'] as int?,
+      logoUrl: decoder.optional<String>(data, 'logoUrl', expected: 'String'),
+      country: decoder.optional<String>(data, 'country', expected: 'String'),
+      externalTeamId: externalTeamId ?? rapidApiId,
       // ignore: deprecated_member_use_from_same_package
-      rapidApiId: data['rapidApiId'] as int?,
+      rapidApiId: rapidApiId,
     );
   }
 

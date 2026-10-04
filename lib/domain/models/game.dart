@@ -1,5 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../core/utils/app_constants.dart';
+import 'firestore_decode.dart';
+
 /// Broadcast platform info attached to a game.
 class BroadcastInfo {
   const BroadcastInfo({required this.platform, this.url, this.note});
@@ -9,11 +12,37 @@ class BroadcastInfo {
   final String? url;
   final String? note;
 
-  factory BroadcastInfo.fromMap(Map<String, dynamic> data) {
+  factory BroadcastInfo.fromMap(
+    Map<String, dynamic> data, {
+    required String collection,
+    required String documentId,
+    required String field,
+  }) {
+    final decoder = FirestoreDecoder(
+      collection: collection,
+      documentId: documentId,
+    );
+    String requireText(String name) {
+      final path = '$field.$name';
+      if (!data.containsKey(name)) {
+        decoder.fail(path, 'String', missingFirestoreValue);
+      }
+      final value = data[name];
+      if (value is! String) decoder.fail(path, 'String', value);
+      return value;
+    }
+
+    String? optionalText(String name) {
+      if (!data.containsKey(name) || data[name] == null) return null;
+      final value = data[name];
+      if (value is! String) decoder.fail('$field.$name', 'String', value);
+      return value;
+    }
+
     return BroadcastInfo(
-      platform: data['platform'] as String,
-      url: data['url'] as String?,
-      note: data['note'] as String?,
+      platform: requireText('platform'),
+      url: optionalText('url'),
+      note: optionalText('note'),
     );
   }
 
@@ -140,51 +169,174 @@ class Game {
   final String? sourceFixtureId;
 
   factory Game.fromFirestore(Map<String, dynamic> data, String docId) {
-    final broadcastList = (data['broadcastPlatforms'] as List<dynamic>? ?? [])
-        .map((e) => BroadcastInfo.fromMap(e as Map<String, dynamic>))
-        .toList();
+    final decoder = FirestoreDecoder(
+      collection: AppConstants.gamesCollection,
+      documentId: docId,
+    );
+    final broadcastList = _broadcasts(decoder, data);
 
     // Prefer the new `competitionKey` field; fall back to legacy `sportKey`.
     // Do NOT infer from leagueId — ambiguous inference is worse than null.
-    final competitionKey =
-        data['competitionKey'] as String? ?? data['sportKey'] as String?;
+    final competitionKey = readLegacyCompetitionKey(decoder, data);
+    final externalFixtureId = decoder.optional<int>(
+      data,
+      'externalFixtureId',
+      expected: 'int',
+    );
+    final rapidApiFixtureId = decoder.optional<int>(
+      data,
+      'rapidApiFixtureId',
+      expected: 'int',
+    );
 
     return Game(
       id: docId,
       competitionKey: competitionKey,
-      competitionSeasonKey: data['competitionSeasonKey'] as String?,
-      leagueId: data['leagueId'] as String,
-      homeTeamId: data['homeTeamId'] as String?,
-      homeSourceTeamId: data['homeSourceTeamId'] as String?,
-      homeTeamNameJa: data['homeTeamNameJa'] as String,
-      awayTeamId: data['awayTeamId'] as String?,
-      awaySourceTeamId: data['awaySourceTeamId'] as String?,
-      awayTeamNameJa: data['awayTeamNameJa'] as String,
-      homeTeamNameEn: data['homeTeamNameEn'] as String?,
-      awayTeamNameEn: data['awayTeamNameEn'] as String?,
-      homeTeamProviderName: data['homeTeamProviderName'] as String?,
-      awayTeamProviderName: data['awayTeamProviderName'] as String?,
-      homeTeamLogoUrl: data['homeTeamLogoUrl'] as String?,
-      awayTeamLogoUrl: data['awayTeamLogoUrl'] as String?,
-      startTimeUtc: data['startTimeUTC'] as Timestamp,
-      startTimeJst: data['startTimeJST'] as String,
-      timezone: data['timezone'] as String,
-      status: GameStatus.values.firstWhere(
-        (e) => e.name == data['status'],
-        orElse: () => GameStatus.scheduled,
+      competitionSeasonKey: decoder.optional<String>(
+        data,
+        'competitionSeasonKey',
+        expected: 'String',
       ),
-      venue: data['venue'] as String?,
-      homeScore: data['homeScore'] as int?,
-      awayScore: data['awayScore'] as int?,
+      leagueId: decoder.require<String>(data, 'leagueId', expected: 'String'),
+      homeTeamId: decoder.optional<String>(
+        data,
+        'homeTeamId',
+        expected: 'String',
+      ),
+      homeSourceTeamId: decoder.optional<String>(
+        data,
+        'homeSourceTeamId',
+        expected: 'String',
+      ),
+      homeTeamNameJa: decoder.require<String>(
+        data,
+        'homeTeamNameJa',
+        expected: 'String',
+      ),
+      awayTeamId: decoder.optional<String>(
+        data,
+        'awayTeamId',
+        expected: 'String',
+      ),
+      awaySourceTeamId: decoder.optional<String>(
+        data,
+        'awaySourceTeamId',
+        expected: 'String',
+      ),
+      awayTeamNameJa: decoder.require<String>(
+        data,
+        'awayTeamNameJa',
+        expected: 'String',
+      ),
+      homeTeamNameEn: decoder.optional<String>(
+        data,
+        'homeTeamNameEn',
+        expected: 'String',
+      ),
+      awayTeamNameEn: decoder.optional<String>(
+        data,
+        'awayTeamNameEn',
+        expected: 'String',
+      ),
+      homeTeamProviderName: decoder.optional<String>(
+        data,
+        'homeTeamProviderName',
+        expected: 'String',
+      ),
+      awayTeamProviderName: decoder.optional<String>(
+        data,
+        'awayTeamProviderName',
+        expected: 'String',
+      ),
+      homeTeamLogoUrl: decoder.optional<String>(
+        data,
+        'homeTeamLogoUrl',
+        expected: 'String',
+      ),
+      awayTeamLogoUrl: decoder.optional<String>(
+        data,
+        'awayTeamLogoUrl',
+        expected: 'String',
+      ),
+      startTimeUtc: decoder.require<Timestamp>(
+        data,
+        'startTimeUTC',
+        expected: 'Timestamp',
+      ),
+      startTimeJst: decoder.require<String>(
+        data,
+        'startTimeJST',
+        expected: 'String',
+      ),
+      timezone: decoder.require<String>(data, 'timezone', expected: 'String'),
+      // Stored status must already be a [GameStatus] name. Provider adapters
+      // may map an unknown upstream code to `scheduled` before writing.
+      // Reading that fallback again would show a corrupt document as a
+      // scheduled match. Calendar rejects the same value.
+      status: _status(decoder, data),
+      venue: decoder.optional<String>(data, 'venue', expected: 'String'),
+      homeScore: decoder.optional<int>(data, 'homeScore', expected: 'int'),
+      awayScore: decoder.optional<int>(data, 'awayScore', expected: 'int'),
       broadcastPlatforms: broadcastList,
-      externalFixtureId:
-          data['externalFixtureId'] as int? ??
-          data['rapidApiFixtureId'] as int?,
+      externalFixtureId: externalFixtureId ?? rapidApiFixtureId,
       // ignore: deprecated_member_use_from_same_package
-      rapidApiFixtureId: data['rapidApiFixtureId'] as int?,
-      sourceProvider: data['sourceProvider'] as String?,
-      sourceFixtureId: data['sourceFixtureId'] as String?,
+      rapidApiFixtureId: rapidApiFixtureId,
+      sourceProvider: decoder.optional<String>(
+        data,
+        'sourceProvider',
+        expected: 'String',
+      ),
+      sourceFixtureId: decoder.optional<String>(
+        data,
+        'sourceFixtureId',
+        expected: 'String',
+      ),
     );
+  }
+
+  static List<BroadcastInfo> _broadcasts(
+    FirestoreDecoder decoder,
+    Map<String, dynamic> data,
+  ) {
+    if (!data.containsKey('broadcastPlatforms') ||
+        data['broadcastPlatforms'] == null) {
+      return const [];
+    }
+    final raw = data['broadcastPlatforms'];
+    if (raw is! List) {
+      decoder.fail('broadcastPlatforms', 'List<Map>', raw);
+    }
+    final broadcasts = <BroadcastInfo>[];
+    for (var index = 0; index < raw.length; index++) {
+      final entry = raw[index];
+      if (entry is! Map) {
+        decoder.fail('broadcastPlatforms[$index]', 'Map', entry);
+      }
+      broadcasts.add(
+        BroadcastInfo.fromMap(
+          Map<String, dynamic>.from(entry),
+          collection: decoder.collection,
+          documentId: decoder.documentId,
+          field: 'broadcastPlatforms[$index]',
+        ),
+      );
+    }
+    return broadcasts;
+  }
+
+  static GameStatus _status(
+    FirestoreDecoder decoder,
+    Map<String, dynamic> data,
+  ) {
+    final raw = decoder.require<String>(
+      data,
+      'status',
+      expected: 'scheduled|live|finished|postponed|cancelled',
+    );
+    for (final status in GameStatus.values) {
+      if (status.name == raw) return status;
+    }
+    decoder.fail('status', 'scheduled|live|finished|postponed|cancelled', raw);
   }
 
   Map<String, dynamic> toFirestore() {

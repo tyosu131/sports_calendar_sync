@@ -221,8 +221,9 @@ void main() {
         'Tokyo unknown',
       ]) {
         expect(
-          TeamPresentationLogoResolver(const [])
-              .side(fixture(name, 'football_j1'), true),
+          TeamPresentationLogoResolver(
+            const [],
+          ).side(fixture(name, 'football_j1'), true),
           isNull,
         );
       }
@@ -251,8 +252,9 @@ void main() {
         isNull,
       );
       expect(
-        TeamPresentationLogoResolver(const [])
-            .side(fixture('Fulham', 'baseball_npb'), true),
+        TeamPresentationLogoResolver(
+          const [],
+        ).side(fixture('Fulham', 'baseball_npb'), true),
         isNull,
       );
     },
@@ -313,6 +315,47 @@ void main() {
       expect(games.single.homeTeamId, 'arsenal');
     },
   );
+
+  test(
+    'new domestic competitions use the J1-J3 masters; overseas stays overseas',
+    () async {
+      final repository = RecordingTeams();
+      final container = ProviderContainer(
+        overrides: [teamRepositoryProvider.overrideWithValue(repository)],
+      );
+      addTearDown(container.dispose);
+      final games = [
+        fixture('Kawasaki Frontale', 'football_j1', id: 'kawasaki_frontale'),
+        fixture('Jubilo Iwata', 'football_j2', id: 'jubilo_iwata'),
+        fixture('Vegalta Sendai', 'football_j3', id: 'vegalta_sendai'),
+        fixture('Tochigi SC', 'football_j2_j3_special', id: 'tochigi_sc'),
+        fixture('FC Tokyo', 'football_j_league_cup', id: 'fc_tokyo'),
+        fixture('Kashima Antlers', 'football_emperor_cup', id: 'kashima'),
+        fixture('Future FC', 'football_j_future', id: 'future_fc'),
+        fixture('Arsenal FC', 'football_premier', id: 'arsenal'),
+        fixture('Arsenal FC', 'football_champions_league', id: 'arsenal_ucl'),
+        fixture('Arsenal FC', 'football_league_cup', id: 'arsenal_efl'),
+        fixture('Yomiuri', 'baseball_npb', id: 'giants'),
+      ];
+      final resolver = await container.read(
+        gamePresentationProvider(games).future,
+      );
+
+      expect(repository.masterReads.keys, {
+        'football_j1',
+        'football_j2',
+        'football_j3',
+        'football_premier',
+      });
+      expect(
+        repository.masterReads.containsKey('football_j2_j3_special'),
+        isFalse,
+      );
+      expect(repository.masterReads['football_premier'], 1);
+      expect(publicTeamLogoUrl(resolver.side(games.first, true)), isNull);
+      expect(resolver.side(games.last, true), isNull);
+    },
+  );
 }
 
 class RecordingTeams implements TeamRepository {
@@ -326,14 +369,14 @@ class RecordingTeams implements TeamRepository {
       (reads) => reads + 1,
       ifAbsent: () => 1,
     );
-    if (fail) throw StateError('unavailable');
+    if (fail) throw Exception('unavailable');
     return const [];
   }
 
   @override
   Future<List<Team>> fetchTeamsByIds(List<String> ids) async {
     canonicalReads.add(ids);
-    if (fail) throw StateError('unavailable');
+    if (fail) throw Exception('unavailable');
     return const [];
   }
 

@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/models/game.dart';
 import '../../domain/models/team.dart';
+import '../../domain/policies/japanese_domestic_football.dart';
 import '../../domain/policies/team_presentation_policy.dart';
 import 'auth_providers.dart';
 import 'repository_providers.dart';
@@ -48,7 +49,7 @@ final gamesStreamForTeamProvider = StreamProvider.family<List<Game>, String>((
 final upcomingGamesForFollowedTeamsProvider = FutureProvider<List<Game>>((
   ref,
 ) async {
-  final teamIds = ref.watch(followedTeamIdsProvider);
+  final teamIds = await ref.watch(followedTeamIdsProvider.future);
   if (teamIds.isEmpty) return [];
   return ref.watch(gameRepositoryProvider).fetchUpcomingGamesForTeams(teamIds);
 });
@@ -72,8 +73,10 @@ final presentationMasterProvider = FutureProvider.family<List<Team>, String>((
     return await ref
         .watch(teamRepositoryProvider)
         .fetchTeams(competitionKey: key);
-  } catch (_) {
-    return const []; // Optional metadata must not suppress the schedule.
+  } on Exception {
+    // Optional logo metadata. Network and decode failures stay empty so the
+    // match list remains. Programmer errors are not Exception and propagate.
+    return const [];
   }
 });
 
@@ -84,17 +87,15 @@ final gamePresentationProvider =
     ) async {
       final keys = <String>{};
       for (final game in games) {
-        if (const {
-          'football_j1',
-          'football_j_league_cup',
-          'football_emperor_cup',
-        }.contains(game.competitionKey)) {
-          keys.addAll(['football_j1', 'football_j2', 'football_j3']);
-        } else if (const {
-          'football_premier',
-          'football_champions_league',
-          'football_league_cup',
-        }.contains(game.competitionKey)) {
+        // Domestic name policy and this master lookup are the same set:
+        // J1/J2/J3, the special, both domestic cups, and a future football_j*
+        // key. Overseas clubs that share the Premier League master are a
+        // different lookup and stay listed below.
+        if (isJapaneseDomesticFootballCompetition(game.competitionKey)) {
+          keys.addAll(const ['football_j1', 'football_j2', 'football_j3']);
+        } else if (_premierClubMasterCompetitions.contains(
+          game.competitionKey,
+        )) {
           keys.add('football_premier');
         }
       }
@@ -111,8 +112,8 @@ final gamePresentationProvider =
           canonical = await ref
               .watch(teamRepositoryProvider)
               .fetchTeamsByIds(ids);
-        } catch (_) {
-          /* Keep the games and use reviewed static presentation data. */
+        } on Exception {
+          // Same optional-metadata boundary as presentationMasterProvider.
         }
       }
       final masters = await Future.wait(masterFutures);
@@ -126,6 +127,15 @@ final gamePresentationProvider =
         }.values,
       ]);
     });
+
+/// Overseas club competitions whose presentation master is the Premier
+/// League team list. Not Japanese domestic football, and not a navigation
+/// category.
+const _premierClubMasterCompetitions = {
+  'football_premier',
+  'football_champions_league',
+  'football_league_cup',
+};
 
 class HomeUpcomingGames {
   const HomeUpcomingGames({required this.games, required this.presentation});
@@ -141,7 +151,7 @@ class HomeUpcomingGames {
 final scheduleGamesForFollowedTeamsProvider = FutureProvider<List<Game>>((
   ref,
 ) async {
-  final teamIds = ref.watch(followedTeamIdsProvider);
+  final teamIds = await ref.watch(followedTeamIdsProvider.future);
   if (teamIds.isEmpty) return [];
   return ref.watch(gameRepositoryProvider).fetchScheduleGamesForTeams(teamIds);
 });

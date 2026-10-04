@@ -8,6 +8,8 @@
 library;
 
 import '../../core/config/sports_registry.dart';
+import '../../core/utils/app_constants.dart';
+import 'firestore_decode.dart';
 import 'sport_definition.dart';
 
 /// @deprecated Kept for backward compatibility.  Use [SportsRegistry] instead.
@@ -105,8 +107,8 @@ class League {
     this.externalLeagueId,
     @Deprecated('Use competitionKey') SportType? sportType,
     @Deprecated('Use externalLeagueId') int? rapidApiId,
-  })  : _sportType = sportType,
-        _rapidApiId = rapidApiId;
+  }) : _sportType = sportType,
+       _rapidApiId = rapidApiId;
 
   final String id;
   final String nameEn;
@@ -141,20 +143,32 @@ class League {
       competitionKey != null ? SportsRegistry.findByKey(competitionKey!) : null;
 
   factory League.fromFirestore(Map<String, dynamic> data, String docId) {
+    final decoder = FirestoreDecoder(
+      collection: AppConstants.leaguesCollection,
+      documentId: docId,
+    );
     // Prefer the new `competitionKey` field; fall back to legacy `sportKey`.
     // Do NOT infer from `sportType` — ambiguous inference is worse than null.
-    final competitionKey =
-        data['competitionKey'] as String? ?? data['sportKey'] as String?;
+    final competitionKey = readLegacyCompetitionKey(decoder, data);
+    final externalLeagueId = decoder.optional<int>(
+      data,
+      'externalLeagueId',
+      expected: 'int',
+    );
+    final rapidApiId = decoder.optional<int>(
+      data,
+      'rapidApiId',
+      expected: 'int',
+    );
 
     return League(
       id: docId,
-      nameEn: data['nameEn'] as String,
-      nameJa: data['nameJa'] as String,
+      nameEn: decoder.require<String>(data, 'nameEn', expected: 'String'),
+      nameJa: decoder.require<String>(data, 'nameJa', expected: 'String'),
       competitionKey: competitionKey,
-      country: data['country'] as String,
-      logoUrl: data['logoUrl'] as String?,
-      externalLeagueId: data['externalLeagueId'] as int? ??
-          data['rapidApiId'] as int?,
+      country: decoder.require<String>(data, 'country', expected: 'String'),
+      logoUrl: decoder.optional<String>(data, 'logoUrl', expected: 'String'),
+      externalLeagueId: externalLeagueId ?? rapidApiId,
     );
   }
 

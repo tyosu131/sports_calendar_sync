@@ -7,7 +7,6 @@ import '../../data/providers/game_providers.dart';
 import '../../data/providers/repository_providers.dart';
 import '../../data/providers/team_providers.dart';
 import '../../domain/models/team.dart';
-import '../../domain/models/user_profile.dart';
 import '../../domain/policies/home_sport_navigation.dart';
 import '../../domain/policies/team_display_name_policy.dart';
 import '../../domain/policies/team_presentation_policy.dart';
@@ -28,22 +27,22 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final userAsync = ref.watch(userProfileProvider);
+    final account = ref.watch(accountGateProvider);
     final tabs = homeSportTabs();
 
     return DefaultTabController(
       length: tabs.length,
       initialIndex: defaultHomeSportTabIndex(tabs),
-      child: _HomeScaffold(tabs: tabs, userAsync: userAsync),
+      child: _HomeScaffold(tabs: tabs, account: account),
     );
   }
 }
 
 class _HomeScaffold extends StatefulWidget {
-  const _HomeScaffold({required this.tabs, required this.userAsync});
+  const _HomeScaffold({required this.tabs, required this.account});
 
   final List<HomeSportTab> tabs;
-  final AsyncValue<UserProfile?> userAsync;
+  final AccountGate account;
 
   @override
   State<_HomeScaffold> createState() => _HomeScaffoldState();
@@ -89,7 +88,7 @@ class _HomeScaffoldState extends State<_HomeScaffold> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tabs = widget.tabs;
-    final userAsync = widget.userAsync;
+    final account = widget.account;
     final tabIndex = _controller?.index ?? defaultHomeSportTabIndex(tabs);
     final showSubNav = homeTabShowsSportSubNav(tabs[tabIndex]);
 
@@ -98,23 +97,15 @@ class _HomeScaffoldState extends State<_HomeScaffold> {
         title: const Text('スポーツカレンダー'),
         actions: [
           // In-app calendar view (not iCalendar sync).
-          userAsync.whenOrNull(
-                data: (profile) => profile != null
-                    ? IconButton(
-                        icon: const Icon(Icons.event_note_outlined),
-                        tooltip: 'スケジュールを表示',
-                        onPressed: () => context.push('/schedule'),
-                      )
-                    : null,
-              ) ??
-              const SizedBox.shrink(),
+          if (account.kind == AccountGateKind.ready)
+            IconButton(
+              icon: const Icon(Icons.event_note_outlined),
+              tooltip: 'スケジュールを表示',
+              onPressed: () => context.push('/schedule'),
+            ),
           // Calendar sync button
-          userAsync.whenOrNull(
-                data: (profile) => !useSampleData && profile != null
-                    ? const CalendarSyncButton()
-                    : null,
-              ) ??
-              const SizedBox.shrink(),
+          if (!useSampleData && account.kind == AccountGateKind.ready)
+            const CalendarSyncButton(),
           // Settings
           IconButton(
             icon: const Icon(Icons.settings_outlined),
@@ -153,7 +144,7 @@ class _HomeScaffoldState extends State<_HomeScaffold> {
               key: ValueKey('home-sport-page-${tab.id}'),
               child: _HomeSportPage(
                 tab: tab,
-                userAsync: userAsync,
+                account: account,
                 subNavIndex: homeTabShowsSportSubNav(tab) ? _subNavIndex : null,
               ),
             ),
@@ -174,17 +165,17 @@ class _HomeScaffoldState extends State<_HomeScaffold> {
 class _HomeSportPage extends StatelessWidget {
   const _HomeSportPage({
     required this.tab,
-    required this.userAsync,
+    required this.account,
     required this.subNavIndex,
   });
 
   final HomeSportTab tab;
-  final AsyncValue<UserProfile?> userAsync;
+  final AccountGate account;
   final ValueNotifier<int>? subNavIndex;
 
   @override
   Widget build(BuildContext context) {
-    final feed = _HomeSportFeed(tab: tab, userAsync: userAsync);
+    final feed = _HomeSportFeed(tab: tab, account: account);
     final notifier = subNavIndex;
     if (notifier == null) return feed;
     return ValueListenableBuilder<int>(
@@ -201,38 +192,53 @@ class _HomeSportPage extends StatelessWidget {
 }
 
 class _HomeSportFeed extends ConsumerWidget {
-  const _HomeSportFeed({required this.tab, required this.userAsync});
+  const _HomeSportFeed({required this.tab, required this.account});
 
   final HomeSportTab tab;
-  final AsyncValue<UserProfile?> userAsync;
+  final AccountGate account;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return userAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('エラー: $e')),
-      data: (profile) {
-        if (profile == null) {
-          return const _SignInPrompt();
-        }
+    switch (account.kind) {
+      case AccountGateKind.loading:
+        return const Center(child: CircularProgressIndicator());
+      case AccountGateKind.failed:
+        return Center(child: Text('エラー: ${account.error}'));
+      case AccountGateKind.signedOut:
+        return const _SignInPrompt();
+      case AccountGateKind.missingProfile:
+        return const _ProfileUnavailable();
+      case AccountGateKind.ready:
+        final profile = account.profile!;
         return _HomeContent(
           tab: tab,
+          followedIds: profile.followedTeamIds,
           gamesAsync: ref.watch(homeUpcomingGamesProvider),
           followedTeamsAsync: ref.watch(followedTeamsProvider),
         );
-      },
-    );
+    }
+  }
+}
+
+class _ProfileUnavailable extends StatelessWidget {
+  const _ProfileUnavailable();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(child: Text('プロフィールを確認できません'));
   }
 }
 
 class _HomeContent extends ConsumerWidget {
   const _HomeContent({
     required this.tab,
+    required this.followedIds,
     required this.gamesAsync,
     required this.followedTeamsAsync,
   });
 
   final HomeSportTab tab;
+  final List<String> followedIds;
   final AsyncValue<HomeUpcomingGames> gamesAsync;
   final AsyncValue<List<Team>> followedTeamsAsync;
 
@@ -261,7 +267,6 @@ class _HomeContent extends ConsumerWidget {
           error: (e, _) => Center(child: Text('エラー: $e')),
           data: (homeGames) {
             final games = gamesForHomeSportTab(homeGames.games, tab);
-            final followedIds = ref.watch(followedTeamIdsProvider);
             return GamePresentationScope(
               resolver: homeGames.presentation,
               child: RefreshIndicator(

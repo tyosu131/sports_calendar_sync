@@ -1,3 +1,6 @@
+import '../../core/utils/app_constants.dart';
+import 'firestore_decode.dart';
+
 /// Represents a user's calendar subscription for a team
 class CalendarSubscription {
   const CalendarSubscription({
@@ -24,12 +27,22 @@ class CalendarSubscription {
     Map<String, dynamic> data,
     String docId,
   ) {
+    final decoder = FirestoreDecoder(
+      collection: AppConstants.subscriptionsCollection,
+      documentId: docId,
+    );
     return CalendarSubscription(
-      uid: data['uid'] as String,
-      teamId: data['teamId'] as String,
-      icsUrl: data['icsUrl'] as String,
-      googleCalendarId: data['googleCalendarId'] as String?,
-      isActive: data['isActive'] as bool? ?? true,
+      uid: decoder.require<String>(data, 'uid', expected: 'String'),
+      teamId: decoder.require<String>(data, 'teamId', expected: 'String'),
+      icsUrl: decoder.require<String>(data, 'icsUrl', expected: 'String'),
+      googleCalendarId: decoder.optional<String>(
+        data,
+        'googleCalendarId',
+        expected: 'String',
+      ),
+      // Absent means active. A present non-bool is invalid.
+      isActive:
+          decoder.optional<bool>(data, 'isActive', expected: 'bool') ?? true,
     );
   }
 

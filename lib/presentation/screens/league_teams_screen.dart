@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import '../../core/config/sports_registry.dart';
 import '../../data/providers/auth_providers.dart';
 import '../../data/providers/game_providers.dart';
-import '../../data/providers/repository_providers.dart';
 import '../../data/providers/team_providers.dart';
 import '../../domain/models/sport_definition.dart';
 import '../../domain/models/team.dart';
@@ -13,6 +12,7 @@ import '../../domain/policies/league_browse_presentation.dart';
 import '../../domain/policies/team_display_name_policy.dart';
 import '../../domain/policies/team_presentation_policy.dart';
 import '../theme/presentation_decoration.dart';
+import '../widgets/follow_toggle.dart';
 import '../widgets/team_presentation_badge.dart';
 
 /// Teams for one registry competition, opened from the in-sport league list.
@@ -69,10 +69,7 @@ class _LeagueTeamGrid extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final followedIds = ref.watch(followedTeamIdsProvider);
-    final user = ref.watch(currentUserProvider);
-    final profile = ref.watch(userProfileProvider).valueOrNull;
-    final userId = user?.uid ?? profile?.uid;
+    final session = watchFollowInteraction(ref);
     final gamesAsync = ref.watch(
       upcomingGamesForTeamIdsProvider(
         leagueTeamIdsKey(teams.map((team) => team.id)),
@@ -92,7 +89,7 @@ class _LeagueTeamGrid extends ConsumerWidget {
       itemCount: teams.length,
       itemBuilder: (context, index) {
         final team = teams[index];
-        final isFollowing = followedIds.contains(team.id);
+        final isFollowing = session.isFollowing(team.id);
         final next = games == null
             ? null
             : nextMatchForTeam(
@@ -107,26 +104,8 @@ class _LeagueTeamGrid extends ConsumerWidget {
           gamesSettled: gamesAsync.hasValue || gamesAsync.hasError,
           gamesFailed: gamesAsync.hasError,
           onTap: () => context.push('/team/${team.id}'),
-          onFollowToggle: () async {
-            if (userId == null) {
-              context.push('/signin');
-              return;
-            }
-            final repo = ref.read(userRepositoryProvider);
-            if (isFollowing) {
-              await repo.unfollowTeam(
-                userId,
-                team.id,
-                competitionKey: team.competitionKey,
-              );
-            } else {
-              await repo.followTeam(
-                userId,
-                team.id,
-                competitionKey: team.competitionKey,
-              );
-            }
-          },
+          onFollowToggle: () =>
+              toggleFollow(context, ref, session, team.id, team.competitionKey),
         );
       },
     );

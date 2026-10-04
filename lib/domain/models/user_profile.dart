@@ -1,5 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../core/utils/app_constants.dart';
+import 'firestore_decode.dart';
+
 /// User profile stored in Firestore under /users/{uid}.
 ///
 /// ## Canonical follow state
@@ -60,28 +63,89 @@ class UserProfile {
   List<String> get allFavoriteTeamIds => followedTeamIds;
 
   factory UserProfile.fromFirestore(Map<String, dynamic> data, String uid) {
-    final Map<String, List<String>> favoriteTeamIdsByCompetition = {};
-    final rawMap = data['favoriteTeamIdsByCompetition'] as Map<String, dynamic>?;
-    if (rawMap != null) {
-      rawMap.forEach((key, value) {
-        favoriteTeamIdsByCompetition[key] =
-            List<String>.from(value as List? ?? []);
-      });
+    final decoder = FirestoreDecoder(
+      collection: AppConstants.usersCollection,
+      documentId: uid,
+    );
+    final favoriteTeamIdsByCompetition = _favoriteMap(decoder, data);
+
+    // A missing preferredLanguage stays `ja` so an old document can still be
+    // shown. The follow write repairs that key. A present non-string, or a
+    // string other than ja/en, fails closed.
+    final storedLanguage = decoder.optional<String>(
+      data,
+      'preferredLanguage',
+      expected: 'ja|en',
+    );
+    if (storedLanguage != null &&
+        storedLanguage != 'ja' &&
+        storedLanguage != 'en') {
+      decoder.fail('preferredLanguage', 'ja|en', storedLanguage);
     }
+    final preferredLanguage = storedLanguage ?? 'ja';
 
     return UserProfile(
       uid: uid,
-      email: data['email'] as String? ?? '',
-      displayName: data['displayName'] as String?,
-      photoUrl: data['photoUrl'] as String?,
-      selectedCompetitions: List<String>.from(
-          data['selectedCompetitions'] as List? ?? []),
+      email: decoder.optional<String>(data, 'email', expected: 'String') ?? '',
+      displayName: decoder.optional<String>(
+        data,
+        'displayName',
+        expected: 'String',
+      ),
+      photoUrl: decoder.optional<String>(data, 'photoUrl', expected: 'String'),
+      selectedCompetitions: decoder.stringList(data, 'selectedCompetitions'),
       favoriteTeamIdsByCompetition: favoriteTeamIdsByCompetition,
-      followedTeamIds: List<String>.from(
-          data['followedTeamIds'] as List? ?? []),
-      preferredLanguage: data['preferredLanguage'] as String? ?? 'ja',
-      createdAt: data['createdAt'] as Timestamp?,
+      followedTeamIds: decoder.stringList(data, 'followedTeamIds'),
+      preferredLanguage: preferredLanguage,
+      createdAt: decoder.optional<Timestamp>(
+        data,
+        'createdAt',
+        expected: 'Timestamp',
+      ),
     );
+  }
+
+  static Map<String, List<String>> _favoriteMap(
+    FirestoreDecoder decoder,
+    Map<String, dynamic> data,
+  ) {
+    if (!data.containsKey('favoriteTeamIdsByCompetition') ||
+        data['favoriteTeamIdsByCompetition'] == null) {
+      return const {};
+    }
+    final rawMap = data['favoriteTeamIdsByCompetition'];
+    if (rawMap is! Map) {
+      decoder.fail('favoriteTeamIdsByCompetition', 'Map<String, List>', rawMap);
+    }
+    final favoriteTeamIdsByCompetition = <String, List<String>>{};
+    for (final entry in rawMap.entries) {
+      final key = entry.key;
+      if (key is! String) {
+        decoder.fail('favoriteTeamIdsByCompetition', 'String key', key);
+      }
+      final value = entry.value;
+      if (value is! List) {
+        decoder.fail(
+          'favoriteTeamIdsByCompetition.$key',
+          'List<String>',
+          value,
+        );
+      }
+      final ids = <String>[];
+      for (var index = 0; index < value.length; index++) {
+        final item = value[index];
+        if (item is! String) {
+          decoder.fail(
+            'favoriteTeamIdsByCompetition.$key[$index]',
+            'String',
+            item,
+          );
+        }
+        ids.add(item);
+      }
+      favoriteTeamIdsByCompetition[key] = List<String>.unmodifiable(ids);
+    }
+    return favoriteTeamIdsByCompetition;
   }
 
   Map<String, dynamic> toFirestore() {

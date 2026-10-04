@@ -383,6 +383,9 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          authSessionProvider.overrideWith(
+            (ref) => const AsyncData<String?>('user'),
+          ),
           userProfileProvider.overrideWith(
             (ref) => Stream<UserProfile?>.value(
               UserProfile(

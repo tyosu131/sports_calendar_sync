@@ -10,6 +10,7 @@ import '../../data/providers/team_providers.dart';
 import '../../domain/models/game.dart';
 import '../../domain/policies/team_display_name_policy.dart';
 import '../../domain/policies/team_presentation_policy.dart';
+import '../widgets/follow_toggle.dart';
 import '../widgets/team_presentation_badge.dart';
 import '../widgets/game_card.dart';
 import '../widgets/game_presentation_scope.dart';
@@ -25,12 +26,9 @@ class TeamDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final teamAsync = ref.watch(teamByIdProvider(teamId));
     final gamesAsync = ref.watch(upcomingGamesForTeamProvider(teamId));
-    final followedIds = ref.watch(followedTeamIdsProvider);
-    final user = ref.watch(currentUserProvider);
-    final profile = ref.watch(userProfileProvider).valueOrNull;
-    final userId = user?.uid ?? profile?.uid;
-
-    final isFollowing = followedIds.contains(teamId);
+    final session = watchFollowInteraction(ref);
+    final userId = session.userId;
+    final isFollowing = session.isFollowing(teamId);
 
     return Scaffold(
       body: teamAsync.when(
@@ -67,26 +65,14 @@ class TeamDetailScreen extends ConsumerWidget {
                         color: isFollowing ? Colors.red : null,
                       ),
                       tooltip: isFollowing ? 'フォロー解除' : 'フォローする',
-                      onPressed: () async {
-                        if (userId == null) return;
-                        final repo = ref.read(userRepositoryProvider);
-                        // Pass competitionKey when available so per-competition
-                        // state is updated; legacy followedTeamIds is always
-                        // kept in sync inside the repository.
-                        if (isFollowing) {
-                          await repo.unfollowTeam(
-                            userId,
-                            teamId,
-                            competitionKey: team.competitionKey,
-                          );
-                        } else {
-                          await repo.followTeam(
-                            userId,
-                            teamId,
-                            competitionKey: team.competitionKey,
-                          );
-                        }
-                      },
+                      onPressed: () => toggleFollow(
+                        context,
+                        ref,
+                        session,
+                        teamId,
+                        team.competitionKey,
+                        openSignIn: false,
+                      ),
                     ),
                     // Calendar sync
                     if (!useSampleData && userId != null)

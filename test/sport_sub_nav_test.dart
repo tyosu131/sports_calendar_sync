@@ -463,6 +463,9 @@ void main() {
 
       final container = ProviderContainer(
         overrides: [
+          authSessionProvider.overrideWith(
+            (ref) => const AsyncData<String?>(null),
+          ),
           userProfileProvider.overrideWith(
             (ref) => Stream<UserProfile?>.value(null),
           ),
