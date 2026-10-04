@@ -8,8 +8,8 @@ import '../../data/providers/repository_providers.dart';
 /// Writes a follow only when the session and the follow list are both known.
 ///
 /// A profile or follow-list error is not signed-out and does not open sign-in.
-/// Loading does not write. A missing actor opens sign-in except on team detail,
-/// which already ignores that tap.
+/// Loading does not write. Sign-in opens only for a settled signed-out session.
+/// Repository failures stay on this button; they do not change follow state.
 Future<void> toggleFollow(
   BuildContext context,
   WidgetRef ref,
@@ -27,17 +27,28 @@ Future<void> toggleFollow(
   if (session.followedIds == null) return;
   final userId = session.userId;
   if (userId == null) {
-    if (openSignIn) context.push('/signin');
+    if (session.signedOut && openSignIn) context.push('/signin');
     return;
   }
   final repository = ref.read(userRepositoryProvider);
-  if (session.isFollowing(teamId)) {
-    await repository.unfollowTeam(
-      userId,
-      teamId,
-      competitionKey: competitionKey,
-    );
-  } else {
-    await repository.followTeam(userId, teamId, competitionKey: competitionKey);
+  try {
+    if (session.isFollowing(teamId)) {
+      await repository.unfollowTeam(
+        userId,
+        teamId,
+        competitionKey: competitionKey,
+      );
+    } else {
+      await repository.followTeam(
+        userId,
+        teamId,
+        competitionKey: competitionKey,
+      );
+    }
+  } on Exception {
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('フォローを更新できませんでした')));
   }
 }

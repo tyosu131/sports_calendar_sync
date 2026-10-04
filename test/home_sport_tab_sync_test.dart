@@ -151,6 +151,13 @@ Future<void> _pumpHome(
     ProviderScope(
       key: UniqueKey(),
       overrides: [
+        authSessionProvider.overrideWith((ref) {
+          if (loadingProfile || profileError != null) {
+            return const AsyncData<String?>('user');
+          }
+          if (profile == null) return const AsyncData<String?>(null);
+          return AsyncData<String?>(profile.uid);
+        }),
         userProfileProvider.overrideWith((ref) => profileStream),
         if (teamsError != null)
           followedTeamsProvider.overrideWith((ref) => Future.error(teamsError))

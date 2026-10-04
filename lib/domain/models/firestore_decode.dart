@@ -37,7 +37,8 @@ const missingFirestoreValue = MissingFirestoreValue();
 String _actualLabel(Object? actual) {
   if (actual is MissingFirestoreValue) return 'missing';
   if (actual == null) return 'null';
-  return '${actual.runtimeType} ($actual)';
+  // Runtime type only. The stored value can be an email, URL, or token.
+  return actual.runtimeType.toString();
 }
 
 /// Reads one document. Invalid values throw [FirestoreDecodeException].

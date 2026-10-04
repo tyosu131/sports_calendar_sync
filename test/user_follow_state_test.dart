@@ -34,6 +34,40 @@ void main() {
       expect(profile.preferredLanguage, 'ja');
     });
 
+    test('preferredLanguage accepts ja and en and rejects other strings', () {
+      expect(
+        UserProfile.fromFirestore({
+          'email': 'user@example.com',
+          'followedTeamIds': ['arsenal'],
+          'preferredLanguage': 'en',
+        }, 'user').preferredLanguage,
+        'en',
+      );
+      expect(
+        UserProfile.fromFirestore({
+          'email': 'user@example.com',
+          'followedTeamIds': ['arsenal'],
+        }, 'user').preferredLanguage,
+        'ja',
+      );
+
+      FirestoreDecodeException? error;
+      try {
+        UserProfile.fromFirestore({
+          'email': 'user@example.com',
+          'followedTeamIds': ['arsenal'],
+          'preferredLanguage': 'fr',
+        }, 'user');
+      } on FirestoreDecodeException catch (caught) {
+        error = caught;
+      }
+      expect(error, isNotNull);
+      expect(error!.field, 'preferredLanguage');
+      expect(error.actual, 'fr');
+      expect(error.toString(), contains('got String'));
+      expect(error.toString(), isNot(contains('fr')));
+    });
+
     test('a present preferredLanguage of the wrong type fails closed', () {
       expect(
         () => UserProfile.fromFirestore({

@@ -70,14 +70,19 @@ class UserProfile {
     final favoriteTeamIdsByCompetition = _favoriteMap(decoder, data);
 
     // A missing preferredLanguage stays `ja` so an old document can still be
-    // shown. The follow write repairs that key. A present non-string fails.
-    final preferredLanguage =
-        decoder.optional<String>(
-          data,
-          'preferredLanguage',
-          expected: 'String',
-        ) ??
-        'ja';
+    // shown. The follow write repairs that key. A present non-string, or a
+    // string other than ja/en, fails closed.
+    final storedLanguage = decoder.optional<String>(
+      data,
+      'preferredLanguage',
+      expected: 'ja|en',
+    );
+    if (storedLanguage != null &&
+        storedLanguage != 'ja' &&
+        storedLanguage != 'en') {
+      decoder.fail('preferredLanguage', 'ja|en', storedLanguage);
+    }
+    final preferredLanguage = storedLanguage ?? 'ja';
 
     return UserProfile(
       uid: uid,

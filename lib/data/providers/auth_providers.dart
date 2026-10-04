@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -72,8 +74,9 @@ Stream<UserProfile?> profileStreamForSession({
 
 /// Stream of the current user's Firestore profile.
 ///
-/// Null is signed-out, or signed-in before the profile document exists.
-/// Those are not read errors. Sample mode watches only the sample uid.
+/// Null is either signed-out, or signed-in before the profile document
+/// exists. Those are not the same session. Sample mode watches only the
+/// sample uid.
 final userProfileProvider = StreamProvider<UserProfile?>((ref) {
   if (useSampleData) {
     return ref
@@ -87,40 +90,204 @@ final userProfileProvider = StreamProvider<UserProfile?>((ref) {
   );
 });
 
-/// Followed team ids after auth and the profile read have settled.
+/// Signed-in, and `users/{uid}` has no document.
 ///
-/// Signed-out and a missing profile are an empty list. A stored empty
-/// [UserProfile.followedTeamIds] is an empty list. Loading stays loading.
-/// A permission or network error stays an error and is not an empty list.
+/// This is not signed-out and not an empty follow list. Follow writes against
+/// a missing document fail, so the session must not attempt one.
+class ProfileDocumentMissing implements Exception {
+  const ProfileDocumentMissing();
+
+  @override
+  String toString() => 'プロフィールを確認できません';
+}
+
+/// Followed team ids after auth and the profile read have settled for the
+/// same uid.
+///
+/// Signed-out is an empty list. A stored empty [UserProfile.followedTeamIds]
+/// is an empty list. Loading stays loading, including while a previous user's
+/// profile is still the reload value. A permission, network, or missing
+/// document stays an error and is not an empty list.
 final followedTeamIdsProvider = FutureProvider<List<String>>((ref) async {
+  final sampleSession = _sampleSession(ref);
+  final session = _sessionFor(ref, sampleSession);
   final profile = ref.watch(userProfileProvider);
-  if (profile.hasError) {
-    Error.throwWithStackTrace(
-      profile.error!,
-      profile.stackTrace ?? StackTrace.current,
-    );
+  final decision = settleFollowList(
+    sampleSession: sampleSession,
+    session: session,
+    profile: profile,
+  );
+  switch (decision) {
+    case FollowListReady(:final ids):
+      return ids;
+    case FollowListFailed(:final error, :final stackTrace):
+      Error.throwWithStackTrace(error, stackTrace);
+    case FollowListPending():
+      // The profile future completes on the next emission, not on the
+      // previous value Riverpod keeps during reload. A session change
+      // rebuilds this provider and drops the in-flight result.
+      await ref.watch(userProfileProvider.future);
+      final again = settleFollowList(
+        sampleSession: sampleSession,
+        session: _sessionFor(ref, sampleSession),
+        profile: ref.watch(userProfileProvider),
+      );
+      switch (again) {
+        case FollowListReady(:final ids):
+          return ids;
+        case FollowListFailed(:final error, :final stackTrace):
+          Error.throwWithStackTrace(error, stackTrace);
+        case FollowListPending():
+          return await Completer<List<String>>().future;
+      }
   }
-  if (!profile.hasValue) {
-    final resolved = await ref.watch(userProfileProvider.future);
-    return resolved?.followedTeamIds ?? const <String>[];
-  }
-  return profile.value?.followedTeamIds ?? const <String>[];
 });
+
+bool _sampleSession(Ref ref) {
+  return useSampleData ||
+      ref.watch(userRepositoryProvider) is SampleUserRepository;
+}
+
+AsyncValue<String?> _sessionFor(Ref ref, bool sampleSession) {
+  if (sampleSession) return const AsyncData(SampleUserRepository.sampleUid);
+  return ref.watch(authSessionProvider);
+}
 
 /// Who may follow or unfollow.
 ///
-/// A sample session uses the settled sample profile uid. Production uses only
-/// the Firebase uid. A profile document is not a production session, including
-/// a previous profile still visible while auth is loading.
+/// A sample session uses the settled sample profile uid. Production uses the
+/// Firebase uid only when that same uid's profile is settled. A previous
+/// profile, a missing document, auth loading, and auth errors are not an actor.
 String? followActorId({
   required bool sampleSession,
   required String? firebaseUid,
-  required bool profileSettled,
+  required bool profileReady,
   required String? profileUid,
 }) {
-  if (!sampleSession) return firebaseUid;
-  if (!profileSettled) return null;
-  return profileUid;
+  if (!profileReady || profileUid == null) return null;
+  if (sampleSession) return profileUid;
+  if (firebaseUid == null || firebaseUid != profileUid) return null;
+  return firebaseUid;
+}
+
+/// Follow list after discarding a profile that belongs to another session.
+sealed class FollowListDecision {
+  const FollowListDecision();
+}
+
+class FollowListPending extends FollowListDecision {
+  const FollowListPending();
+}
+
+class FollowListReady extends FollowListDecision {
+  const FollowListReady(this.ids, this.profile);
+
+  final List<String> ids;
+  final UserProfile? profile;
+}
+
+class FollowListFailed extends FollowListDecision {
+  const FollowListFailed(this.error, this.stackTrace);
+
+  final Object error;
+  final StackTrace stackTrace;
+}
+
+/// Resolves follows for the session that is current now.
+///
+/// [profile] may still expose the previous user's document while it reloads.
+/// That value is pending, not a follow list, and it is not paired with the
+/// new uid.
+FollowListDecision settleFollowList({
+  required bool sampleSession,
+  required AsyncValue<String?> session,
+  required AsyncValue<UserProfile?> profile,
+}) {
+  final expectedUid = sampleSession
+      ? SampleUserRepository.sampleUid
+      : _settledUid(session);
+  if (!sampleSession && session.hasError) {
+    return FollowListFailed(
+      session.error!,
+      session.stackTrace ?? StackTrace.empty,
+    );
+  }
+  if (expectedUid == _uidPending) return const FollowListPending();
+
+  if (profile.isLoading || !profile.hasValue) return const FollowListPending();
+  if (profile.hasError) {
+    return FollowListFailed(
+      profile.error!,
+      profile.stackTrace ?? StackTrace.empty,
+    );
+  }
+
+  final value = profile.value;
+  if (expectedUid == null) {
+    if (value != null) return const FollowListPending();
+    return const FollowListReady(<String>[], null);
+  }
+  if (value == null) {
+    return FollowListFailed(const ProfileDocumentMissing(), StackTrace.current);
+  }
+  if (value.uid != expectedUid) return const FollowListPending();
+  return FollowListReady(value.followedTeamIds, value);
+}
+
+const _uidPending = Object();
+
+Object? _settledUid(AsyncValue<String?> session) {
+  if (session.isLoading || !session.hasValue || session.hasError) {
+    return _uidPending;
+  }
+  return session.value;
+}
+
+/// What Home may show for the current account.
+enum AccountGateKind { loading, failed, signedOut, missingProfile, ready }
+
+class AccountGate {
+  const AccountGate._(this.kind, {this.profile, this.error});
+
+  const AccountGate.loading() : this._(AccountGateKind.loading);
+
+  const AccountGate.failed(Object error)
+    : this._(AccountGateKind.failed, error: error);
+
+  const AccountGate.signedOut() : this._(AccountGateKind.signedOut);
+
+  const AccountGate.missingProfile() : this._(AccountGateKind.missingProfile);
+
+  const AccountGate.ready(UserProfile profile)
+    : this._(AccountGateKind.ready, profile: profile);
+
+  final AccountGateKind kind;
+  final UserProfile? profile;
+  final Object? error;
+}
+
+AccountGate accountGate({
+  required bool sampleSession,
+  required AsyncValue<String?> session,
+  required AsyncValue<UserProfile?> profile,
+}) {
+  final decision = settleFollowList(
+    sampleSession: sampleSession,
+    session: session,
+    profile: profile,
+  );
+  switch (decision) {
+    case FollowListPending():
+      return const AccountGate.loading();
+    case FollowListFailed(:final error):
+      if (error is ProfileDocumentMissing) {
+        return const AccountGate.missingProfile();
+      }
+      return AccountGate.failed(error);
+    case FollowListReady(:final profile):
+      if (profile == null) return const AccountGate.signedOut();
+      return AccountGate.ready(profile);
+  }
 }
 
 /// Follow button state shared by search, league, and team detail.
@@ -129,36 +296,89 @@ class FollowInteraction {
     required this.userId,
     required this.followedIds,
     required this.profileFailed,
+    required this.signedOut,
   });
 
   /// Null when this session must not write a follow.
   final String? userId;
 
-  /// Null while the follow list is loading or failed. Empty is a known empty
-  /// list, not a failure.
+  /// Null while the follow list is loading, failed, or not for this uid.
+  /// Empty is a known empty list, not a failure.
   final List<String>? followedIds;
 
   final bool profileFailed;
 
+  /// Settled signed-out. Missing documents and auth errors are not this.
+  final bool signedOut;
+
   bool isFollowing(String teamId) => followedIds?.contains(teamId) ?? false;
 }
 
-FollowInteraction watchFollowInteraction(WidgetRef ref) {
-  final sampleSession =
-      useSampleData ||
-      ref.watch(userRepositoryProvider) is SampleUserRepository;
+final followSessionProvider = Provider<FollowInteraction>((ref) {
+  final sampleSession = _sampleSession(ref);
+  final session = _sessionFor(ref, sampleSession);
   final profile = ref.watch(userProfileProvider);
-  final follows = ref.watch(followedTeamIdsProvider);
-  final profileSettled =
-      profile.hasValue && !profile.isLoading && !profile.hasError;
-  return FollowInteraction(
-    userId: followActorId(
-      sampleSession: sampleSession,
-      firebaseUid: ref.watch(currentUserProvider)?.uid,
-      profileSettled: profileSettled,
-      profileUid: profileSettled ? profile.value?.uid : null,
-    ),
-    followedIds: follows.hasError ? null : follows.asData?.value,
-    profileFailed: profile.hasError || follows.hasError,
+  return followInteractionFrom(
+    sampleSession: sampleSession,
+    session: session,
+    profile: profile,
   );
+});
+
+FollowInteraction followInteractionFrom({
+  required bool sampleSession,
+  required AsyncValue<String?> session,
+  required AsyncValue<UserProfile?> profile,
+}) {
+  final decision = settleFollowList(
+    sampleSession: sampleSession,
+    session: session,
+    profile: profile,
+  );
+  final sessionUid = sampleSession
+      ? SampleUserRepository.sampleUid
+      : (session.hasValue && !session.isLoading && !session.hasError
+            ? session.value
+            : null);
+  switch (decision) {
+    case FollowListReady(:final ids, :final profile):
+      return FollowInteraction(
+        userId: followActorId(
+          sampleSession: sampleSession,
+          firebaseUid: sessionUid,
+          profileReady: profile != null,
+          profileUid: profile?.uid,
+        ),
+        followedIds: ids,
+        profileFailed: false,
+        signedOut: profile == null,
+      );
+    case FollowListFailed():
+      return const FollowInteraction(
+        userId: null,
+        followedIds: null,
+        profileFailed: true,
+        signedOut: false,
+      );
+    case FollowListPending():
+      return const FollowInteraction(
+        userId: null,
+        followedIds: null,
+        profileFailed: false,
+        signedOut: false,
+      );
+  }
+}
+
+final accountGateProvider = Provider<AccountGate>((ref) {
+  final sampleSession = _sampleSession(ref);
+  return accountGate(
+    sampleSession: sampleSession,
+    session: _sessionFor(ref, sampleSession),
+    profile: ref.watch(userProfileProvider),
+  );
+});
+
+FollowInteraction watchFollowInteraction(WidgetRef ref) {
+  return ref.watch(followSessionProvider);
 }

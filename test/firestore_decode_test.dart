@@ -56,6 +56,55 @@ void main() {
     expect(game.broadcastPlatforms.single.platform, 'DAZN');
   });
 
+  test('decode text names the type and not the stored value', () {
+    const secret = 'user@example.com';
+    const token = 'https://example.test/reset?token=abc123';
+    FirestoreDecodeException? error;
+    try {
+      Game.fromFirestore({
+        ..._game(),
+        'startTimeUTC': secret,
+        'broadcastPlatforms': [
+          {'platform': token},
+        ],
+      }, 'game-1');
+    } on FirestoreDecodeException catch (caught) {
+      error = caught;
+    }
+
+    expect(error, isNotNull);
+    expect(error!.field, 'startTimeUTC');
+    expect(error.actual, secret);
+    expect(error.toString(), contains('games/game-1'));
+    expect(error.toString(), contains('expected Timestamp, got String'));
+    expect(error.toString(), isNot(contains(secret)));
+    expect(error.toString(), isNot(contains(token)));
+    expect(error.toString(), isNot(contains('example.test')));
+
+    FirestoreDecodeException? missing;
+    FirestoreDecodeException? isNull;
+    try {
+      Team.fromFirestore({
+        'nameJa': '鹿島アントラーズ',
+        'leagueId': 'j1_league',
+      }, 'kashima_antlers');
+    } on FirestoreDecodeException catch (caught) {
+      missing = caught;
+    }
+    try {
+      Team.fromFirestore({
+        'nameEn': null,
+        'nameJa': '鹿島アントラーズ',
+        'leagueId': 'j1_league',
+      }, 'kashima_antlers');
+    } on FirestoreDecodeException catch (caught) {
+      isNull = caught;
+    }
+    expect(missing!.toString(), contains('got missing'));
+    expect(isNull!.toString(), contains('got null'));
+    expect(missing.toString(), isNot(contains('got null')));
+  });
+
   test('an invalid timestamp names the game document', () {
     expect(
       () => Game.fromFirestore({
