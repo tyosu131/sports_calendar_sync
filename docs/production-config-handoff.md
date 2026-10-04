@@ -16,7 +16,7 @@
 | Firestore indexes | `firestore.indexes.json` |  |  |  |
 | Functions（`asia-northeast1`） | `functions/` |  |  |  |
 
-rules の SHA は、`competitionSeasonMemberships` の `allow read: if true` を含むコミット以降であること。indexes の SHA は、`teams` の `competitionKey + nameJa`、`competitionKey + searchKeywords`、`sportKey` の同形、および `games` の `homeTeamId` / `awayTeamId` 複合索引を含むコミット以降であること。Functions を使う画面（カレンダー接続、ICS）を渡すときは Functions の行も埋める。
+rules の SHA は、`competitionSeasonMemberships` の `allow read: if true` を含むコミット以降であること。indexes の SHA は、`teams` の `competitionKey + nameJa`、`competitionKey + searchKeywords`、`sportKey` の同形、および `games` の `homeTeamId` / `awayTeamId` 複合索引を含むコミット以降であること。Google カレンダー、Apple カレンダー、ICS を渡すときは Functions の行も埋める。PR #53 の日本語名をそのカレンダーに出すとき、Functions の SHA は `1fe5ecc` 以降である。#53 自体は rules と indexes の行を要求しない。
 
 ## 実機に渡す前の最小確認
 
@@ -24,14 +24,17 @@ rules の SHA は、`competitionSeasonMemberships` の `allow read: if true` を
 2. 上の台帳で、そのビルドが依存する行が埋まっている。検索とリーグ一覧だけなら rules と indexes。Google カレンダーや Apple / ICS を触るなら Functions も。
 3. 「チームを探す」で、文字を入れないサッカーのホーム、文字を入れた検索、サッカーのリーグから Jリーグ、の3つを開き、出たエラー文字列をそのまま残す。`エラー: $e` は診断用なので、汎用文言に置き換えない。
 4. リーグ一覧が `エラー:` で止まる場合、それは「チームが無い」ではない。`permission-denied` は membership の rules 未反映の候補である。一覧が「このリーグのチームはまだありません」なら、読み取りは通っており、ドキュメントが無い（または legacy のチームも無い）状態である。
+5. アプリ内の日本語名は、PR #53 を含むクライアントの再ビルドと再インストールで確認する。対象は `football_j*`（`football_j2_j3_special` を含む）と `football_emperor_cup` で、プレミアリーグを含む海外競技は英語のままである。Google Calendar、Apple Calendar、ICS の同じ名前は、Functions の行が `1fe5ecc` 以降のときだけ確認する。#53 のために rules のデプロイ、indexes のデプロイ、Firestore への書き込み、API sync はしない。
 
 ## 成果物の分類
 
 | 成果物 | 分類 |
 | --- | --- |
-| Flutter UI / 表示名 / ナビゲーション | client-only |
+| Flutter の画面とナビゲーション | client-only |
+| アプリ内のチーム表示名 | client-only。PR #53 の日本語名は再ビルドと再インストールで反映される |
+| Google Calendar / Apple Calendar / ICS のチーム表示名 | functions-deploy-required。PR #53 の日本語名は本番 Functions のデプロイが要る。rules、indexes、Firestore への書き込み、API sync は不要 |
 | `lib/firebase_options.dart`、`android/app/google-services.json`、`ios/Runner/GoogleService-Info.plist` | client-only（アプリに同梱。本番プロジェクト ID は一致） |
-| 生成済み presentation catalog（Dart / Functions JSON） | client-only。Functions のカレンダー名も同じ判定を使う場合は functions-deploy-required |
+| 生成済み presentation catalog | Dart は client-only。`functions/` の catalog は、カレンダー名を本番に載せるとき functions-deploy-required |
 | `firestore.rules` | rules-deploy-required |
 | `firestore.indexes.json` | indexes-deploy-required |
 | `functions/**`、`firebase.json` の functions 設定 | functions-deploy-required |
@@ -43,8 +46,11 @@ rules の SHA は、`competitionSeasonMemberships` の `allow read: if true` を
 
 ## 直近 main の分類
 
+現行 main は `1fe5ecc`（PR #53 のマージ）である。
+
 | 変更 | 分類 |
 | --- | --- |
+| PR #53 日本語国内サッカーの表示名（マージ `1fe5ecc`、実装 `f2f27d9`） | Flutter の表示名ポリシーと Functions のカレンダー / ICS 表示名ポリシーの両方。`football_j*`（`football_j2_j3_special` を含む）と `football_emperor_cup` は日本語。プレミアリーグを含む海外競技は英語。アプリ内の名前は client-only（再ビルドと再インストール）。Google Calendar、Apple Calendar、ICS の名前は functions-deploy-required。rules のデプロイ、indexes のデプロイ、Firestore への書き込み、API sync は不要 |
 | PR #52 試合カードの枠（`25be9d0`） | client-only |
 | PR #51 フォロー検索の表示名（`f28ca9a`） | client-only |
 | PR #50 スタジアム / 移動の表示（`1ee3c1c`） | client-only |
@@ -53,8 +59,6 @@ rules の SHA は、`competitionSeasonMemberships` の `allow read: if true` を
 | キーワード検索の複合索引（`9b4f041`）と試合索引（`107c6e6`） | indexes-deploy-required |
 | Google カレンダー Functions（`5f98262`）と Node 22（`5f0204b`） | functions-deploy-required。OAuth secret は external-console-required |
 | チーム / 試合の seed と sync | data-write-required。実機インストールだけでは走らない |
-
-表示名の日本語国内サッカー判定は別 PR にある。この台帳のブランチは main の設定差分だけを見る。
 
 ## 画面と本番依存
 
@@ -70,10 +74,12 @@ rules の SHA は、`competitionSeasonMemberships` の `allow read: if true` を
 | リーグのチーム一覧 | `CompetitionTeamListingService` | `competitionSeasonMemberships` を `competitionKey` 等価。ID があれば `documentId whereIn`。無ければ `fetchTeams` | membership の公開 read が本番に無いと default deny | membership と ID 取得は単一フィールド。カードの次戦はホームと同じ試合索引 | 不要 | rules 未反映は `エラー: $error` で止まり、空一覧にしない。ドキュメント欠如は legacy へ落ち、それも空なら「このリーグのチームはまだありません」 |
 | チーム詳細 | `fetchTeam`、`fetchUpcomingGamesForTeam`、`watchUpcomingGamesForTeam` | ドキュメント get。次戦は `homeTeamId` または `awayTeamId` + `status` + `startTimeUTC`。watch は home のみ + `startTimeUTC`（status なし） | teams / games 公開 read | 3フィールド索引と、watch 用の2フィールド索引 | 不要 | 索引が無いと試合側が `エラー: $e`。チーム get は索引不要 |
 | スケジュール | `fetchScheduleGamesForTeams` | `homeTeamId` / `awayTeamId` の `whereIn` + `orderBy startTimeUTC`。未来フィルタなし | games 公開 read | 2フィールド索引 | 不要 | 索引が無いと `エラー: $e` |
-| Google カレンダー | `GoogleCalendarConnectionRepository` | Firestore 直読みなし。callable | 接続ドキュメントはクライアント拒否 | 不要 | `beginGoogleCalendarConnection`、`getGoogleCalendarConnectionStatus`、`syncGoogleCalendarNow`、`disconnectGoogleCalendar`、HTTPS `googleCalendarOAuthCallback` | Functions または OAuth secret が無いと接続できない。検索一覧とは独立 |
-| Apple / ICS | `CalendarFeedRepository`、`IcsUrlBuilder` | フィード token は callable。ICS は HTTPS `getCalendar` | users の `followedTeamIds` を Functions が読む | 試合の取得は Functions 側。クライアントのスケジュール索引とは別 | `ensureCalendarFeed`、`rotateCalendarFeed`、`getCalendar` | Functions 未デプロイは URL 購読が失敗。検索一覧とは独立 |
+| Google カレンダー | `GoogleCalendarConnectionRepository` | Firestore 直読みなし。callable | 接続ドキュメントはクライアント拒否 | 不要 | `beginGoogleCalendarConnection`、`getGoogleCalendarConnectionStatus`、`syncGoogleCalendarNow`、`disconnectGoogleCalendar`、HTTPS `googleCalendarOAuthCallback` | Functions または OAuth secret が無いと接続できない。検索一覧とは独立。表示名は PR #53 の Functions ポリシー |
+| Apple / ICS | `CalendarFeedRepository`、`IcsUrlBuilder` | フィード token は callable。ICS は HTTPS `getCalendar` | users の `followedTeamIds` を Functions が読む | 試合の取得は Functions 側。クライアントのスケジュール索引とは別 | `ensureCalendarFeed`、`rotateCalendarFeed`、`getCalendar` | Functions 未デプロイは URL 購読が失敗。検索一覧とは独立。表示名は PR #53 の Functions ポリシー |
 
 サッカーのホームが空クエリで読む競技は、有効なレジストリのうち `football_j1` と `football_premier` だけである。J2 / J3 / 百年構想リーグは、このホーム検索のクエリ対象ではない。
+
+PR #53 の表示名は、上の Firestore クエリを変えていない。アプリ内のホーム、検索、リーグ、スケジュール、チーム詳細は、クライアントの再ビルドと再インストールで日本語になる。Google Calendar、Apple Calendar、ICS は、本番 Functions が `1fe5ecc` のポリシーを実行するまで、国内クラブが英語のままになり得る。この差は rules、indexes、試合データの有無とは別である。
 
 ロゴ用の `presentationMasterProvider` はチーム取得の失敗を空配列にする。これは試合カードを落とさないためで、検索一覧とリーグ一覧の失敗を空にするものではない。
 

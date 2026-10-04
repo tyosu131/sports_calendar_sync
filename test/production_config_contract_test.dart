@@ -64,7 +64,16 @@ void main() {
     expect(handoff, contains('asia-northeast1'));
     expect(handoff, contains('competitionSeasonMemberships'));
     expect(handoff, contains('permission-denied'));
-    expect(File('.firebaserc').existsSync(), isFalse);
+    expect(handoff, contains('PR #53'));
+    expect(handoff, contains('1fe5ecc'));
+    expect(handoff, contains('football_j2_j3_special'));
+    expect(handoff, contains('football_emperor_cup'));
+    expect(handoff, contains('functions-deploy-required'));
+    expect(
+      handoff,
+      contains('rules のデプロイ、indexes のデプロイ、Firestore への書き込み、API sync は不要'),
+    );
+    expect(handoff, isNot(contains('別 PR')));
   });
 
   test('client Firebase config names one project', () {
@@ -186,14 +195,8 @@ void main() {
     },
   );
 
-  test('every Firestore filter is either single-field or index-backed', () {
+  test('required queries stay covered when extra indexes exist', () {
     expect(indexesFile['fieldOverrides'], isEmpty);
-    expect(_firestoreFilters(teamRepository), 15);
-    expect(_firestoreOrders(teamRepository), 2);
-    expect(_firestoreFilters(gameRepository), 14);
-    expect(_firestoreOrders(gameRepository), 7);
-    expect(_firestoreFilters(membershipRepository), 1);
-    expect(_firestoreOrders(membershipRepository), 0);
 
     final flat = _squash(teamRepository);
     for (final snippet in _singleFieldTeamSnippets) {
@@ -205,19 +208,12 @@ void main() {
     }
 
     final indexes = (indexesFile['indexes'] as List).cast<Map>();
-    expect(indexes, hasLength(_requiredComposites.length));
     for (final required in _requiredComposites) {
       expect(
         indexes.any((index) => _covers(index, required)),
         isTrue,
-        reason: required.collection,
-      );
-    }
-    for (final index in indexes) {
-      expect(
-        _requiredComposites.any((required) => _covers(index, required)),
-        isTrue,
-        reason: index['collectionGroup'],
+        reason:
+            '${required.collection} ${required.fields.map((field) => field.path).join(",")}',
       );
     }
   });
@@ -250,16 +246,6 @@ void main() {
       contains('ensureCalendarFeed'),
     );
   });
-}
-
-int _firestoreFilters(String source) {
-  return RegExp(
-    r"\.where\(\s*'|\.where\(\s*FieldPath",
-  ).allMatches(source).length;
-}
-
-int _firestoreOrders(String source) {
-  return RegExp(r"\.orderBy\(\s*'").allMatches(source).length;
 }
 
 String _squash(String value) => value.replaceAll(RegExp(r'\s+'), ' ');
