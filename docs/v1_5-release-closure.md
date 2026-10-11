@@ -61,7 +61,7 @@ Use `docs/production-config-handoff.md`. Do not infer deployed revisions from Gi
 | Dependency | Required for this smoke | Production evidence |
 | --- | --- | --- |
 | Firestore rules | Search / League / Follow paths |  |
-| Firestore indexes | typed Search and game queries |  |
+| Firestore indexes | text Search and game queries |  |
 | Functions | Google Calendar and Apple / ICS; required for PR #53 calendar-side Japanese names |  |
 
 Minimum expectations:
