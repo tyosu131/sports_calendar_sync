@@ -8,15 +8,11 @@
 
 索引の根拠: [Firestore indexes](https://firebase.google.com/docs/firestore/query-data/indexing)。単一フィールド索引は自動作成で、`firestore.indexes.json` の `fieldOverrides` は空なので無効化していない。複合クエリだけが `indexes` 配列を必要とする。未マッチの rules は拒否される: [rules structure](https://firebase.google.com/docs/firestore/security/rules-structure)。
 
-## Release candidate
+## Release candidate evidence
 
-この文書に「現在の main SHA」を固定値として書かない。実機へ渡す具体的なartifactを決めた時点で、その候補revisionをここへ記録する。mainが進んでも、過去のhandoff evidenceをcurrent扱いしない。
+この文書に「現在の main SHA」や、release candidate自身のSHAを固定値としてcommitしない。候補SHAをこのファイルへ書いてcommitすると、そのcommitでSHAが変わるためである。
 
-| 項目 | 値 |
-| --- | --- |
-| Release candidate git SHA |  |
-| Build / install確認日 |  |
-| 実機 |  |
+V1.5 の実行台帳は GitHub Issue #57（`V1.5 release closure`）。Release candidate git SHA、build / install確認日、実機、production config evidence、smoke結果はその実行台帳へ記録する。mainが進んでも、過去のhandoff evidenceをcurrent扱いしない。
 
 ## 人が確認する台帳
 
@@ -30,7 +26,7 @@ rules の SHA は、`competitionSeasonMemberships` の `allow read: if true` を
 
 ## 実機に渡す前の最小確認
 
-1. 上の Release candidate git SHA に、実際に build / install するrevisionを記録する。
+1. active release-closure issue（V1.5 は #57）に、実際に build / install する Release candidate git SHA を記録する。
 2. 渡すビルドは `USE_SAMPLE_DATA` なし。release の `bool.fromEnvironment('USE_SAMPLE_DATA')` は false で、本番 Firebase を読む。
 3. 上の台帳で、そのビルドが依存する行が埋まっている。検索とリーグ一覧だけなら rules と indexes。Google カレンダーや Apple / ICS を触るなら Functions も。
 4. 「チームを探す」で、文字を入れないサッカーのホーム、文字を入れた検索、サッカーのリーグから Jリーグ、の3つを開き、出たエラー文字列をそのまま残す。`エラー: $e` は診断用なので、汎用文言に置き換えない。
@@ -57,7 +53,7 @@ rules の SHA は、`competitionSeasonMemberships` の `allow read: if true` を
 
 ## 直近変更の依存分類
 
-この節は変更ごとのruntime依存を記録する。current mainやrelease candidateをここで固定しない。実機へ渡すrevisionは上の「Release candidate git SHA」に記録する。
+この節は変更ごとのruntime依存を記録する。current mainやrelease candidateをここで固定しない。実機へ渡すrevisionはactive release-closure issueへ記録する。
 
 | 変更 | 分類 |
 | --- | --- |
