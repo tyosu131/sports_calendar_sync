@@ -69,10 +69,12 @@ void main() {
     expect(handoff, contains('football_j2_j3_special'));
     expect(handoff, contains('football_emperor_cup'));
     expect(handoff, contains('functions-deploy-required'));
+    expect(handoff, contains('Release candidate git SHA'));
     expect(
       handoff,
       contains('rules のデプロイ、indexes のデプロイ、Firestore への書き込み、API sync は不要'),
     );
+    expect(handoff, isNot(contains('現行 main は `')));
     expect(handoff, isNot(contains('別 PR')));
   });
 
