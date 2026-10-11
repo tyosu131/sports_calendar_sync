@@ -11,7 +11,7 @@ The V1 production path has been deployed and verified previously. The current V1
 - Personalized ICS feeds are deployed; Apple Calendar production behavior has been verified. ICS remains the integration path for Apple Calendar and other ICS-capable clients.
 - Google Calendar direct API synchronization is deployed and is the only normal Google Calendar path. On a real iPhone, the core flow—including OAuth connection and return, app-owned **Sports Calendar** creation/recreation, initial event population, competition labels, and finished scores—has been verified.
 - Repository runtime is Node.js 22, 1st Gen. The latest owner-reported Functions deployment evidence is dated 2026-09-22; changes merged after that date are not automatically proven deployed.
-- The V1.5 client implementation and stabilization work is merged through PR #55. Fresh-device confirmation of that candidate is still pending.
+- The V1.5 client implementation and stabilization work is merged through PR #55. Fresh-device confirmation is still pending and is tracked in GitHub Issue #57 (`V1.5 release closure`).
 - Pixel 9a release-build Google Sign-In, Google Calendar OAuth, cancel return and Settings sync passed after SHA-1 registration and a Firebase-generated config refresh (owner evidence). One initial Google login failure did not recur on retry; monitor it without speculative changes. Terminated-app return, revoked credentials and quota/rate-limit device coverage remain pending.
 
 The repository also retains sample mode as a local development and UI-test option. Sample mode is not the overall production state.
