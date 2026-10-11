@@ -31,17 +31,11 @@ Out of scope for V1.5 closure:
 - `sportKey` migration
 - new AWS architecture work
 
-## Release candidate
+## Execution record
 
-Fill this only when the actual artifact to install is chosen.
+The stateful execution record is GitHub Issue #57, `V1.5 release closure`.
 
-| Item | Evidence |
-| --- | --- |
-| Release candidate git SHA |  |
-| Branch / tag |  |
-| Build date |  |
-| Device |  |
-| Build/install result |  |
+Record the release-candidate SHA, build/install date, device, production-config evidence, and smoke results in that issue. Do not commit a filled candidate SHA back into the candidate itself; that would create a new commit with a different SHA.
 
 Baseline when this worksheet was created: main contained PR #55 merge `c7e467e`. This is historical context only; it is not an instruction to install that SHA.
 
@@ -149,7 +143,7 @@ Do not diagnose one category from another category's symptom.
 
 V1.5 is closed when all of the following are true:
 
-1. a concrete release candidate SHA is recorded
+1. a concrete release candidate SHA is recorded in the active release-closure issue
 2. required repository gates for that candidate are PASS
 3. required production rules / indexes / Functions revisions are confirmed
 4. the focused real-device smoke matrix has no open blocker
