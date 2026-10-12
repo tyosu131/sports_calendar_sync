@@ -4,13 +4,14 @@ A Flutter + Firebase sports calendar app for following teams and synchronizing t
 
 ## Current project status
 
-The production path is implemented and deployed:
+The V1 production path has been deployed and verified previously. The current V1.5 candidate adds the latest follow/search/navigation presentation work plus client-state and Firestore-boundary hardening; its release closure still requires current production-config confirmation and a fresh real-device smoke pass.
 
-- Cloud Functions and the GOAL V1 football synchronization path are deployed and have populated canonical real games in Firestore.
+- Cloud Functions and the GOAL V1 football synchronization path have populated canonical real games in Firestore.
 - Presentation closure is merged, and the public domain and OAuth branding are published.
 - Personalized ICS feeds are deployed; Apple Calendar production behavior has been verified. ICS remains the integration path for Apple Calendar and other ICS-capable clients.
 - Google Calendar direct API synchronization is deployed and is the only normal Google Calendar path. On a real iPhone, the core flow—including OAuth connection and return, app-owned **Sports Calendar** creation/recreation, initial event population, competition labels, and finished scores—has been verified.
-- Repository and production both use Node.js 22, 1st Gen. The owner reported successful updates of all 11 Functions on 2026-09-22; this task did not deploy.
+- Repository runtime is Node.js 22, 1st Gen. The latest owner-reported Functions deployment evidence is dated 2026-09-22; changes merged after that date are not automatically proven deployed.
+- The V1.5 client implementation and stabilization work is merged through PR #55. Fresh-device confirmation is still pending and is tracked in GitHub Issue #57 (`V1.5 release closure`).
 - Pixel 9a release-build Google Sign-In, Google Calendar OAuth, cancel return and Settings sync passed after SHA-1 registration and a Firebase-generated config refresh (owner evidence). One initial Google login failure did not recur on retry; monitor it without speculative changes. Terminated-app return, revoked credentials and quota/rate-limit device coverage remain pending.
 
 The repository also retains sample mode as a local development and UI-test option. Sample mode is not the overall production state.
@@ -45,7 +46,7 @@ Functions tests and configuration validation use local synthetic fixtures and do
 ## Architecture summary
 
 - Flutter app using Material 3, Riverpod, and GoRouter
-- Home top tabs are お気に入り, 野球, サッカー, and その他スポーツ. League names are not top tabs. お気に入り is cross-sport and has no bottom bar. Each sport tab has a bottom bar with exactly two items, ホーム and リーグ. リーグ lists that sport's `SportsRegistry` competitions and pushes a team list that uses the existing follow API. Search still uses flat competition tabs; `sportLeagueGroups()` is the shared sport-to-league hook.
+- Home top tabs are お気に入り, 野球, サッカー, and その他スポーツ. League names are not top tabs. お気に入り is cross-sport and has no bottom bar. Each sport tab has a bottom bar with exactly two items, ホーム and リーグ. Team Search mirrors the same sport-first structure (フォロー中 instead of お気に入り), with ホーム / リーグ inside each sport and per-tab search results. リーグ lists that sport's `SportsRegistry` competitions and pushes a team list that uses the existing follow API.
 - Firebase Auth and Firestore-backed production repositories
 - Cloud Functions serving personalized ICS and orchestrating real GOAL V1 synchronization
 - Canonical Firestore games shared by in-app views, personalized ICS, and Google Calendar presentation
@@ -59,7 +60,8 @@ Functions tests and configuration validation use local synthetic fixtures and do
 - Terminated-app OAuth return remains pending verification.
 - OAuth denial UX, revoked-credential behavior, quota/rate-limit behavior, and all transient callback failure paths are not fully production-verified.
 - Broader competition/provider coverage, broadcast data, notifications, full-text search, offline caching, and high-resolution local logo assets remain incomplete.
-- Search and Follow have not moved onto the sport → league browser. They can reuse `competitionsForSportCategories()` / `sportLeagueGroups()` without listing every league in the bottom bar.
+- V1.5 real-device acceptance is still pending for the latest Home / Search / League / Follow / Schedule changes and the client-state hardening merged through PR #55.
+- Production Firestore rules / indexes and the Functions revision used for the tester handoff must be confirmed separately from repository CI. See the production handoff and V1.5 release-closure docs.
 
 ## Safety notes
 
@@ -70,6 +72,8 @@ Functions tests and configuration validation use local synthetic fixtures and do
 ## Useful docs
 
 - [Current state](docs/current-state.md)
+- [V1.5 release closure](docs/v1_5-release-closure.md)
+- [Production config handoff](docs/production-config-handoff.md)
 - [Google Calendar direct synchronization](docs/google-calendar-connection.md)
 - [Phase 0 architecture snapshot (historical)](docs/phase0-current-architecture.md)
 - [E2E minimum setup guide (historical/deprecated)](docs/e2e-minimum-setup.md)

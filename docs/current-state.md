@@ -1,5 +1,14 @@
 # Current State — sports_calendar_sync
 
+## V1.5 stabilization and release closure (2026-10-11)
+
+- Repository implementation and stabilization are merged through PR #55 (`c7e467e`). The latest client hardening separates signed-out / loading / profile-error / missing-profile states, keeps follow write failures user-visible, fails closed on malformed Firestore data and unknown stored game status, and aligns domestic presentation-master lookup with the shared Japanese-domestic classification.
+- PR #55 changed client code and tests only. It did not deploy Functions, Firestore rules or indexes, write production data, or run provider sync.
+- The latest owner-reported Functions deployment evidence in this repository is still 2026-09-22. PR #53 calendar-side Japanese domestic names were merged later (`1fe5ecc`, 2026-10-04), so repository evidence does not prove that Google Calendar / Apple / ICS currently use that naming policy.
+- Public client read for `competitionSeasonMemberships` was added in `af1109b` on 2026-10-03. Production rules and indexes remain a separate handoff confirmation; repository CI is not deployment evidence.
+- Tester V1.5 release closure is tracked in GitHub Issue #57. The stateful release-candidate SHA, production revision evidence, and real-device smoke results belong there rather than being committed into the candidate itself.
+- Fresh real-device confirmation of the V1.5 Home / Search / League / Follow / Schedule changes is pending. No new feature scope is required before that smoke pass.
+
 ## Match-card vs-frame and venue clock (2026-10-03)
 
 In-app presentation only. No deploy, no Firestore write, no Apple Sign-In,

@@ -8,6 +8,12 @@
 
 索引の根拠: [Firestore indexes](https://firebase.google.com/docs/firestore/query-data/indexing)。単一フィールド索引は自動作成で、`firestore.indexes.json` の `fieldOverrides` は空なので無効化していない。複合クエリだけが `indexes` 配列を必要とする。未マッチの rules は拒否される: [rules structure](https://firebase.google.com/docs/firestore/security/rules-structure)。
 
+## Release candidate evidence
+
+この文書に「現在の main SHA」や、release candidate自身のSHAを固定値としてcommitしない。候補SHAをこのファイルへ書いてcommitすると、そのcommitでSHAが変わるためである。
+
+V1.5 の実行台帳は GitHub Issue #57（`V1.5 release closure`）。Release candidate git SHA、build / install確認日、実機、production config evidence、smoke結果はその実行台帳へ記録する。mainが進んでも、過去のhandoff evidenceをcurrent扱いしない。
+
 ## 人が確認する台帳
 
 | 本番に必要なもの | リポジトリ | 本番に反映した git SHA | 確認日 | 確認者 |
@@ -20,11 +26,12 @@ rules の SHA は、`competitionSeasonMemberships` の `allow read: if true` を
 
 ## 実機に渡す前の最小確認
 
-1. 渡すビルドは `USE_SAMPLE_DATA` なし。release の `bool.fromEnvironment('USE_SAMPLE_DATA')` は false で、本番 Firebase を読む。
-2. 上の台帳で、そのビルドが依存する行が埋まっている。検索とリーグ一覧だけなら rules と indexes。Google カレンダーや Apple / ICS を触るなら Functions も。
-3. 「チームを探す」で、文字を入れないサッカーのホーム、文字を入れた検索、サッカーのリーグから Jリーグ、の3つを開き、出たエラー文字列をそのまま残す。`エラー: $e` は診断用なので、汎用文言に置き換えない。
-4. リーグ一覧が `エラー:` で止まる場合、それは「チームが無い」ではない。`permission-denied` は membership の rules 未反映の候補である。一覧が「このリーグのチームはまだありません」なら、読み取りは通っており、ドキュメントが無い（または legacy のチームも無い）状態である。
-5. アプリ内の日本語名は、PR #53 を含むクライアントの再ビルドと再インストールで確認する。対象は `football_j*`（`football_j2_j3_special` を含む）と `football_emperor_cup` で、プレミアリーグを含む海外競技は英語のままである。Google Calendar、Apple Calendar、ICS の同じ名前は、Functions の行が `1fe5ecc` 以降のときだけ確認する。#53 のために rules のデプロイ、indexes のデプロイ、Firestore への書き込み、API sync はしない。
+1. active release-closure issue（V1.5 は #57）に、実際に build / install する Release candidate git SHA を記録する。
+2. 渡すビルドは `USE_SAMPLE_DATA` なし。release の `bool.fromEnvironment('USE_SAMPLE_DATA')` は false で、本番 Firebase を読む。
+3. 上の台帳で、そのビルドが依存する行が埋まっている。検索とリーグ一覧だけなら rules と indexes。Google カレンダーや Apple / ICS を触るなら Functions も。
+4. 「チームを探す」で、文字を入れないサッカーのホーム、文字を入れた検索、サッカーのリーグから Jリーグ、の3つを開き、出たエラー文字列をそのまま残す。`エラー: $e` は診断用なので、汎用文言に置き換えない。
+5. リーグ一覧が `エラー:` で止まる場合、それは「チームが無い」ではない。`permission-denied` は membership の rules 未反映の候補である。一覧が「このリーグのチームはまだありません」なら、読み取りは通っており、ドキュメントが無い（または legacy のチームも無い）状態である。
+6. アプリ内の日本語名は、PR #53 を含むクライアントの再ビルドと再インストールで確認する。対象は `football_j*`（`football_j2_j3_special` を含む）と `football_emperor_cup` で、プレミアリーグを含む海外競技は英語のままである。Google Calendar、Apple Calendar、ICS の同じ名前は、Functions の行が `1fe5ecc` 以降のときだけ確認する。#53 のために rules のデプロイ、indexes のデプロイ、Firestore への書き込み、API sync はしない。
 
 ## 成果物の分類
 
@@ -44,12 +51,14 @@ rules の SHA は、`competitionSeasonMemberships` の `allow read: if true` を
 | `subscriptions` | rules にはある。Flutter クライアントは読んでいない |
 | `translationMaps` | rules は公開 read。書くのは Functions / seed。Flutter は読んでいない |
 
-## 直近 main の分類
+## 直近変更の依存分類
 
-現行 main は `1fe5ecc`（PR #53 のマージ）である。
+この節は変更ごとのruntime依存を記録する。current mainやrelease candidateをここで固定しない。実機へ渡すrevisionはactive release-closure issueへ記録する。
 
 | 変更 | 分類 |
 | --- | --- |
+| PR #55 client state / Firestore decode hardening（マージ `c7e467e`） | client-only。auth/profile state、follow write failure、Firestore decode、unknown stored status、presentation master lookupのstabilization。Functions / rules / indexes / production data は変更していない |
+| PR #54 production config handoff（マージ `64a1222`） | docs / tests only。runtime artifactのdeploy要件は増やしていない |
 | PR #53 日本語国内サッカーの表示名（マージ `1fe5ecc`、実装 `f2f27d9`） | Flutter の表示名ポリシーと Functions のカレンダー / ICS 表示名ポリシーの両方。`football_j*`（`football_j2_j3_special` を含む）と `football_emperor_cup` は日本語。プレミアリーグを含む海外競技は英語。アプリ内の名前は client-only（再ビルドと再インストール）。Google Calendar、Apple Calendar、ICS の名前は functions-deploy-required。rules のデプロイ、indexes のデプロイ、Firestore への書き込み、API sync は不要 |
 | PR #52 試合カードの枠（`25be9d0`） | client-only |
 | PR #51 フォロー検索の表示名（`f28ca9a`） | client-only |
