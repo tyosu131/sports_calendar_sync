@@ -17,7 +17,7 @@
 
 import * as admin from "firebase-admin";
 import * as functions from "firebase-functions/v1";
-import { defineSecret } from "firebase-functions/params";
+import { defineSecret, defineString } from "firebase-functions/params";
 
 // Initialize Firebase Admin SDK (singleton)
 admin.initializeApp();
@@ -121,3 +121,32 @@ export const triggerFootballSync = functions
       return { success: true };
     }
   );
+
+// ── TheSportsDB (NFL / UFC) ───────────────────────────────────────────────────
+
+import { syncTheSportsDb } from "./pipelines/syncTheSportsDb";
+
+/** Free test key "123" by default. Set THESPORTSDB_API_KEY to use another key. */
+const THESPORTSDB_API_KEY = defineString("THESPORTSDB_API_KEY", { default: "123" });
+
+/** Daily NFL / UFC sync. About 40 spaced requests, so the timeout is raised. */
+export const scheduledSyncTheSportsDb = functions
+  .runWith({ timeoutSeconds: 540, secrets: calendarSecrets })
+  .region("asia-northeast1")
+  .pubsub.schedule("every day 05:00")
+  .timeZone("Asia/Tokyo")
+  .onRun(async (_context: unknown) => {
+    await syncTheSportsDb(THESPORTSDB_API_KEY.value());
+    try { await syncAllActiveGoogleCalendars({clientId: GOOGLE_CALENDAR_OAUTH_CLIENT_ID.value(), clientSecret: GOOGLE_CALENDAR_OAUTH_CLIENT_SECRET.value(),
+      encryptionKey: GOOGLE_CALENDAR_TOKEN_ENCRYPTION_KEY.value(), redirectUri: GOOGLE_CALENDAR_OAUTH_REDIRECT_URI.value()}); }
+    catch (_) { console.warn("Canonical sync succeeded; Google Calendar batch could not start"); }
+  });
+
+/** Manual NFL / UFC sync (admin only). */
+export const triggerTheSportsDbSync = functions
+  .runWith({ timeoutSeconds: 540 })
+  .region("asia-northeast1")
+  .https.onCall(async (_data: unknown, context: functions.https.CallableContext) => {
+    requireAdmin(context);
+    return { success: true, summary: await syncTheSportsDb(THESPORTSDB_API_KEY.value()) };
+  });

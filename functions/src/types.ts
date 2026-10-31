@@ -112,6 +112,8 @@ export interface GameDoc {
   timezone: string;
   status: GameStatus;
   venue?: string;
+  /** Venue clock offset from UTC in minutes, when the provider gives a venue wall clock. */
+  venueUtcOffsetMinutes?: number;
   homeScore?: number;
   awayScore?: number;
   broadcastPlatforms: BroadcastInfo[];

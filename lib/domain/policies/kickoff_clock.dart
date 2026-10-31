@@ -4,6 +4,7 @@ import 'package:timezone/timezone.dart' as tz;
 
 import '../../core/config/display_language_setting.dart';
 import '../../core/utils/date_time_utils.dart';
+import 'japanese_domestic_football.dart';
 
 /// Clock shown for a kickoff.
 ///
@@ -72,6 +73,38 @@ const _referenceClocks = <String, ({String zone, String ja, String en})>{
   'mma_ufc': (zone: 'America/New_York', ja: '米東部時間', en: 'ET'),
 };
 
+/// Venue wall clock from the provider offset. Null for Japanese
+/// competitions, a JST venue, or when the offset is unknown.
+ReferenceKickoff? venueLocalKickoff({
+  required DateTime startTimeUtc,
+  required String? competitionKey,
+  required int? venueUtcOffsetMinutes,
+}) {
+  final offset = venueUtcOffsetMinutes;
+  if (offset == null || offset == 9 * 60) return null;
+  if (isJapaneseDomesticCompetition(competitionKey)) return null;
+  final local = startTimeUtc.toUtc().add(Duration(minutes: offset));
+  final jst = DateTimeUtils.toJst(startTimeUtc);
+  final sameDay =
+      local.year == jst.year &&
+      local.month == jst.month &&
+      local.day == jst.day;
+  return ReferenceKickoff(
+    label: displayLanguageForcesEnglish ? 'Local' : '現地時間',
+    time: DateFormat('HH:mm').format(local),
+    zone: _offsetLabel(offset),
+    date: sameDay ? null : '${local.month}/${local.day}',
+  );
+}
+
+String _offsetLabel(int minutes) {
+  final sign = minutes < 0 ? '-' : '+';
+  final value = minutes.abs();
+  final hours = (value ~/ 60).toString().padLeft(2, '0');
+  final rest = (value % 60).toString().padLeft(2, '0');
+  return 'UTC$sign$hours:$rest';
+}
+
 var _timeZonesReady = false;
 
 /// Reference clock for [competitionKey], or null when none is defined.
@@ -123,6 +156,7 @@ DisplayedKickoff displayedKickoff({
   required String providerTimezone,
   String? venueName,
   String? competitionKey,
+  int? venueUtcOffsetMinutes,
 }) {
   final venueTimeZone = authoritativeVenueTimeZone(
     providerTimezone: providerTimezone,
@@ -133,9 +167,15 @@ DisplayedKickoff displayedKickoff({
     date: DateTimeUtils.formatJstDate(startTimeUtc),
     isToday: DateTimeUtils.isToday(startTimeUtc),
     venueTimeZone: venueTimeZone,
-    reference: referenceKickoff(
-      startTimeUtc: startTimeUtc,
-      competitionKey: competitionKey,
-    ),
+    reference:
+        venueLocalKickoff(
+          startTimeUtc: startTimeUtc,
+          competitionKey: competitionKey,
+          venueUtcOffsetMinutes: venueUtcOffsetMinutes,
+        ) ??
+        referenceKickoff(
+          startTimeUtc: startTimeUtc,
+          competitionKey: competitionKey,
+        ),
   );
 }

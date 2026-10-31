@@ -1,0 +1,208 @@
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.TSDB_WRITE_CHUNK_SIZE = exports.UFC_MAX_ROUND = exports.NFL_REGULAR_SEASON_ROUNDS = exports.TSDB_COMPETITIONS = void 0;
+exports.nflSeason = nflSeason;
+exports.ufcSeasons = ufcSeasons;
+exports.upcomingEventRounds = upcomingEventRounds;
+exports.syncTheSportsDb = syncTheSportsDb;
+const admin = __importStar(require("firebase-admin"));
+const client_1 = require("../providers/thesportsdb/client");
+const theSportsDbAdapter_1 = require("../adapters/theSportsDbAdapter");
+/** Leagues read from TheSportsDB. Adding a league is a config change, not a roster. */
+exports.TSDB_COMPETITIONS = Object.freeze([
+    {
+        competitionKey: "americanfootball_nfl", providerLeagueId: "4391", appLeagueId: "nfl", kind: "teams",
+    },
+    {
+        competitionKey: "mma_ufc", providerLeagueId: "4443", appLeagueId: "ufc", kind: "event",
+        followName: "UFC", eventNamePrefix: "UFC",
+    },
+]);
+/** NFL regular season weeks. Pre-season (round 500) is skipped; the post-season round number is not known yet. */
+exports.NFL_REGULAR_SEASON_ROUNDS = 18;
+/** Upper bound when probing UFC card numbers (about 60 cards a year). */
+exports.UFC_MAX_ROUND = 128;
+/** Cards that started within this window are still refreshed. */
+const UFC_LOOKBACK_MS = 7 * 24 * 60 * 60 * 1000;
+exports.TSDB_WRITE_CHUNK_SIZE = 400;
+/** NFL seasons are named by the year they start; January–February belong to the previous year. */
+function nflSeason(now) {
+    const year = now.getUTCFullYear();
+    return String(now.getUTCMonth() < 2 ? year - 1 : year);
+}
+/** UFC seasons are calendar years. December also reads next year's cards. */
+function ufcSeasons(now) {
+    const year = now.getUTCFullYear();
+    return now.getUTCMonth() === 11 ? [String(year), String(year + 1)] : [String(year)];
+}
+function firestorePersistence(db) {
+    return {
+        gameRef: (id) => db.collection("games").doc(id),
+        teamRef: (id) => db.collection("teams").doc(id),
+        newBatch: () => db.batch(),
+    };
+}
+/**
+ * UFC card numbers run in date order within a season. Finds the first card
+ * not older than [from] with an exponential probe and a binary search, then
+ * reads forward until an empty number. About 20 requests a day instead of
+ * one per card.
+ */
+async function upcomingEventRounds(source, leagueId, season, from, maxRound = exports.UFC_MAX_ROUND) {
+    const cache = new Map();
+    const read = async (round) => {
+        if (!cache.has(round))
+            cache.set(round, await source.eventsRound(leagueId, round, season));
+        return cache.get(round);
+    };
+    const startsBefore = (events) => {
+        const time = events.map((event) => (0, theSportsDbAdapter_1.tsdbUtc)(event.strTimestamp)?.getTime())
+            .find((value) => value !== undefined);
+        return time !== undefined && time < from.getTime();
+    };
+    // Probe 1, 2, 4, 8 … until a number is empty or not older than [from].
+    let low = 0; // highest number known to be older than [from]
+    let high = 1;
+    while (high <= maxRound) {
+        const events = await read(high);
+        if (events.length === 0 || !startsBefore(events))
+            break;
+        low = high;
+        high *= 2;
+    }
+    high = Math.min(high, maxRound + 1);
+    // Binary search in (low, high) for the first number not older than [from].
+    while (high - low > 1) {
+        const mid = Math.floor((low + high) / 2);
+        const events = await read(mid);
+        if (events.length > 0 && startsBefore(events))
+            low = mid;
+        else
+            high = mid;
+    }
+    const result = [];
+    for (let round = low + 1; round <= maxRound; round += 1) {
+        const events = await read(round);
+        if (events.length === 0)
+            break;
+        result.push(...events);
+    }
+    return result;
+}
+/** Fetches NFL weeks and upcoming UFC cards, then upserts games and teams. Never deletes. */
+async function syncTheSportsDb(apiKey, options = {}) {
+    let requests = 0;
+    const base = options.source ?? new client_1.TheSportsDbClient(apiKey);
+    const source = {
+        eventsRound: async (league, round, season) => {
+            requests += 1;
+            return base.eventsRound(league, round, season);
+        },
+    };
+    const persistence = options.persistence ?? firestorePersistence(admin.firestore());
+    const now = (options.now ?? (() => new Date()))();
+    const writes = new Map();
+    const skipCounts = {};
+    const skip = (reason) => { skipCounts[reason] = (skipCounts[reason] ?? 0) + 1; };
+    let fetched = 0;
+    for (const competition of options.competitions ?? exports.TSDB_COMPETITIONS) {
+        const batches = [];
+        if (competition.kind === "teams") {
+            const season = nflSeason(now);
+            for (let round = 1; round <= exports.NFL_REGULAR_SEASON_ROUNDS; round += 1) {
+                batches.push({ season, events: await source.eventsRound(competition.providerLeagueId, round, season) });
+            }
+        }
+        else {
+            for (const season of ufcSeasons(now)) {
+                batches.push({ season, events: await upcomingEventRounds(source, competition.providerLeagueId, season, new Date(now.getTime() - UFC_LOOKBACK_MS)) });
+            }
+            const followId = (0, theSportsDbAdapter_1.tsdbLeagueFollowId)(competition.providerLeagueId);
+            writes.set(`team:${followId}`, { kind: "team", id: followId,
+                data: (0, theSportsDbAdapter_1.tsdbTeamDoc)(competition.followName ?? competition.competitionKey, competition.providerLeagueId, competition) });
+        }
+        for (const { season, events } of batches) {
+            for (const event of events) {
+                fetched += 1;
+                if (event.idLeague !== competition.providerLeagueId) {
+                    skip("filtered_event");
+                    continue;
+                }
+                if (competition.eventNamePrefix && !event.strEvent.trim().startsWith(competition.eventNamePrefix)) {
+                    skip("filtered_event");
+                    continue;
+                }
+                let game;
+                try {
+                    game = (0, theSportsDbAdapter_1.adaptTsdbEventToGameDoc)(event, competition, season, now);
+                }
+                catch (error) {
+                    if (error instanceof theSportsDbAdapter_1.TsdbSkip) {
+                        skip(error.reason);
+                        continue;
+                    }
+                    throw error;
+                }
+                writes.set(`game:${event.idEvent}`, { kind: "game", id: (0, theSportsDbAdapter_1.tsdbGameId)(event.idEvent), data: game });
+                if (competition.kind === "teams") {
+                    for (const [name, id] of [[event.strHomeTeam, event.idHomeTeam], [event.strAwayTeam, event.idAwayTeam]]) {
+                        const teamId = (0, theSportsDbAdapter_1.tsdbTeamId)(id);
+                        writes.set(`team:${teamId}`, { kind: "team", id: teamId, data: (0, theSportsDbAdapter_1.tsdbTeamDoc)(name.trim(), id, competition) });
+                    }
+                }
+            }
+        }
+    }
+    const ordered = [...writes.values()].sort((a, b) => `${a.kind}:${a.id}`.localeCompare(`${b.kind}:${b.id}`));
+    for (let offset = 0; offset < ordered.length; offset += exports.TSDB_WRITE_CHUNK_SIZE) {
+        const batch = persistence.newBatch();
+        for (const write of ordered.slice(offset, offset + exports.TSDB_WRITE_CHUNK_SIZE)) {
+            const ref = write.kind === "game" ? persistence.gameRef(write.id) : persistence.teamRef(write.id);
+            batch.set(ref, write.data, { merge: true });
+        }
+        await batch.commit();
+    }
+    const summary = {
+        requests,
+        eventsFetched: fetched,
+        gamesUpserted: ordered.filter((write) => write.kind === "game").length,
+        teamsUpserted: ordered.filter((write) => write.kind === "team").length,
+        skipCounts,
+    };
+    console.info("TheSportsDB sync complete", summary);
+    return summary;
+}
+//# sourceMappingURL=syncTheSportsDb.js.map

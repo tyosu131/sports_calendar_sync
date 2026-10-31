@@ -49,7 +49,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.triggerFootballSync = exports.scheduledSyncFootball = exports.syncGoogleCalendarOnFollowChange = exports.syncGoogleCalendarNow = exports.googleCalendarOAuthCallback = exports.disconnectGoogleCalendar = exports.getGoogleCalendarConnectionStatus = exports.beginGoogleCalendarConnection = exports.rotateCalendarFeed = exports.ensureCalendarFeed = exports.getCalendar = void 0;
+exports.triggerTheSportsDbSync = exports.scheduledSyncTheSportsDb = exports.triggerFootballSync = exports.scheduledSyncFootball = exports.syncGoogleCalendarOnFollowChange = exports.syncGoogleCalendarNow = exports.googleCalendarOAuthCallback = exports.disconnectGoogleCalendar = exports.getGoogleCalendarConnectionStatus = exports.beginGoogleCalendarConnection = exports.rotateCalendarFeed = exports.ensureCalendarFeed = exports.getCalendar = void 0;
 const admin = __importStar(require("firebase-admin"));
 const functions = __importStar(require("firebase-functions/v1"));
 const params_1 = require("firebase-functions/params");
@@ -151,5 +151,33 @@ exports.triggerFootballSync = functions
         console.warn("Canonical sync succeeded; Google Calendar batch could not start");
     }
     return { success: true };
+});
+// ── TheSportsDB (NFL / UFC) ───────────────────────────────────────────────────
+const syncTheSportsDb_1 = require("./pipelines/syncTheSportsDb");
+/** Free test key "123" by default. Set THESPORTSDB_API_KEY to use another key. */
+const THESPORTSDB_API_KEY = (0, params_1.defineString)("THESPORTSDB_API_KEY", { default: "123" });
+/** Daily NFL / UFC sync. About 40 spaced requests, so the timeout is raised. */
+exports.scheduledSyncTheSportsDb = functions
+    .runWith({ timeoutSeconds: 540, secrets: calendarSecrets })
+    .region("asia-northeast1")
+    .pubsub.schedule("every day 05:00")
+    .timeZone("Asia/Tokyo")
+    .onRun(async (_context) => {
+    await (0, syncTheSportsDb_1.syncTheSportsDb)(THESPORTSDB_API_KEY.value());
+    try {
+        await (0, googleCalendarConnection_1.syncAllActiveGoogleCalendars)({ clientId: GOOGLE_CALENDAR_OAUTH_CLIENT_ID.value(), clientSecret: GOOGLE_CALENDAR_OAUTH_CLIENT_SECRET.value(),
+            encryptionKey: GOOGLE_CALENDAR_TOKEN_ENCRYPTION_KEY.value(), redirectUri: GOOGLE_CALENDAR_OAUTH_REDIRECT_URI.value() });
+    }
+    catch (_) {
+        console.warn("Canonical sync succeeded; Google Calendar batch could not start");
+    }
+});
+/** Manual NFL / UFC sync (admin only). */
+exports.triggerTheSportsDbSync = functions
+    .runWith({ timeoutSeconds: 540 })
+    .region("asia-northeast1")
+    .https.onCall(async (_data, context) => {
+    (0, adminAuthorization_1.requireAdmin)(context);
+    return { success: true, summary: await (0, syncTheSportsDb_1.syncTheSportsDb)(THESPORTSDB_API_KEY.value()) };
 });
 //# sourceMappingURL=index.js.map

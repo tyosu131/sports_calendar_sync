@@ -100,6 +100,7 @@ class Game {
     this.venue,
     this.venueJa,
     this.venueEn,
+    this.venueUtcOffsetMinutes,
     this.homeScore,
     this.awayScore,
     this.broadcastPlatforms = const [],
@@ -167,6 +168,10 @@ class Game {
   /// display-name policy picks one by language; otherwise [venue] is shown.
   final String? venueJa;
   final String? venueEn;
+
+  /// Venue clock offset from UTC in minutes, written by sync when the
+  /// provider gives a venue wall clock. Null when unknown.
+  final int? venueUtcOffsetMinutes;
   final int? homeScore;
   final int? awayScore;
 
@@ -303,6 +308,11 @@ class Game {
       ),
       venueJa: decoder.optional<String>(data, 'venueJa', expected: 'String'),
       venueEn: decoder.optional<String>(data, 'venueEn', expected: 'String'),
+      venueUtcOffsetMinutes: decoder.optional<int>(
+        data,
+        'venueUtcOffsetMinutes',
+        expected: 'int',
+      ),
       homeScore: decoder.optional<int>(data, 'homeScore', expected: 'int'),
       awayScore: decoder.optional<int>(data, 'awayScore', expected: 'int'),
       broadcastPlatforms: broadcastList,
@@ -398,6 +408,8 @@ class Game {
       if (awayTeamCountry != null) 'awayTeamCountry': awayTeamCountry,
       if (venueJa != null) 'venueJa': venueJa,
       if (venueEn != null) 'venueEn': venueEn,
+      if (venueUtcOffsetMinutes != null)
+        'venueUtcOffsetMinutes': venueUtcOffsetMinutes,
       if (homeScore != null) 'homeScore': homeScore,
       if (awayScore != null) 'awayScore': awayScore,
       'broadcastPlatforms': broadcastPlatforms.map((b) => b.toMap()).toList(),
@@ -410,4 +422,8 @@ class Game {
   }
 
   DateTime get startTimeUtcDateTime => startTimeUtc.toDate();
+
+  /// A card with one title and no away side (e.g. a UFC event).
+  bool get isSingleTitleEvent =>
+      awayTeamId == null && awayTeamNameJa.trim().isEmpty;
 }

@@ -4,7 +4,14 @@
 
 Client + Functions name policy only. No deploy, no Firestore write, no provider call.
 
-- `mma_ufc` (category `mma`) is added to `SportsRegistry`; NFL already existed. Both sit under その他スポーツ. Neither has a production provider binding yet (`dataSourceKey` null for UFC), so only sample mode shows NFL teams / UFC fighters and games. Production data must come from a provider sync like football, not hand-written team/fighter lists.
+- `mma_ufc` (category `mma`) is added to `SportsRegistry`; NFL already existed. Both sit under その他スポーツ.
+- NFL / UFC production data come from TheSportsDB v1 (`functions/src/pipelines/syncTheSportsDb.ts`), daily at 05:00 JST (`scheduledSyncTheSportsDb`, manual `triggerTheSportsDbSync`). Not deployed yet.
+  - Free key evidence (owner-run, 2026-10-31): `eventsseason` stops at 15 events and `eventsday` at 3, so only `eventsround` is used. One NFL week returned all 16 games; UFC card numbers run in date order, one card per number. Fast consecutive calls returned non-JSON, so calls are spaced 3 s and retried once.
+  - NFL: rounds 1–18 of the season. Pre-season (round 500) is skipped. The post-season round number is unknown (19–23 and 125 were empty); revisit in January.
+  - UFC: the provider has no fighters per card, so the whole league is one follow item (`tsdb_league_4443`) and each card is one game with a single title. Only titles starting with `UFC` are kept (Contender Series dropped). Past cards stay `NS` at the provider, so a card is finished once it has started.
+  - Teams are created from provider ids (`tsdb_team_<id>`); there is no hand-kept roster. Games are upserted, never deleted.
+  - `venueUtcOffsetMinutes` is derived from the UTC instant and the venue wall clock; the provider's local date can be a day off and is not read. The app shows 「現地時間」 from it.
+  - Whether the free test key `123` may be used in a public app is not confirmed. `THESPORTSDB_API_KEY` (default `123`) switches keys.
 - Name language: Japanese domestic competitions (J.League, Emperor's Cup, NPB, B.League) use Japanese; everything else uses English. A side whose provider `country` / `homeTeamCountry` / `awayTeamCountry` is Japan keeps Japanese in any competition. There is no hand-kept id list. Functions `displayTeamName` mirrors this (calendar output needs a Functions deploy to change).
 - Settings 「名前の言語」 reuses profile `preferredLanguage`: `ja` = automatic rule above, `en` = every team / person / venue / competition name in English. App chrome stays Japanese.
 - Optional game fields `venueJa` / `venueEn` / `homeTeamCountry` / `awayTeamCountry` and team field `presentationColor` (`#RRGGBB`) are read when present. No sync writes them yet.

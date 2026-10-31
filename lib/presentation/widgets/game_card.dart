@@ -51,6 +51,7 @@ class GameCard extends StatelessWidget {
       providerTimezone: game.timezone,
       venueName: game.venue,
       competitionKey: game.competitionKey,
+      venueUtcOffsetMinutes: game.venueUtcOffsetMinutes,
     );
     final frames = competitionVsFrameColors(game.competitionKey);
 
@@ -164,49 +165,77 @@ class GameCard extends StatelessWidget {
               ),
             ],
             const SizedBox(height: 12),
-            // Teams row. Home and away frames differ in color and shape.
-            // The card surface stays the theme surface.
-            IntrinsicHeight(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Expanded(
-                    child: CompetitionVsSide(
-                      side: CompetitionVsSideKind.home,
-                      color: frames.home,
-                      child: _TeamSide(
-                        name: teamDisplayNames.homeName(game),
-                        nameColor: competitionVsFrameTextColor(frames.home),
-                        logoUrl: resolveGameTeamLogoUrl(
-                          game.homeTeamLogoUrl,
-                          homeTeamLogoUrlFallback ??
-                              GamePresentationScope.logo(context, game, true),
+            // An event card (e.g. UFC) has one title and no away side.
+            if (game.isSingleTitleEvent)
+              Container(
+                key: const Key('game-card-event-title'),
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: competitionVsFrameFill(frames.home),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Text(
+                  teamDisplayNames.homeName(game),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: competitionVsFrameTextColor(frames.home),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              )
+            else
+              // Teams row. Home and away frames differ in color and shape.
+              // The card surface stays the theme surface.
+              IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      child: CompetitionVsSide(
+                        side: CompetitionVsSideKind.home,
+                        color: frames.home,
+                        child: _TeamSide(
+                          name: teamDisplayNames.homeName(game),
+                          nameColor: competitionVsFrameTextColor(frames.home),
+                          logoUrl: resolveGameTeamLogoUrl(
+                            game.homeTeamLogoUrl,
+                            homeTeamLogoUrlFallback ??
+                                GamePresentationScope.logo(context, game, true),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Center(child: _ScoreOrVs(game: game)),
-                  ),
-                  Expanded(
-                    child: CompetitionVsSide(
-                      side: CompetitionVsSideKind.away,
-                      color: frames.away,
-                      child: _TeamSide(
-                        name: teamDisplayNames.awayName(game),
-                        nameColor: competitionVsFrameTextColor(frames.away),
-                        logoUrl: resolveGameTeamLogoUrl(
-                          game.awayTeamLogoUrl,
-                          awayTeamLogoUrlFallback ??
-                              GamePresentationScope.logo(context, game, false),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Center(child: _ScoreOrVs(game: game)),
+                    ),
+                    Expanded(
+                      child: CompetitionVsSide(
+                        side: CompetitionVsSideKind.away,
+                        color: frames.away,
+                        child: _TeamSide(
+                          name: teamDisplayNames.awayName(game),
+                          nameColor: competitionVsFrameTextColor(frames.away),
+                          logoUrl: resolveGameTeamLogoUrl(
+                            game.awayTeamLogoUrl,
+                            awayTeamLogoUrlFallback ??
+                                GamePresentationScope.logo(
+                                  context,
+                                  game,
+                                  false,
+                                ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
             // Venue
             if (visibleVenue(teamDisplayNames.venueName(game))
                 case final venue?) ...[

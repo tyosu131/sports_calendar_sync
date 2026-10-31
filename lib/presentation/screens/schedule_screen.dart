@@ -500,7 +500,7 @@ class _CompactGameLine extends StatelessWidget {
   Widget build(BuildContext context) {
     final home = teamDisplayNames.homeName(game);
     final away = teamDisplayNames.awayName(game);
-    final marker = '$home/$away';
+    final marker = game.isSingleTitleEvent ? home : '$home/$away';
     final meta = _compactMeta(game);
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -577,23 +577,25 @@ class _CalendarGamePreview extends StatelessWidget {
                   foregroundColor: foregroundColor,
                   selected: selected,
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 3),
-                  child: Text(
-                    'vs',
-                    style: TextStyle(
-                      color: foregroundColor,
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
+                if (!game.isSingleTitleEvent) ...[
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 3),
+                    child: Text(
+                      'vs',
+                      style: TextStyle(
+                        color: foregroundColor,
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                ),
-                _MiniTeamIcon(
-                  name: teamDisplayNames.awayName(game),
-                  logoUrl: GamePresentationScope.logo(context, game, false),
-                  foregroundColor: foregroundColor,
-                  selected: selected,
-                ),
+                  _MiniTeamIcon(
+                    name: teamDisplayNames.awayName(game),
+                    logoUrl: GamePresentationScope.logo(context, game, false),
+                    foregroundColor: foregroundColor,
+                    selected: selected,
+                  ),
+                ],
               ],
             ),
             const SizedBox(height: 2),
@@ -701,22 +703,24 @@ class ScheduleGameTile extends StatelessWidget {
                     alignment: CrossAxisAlignment.start,
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: Text(
-                    scoreText,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
+                if (!game.isSingleTitleEvent) ...[
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: Text(
+                      scoreText,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                ),
-                Expanded(
-                  child: _TeamSide(
-                    name: teamDisplayNames.awayName(game),
-                    logoUrl: GamePresentationScope.logo(context, game, false),
-                    alignment: CrossAxisAlignment.end,
+                  Expanded(
+                    child: _TeamSide(
+                      name: teamDisplayNames.awayName(game),
+                      logoUrl: GamePresentationScope.logo(context, game, false),
+                      alignment: CrossAxisAlignment.end,
+                    ),
                   ),
-                ),
+                ],
               ],
             ),
             if (visibleVenue(teamDisplayNames.venueName(game))
