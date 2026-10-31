@@ -373,6 +373,20 @@ class SampleTeamRepository implements TeamRepository {
       competitionKey: 'basketball_nba',
       country: 'USA',
     ),
+    League(
+      id: 'sample_nfl_league',
+      nameEn: 'NFL',
+      nameJa: 'NFL',
+      competitionKey: 'americanfootball_nfl',
+      country: 'USA',
+    ),
+    League(
+      id: 'sample_ufc_league',
+      nameEn: 'UFC',
+      nameJa: 'UFC',
+      competitionKey: 'mma_ufc',
+      country: 'USA',
+    ),
   ];
 
   static const _teams = [
@@ -480,6 +494,7 @@ class SampleTeamRepository implements TeamRepository {
       competitionKey: 'basketball_nba',
       logoUrl: 'https://a.espncdn.com/i/teamlogos/nba/500/lal.png',
       country: 'USA',
+      presentationColor: '#552583',
     ),
     Team(
       id: 'golden_state_warriors',
@@ -488,6 +503,58 @@ class SampleTeamRepository implements TeamRepository {
       leagueId: 'sample_nba_league',
       competitionKey: 'basketball_nba',
       logoUrl: 'https://a.espncdn.com/i/teamlogos/nba/500/gs.png',
+      country: 'USA',
+      presentationColor: '#1D428A',
+    ),
+    Team(
+      id: 'kansas_city_chiefs',
+      nameEn: 'Kansas City Chiefs',
+      nameJa: 'カンザスシティ・チーフス',
+      leagueId: 'sample_nfl_league',
+      competitionKey: 'americanfootball_nfl',
+      country: 'USA',
+      presentationColor: '#E31837',
+    ),
+    Team(
+      id: 'buffalo_bills',
+      nameEn: 'Buffalo Bills',
+      nameJa: 'バッファロー・ビルズ',
+      leagueId: 'sample_nfl_league',
+      competitionKey: 'americanfootball_nfl',
+      country: 'USA',
+      presentationColor: '#00338D',
+    ),
+    // UFC: one "team" per fighter. Japanese fighters keep Japanese names.
+    Team(
+      id: 'ufc_tatsuro_taira',
+      nameEn: 'Tatsuro Taira',
+      nameJa: '平良達郎',
+      leagueId: 'sample_ufc_league',
+      competitionKey: 'mma_ufc',
+      country: 'Japan',
+    ),
+    Team(
+      id: 'ufc_kai_asakura',
+      nameEn: 'Kai Asakura',
+      nameJa: '朝倉海',
+      leagueId: 'sample_ufc_league',
+      competitionKey: 'mma_ufc',
+      country: 'Japan',
+    ),
+    Team(
+      id: 'ufc_alexandre_pantoja',
+      nameEn: 'Alexandre Pantoja',
+      nameJa: 'アレシャンドレ・パントージャ',
+      leagueId: 'sample_ufc_league',
+      competitionKey: 'mma_ufc',
+      country: 'Brazil',
+    ),
+    Team(
+      id: 'ufc_brandon_royval',
+      nameEn: 'Brandon Royval',
+      nameJa: 'ブランドン・ロイバル',
+      leagueId: 'sample_ufc_league',
+      competitionKey: 'mma_ufc',
       country: 'USA',
     ),
   ];
@@ -575,6 +642,12 @@ class SampleTeamRepository implements TeamRepository {
       if (team.id == 'hanshin_tigers') ...['阪神', 'タイガース'],
       if (team.id == 'los_angeles_lakers') ...['レイカーズ', 'Lakers'],
       if (team.id == 'golden_state_warriors') ...['ウォリアーズ', 'Warriors', 'GSW'],
+      if (team.id == 'kansas_city_chiefs') ...['チーフス', 'Chiefs', 'KC'],
+      if (team.id == 'buffalo_bills') ...['ビルズ', 'Bills'],
+      if (team.id == 'ufc_tatsuro_taira') ...['平良', 'Taira'],
+      if (team.id == 'ufc_kai_asakura') ...['朝倉', 'Asakura'],
+      if (team.id == 'ufc_alexandre_pantoja') ...['パントージャ', 'Pantoja'],
+      if (team.id == 'ufc_brandon_royval') ...['ロイバル', 'Royval'],
     ];
     return aliases.map(_normalize).join(' ');
   }

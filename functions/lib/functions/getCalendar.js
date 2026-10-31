@@ -90,12 +90,12 @@ function asNormalizedGame(id, data) {
             japanese: data.homeTeamNameJa,
             english: data.homeTeamNameEn,
             provider: data.homeTeamProviderName,
-        }, undefined, hasHomeTeamId ? data.homeTeamId : undefined),
+        }, undefined, hasHomeTeamId ? data.homeTeamId : undefined, data.homeTeamCountry),
         awayTeamName: (0, teamDisplayNamePolicy_1.displayTeamName)(competitionKey, {
             japanese: data.awayTeamNameJa,
             english: data.awayTeamNameEn,
             provider: data.awayTeamProviderName,
-        }, undefined, hasAwayTeamId ? data.awayTeamId : undefined),
+        }, undefined, hasAwayTeamId ? data.awayTeamId : undefined, data.awayTeamCountry),
         ...(competitionCompact ? { competitionCompact } : {}),
         status: data.status,
         ...(hasAuthoritativeScores ? {

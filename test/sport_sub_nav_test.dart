@@ -542,7 +542,7 @@ void main() {
       expect(
         find.descendant(
           of: find.byKey(const ValueKey('league-team-card-yomiuri_giants')),
-          matching: find.text('Yomiuri Giants'),
+          matching: find.text('読売ジャイアンツ'),
         ),
         findsOneWidget,
       );

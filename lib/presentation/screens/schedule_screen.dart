@@ -719,7 +719,8 @@ class ScheduleGameTile extends StatelessWidget {
                 ),
               ],
             ),
-            if (visibleVenue(game.venue) case final venue?) ...[
+            if (visibleVenue(teamDisplayNames.venueName(game))
+                case final venue?) ...[
               const SizedBox(height: 10),
               Row(
                 children: [

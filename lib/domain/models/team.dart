@@ -28,6 +28,7 @@ class Team {
     this.competitionKey,
     this.logoUrl,
     this.country,
+    this.presentationColor,
     this.externalTeamId,
     @Deprecated('Use externalTeamId') this.rapidApiId,
   });
@@ -46,6 +47,10 @@ class Team {
 
   final String? logoUrl;
   final String? country;
+
+  /// Reviewed team color as `#RRGGBB`, used to tint team cards. Null means
+  /// no reviewed color; cards stay neutral.
+  final String? presentationColor;
 
   /// External API team ID (API-SPORTS or other source).
   final int? externalTeamId;
@@ -81,6 +86,11 @@ class Team {
       competitionKey: competitionKey,
       logoUrl: decoder.optional<String>(data, 'logoUrl', expected: 'String'),
       country: decoder.optional<String>(data, 'country', expected: 'String'),
+      presentationColor: decoder.optional<String>(
+        data,
+        'presentationColor',
+        expected: 'String',
+      ),
       externalTeamId: externalTeamId ?? rapidApiId,
       // ignore: deprecated_member_use_from_same_package
       rapidApiId: rapidApiId,
@@ -97,6 +107,7 @@ class Team {
       if (competitionKey != null) 'sportKey': competitionKey,
       if (logoUrl != null) 'logoUrl': logoUrl,
       if (country != null) 'country': country,
+      if (presentationColor != null) 'presentationColor': presentationColor,
       if (externalTeamId != null) 'externalTeamId': externalTeamId,
       // Legacy alias.
       if (externalTeamId != null) 'rapidApiId': externalTeamId,
@@ -111,6 +122,7 @@ class Team {
     String? competitionKey,
     String? logoUrl,
     String? country,
+    String? presentationColor,
     int? externalTeamId,
   }) {
     return Team(
@@ -121,6 +133,7 @@ class Team {
       competitionKey: competitionKey ?? this.competitionKey,
       logoUrl: logoUrl ?? this.logoUrl,
       country: country ?? this.country,
+      presentationColor: presentationColor ?? this.presentationColor,
       externalTeamId: externalTeamId ?? this.externalTeamId,
     );
   }

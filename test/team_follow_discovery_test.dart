@@ -105,7 +105,7 @@ void main() {
     expect(find.text('リーグを検索'), findsNothing);
     expect(find.text('鹿島アントラーズ'), findsOneWidget);
     expect(find.text('ガンバ大阪'), findsOneWidget);
-    expect(find.text('Yomiuri Giants'), findsNothing);
+    expect(find.text('読売ジャイアンツ'), findsNothing);
     expect(find.text('鹿'), findsNothing);
     expect(find.text('ガ'), findsNothing);
     expect(find.byKey(const Key('neutral-team-mark')), findsWidgets);
@@ -156,7 +156,7 @@ void main() {
     expect(
       find.descendant(
         of: find.byKey(const ValueKey('team-search-page-football')),
-        matching: find.text('Yomiuri Giants'),
+        matching: find.text('読売ジャイアンツ'),
       ),
       findsNothing,
     );
@@ -238,7 +238,7 @@ void main() {
     expect(
       find.descendant(
         of: find.byKey(const ValueKey('team-search-page-baseball')),
-        matching: find.text('Yomiuri Giants'),
+        matching: find.text('読売ジャイアンツ'),
       ),
       findsOneWidget,
     );
@@ -248,12 +248,12 @@ void main() {
       tester
           .getSemantics(
             find.descendant(
-              of: find.widgetWithText(ListTile, 'Yomiuri Giants'),
+              of: find.widgetWithText(ListTile, '読売ジャイアンツ'),
               matching: find.byType(TeamPresentationBadge),
             ),
           )
           .label,
-      'Yomiuri Giants',
+      '読売ジャイアンツ',
     );
     expect(
       find.descendant(

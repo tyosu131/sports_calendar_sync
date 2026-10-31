@@ -47,7 +47,7 @@ class LocalIcsBuilder {
       'DTSTART:${_formatUtc(game.startTimeUtcDateTime)}',
       'SUMMARY:${_escapeText(_summaryFor(game))}',
       'DESCRIPTION:${_escapeText(_descriptionFor(game))}',
-      'LOCATION:${_escapeText(game.venue ?? '')}',
+      'LOCATION:${_escapeText(teamDisplayNames.venueName(game) ?? '')}',
       'END:VEVENT',
     ];
   }

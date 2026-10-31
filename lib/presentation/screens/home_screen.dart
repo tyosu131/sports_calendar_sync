@@ -10,6 +10,7 @@ import '../../domain/models/team.dart';
 import '../../domain/policies/home_sport_navigation.dart';
 import '../../domain/policies/team_display_name_policy.dart';
 import '../../domain/policies/team_presentation_policy.dart';
+import '../theme/competition_vs_frame.dart' show contrastRatio;
 import '../widgets/game_card.dart';
 import '../widgets/game_presentation_scope.dart';
 import '../widgets/sport_sub_nav_bar.dart';
@@ -370,11 +371,21 @@ class _FollowedTeamCard extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final logoUrl = teamPresentationLogo(team);
     final displayName = teamDisplayNames.teamName(team);
+    // Reviewed team color when present; otherwise the neutral surface.
+    final teamColor = parseTeamPresentationColor(team.presentationColor);
+    final fill = teamColor ?? backgroundColor;
+    final ink = teamColor == null
+        ? null
+        : contrastRatio(Colors.white, teamColor) >=
+              contrastRatio(Colors.black, teamColor)
+        ? Colors.white
+        : Colors.black;
 
     return SizedBox(
       width: 196,
       child: Material(
-        color: backgroundColor,
+        key: ValueKey('followed-team-card-${team.id}'),
+        color: fill,
         borderRadius: BorderRadius.circular(18),
         child: InkWell(
           borderRadius: BorderRadius.circular(18),
@@ -383,7 +394,7 @@ class _FollowedTeamCard extends StatelessWidget {
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: borderColor),
+              border: Border.all(color: teamColor ?? borderColor),
             ),
             child: Row(
               children: [
@@ -400,6 +411,7 @@ class _FollowedTeamCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: textTheme.bodyMedium?.copyWith(
+                      color: ink,
                       fontWeight: FontWeight.w600,
                     ),
                   ),

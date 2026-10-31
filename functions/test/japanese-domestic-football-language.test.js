@@ -4,7 +4,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { Timestamp } = require('firebase-admin/firestore');
 const oracle = require('../../test/fixtures/japanese_domestic_football_language.json');
-const { isJapaneseDomesticFootballCompetition } = require('../lib/domain/japaneseDomesticFootball');
+const { isJapaneseDomesticCompetition, isJapaneseDomesticFootballCompetition } = require('../lib/domain/japaneseDomesticFootball');
 const { defaultDisplayLanguage, displayTeamName } = require('../lib/domain/teamDisplayNamePolicy');
 const { clubPresentation } = require('../lib/domain/clubPresentation');
 const { asNormalizedGame } = require('../lib/functions/getCalendar');
@@ -31,6 +31,11 @@ test('Japanese domestic football classification matches the shared oracle', () =
     const value = key === '' ? undefined : key;
     assert.equal(isJapaneseDomesticFootballCompetition(value), false, key);
     assert.equal(defaultDisplayLanguage(value), 'en', key);
+  }
+  for (const key of oracle.japaneseNonFootball) {
+    assert.equal(isJapaneseDomesticFootballCompetition(key), false, key);
+    assert.equal(isJapaneseDomesticCompetition(key), true, key);
+    assert.equal(defaultDisplayLanguage(key), 'ja', key);
   }
 });
 

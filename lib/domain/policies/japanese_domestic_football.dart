@@ -12,3 +12,23 @@ bool isJapaneseDomesticFootballCompetition(String? competitionKey) {
   if (key == null || key.isEmpty) return false;
   return key.startsWith('football_j') || key == 'football_emperor_cup';
 }
+
+/// Japanese domestic competitions in any sport.
+///
+/// Football uses [isJapaneseDomesticFootballCompetition]. NPB and B.League
+/// keys (and keys that extend them, e.g. `baseball_npb_farm`) are domestic.
+/// MLB, NBA, NFL, NHL and UFC are not.
+bool isJapaneseDomesticCompetition(String? competitionKey) {
+  if (isJapaneseDomesticFootballCompetition(competitionKey)) return true;
+  final key = competitionKey?.trim();
+  if (key == null || key.isEmpty) return false;
+  for (final prefix in _japaneseDomesticNonFootballKeys) {
+    if (key == prefix || key.startsWith('${prefix}_')) return true;
+  }
+  return false;
+}
+
+const _japaneseDomesticNonFootballKeys = [
+  'baseball_npb',
+  'basketball_b_league',
+];

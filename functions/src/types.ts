@@ -91,6 +91,8 @@ export interface GameDoc {
   homeTeamProviderName?: string;
   /** Team logo URL. */
   homeTeamLogoUrl?: string;
+  /** Provider nationality / country of the home participant (e.g. "Japan"). */
+  homeTeamCountry?: string;
   awayTeamId?: string;
   /** Provider participant identity; does not imply a canonical Team exists. */
   awaySourceTeamId?: string;
@@ -98,6 +100,7 @@ export interface GameDoc {
   awayTeamNameEn?: string;
   awayTeamProviderName?: string;
   awayTeamLogoUrl?: string;
+  awayTeamCountry?: string;
   /** UTC Firestore Timestamp — used for calendar sync. */
   startTimeUTC: Timestamp;
   /** JST display string, e.g. "2025-07-15 19:00". */

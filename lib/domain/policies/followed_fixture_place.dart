@@ -5,8 +5,8 @@
 ///
 /// This is the stored home/away designation (`homeTeamId` / `awayTeamId`).
 /// Games have no neutral-venue flag and no stadium master, so [stadium] is
-/// not proof the match is at the club's own ground. [travel] is a transit
-/// cue, not a flight.
+/// not proof the match is at the club's own ground. [travel] is drawn as an
+/// airplane as a friendly "away trip" cue; it does not claim the team flies.
 enum FollowedFixturePlace { stadium, travel }
 
 /// Spoken side fact. The chip shows an icon only; this is not drawn on the card.
@@ -28,7 +28,11 @@ Set<FollowedFixturePlace> fixturePlaceForPerspective({
   required String? homeTeamId,
   required String? awayTeamId,
   required Iterable<String> perspectiveTeamIds,
+  String? competitionKey,
 }) {
+  // Combat sports have no home ground: both fighters travel to the event.
+  if (competitionKey?.trim().startsWith('mma_') ?? false) return const {};
+
   final home = _canonicalId(homeTeamId);
   final away = _canonicalId(awayTeamId);
   if (home != null && away != null && home == away) return const {};

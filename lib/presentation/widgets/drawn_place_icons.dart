@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 /// Stadium bowl drawn in code. Material icon fonts are not available in the
@@ -20,8 +22,8 @@ class StadiumCueMark extends StatelessWidget {
   }
 }
 
-/// Rail car drawn in code. A side view with windows and wheels, not an
-/// airplane and not a font glyph.
+/// Airplane drawn in code for the away (travel) side. Not a font glyph,
+/// so it stays visible when the icon font is missing.
 class TransitCueMark extends StatelessWidget {
   const TransitCueMark({
     super.key,
@@ -31,6 +33,8 @@ class TransitCueMark extends StatelessWidget {
   });
 
   final Color color;
+
+  /// Kept for API compatibility with the previous rail-car mark.
   final Color cutout;
   final double size;
 
@@ -40,7 +44,7 @@ class TransitCueMark extends StatelessWidget {
       key: const Key('transit-cue-icon'),
       child: CustomPaint(
         size: Size.square(size),
-        painter: _TransitCuePainter(ink: color, cutout: cutout),
+        painter: _AirplaneCuePainter(ink: color),
       ),
     );
   }
@@ -110,59 +114,54 @@ class _StadiumCuePainter extends CustomPainter {
       oldDelegate.color != color;
 }
 
-class _TransitCuePainter extends CustomPainter {
-  const _TransitCuePainter({required this.ink, required this.cutout});
+/// Top view of an airliner pointing up-right, like a departure sign.
+class _AirplaneCuePainter extends CustomPainter {
+  const _AirplaneCuePainter({required this.ink});
 
   final Color ink;
-  final Color cutout;
 
   @override
   void paint(Canvas canvas, Size size) {
     final w = size.width;
     final h = size.height;
-    final inkPaint = Paint()..color = ink;
-    final cutPaint = Paint()..color = cutout;
-    final stroke = Paint()
-      ..color = ink
-      ..strokeWidth = w * 0.07
-      ..strokeCap = StrokeCap.round;
+    canvas.save();
+    canvas.translate(w / 2, h / 2);
+    canvas.rotate(math.pi / 4);
+    canvas.translate(-w / 2, -h / 2);
 
-    canvas.drawLine(
-      Offset(w * 0.34, h * 0.22),
-      Offset(w * 0.66, h * 0.22),
-      stroke,
-    );
-    canvas.drawLine(
-      Offset(w * 0.50, h * 0.22),
-      Offset(w * 0.50, h * 0.34),
-      stroke,
-    );
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromLTWH(w * 0.04, h * 0.32, w * 0.92, h * 0.38),
-        Radius.circular(w * 0.12),
-      ),
-      inkPaint,
-    );
-    for (final left in [0.14, 0.52]) {
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(
-          Rect.fromLTWH(w * left, h * 0.40, w * 0.28, h * 0.16),
-          Radius.circular(w * 0.04),
-        ),
-        cutPaint,
-      );
-    }
-    for (final center in [0.28, 0.72]) {
-      final wheel = Offset(w * center, h * 0.78);
-      canvas.drawCircle(wheel, w * 0.10, inkPaint);
-      canvas.drawCircle(wheel, w * 0.04, cutPaint);
-    }
+    final plane = Path()
+      // Nose
+      ..moveTo(w * 0.50, h * 0.04)
+      ..quadraticBezierTo(w * 0.57, h * 0.10, w * 0.57, h * 0.22)
+      // Right wing
+      ..lineTo(w * 0.57, h * 0.38)
+      ..lineTo(w * 0.94, h * 0.58)
+      ..lineTo(w * 0.94, h * 0.66)
+      ..lineTo(w * 0.57, h * 0.56)
+      // Right tail
+      ..lineTo(w * 0.56, h * 0.80)
+      ..lineTo(w * 0.70, h * 0.90)
+      ..lineTo(w * 0.70, h * 0.96)
+      ..lineTo(w * 0.50, h * 0.91)
+      // Left tail
+      ..lineTo(w * 0.30, h * 0.96)
+      ..lineTo(w * 0.30, h * 0.90)
+      ..lineTo(w * 0.44, h * 0.80)
+      // Left wing
+      ..lineTo(w * 0.43, h * 0.56)
+      ..lineTo(w * 0.06, h * 0.66)
+      ..lineTo(w * 0.06, h * 0.58)
+      ..lineTo(w * 0.43, h * 0.38)
+      ..lineTo(w * 0.43, h * 0.22)
+      ..quadraticBezierTo(w * 0.43, h * 0.10, w * 0.50, h * 0.04)
+      ..close();
+    canvas.drawPath(plane, Paint()..color = ink);
+    canvas.restore();
   }
 
   @override
-  bool shouldRepaint(covariant _TransitCuePainter oldDelegate) =>
-      oldDelegate.ink != ink || oldDelegate.cutout != cutout;
+  bool shouldRepaint(covariant _AirplaneCuePainter oldDelegate) =>
+      oldDelegate.ink != ink;
 }
 
 class _VenuePinPainter extends CustomPainter {

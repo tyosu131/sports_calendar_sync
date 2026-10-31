@@ -8,14 +8,19 @@
     "football_j2_j3_special",
     "football_j_future_domestic"
   ],
+  "japaneseNonFootball": [
+    "baseball_npb",
+    "baseball_npb_farm",
+    "basketball_b_league"
+  ],
   "english": [
     "football_premier",
     "football_champions_league",
     "football_league_cup",
-    "baseball_npb",
     "baseball_mlb",
     "basketball_nba",
-    "basketball_b_league",
+    "americanfootball_nfl",
+    "mma_ufc",
     ""
   ],
   "names": [
@@ -101,13 +106,13 @@
       "expected": "Jubilo Iwata"
     },
     {
-      "id": "npb-unchanged",
+      "id": "npb-japanese",
       "competition": "baseball_npb",
       "teamId": "yomiuri_giants",
       "japanese": "読売ジャイアンツ",
       "english": "Yomiuri Giants",
       "provider": "Yomiuri Giants",
-      "expected": "Yomiuri Giants"
+      "expected": "読売ジャイアンツ"
     },
     {
       "id": "mlb-unchanged",
@@ -128,13 +133,13 @@
       "expected": "Los Angeles Lakers"
     },
     {
-      "id": "b-league-unchanged",
+      "id": "b-league-japanese",
       "competition": "basketball_b_league",
       "teamId": "ryukyu_golden_kings",
       "japanese": "琉球ゴールデンキングス",
       "english": "Ryukyu Golden Kings",
       "provider": "Ryukyu Golden Kings",
-      "expected": "Ryukyu Golden Kings"
+      "expected": "琉球ゴールデンキングス"
     }
   ]
 }

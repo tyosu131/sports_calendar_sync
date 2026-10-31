@@ -64,12 +64,12 @@ export function asNormalizedGame(id: string, data: DocumentData): NormalizedGame
       japanese: data.homeTeamNameJa,
       english: data.homeTeamNameEn,
       provider: data.homeTeamProviderName,
-    }, undefined, hasHomeTeamId ? data.homeTeamId as string : undefined),
+    }, undefined, hasHomeTeamId ? data.homeTeamId as string : undefined, data.homeTeamCountry),
     awayTeamName: displayTeamName(competitionKey, {
       japanese: data.awayTeamNameJa,
       english: data.awayTeamNameEn,
       provider: data.awayTeamProviderName,
-    }, undefined, hasAwayTeamId ? data.awayTeamId as string : undefined),
+    }, undefined, hasAwayTeamId ? data.awayTeamId as string : undefined, data.awayTeamCountry),
     ...(competitionCompact ? { competitionCompact } : {}),
     status: data.status,
     ...(hasAuthoritativeScores ? {

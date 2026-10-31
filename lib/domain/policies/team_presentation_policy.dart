@@ -1,3 +1,5 @@
+import 'dart:ui' show Color;
+
 import '../models/game.dart';
 import '../models/team.dart';
 import 'club_presentation_data.dart';
@@ -149,4 +151,11 @@ class TeamPresentationLogoResolver {
     }
     return entry?.logoUrl;
   }
+}
+
+/// Parses a reviewed `#RRGGBB` team color. Anything else is null.
+Color? parseTeamPresentationColor(String? value) {
+  final hex = value?.trim();
+  if (hex == null || !RegExp(r'^#[0-9a-fA-F]{6}$').hasMatch(hex)) return null;
+  return Color(0xFF000000 | int.parse(hex.substring(1), radix: 16));
 }

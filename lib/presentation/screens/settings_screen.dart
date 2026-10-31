@@ -67,10 +67,8 @@ class SettingsScreen extends ConsumerWidget {
               _SectionHeader(title: 'アプリ'),
               ListTile(
                 leading: const Icon(Icons.language),
-                title: const Text('言語'),
-                subtitle: Text(
-                  profile.preferredLanguage == 'ja' ? '日本語' : 'English',
-                ),
+                title: const Text('名前の言語'),
+                subtitle: Text(_languageLabel(profile.preferredLanguage)),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => _showLanguagePicker(
                   context,
@@ -107,15 +105,15 @@ class SettingsScreen extends ConsumerWidget {
     final selected = await showDialog<String>(
       context: context,
       builder: (ctx) => SimpleDialog(
-        title: const Text('言語を選択'),
+        title: const Text('名前の言語'),
         children: [
           SimpleDialogOption(
             onPressed: () => Navigator.pop(ctx, 'ja'),
             child: Row(
               children: [
-                if (current == 'ja') const Icon(Icons.check, size: 18),
+                if (current != 'en') const Icon(Icons.check, size: 18),
                 const SizedBox(width: 8),
-                const Text('日本語'),
+                Expanded(child: Text(_languageLabel('ja'))),
               ],
             ),
           ),
@@ -125,7 +123,7 @@ class SettingsScreen extends ConsumerWidget {
               children: [
                 if (current == 'en') const Icon(Icons.check, size: 18),
                 const SizedBox(width: 8),
-                const Text('English'),
+                Expanded(child: Text(_languageLabel('en'))),
               ],
             ),
           ),
@@ -141,6 +139,10 @@ class SettingsScreen extends ConsumerWidget {
           );
     }
   }
+
+  /// `ja` is the automatic rule; `en` makes every name English.
+  static String _languageLabel(String? value) =>
+      value == 'en' ? 'English（すべて英語）' : '自動（日本のチーム・選手・会場は日本語、海外は英語）';
 
   Future<void> _confirmSignOut(BuildContext context, WidgetRef ref) async {
     final confirmed = await showDialog<bool>(

@@ -15,8 +15,8 @@ import '../../domain/models/sport_definition.dart';
 /// The same key is stored in Firestore as `competitionKey` (new documents) and
 /// `sportKey` (legacy alias).
 ///
-/// ## Initial 8 competitions
-/// J1 League, Premier League, NPB, MLB, NBA, NFL, NHL, B.League
+/// ## Competitions
+/// J1 League, Premier League, NPB, MLB, NBA, NFL, NHL, B.League, UFC
 class SportsRegistry {
   SportsRegistry._();
 
@@ -103,6 +103,19 @@ class SportsRegistry {
       sortOrder: 80,
       enabled: true,
       dataSourceKey: 'apisports_basketball',
+      iconAsset: null,
+    ),
+    // UFC: each "team" is one fighter and each game is one bout.
+    // No production provider is connected yet (dataSourceKey null), so
+    // only sample mode has fighters and bouts.
+    SportDefinition(
+      competitionKey: 'mma_ufc',
+      displayNameJa: 'UFC',
+      displayNameEn: 'UFC',
+      sportCategory: 'mma',
+      sortOrder: 90,
+      enabled: true,
+      dataSourceKey: null,
       iconAsset: null,
     ),
   ];

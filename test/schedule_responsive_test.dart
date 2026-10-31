@@ -159,9 +159,7 @@ void main() {
         status: GameStatus.scheduled,
       ),
     ]);
-    final marker = tester.widget<Text>(
-      find.text('Yomiuri Giants/Hanshin Tigers'),
-    );
+    final marker = tester.widget<Text>(find.text('読売ジャイアンツ/阪神タイガース'));
     expect(marker.maxLines, 1);
     expect(marker.overflow, TextOverflow.ellipsis);
     expect(find.text('Y/H'), findsNothing);

@@ -1,3 +1,5 @@
+import '../../core/config/display_language_setting.dart';
+
 enum CompetitionDisplayLanguage { japanese, english }
 
 class CompetitionDisplayName {
@@ -13,7 +15,11 @@ class CompetitionDisplayName {
   final String compact;
   final CompetitionDisplayLanguage defaultLanguage;
 
-  String get label => defaultLanguage == CompetitionDisplayLanguage.japanese
+  /// Japanese competitions use Japanese; others English. The English
+  /// Settings choice makes every label English.
+  String get label =>
+      defaultLanguage == CompetitionDisplayLanguage.japanese &&
+          !displayLanguageForcesEnglish
       ? nameJa
       : nameEn;
 }
@@ -55,6 +61,18 @@ abstract final class CompetitionDisplayPolicy {
       nameJa: 'リーグカップ',
       nameEn: 'League Cup',
       compact: 'EFL Cup',
+      defaultLanguage: CompetitionDisplayLanguage.english,
+    ),
+    'americanfootball_nfl': CompetitionDisplayName(
+      nameJa: 'NFL',
+      nameEn: 'NFL',
+      compact: 'NFL',
+      defaultLanguage: CompetitionDisplayLanguage.english,
+    ),
+    'mma_ufc': CompetitionDisplayName(
+      nameJa: 'UFC',
+      nameEn: 'UFC',
+      compact: 'UFC',
       defaultLanguage: CompetitionDisplayLanguage.english,
     ),
   };

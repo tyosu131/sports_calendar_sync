@@ -139,7 +139,7 @@ void main() {
           competitionKey: 'baseball_npb',
         ),
       ),
-      'Yomiuri Giants',
+      '読売ジャイアンツ',
     );
     expectFull(leagueTeamCardLabel('Yomiuri Giants'), 'Yomiuri Giants');
     expectFull(leagueTeamCardLabel('読売ジャイアンツ'), '読売ジャイアンツ');

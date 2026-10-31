@@ -40,6 +40,12 @@ void main() {
         );
         expect(teamDisplayNames.languageFor(value), DisplayLanguage.english);
       }
+      // NPB and B.League are Japanese domestic, but not football.
+      for (final key in oracle['japaneseNonFootball'] as List) {
+        expect(isJapaneseDomesticFootballCompetition(key as String), isFalse);
+        expect(isJapaneseDomesticCompetition(key), isTrue);
+        expect(teamDisplayNames.languageFor(key), DisplayLanguage.japanese);
+      }
     },
   );
 

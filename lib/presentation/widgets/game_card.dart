@@ -43,12 +43,14 @@ class GameCard extends StatelessWidget {
       homeTeamId: game.homeTeamId,
       awayTeamId: game.awayTeamId,
       perspectiveTeamIds: perspectiveTeamIds,
+      competitionKey: game.competitionKey,
     );
     final showStatus = GameStatusPresentation.forStatus(game.status) != null;
     final kickoff = displayedKickoff(
       startTimeUtc: game.startTimeUtcDateTime,
       providerTimezone: game.timezone,
       venueName: game.venue,
+      competitionKey: game.competitionKey,
     );
     final frames = competitionVsFrameColors(game.competitionKey);
 
@@ -69,8 +71,8 @@ class GameCard extends StatelessWidget {
               CompetitionBadge(competition: competition),
               const SizedBox(height: 8),
             ],
-            // Kickoff is JST from startTimeUTC. No authoritative venue
-            // timezone is stored, so provider `timezone` is not displayed.
+            // Kickoff is JST from startTimeUTC. Overseas competitions add
+            // one small line in the competition's reference clock.
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -122,6 +124,18 @@ class GameCard extends StatelessWidget {
                           ),
                         ],
                       ),
+                      if (kickoff.reference case final reference?) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          reference.text,
+                          key: const Key('game-card-reference-clock'),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -194,7 +208,8 @@ class GameCard extends StatelessWidget {
               ),
             ),
             // Venue
-            if (visibleVenue(game.venue) case final venue?) ...[
+            if (visibleVenue(teamDisplayNames.venueName(game))
+                case final venue?) ...[
               const SizedBox(height: 8),
               Row(
                 children: [

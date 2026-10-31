@@ -55,6 +55,7 @@ void main() {
       'basketball',
       'americanFootball',
       'hockey',
+      'mma',
     });
     const leagueLabels = {
       'Jリーグ',
@@ -212,6 +213,7 @@ void main() {
       'americanfootball_nfl',
       'hockey_nhl',
       'basketball_b_league',
+      'mma_ufc',
     ]);
     expect(competitionsForHomeSportTab(homeSportTabs().first), isEmpty);
     expect(

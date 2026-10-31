@@ -1,5 +1,17 @@
 # Current State — sports_calendar_sync
 
+## NFL / UFC scaffold, name language, away airplane, reference clock (2026-10-31)
+
+Client + Functions name policy only. No deploy, no Firestore write, no provider call.
+
+- `mma_ufc` (category `mma`) is added to `SportsRegistry`; NFL already existed. Both sit under その他スポーツ. Neither has a production provider binding yet (`dataSourceKey` null for UFC), so only sample mode shows NFL teams / UFC fighters and games. Production data must come from a provider sync like football, not hand-written team/fighter lists.
+- Name language: Japanese domestic competitions (J.League, Emperor's Cup, NPB, B.League) use Japanese; everything else uses English. A side whose provider `country` / `homeTeamCountry` / `awayTeamCountry` is Japan keeps Japanese in any competition. There is no hand-kept id list. Functions `displayTeamName` mirrors this (calendar output needs a Functions deploy to change).
+- Settings 「名前の言語」 reuses profile `preferredLanguage`: `ja` = automatic rule above, `en` = every team / person / venue / competition name in English. App chrome stays Japanese.
+- Optional game fields `venueJa` / `venueEn` / `homeTeamCountry` / `awayTeamCountry` and team field `presentationColor` (`#RRGGBB`) are read when present. No sync writes them yet.
+- Away cue is now a drawn airplane (still a home/away side cue, not a travel claim). UFC bouts show no home/away cue.
+- Overseas competitions add one small line in the competition's reference clock (UK time for Premier League, US Eastern for MLB / NBA / NFL / NHL / UFC). JST stays the main time.
+- Real-device confirmation is pending.
+
 ## V1.5 stabilization and release closure (2026-10-11)
 
 - Repository implementation and stabilization are merged through PR #55 (`c7e467e`). The latest client hardening separates signed-out / loading / profile-error / missing-profile states, keeps follow write failures user-visible, fails closed on malformed Firestore data and unknown stored game status, and aligns domestic presentation-master lookup with the shared Japanese-domestic classification.

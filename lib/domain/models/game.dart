@@ -95,7 +95,11 @@ class Game {
     this.awayTeamProviderName,
     this.homeTeamLogoUrl,
     this.awayTeamLogoUrl,
+    this.homeTeamCountry,
+    this.awayTeamCountry,
     this.venue,
+    this.venueJa,
+    this.venueEn,
     this.homeScore,
     this.awayScore,
     this.broadcastPlatforms = const [],
@@ -150,7 +154,19 @@ class Game {
   final String timezone;
 
   final GameStatus status;
+
+  /// Provider nationality / country of each participant (e.g. `Japan`).
+  /// Written by sync from provider data; drives Japanese/English names.
+  final String? homeTeamCountry;
+  final String? awayTeamCountry;
+
+  /// Venue as stored by the provider (language not guaranteed).
   final String? venue;
+
+  /// Optional reviewed Japanese / English venue names. When present, the
+  /// display-name policy picks one by language; otherwise [venue] is shown.
+  final String? venueJa;
+  final String? venueEn;
   final int? homeScore;
   final int? awayScore;
 
@@ -275,6 +291,18 @@ class Game {
       // scheduled match. Calendar rejects the same value.
       status: _status(decoder, data),
       venue: decoder.optional<String>(data, 'venue', expected: 'String'),
+      homeTeamCountry: decoder.optional<String>(
+        data,
+        'homeTeamCountry',
+        expected: 'String',
+      ),
+      awayTeamCountry: decoder.optional<String>(
+        data,
+        'awayTeamCountry',
+        expected: 'String',
+      ),
+      venueJa: decoder.optional<String>(data, 'venueJa', expected: 'String'),
+      venueEn: decoder.optional<String>(data, 'venueEn', expected: 'String'),
       homeScore: decoder.optional<int>(data, 'homeScore', expected: 'int'),
       awayScore: decoder.optional<int>(data, 'awayScore', expected: 'int'),
       broadcastPlatforms: broadcastList,
@@ -366,6 +394,10 @@ class Game {
       'timezone': timezone,
       'status': status.name,
       if (venue != null) 'venue': venue,
+      if (homeTeamCountry != null) 'homeTeamCountry': homeTeamCountry,
+      if (awayTeamCountry != null) 'awayTeamCountry': awayTeamCountry,
+      if (venueJa != null) 'venueJa': venueJa,
+      if (venueEn != null) 'venueEn': venueEn,
       if (homeScore != null) 'homeScore': homeScore,
       if (awayScore != null) 'awayScore': awayScore,
       'broadcastPlatforms': broadcastPlatforms.map((b) => b.toMap()).toList(),
