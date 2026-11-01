@@ -5,9 +5,9 @@ import '../../core/config/app_strings.dart';
 
 /// Colored side of a match card.
 ///
-/// Home is a rounded panel with a ground bar. Away is a panel whose outer
-/// edge comes to a point. Position (left/right) and these shapes distinguish
-/// the sides; the color is an additional signal.
+/// Both sides are the same rounded panel; home also has a ground bar.
+/// Position (left/right) distinguishes the sides, and the color is an
+/// additional signal.
 /// The frame does not draw a letter, crest, or flag.
 class CompetitionVsSide extends StatelessWidget {
   const CompetitionVsSide({
@@ -32,7 +32,7 @@ class CompetitionVsSide extends StatelessWidget {
         key: Key(home ? 'vs-frame-home-paint' : 'vs-frame-away-paint'),
         painter: CompetitionVsFramePainter(side: side, color: color),
         child: Padding(
-          padding: EdgeInsets.fromLTRB(4, 2, home ? 4 : 14, home ? 8 : 2),
+          padding: EdgeInsets.fromLTRB(4, 2, 4, home ? 8 : 2),
           child: child,
         ),
       ),
@@ -54,9 +54,7 @@ class CompetitionVsFramePainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.5
       ..strokeJoin = StrokeJoin.round;
-    final path = side == CompetitionVsSideKind.home
-        ? _homePath(size)
-        : _awayPath(size);
+    final path = _framePath(size);
     canvas.drawPath(path, fill);
     canvas.drawPath(path, stroke);
     if (side == CompetitionVsSideKind.home) _paintGround(canvas, size);
@@ -73,27 +71,11 @@ class CompetitionVsFramePainter extends CustomPainter {
     );
   }
 
-  Path _homePath(Size size) {
+  /// Both sides share one rounded panel.
+  Path _framePath(Size size) {
     final rect = (Offset.zero & size).deflate(1.5);
     return Path()
       ..addRRect(RRect.fromRectAndRadius(rect, const Radius.circular(16)));
-  }
-
-  /// Outer edge comes to a point. That outline is not the home rectangle.
-  Path _awayPath(Size size) {
-    final rect = (Offset.zero & size).deflate(1.5);
-    final tip = rect.right;
-    final notch = tip - 12;
-    return Path()
-      ..moveTo(rect.left + 14, rect.top)
-      ..lineTo(notch, rect.top)
-      ..lineTo(tip, rect.center.dy)
-      ..lineTo(notch, rect.bottom)
-      ..lineTo(rect.left + 14, rect.bottom)
-      ..quadraticBezierTo(rect.left, rect.bottom, rect.left, rect.bottom - 14)
-      ..lineTo(rect.left, rect.top + 14)
-      ..quadraticBezierTo(rect.left, rect.top, rect.left + 14, rect.top)
-      ..close();
   }
 
   @override

@@ -16,8 +16,8 @@ class CompetitionVsFrameColors {
   final Color away;
 }
 
-/// Home is a grounded rounded panel. Away is a chevron-ended panel.
-/// The shapes differ so color is not the only side signal.
+/// Both sides are rounded panels; home also has a ground bar.
+/// Position (left/right) is the side signal; color is additional.
 enum CompetitionVsSideKind { home, away }
 
 CompetitionVsFrameColors competitionVsFrameColors(String? competitionKey) {
