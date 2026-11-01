@@ -83,6 +83,8 @@ export interface TeamColorSummary {
   looked: number;
   colorsSaved: number;
   noColor: number;
+  /** Teams the provider has no color for, as `id (name)`, so they can be filled in by hand. */
+  noColorTeams: string[];
   failed: string[];
 }
 
@@ -109,7 +111,7 @@ export async function syncTeamColors(apiKey: string, options: SyncTeamColorsOpti
   }
   const persistence = options.persistence ?? firestoreTeamColorPersistence(admin.firestore());
   const now = (options.now ?? (() => new Date()))();
-  const summary: TeamColorSummary = { looked: 0, colorsSaved: 0, noColor: 0, failed: [] };
+  const summary: TeamColorSummary = { looked: 0, colorsSaved: 0, noColor: 0, noColorTeams: [], failed: [] };
 
   const targets = (await persistence.targets(now)).slice(0, options.limit ?? TEAM_COLOR_LOOKUPS_PER_RUN);
   for (const target of targets) {
@@ -140,6 +142,7 @@ export async function syncTeamColors(apiKey: string, options: SyncTeamColorsOpti
       } else {
         await persistence.update(target.id, { presentationColorCheckedAt: now.toISOString() });
         summary.noColor += 1;
+        summary.noColorTeams.push(`${target.id} (${target.nameEn})`);
       }
     } catch (error) {
       summary.failed.push(target.id);

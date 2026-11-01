@@ -110,7 +110,7 @@ async function syncTeamColors(apiKey, options = {}) {
     }
     const persistence = options.persistence ?? firestoreTeamColorPersistence(admin.firestore());
     const now = (options.now ?? (() => new Date()))();
-    const summary = { looked: 0, colorsSaved: 0, noColor: 0, failed: [] };
+    const summary = { looked: 0, colorsSaved: 0, noColor: 0, noColorTeams: [], failed: [] };
     const targets = (await persistence.targets(now)).slice(0, options.limit ?? exports.TEAM_COLOR_LOOKUPS_PER_RUN);
     for (const target of targets) {
         const scope = exports.TEAM_COLOR_SCOPES[target.competitionKey];
@@ -145,6 +145,7 @@ async function syncTeamColors(apiKey, options = {}) {
             else {
                 await persistence.update(target.id, { presentationColorCheckedAt: now.toISOString() });
                 summary.noColor += 1;
+                summary.noColorTeams.push(`${target.id} (${target.nameEn})`);
             }
         }
         catch (error) {

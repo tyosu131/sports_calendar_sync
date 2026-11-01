@@ -56,7 +56,10 @@ test('colors are saved when found; a club with no provider color is marked check
     },
   };
   const summary = await syncTeamColors('123', { source, persistence: store, now: () => NOW });
-  assert.deepEqual(summary, { looked: 4, colorsSaved: 2, noColor: 2, failed: [] });
+  assert.deepEqual(summary, {
+    looked: 4, colorsSaved: 2, noColor: 2, failed: [],
+    noColorTeams: ['kawasaki_frontale (Kawasaki Frontale)', 'unknown_fc (Nobody FC)'],
+  });
   const byId = Object.fromEntries(store.updates.map((u) => [u.id, u.fields]));
   assert.equal(byId.tsdb_team_134923.presentationColor, '#FB4F14');
   assert.equal(byId.tsdb_team_134923.presentationColorSource, 'thesportsdb:134923');
