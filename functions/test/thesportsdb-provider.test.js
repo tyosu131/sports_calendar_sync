@@ -223,7 +223,8 @@ test('NFL weeks to read follow the calendar from week 1', () => {
   const weekOne = new Date('2026-09-10T00:20:00Z');
   assert.deepEqual(nflRoundsToRead(weekOne, new Date('2026-08-20T00:00:00Z')), [1, 2, 3, 4]);
   assert.deepEqual(nflRoundsToRead(weekOne, new Date('2026-11-01T00:00:00Z')), [7, 8, 9, 10, 11]);
-  assert.deepEqual(nflRoundsToRead(weekOne, new Date('2027-01-05T00:00:00Z')), [17, 18]);
+  assert.deepEqual(nflRoundsToRead(weekOne, new Date('2027-01-05T00:00:00Z')), [16, 17, 18]);
+  assert.deepEqual(nflRoundsToRead(weekOne, new Date('2027-02-01T00:00:00Z')), [17, 18]);
 });
 
 test('each competition is saved as soon as it is read, even if the next one fails', async () => {
