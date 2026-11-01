@@ -110,6 +110,16 @@ class TeamPresentationLogoResolver {
   TeamPresentationLogoResolver(this.teams);
   final List<Team> teams;
 
+  /// Real team color of one side, from the canonical Team. Null when the
+  /// team is unknown, ambiguous, or has no stored color.
+  Color? sideColor(Game game, bool home) {
+    final id = home ? game.homeTeamId : game.awayTeamId;
+    if (id == null) return null;
+    final canonical = teams.where((team) => team.id == id).toList();
+    if (canonical.length != 1) return null;
+    return parseTeamPresentationColor(canonical.single.presentationColor);
+  }
+
   String? side(Game game, bool home) {
     final gameLogo = home ? game.homeTeamLogoUrl : game.awayTeamLogoUrl;
     if (hasPresentationLogo(gameLogo)) return gameLogo;

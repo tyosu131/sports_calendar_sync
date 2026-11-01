@@ -201,6 +201,11 @@ class GameCard extends StatelessWidget {
                         side: CompetitionVsSideKind.home,
                         color: frames.home,
                         child: _TeamSide(
+                          teamColor: GamePresentationScope.color(
+                            context,
+                            game,
+                            true,
+                          ),
                           name: teamDisplayNames.homeName(game),
                           nameColor: competitionVsFrameTextColor(frames.home),
                           logoUrl: resolveGameTeamLogoUrl(
@@ -220,6 +225,11 @@ class GameCard extends StatelessWidget {
                         side: CompetitionVsSideKind.away,
                         color: frames.away,
                         child: _TeamSide(
+                          teamColor: GamePresentationScope.color(
+                            context,
+                            game,
+                            false,
+                          ),
                           name: teamDisplayNames.awayName(game),
                           nameColor: competitionVsFrameTextColor(frames.away),
                           logoUrl: resolveGameTeamLogoUrl(
@@ -288,8 +298,11 @@ class _TeamSide extends StatelessWidget {
     required this.name,
     required this.nameColor,
     required this.logoUrl,
+    this.teamColor,
   });
 
+  /// Real team color for the icon circle. Null keeps the neutral circle.
+  final Color? teamColor;
   final String name;
   final Color nameColor;
   final String? logoUrl;
@@ -301,7 +314,7 @@ class _TeamSide extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _GameTeamLogo(name: name, logoUrl: logoUrl),
+        _GameTeamLogo(name: name, logoUrl: logoUrl, teamColor: teamColor),
         const SizedBox(height: 6),
         Text(
           name,
@@ -319,18 +332,33 @@ class _TeamSide extends StatelessWidget {
 }
 
 class _GameTeamLogo extends StatelessWidget {
-  const _GameTeamLogo({required this.name, required this.logoUrl});
+  const _GameTeamLogo({
+    required this.name,
+    required this.logoUrl,
+    this.teamColor,
+  });
 
   final String name;
   final String? logoUrl;
+  final Color? teamColor;
 
   @override
-  Widget build(BuildContext context) => TeamPresentationBadge(
-    size: 48,
-    displayName: name,
-    logoUrl: logoUrl,
-    backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
-  );
+  Widget build(BuildContext context) {
+    final color = teamColor;
+    return TeamPresentationBadge(
+      size: 48,
+      displayName: name,
+      logoUrl: logoUrl,
+      backgroundColor:
+          color ?? Theme.of(context).colorScheme.surfaceContainerHigh,
+      foregroundColor: color == null
+          ? null
+          : contrastRatio(Colors.white, color) >=
+                contrastRatio(Colors.black, color)
+          ? Colors.white
+          : Colors.black,
+    );
+  }
 }
 
 class _FollowedPlaceChip extends StatelessWidget {

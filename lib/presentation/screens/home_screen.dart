@@ -11,7 +11,6 @@ import '../../domain/policies/home_sport_navigation.dart';
 import '../../domain/policies/team_display_name_policy.dart';
 import '../../domain/policies/team_presentation_policy.dart';
 import '../theme/competition_vs_frame.dart' show contrastRatio;
-import '../theme/presentation_decoration.dart' show teamBrowseCardFill;
 import '../widgets/game_card.dart';
 import '../widgets/game_presentation_scope.dart';
 import '../widgets/sport_sub_nav_bar.dart';
@@ -372,17 +371,16 @@ class _FollowedTeamCard extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final logoUrl = teamPresentationLogo(team);
     final displayName = teamDisplayNames.teamName(team);
-    // The provider / reviewed team color when present. Otherwise a stable
-    // decorative color for the team id, so every card is colored. These
-    // fallback colors are not official kit colors.
-    final fill =
-        parseTeamPresentationColor(team.presentationColor) ??
-        teamBrowseCardFill(team.id);
-    final ink =
-        contrastRatio(Colors.white, fill) >= contrastRatio(Colors.black, fill)
+    // The team's real color (from the data provider) when known. Otherwise
+    // the neutral surface: no invented color.
+    final teamColor = parseTeamPresentationColor(team.presentationColor);
+    final fill = teamColor ?? backgroundColor;
+    final ink = teamColor == null
+        ? null
+        : contrastRatio(Colors.white, teamColor) >=
+              contrastRatio(Colors.black, teamColor)
         ? Colors.white
         : Colors.black;
-    final teamColor = fill;
 
     return SizedBox(
       width: 196,
@@ -397,7 +395,7 @@ class _FollowedTeamCard extends StatelessWidget {
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: teamColor),
+              border: Border.all(color: borderColor),
             ),
             child: Row(
               children: [

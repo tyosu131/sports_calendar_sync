@@ -1,3 +1,4 @@
+
 import 'package:flutter/widgets.dart';
 
 import '../../domain/models/game.dart';
@@ -20,6 +21,11 @@ class GamePresentationScope extends InheritedWidget {
                 TeamPresentationLogoResolver(const []))
             .side(game, home),
       );
+
+  static Color? color(BuildContext context, Game game, bool home) => context
+      .dependOnInheritedWidgetOfExactType<GamePresentationScope>()
+      ?.resolver
+      .sideColor(game, home);
 
   @override
   bool updateShouldNotify(GamePresentationScope oldWidget) =>

@@ -6,8 +6,8 @@ import '../../core/config/app_strings.dart';
 /// Colored side of a match card.
 ///
 /// Home is a rounded panel with a ground bar. Away is a panel whose outer
-/// edge comes to a point, with a chevron mark. Position (left/right) and
-/// these shapes distinguish the sides; the color is an additional signal.
+/// edge comes to a point. Position (left/right) and these shapes distinguish
+/// the sides; the color is an additional signal.
 /// The frame does not draw a letter, crest, or flag.
 class CompetitionVsSide extends StatelessWidget {
   const CompetitionVsSide({
@@ -59,11 +59,7 @@ class CompetitionVsFramePainter extends CustomPainter {
         : _awayPath(size);
     canvas.drawPath(path, fill);
     canvas.drawPath(path, stroke);
-    if (side == CompetitionVsSideKind.home) {
-      _paintGround(canvas, size);
-    } else {
-      _paintChevron(canvas, size);
-    }
+    if (side == CompetitionVsSideKind.home) _paintGround(canvas, size);
   }
 
   void _paintGround(Canvas canvas, Size size) {
@@ -74,24 +70,6 @@ class CompetitionVsFramePainter extends CustomPainter {
         const Radius.circular(2),
       ),
       ground,
-    );
-  }
-
-  void _paintChevron(Canvas canvas, Size size) {
-    final mark = Paint()
-      ..color = competitionVsFrameInk(color)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.5
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-    final x = size.width - 12;
-    final y = size.height / 2;
-    canvas.drawPath(
-      Path()
-        ..moveTo(x - 7, y - 8)
-        ..lineTo(x, y)
-        ..lineTo(x - 7, y + 8),
-      mark,
     );
   }
 
