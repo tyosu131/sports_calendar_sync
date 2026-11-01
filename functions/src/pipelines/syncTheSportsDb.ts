@@ -19,10 +19,18 @@ export const TSDB_COMPETITIONS: readonly TsdbCompetition[] = Object.freeze([
 
 /** NFL regular season weeks. Pre-season (round 500) is skipped; the post-season round number is not known yet. */
 export const NFL_REGULAR_SEASON_ROUNDS = 18;
+/** Weeks read before and after the current one. The free key allows only about a dozen calls per burst. */
+export const NFL_WEEKS_BEFORE = 1;
+export const NFL_WEEKS_AFTER = 3;
 /** Upper bound when probing UFC card numbers (about 60 cards a year). */
 export const UFC_MAX_ROUND = 128;
+/** Upcoming cards read per run. */
+export const UFC_CARDS_PER_RUN = 8;
 /** Cards that started within this window are still refreshed. */
 const UFC_LOOKBACK_MS = 7 * 24 * 60 * 60 * 1000;
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+/** The scheduled function times out at 540 s; stop waiting well before that. */
+export const TSDB_RUN_BUDGET_MS = 480_000;
 export const TSDB_WRITE_CHUNK_SIZE = 400;
 
 /** NFL seasons are named by the year they start; January–February belong to the previous year. */
@@ -35,6 +43,20 @@ export function nflSeason(now: Date): string {
 export function ufcSeasons(now: Date): string[] {
   const year = now.getUTCFullYear();
   return now.getUTCMonth() === 11 ? [String(year), String(year + 1)] : [String(year)];
+}
+
+/**
+ * Weeks to read now. Week 1 starts on [weekOneStart]; later weeks follow every
+ * 7 days. Before the season, the first weeks are read.
+ */
+export function nflRoundsToRead(weekOneStart: Date, now: Date): number[] {
+  const current = Math.min(NFL_REGULAR_SEASON_ROUNDS,
+    Math.max(1, Math.floor((now.getTime() - weekOneStart.getTime()) / WEEK_MS) + 1));
+  const first = Math.max(1, current - NFL_WEEKS_BEFORE);
+  const last = Math.min(NFL_REGULAR_SEASON_ROUNDS, current + NFL_WEEKS_AFTER);
+  const rounds: number[] = [];
+  for (let round = first; round <= last; round += 1) rounds.push(round);
+  return rounds;
 }
 
 export type TsdbSkipReason = TsdbSkip["reason"] | "filtered_event";
@@ -71,17 +93,18 @@ function firestorePersistence(db: admin.firestore.Firestore): TsdbPersistence {
 type Write = { kind: "game"; id: string; data: GameDoc } | { kind: "team"; id: string; data: TsdbTeamDoc };
 
 /**
- * UFC card numbers run in date order within a season. Finds the first card
- * not older than [from] with an exponential probe and a binary search, then
- * reads forward until an empty number. About 20 requests a day instead of
- * one per card.
+ * UFC card numbers run in date order within a season. A binary search finds the
+ * first card not older than [from] (an empty number counts as "not older"),
+ * then up to [limit] cards are read forward until an empty number.
+ * About 7 + [limit] requests instead of one per card.
  */
 export async function upcomingEventRounds(
   source: TsdbEventSource,
   leagueId: string,
   season: string,
   from: Date,
-  maxRound = UFC_MAX_ROUND
+  maxRound = UFC_MAX_ROUND,
+  limit = UFC_CARDS_PER_RUN
 ): Promise<TsdbEvent[]> {
   const cache = new Map<number, TsdbEvent[]>();
   const read = async (round: number) => {
@@ -94,17 +117,8 @@ export async function upcomingEventRounds(
     return time !== undefined && time < from.getTime();
   };
 
-  // Probe 1, 2, 4, 8 … until a number is empty or not older than [from].
   let low = 0; // highest number known to be older than [from]
-  let high = 1;
-  while (high <= maxRound) {
-    const events = await read(high);
-    if (events.length === 0 || !startsBefore(events)) break;
-    low = high;
-    high *= 2;
-  }
-  high = Math.min(high, maxRound + 1);
-  // Binary search in (low, high) for the first number not older than [from].
+  let high = maxRound + 1; // lowest number known to be not older (or empty)
   while (high - low > 1) {
     const mid = Math.floor((low + high) / 2);
     const events = await read(mid);
@@ -112,7 +126,7 @@ export async function upcomingEventRounds(
     else high = mid;
   }
   const result: TsdbEvent[] = [];
-  for (let round = low + 1; round <= maxRound; round += 1) {
+  for (let round = low + 1; round <= maxRound && round <= low + limit; round += 1) {
     const events = await read(round);
     if (events.length === 0) break;
     result.push(...events);
@@ -125,39 +139,84 @@ export interface SyncTsdbOptions {
   persistence?: TsdbPersistence;
   now?: () => Date;
   competitions?: readonly TsdbCompetition[];
+  /** Milliseconds this run may spend waiting on the provider. */
+  budgetMs?: number;
 }
 
-/** Fetches NFL weeks and upcoming UFC cards, then upserts games and teams. Never deletes. */
+async function persist(persistence: TsdbPersistence, writes: Map<string, Write>): Promise<void> {
+  const ordered = [...writes.values()].sort((a, b) => `${a.kind}:${a.id}`.localeCompare(`${b.kind}:${b.id}`));
+  for (let offset = 0; offset < ordered.length; offset += TSDB_WRITE_CHUNK_SIZE) {
+    const batch = persistence.newBatch();
+    for (const write of ordered.slice(offset, offset + TSDB_WRITE_CHUNK_SIZE)) {
+      const ref = write.kind === "game" ? persistence.gameRef(write.id) : persistence.teamRef(write.id);
+      batch.set(ref, write.data, { merge: true });
+    }
+    await batch.commit();
+  }
+}
+
+/**
+ * Fetches the current NFL weeks and upcoming UFC cards, then upserts games and
+ * teams. Each competition is saved as soon as it is read, so a throttled or
+ * timed-out later competition cannot discard it. Never deletes.
+ */
 export async function syncTheSportsDb(apiKey: string, options: SyncTsdbOptions = {}): Promise<TsdbSyncSummary> {
   let requests = 0;
-  const base = options.source ?? new TheSportsDbClient(apiKey);
+  const startedAt = Date.now();
+  const budgetMs = options.budgetMs ?? TSDB_RUN_BUDGET_MS;
+  let base = options.source;
+  if (!base) {
+    const client = new TheSportsDbClient(apiKey);
+    client.setDeadline(startedAt + budgetMs);
+    base = client;
+  }
+  const inner = base;
   const source: TsdbEventSource = {
     eventsRound: async (league, round, season) => {
       requests += 1;
-      return base.eventsRound(league, round, season);
+      return inner.eventsRound(league, round, season);
     },
   };
   const persistence = options.persistence ?? firestorePersistence(admin.firestore());
   const now = (options.now ?? (() => new Date()))();
-  const writes = new Map<string, Write>();
   const failedRounds: string[] = [];
   const skipCounts: Partial<Record<TsdbSkipReason, number>> = {};
   const skip = (reason: TsdbSkipReason) => { skipCounts[reason] = (skipCounts[reason] ?? 0) + 1; };
   let fetched = 0;
+  let games = 0;
+  let teams = 0;
 
   for (const competition of options.competitions ?? TSDB_COMPETITIONS) {
+    const writes = new Map<string, Write>();
     const batches: { season: string; events: TsdbEvent[] }[] = [];
+    const fail = (label: string, error: unknown) => {
+      failedRounds.push(label);
+      console.error("TheSportsDB read failed", { label, error: error instanceof Error ? error.message : String(error) });
+    };
+
     if (competition.kind === "teams") {
       const season = nflSeason(now);
-      for (let round = 1; round <= NFL_REGULAR_SEASON_ROUNDS; round += 1) {
-        // A throttled week must not discard the weeks already read.
-        try {
-          batches.push({ season, events: await source.eventsRound(competition.providerLeagueId, round, season) });
-        } catch (error) {
-          failedRounds.push(`${competition.competitionKey}:${season}:${round}`);
-          console.error("TheSportsDB round failed", { competition: competition.competitionKey, season, round,
-            error: error instanceof Error ? error.message : String(error) });
+      try {
+        const first = await source.eventsRound(competition.providerLeagueId, 1, season);
+        batches.push({ season, events: first });
+        const startTimes = first.map((event) => tsdbUtc(event.strTimestamp)?.getTime())
+          .filter((value): value is number => value !== undefined);
+        if (startTimes.length > 0) {
+          const weekOne = new Date(Math.min(...startTimes));
+          for (const round of nflRoundsToRead(weekOne, now)) {
+            if (round === 1) continue;
+            // A throttled week must not discard the weeks already read.
+            try {
+              batches.push({ season, events: await source.eventsRound(competition.providerLeagueId, round, season) });
+            } catch (error) {
+              fail(`${competition.competitionKey}:${season}:${round}`, error);
+            }
+          }
+        } else {
+          fail(`${competition.competitionKey}:${season}:no-week-one`, new Error("week 1 is empty"));
         }
+      } catch (error) {
+        fail(`${competition.competitionKey}:${season}:1`, error);
       }
     } else {
       for (const season of ufcSeasons(now)) {
@@ -165,9 +224,7 @@ export async function syncTheSportsDb(apiKey: string, options: SyncTsdbOptions =
           batches.push({ season, events: await upcomingEventRounds(source, competition.providerLeagueId, season,
             new Date(now.getTime() - UFC_LOOKBACK_MS)) });
         } catch (error) {
-          failedRounds.push(`${competition.competitionKey}:${season}`);
-          console.error("TheSportsDB UFC season failed", { season,
-            error: error instanceof Error ? error.message : String(error) });
+          fail(`${competition.competitionKey}:${season}`, error);
         }
       }
       const followId = tsdbLeagueFollowId(competition.providerLeagueId);
@@ -199,24 +256,18 @@ export async function syncTheSportsDb(apiKey: string, options: SyncTsdbOptions =
         }
       }
     }
-  }
-
-  const ordered = [...writes.values()].sort((a, b) => `${a.kind}:${a.id}`.localeCompare(`${b.kind}:${b.id}`));
-  for (let offset = 0; offset < ordered.length; offset += TSDB_WRITE_CHUNK_SIZE) {
-    const batch = persistence.newBatch();
-    for (const write of ordered.slice(offset, offset + TSDB_WRITE_CHUNK_SIZE)) {
-      const ref = write.kind === "game" ? persistence.gameRef(write.id) : persistence.teamRef(write.id);
-      batch.set(ref, write.data, { merge: true });
+    await persist(persistence, writes);
+    for (const write of writes.values()) {
+      if (write.kind === "game") games += 1; else teams += 1;
     }
-    await batch.commit();
   }
 
   const summary: TsdbSyncSummary = {
     failedRounds,
     requests,
     eventsFetched: fetched,
-    gamesUpserted: ordered.filter((write) => write.kind === "game").length,
-    teamsUpserted: ordered.filter((write) => write.kind === "team").length,
+    gamesUpserted: games,
+    teamsUpserted: teams,
     skipCounts,
   };
   console.info("TheSportsDB sync complete", summary);

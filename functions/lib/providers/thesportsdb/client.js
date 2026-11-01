@@ -30,6 +30,10 @@ const BASE_URL = "https://www.thesportsdb.com/api/v1/json";
  * starting at [retryDelayMs].
  */
 class TheSportsDbClient {
+    /** A retry wait that would pass this epoch-ms deadline is not taken; the error is thrown instead. */
+    setDeadline(epochMs) {
+        this.deadlineMs = epochMs;
+    }
     constructor(apiKey, http = axios_1.default, minIntervalMs = 5000, retryDelayMs = 30000, sleep = (ms) => new Promise((r) => setTimeout(r, ms)), timeoutMs = 10000, maxRetries = 3, log = (message, detail) => console.warn(message, detail)) {
         this.apiKey = apiKey;
         this.http = http;
@@ -40,6 +44,7 @@ class TheSportsDbClient {
         this.maxRetries = maxRetries;
         this.log = log;
         this.lastRequestAt = 0;
+        this.deadlineMs = Number.POSITIVE_INFINITY;
         if (!apiKey)
             throw new Error("TheSportsDB API key is required");
     }
@@ -56,6 +61,8 @@ class TheSportsDbClient {
                     attempt >= this.maxRetries)
                     throw error;
                 const delay = Math.max((error.retryAfterSeconds ?? 0) * 1000, this.retryDelayMs * (attempt + 1));
+                if (Date.now() + delay > this.deadlineMs)
+                    throw error;
                 this.log("TheSportsDB throttled; waiting before retry", {
                     kind: error.kind, status: error.status, attempt: attempt + 1, waitMs: delay,
                     retryAfterSeconds: error.retryAfterSeconds,

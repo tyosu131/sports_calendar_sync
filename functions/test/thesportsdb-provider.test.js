@@ -8,7 +8,8 @@ const {
   adaptTsdbEventToGameDoc, tsdbVenueOffsetMinutes, tsdbUtc, TsdbSkip, englishSearchKeywords,
 } = require('../lib/adapters/theSportsDbAdapter');
 const {
-  syncTheSportsDb, upcomingEventRounds, nflSeason, ufcSeasons, TSDB_COMPETITIONS, NFL_REGULAR_SEASON_ROUNDS,
+  syncTheSportsDb, upcomingEventRounds, nflSeason, ufcSeasons, nflRoundsToRead, TSDB_COMPETITIONS,
+  UFC_CARDS_PER_RUN,
 } = require('../lib/pipelines/syncTheSportsDb');
 const { presentCalendarGame } = require('../lib/calendar/eventPresentation');
 
@@ -116,8 +117,9 @@ test('upcoming UFC cards are found without reading every past card', async () =>
   const events = await upcomingEventRounds(source, '4443', '2026', from);
   const firstExpected = dates.findIndex((d) => new Date(`${d}T22:00:00Z`) >= from) + 1;
   assert.equal(events[0].intRound, String(firstExpected));
-  assert.equal(events.at(-1).intRound, '60');
-  assert.ok(source.calls.length < 40, `used ${source.calls.length} requests`);
+  assert.equal(events.length, UFC_CARDS_PER_RUN);
+  assert.equal(events.at(-1).intRound, String(firstExpected + UFC_CARDS_PER_RUN - 1));
+  assert.ok(source.calls.length <= 7 + UFC_CARDS_PER_RUN + 1, `used ${source.calls.length} requests`);
 });
 
 test('upcoming UFC cards: empty season and all-future season', async () => {
@@ -149,7 +151,7 @@ test('sync upserts games and provider-id teams, filters side shows, never delete
     eventsRound: async (league, round) => {
       if (league === '4391') {
         nflRounds.push(round);
-        return round === 1 ? [event('nfl', { strStatus: 'NS', intHomeScore: null, intAwayScore: null })] : [];
+        return round === 1 ? [event('nfl', { strStatus: 'NS', intHomeScore: null, intAwayScore: null, strTimestamp: '2026-11-04T23:00:00' })] : [];
       }
       if (round === 1) return [event('ufcVegas', { strTimestamp: '2026-11-07T22:00:00' })];
       if (round === 2) return [event('ufcVegas', { idEvent: 'dwcs', strEvent: 'Dana Whites Contender Series season 10 Week 3', strTimestamp: '2026-11-10T00:00:00' })];
@@ -157,7 +159,8 @@ test('sync upserts games and provider-id teams, filters side shows, never delete
     },
   };
   const summary = await syncTheSportsDb('123', { source, persistence, now: () => NOW });
-  assert.deepEqual(nflRounds, Array.from({ length: NFL_REGULAR_SEASON_ROUNDS }, (_, i) => i + 1));
+  // Week 1 is read first; the rest is the window around the current week (before week 1 starts: weeks 2-4).
+  assert.deepEqual(nflRounds, [1, 2, 3, 4]);
   const paths = writes.map((w) => w.path).sort();
   assert.deepEqual(paths, [
     'games/tsdb_2389036', 'games/tsdb_2475337',
@@ -207,11 +210,48 @@ test('a throttled NFL week is reported but the other weeks are still saved', asy
   const source = {
     eventsRound: async (league, round) => {
       if (league === '4391' && round === 2) throw new TsdbApiError('rate_limited', 'limit', 429);
-      if (league === '4391' && round === 1) return [event('nfl', { strStatus: 'NS', intHomeScore: null, intAwayScore: null })];
+      if (league === '4391' && round === 1) return [event('nfl', { strStatus: 'NS', intHomeScore: null, intAwayScore: null, strTimestamp: '2026-11-04T23:00:00' })];
       return [];
     },
   };
   const summary = await syncTheSportsDb('123', { source, persistence, now: () => NOW });
   assert.deepEqual(summary.failedRounds, ['americanfootball_nfl:2026:2']);
   assert.ok(writes.includes('games/tsdb_2475337'));
+});
+
+test('NFL weeks to read follow the calendar from week 1', () => {
+  const weekOne = new Date('2026-09-10T00:20:00Z');
+  assert.deepEqual(nflRoundsToRead(weekOne, new Date('2026-08-20T00:00:00Z')), [1, 2, 3, 4]);
+  assert.deepEqual(nflRoundsToRead(weekOne, new Date('2026-11-01T00:00:00Z')), [7, 8, 9, 10, 11]);
+  assert.deepEqual(nflRoundsToRead(weekOne, new Date('2027-01-05T00:00:00Z')), [17, 18]);
+});
+
+test('each competition is saved as soon as it is read, even if the next one fails', async () => {
+  const committed = [];
+  const persistence = {
+    gameRef: (id) => ({ path: `games/${id}` }),
+    teamRef: (id) => ({ path: `teams/${id}` }),
+    newBatch: () => ({ set: () => {}, commit: async () => { committed.push(true); } }),
+  };
+  const source = {
+    eventsRound: async (league, round) => {
+      if (league === '4391') return round === 1
+        ? [event('nfl', { strStatus: 'NS', intHomeScore: null, intAwayScore: null, strTimestamp: '2026-11-04T23:00:00' })] : [];
+      throw new TsdbApiError('rate_limited', 'limit', 429);
+    },
+  };
+  const summary = await syncTheSportsDb('123', { source, persistence, now: () => NOW });
+  assert.equal(committed.length, 2); // NFL batch, then the UFC follow item.
+  assert.deepEqual(summary.failedRounds, ['mma_ufc:2026']);
+  assert.equal(summary.gamesUpserted, 1);
+});
+
+test('a retry wait that would pass the deadline is not taken', async () => {
+  const sleeps = [];
+  const client = new TheSportsDbClient('123', {
+    get: async () => { throw Object.assign(new Error('429'), { response: { status: 429, headers: { 'retry-after': '120' } } }); },
+  }, 0, 10, async (ms) => { sleeps.push(ms); }, 1000, 3, () => {});
+  client.setDeadline(Date.now() + 60_000);
+  await assert.rejects(client.eventsRound('4391', 1, '2026'), (error) => error.kind === 'rate_limited');
+  assert.deepEqual(sleeps, []);
 });

@@ -60,6 +60,12 @@ const BASE_URL = "https://www.thesportsdb.com/api/v1/json";
  */
 export class TheSportsDbClient implements TsdbEventSource {
   private lastRequestAt = 0;
+  private deadlineMs = Number.POSITIVE_INFINITY;
+
+  /** A retry wait that would pass this epoch-ms deadline is not taken; the error is thrown instead. */
+  setDeadline(epochMs: number): void {
+    this.deadlineMs = epochMs;
+  }
 
   constructor(
     private readonly apiKey: string,
@@ -85,6 +91,7 @@ export class TheSportsDbClient implements TsdbEventSource {
             (error.kind !== "invalid_response" && error.kind !== "rate_limited") ||
             attempt >= this.maxRetries) throw error;
         const delay = Math.max((error.retryAfterSeconds ?? 0) * 1000, this.retryDelayMs * (attempt + 1));
+        if (Date.now() + delay > this.deadlineMs) throw error;
         this.log("TheSportsDB throttled; waiting before retry", {
           kind: error.kind, status: error.status, attempt: attempt + 1, waitMs: delay,
           retryAfterSeconds: error.retryAfterSeconds,
