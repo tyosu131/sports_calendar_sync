@@ -32,6 +32,8 @@ const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 /** The scheduled function times out at 540 s; stop waiting well before that. */
 export const TSDB_RUN_BUDGET_MS = 480_000;
 export const TSDB_WRITE_CHUNK_SIZE = 400;
+/** Team color lookups per run. Each is one more provider call, so colors fill in over several runs. */
+export const TSDB_COLOR_LOOKUPS_PER_RUN = 8;
 
 /** NFL seasons are named by the year they start; January–February belong to the previous year. */
 export function nflSeason(now: Date): string {
@@ -68,6 +70,8 @@ export interface TsdbSyncSummary {
   eventsFetched: number;
   gamesUpserted: number;
   teamsUpserted: number;
+  /** Team colors saved in this run. */
+  colorsSaved: number;
   skipCounts: Partial<Record<TsdbSkipReason, number>>;
 }
 
@@ -80,6 +84,8 @@ export interface TsdbPersistence {
   gameRef(id: string): admin.firestore.DocumentReference;
   teamRef(id: string): admin.firestore.DocumentReference;
   newBatch(): WriteBatchLike;
+  /** Subset of [teamIds] whose stored team has no presentationColor. */
+  teamsWithoutColor(teamIds: string[]): Promise<string[]>;
 }
 
 function firestorePersistence(db: admin.firestore.Firestore): TsdbPersistence {
@@ -87,10 +93,16 @@ function firestorePersistence(db: admin.firestore.Firestore): TsdbPersistence {
     gameRef: (id) => db.collection("games").doc(id),
     teamRef: (id) => db.collection("teams").doc(id),
     newBatch: () => db.batch(),
+    teamsWithoutColor: async (teamIds) => {
+      const snapshots = await Promise.all(teamIds.map((id) => db.collection("teams").doc(id).get()));
+      return snapshots.filter((snapshot) => !snapshot.get("presentationColor")).map((snapshot) => snapshot.id);
+    },
   };
 }
 
-type Write = { kind: "game"; id: string; data: GameDoc } | { kind: "team"; id: string; data: TsdbTeamDoc };
+type Write =
+  | { kind: "game"; id: string; data: GameDoc }
+  | { kind: "team"; id: string; data: TsdbTeamDoc | { presentationColor: string } };
 
 /**
  * UFC card numbers run in date order within a season. A binary search finds the
@@ -185,6 +197,8 @@ export async function syncTheSportsDb(apiKey: string, options: SyncTsdbOptions =
   let fetched = 0;
   let games = 0;
   let teams = 0;
+  let colors = 0;
+  const colorCandidates: string[] = [];
 
   for (const competition of options.competitions ?? TSDB_COMPETITIONS) {
     const writes = new Map<string, Write>();
@@ -259,6 +273,31 @@ export async function syncTheSportsDb(apiKey: string, options: SyncTsdbOptions =
     await persist(persistence, writes);
     for (const write of writes.values()) {
       if (write.kind === "game") games += 1; else teams += 1;
+      if (competition.kind === "teams" && write.kind === "team") colorCandidates.push(write.id);
+    }
+
+  }
+
+  // Team colors come from the provider, a few per run, for teams that have none
+  // yet. Last, so a short time budget costs colors before it costs games.
+  if (colorCandidates.length > 0 && inner.lookupTeamColor) {
+    try {
+      const missing = (await persistence.teamsWithoutColor(colorCandidates)).slice(0, TSDB_COLOR_LOOKUPS_PER_RUN);
+      const colorWrites = new Map<string, Write>();
+      for (const teamId of missing) {
+        requests += 1;
+        const found = await inner.lookupTeamColor(teamId.replace(/^tsdb_team_/, ""));
+        if (found?.primaryColor) {
+          colorWrites.set(`team:${teamId}`, { kind: "team", id: teamId, data: { presentationColor: found.primaryColor } });
+          colors += 1;
+        }
+        // Keep what was read if a later lookup is throttled.
+        await persist(persistence, colorWrites);
+        colorWrites.clear();
+      }
+    } catch (error) {
+      failedRounds.push("colors");
+      console.error("TheSportsDB read failed", { label: "colors", error: error instanceof Error ? error.message : String(error) });
     }
   }
 
@@ -268,6 +307,7 @@ export async function syncTheSportsDb(apiKey: string, options: SyncTsdbOptions =
     eventsFetched: fetched,
     gamesUpserted: games,
     teamsUpserted: teams,
+    colorsSaved: colors,
     skipCounts,
   };
   console.info("TheSportsDB sync complete", summary);

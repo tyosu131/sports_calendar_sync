@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TheSportsDbClient = exports.TsdbApiError = void 0;
 exports.parseEvents = parseEvents;
+exports.parseTeamColor = parseTeamColor;
 const axios_1 = __importDefault(require("axios"));
 class TsdbApiError extends Error {
     constructor(kind, message, status, 
@@ -50,10 +51,15 @@ class TheSportsDbClient {
     }
     async eventsRound(leagueId, round, season) {
         const query = `id=${encodeURIComponent(leagueId)}&r=${encodeURIComponent(round)}&s=${encodeURIComponent(season)}`;
-        const path = `/eventsround.php?${query}`;
+        return this.getWithRetry(`/eventsround.php?${query}`, parseEvents);
+    }
+    async lookupTeamColor(teamId) {
+        return this.getWithRetry(`/lookupteam.php?id=${encodeURIComponent(teamId)}`, parseTeamColor);
+    }
+    async getWithRetry(path, parse) {
         for (let attempt = 0;; attempt += 1) {
             try {
-                return parseEvents(await this.request(path));
+                return parse(await this.request(path));
             }
             catch (error) {
                 if (!(error instanceof TsdbApiError) ||
@@ -145,5 +151,27 @@ function parseEvents(body) {
         }
         return event;
     });
+}
+/**
+ * `{"teams":[{"idTeam":"134923","strColour1":"#FB4F14",...}]}`. A missing team
+ * (`teams: null`) or a color that is not `#RRGGBB` gives no color.
+ */
+function parseTeamColor(body) {
+    if (!body || typeof body !== "object" || !("teams" in body)) {
+        throw new TsdbApiError("invalid_response", "TheSportsDB response has no teams field");
+    }
+    const teams = body.teams;
+    if (teams === null)
+        return undefined;
+    if (!Array.isArray(teams))
+        throw new TsdbApiError("invalid_response", "TheSportsDB teams is not a list");
+    const team = teams[0];
+    if (!team || typeof team.idTeam !== "string")
+        return undefined;
+    const color = team.strColour1;
+    return {
+        idTeam: team.idTeam,
+        ...(typeof color === "string" && /^#[0-9a-fA-F]{6}$/.test(color.trim()) ? { primaryColor: color.trim().toUpperCase() } : {}),
+    };
 }
 //# sourceMappingURL=client.js.map

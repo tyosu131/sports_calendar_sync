@@ -136,7 +136,9 @@ class _LeagueTeamCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final fullName = teamDisplayNames.teamName(team);
-    final accent = teamBrowseCardFill(team.id);
+    final accent =
+        parseTeamPresentationColor(team.presentationColor) ??
+        teamBrowseCardFill(team.id);
     final followLabel = isFollowing ? tr('フォロー中') : tr('フォロー');
     final matchLine = !gamesSettled
         ? null

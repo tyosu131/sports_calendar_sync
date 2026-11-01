@@ -8,7 +8,8 @@ Client only. No deploy.
 - 「名前の言語」 = English now switches the whole UI, not only names: screen text goes through `tr()` / `trArgs()` (`lib/core/config/app_strings.dart`, Japanese is the source text, English is the dictionary). A missing entry stays Japanese; `test/ui_language_test.dart` fails if any `tr()` text has no English entry. Dates, weekday headers, status labels, league titles and the Material locale follow the setting.
 - Foreign league titles show in English even in the automatic mode (Japanese domestic ones stay Japanese).
 - Home followed-team cards use the team's `presentationColor` when present, otherwise a stable decorative color per team id (not an official kit color). Nothing writes `presentationColor` yet.
-- Not reproduced / not fixed: Calendar-sync sheet asking for FaceTime on iPhone; a stray 「＞」 on the followed-team row. Both need a screenshot.
+- NFL team colors come from TheSportsDB `lookupteam` (`strColour1`, `#RRGGBB`; owner-run check: Bengals `#FB4F14`). The sync looks up up to 8 teams without a color per run (last in the run) and saves `presentationColor` on `teams/tsdb_team_<id>`, so all 32 teams fill in over a few runs. Home followed cards and league team cards prefer it over the decorative color.
+- Not reproduced / not fixed: iPhone asks for FaceTime (owner wording; possibly Face ID from Google's sign-in page) after tapping Google Calendar; a stray 「＞」 on the followed-team row.
 
 ## NFL / UFC scaffold, name language, away airplane, reference clock (2026-10-31)
 
