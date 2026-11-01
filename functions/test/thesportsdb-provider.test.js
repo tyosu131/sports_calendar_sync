@@ -177,3 +177,41 @@ test('english search keywords cover phrase and word prefixes', () => {
   const keywords = englishSearchKeywords('Kansas City Chiefs');
   for (const value of ['k', 'kansas city chiefs', 'chi', 'chiefs', 'city']) assert.ok(keywords.includes(value), value);
 });
+
+test('429 waits for Retry-After, then succeeds; gives up after the retry limit', async () => {
+  const throttled = () => Object.assign(new Error('429'), { response: { status: 429, headers: { 'retry-after': '45' } } });
+  const queue = [throttled, () => ({ data: JSON.stringify({ events: [fixtures.nfl] }) })];
+  const sleeps = [];
+  const logs = [];
+  const client = new TheSportsDbClient('123', {
+    get: async () => { const next = queue.shift()(); if (next instanceof Error) throw next; return next; },
+  }, 0, 10, async (ms) => { sleeps.push(ms); }, 1000, 3, (message, detail) => logs.push({ message, detail }));
+  assert.equal((await client.eventsRound('4391', 1, '2026')).length, 1);
+  assert.deepEqual(sleeps, [45_000]);
+  assert.equal(logs[0].detail.retryAfterSeconds, 45);
+
+  let calls = 0;
+  const always = new TheSportsDbClient('123', { get: async () => { calls += 1; throw throttled(); } },
+    0, 10, async () => {}, 1000, 2, () => {});
+  await assert.rejects(always.eventsRound('4391', 1, '2026'), (error) => error.kind === 'rate_limited');
+  assert.equal(calls, 3);
+});
+
+test('a throttled NFL week is reported but the other weeks are still saved', async () => {
+  const writes = [];
+  const persistence = {
+    gameRef: (id) => ({ path: `games/${id}` }),
+    teamRef: (id) => ({ path: `teams/${id}` }),
+    newBatch: () => ({ set: (ref) => writes.push(ref.path), commit: async () => {} }),
+  };
+  const source = {
+    eventsRound: async (league, round) => {
+      if (league === '4391' && round === 2) throw new TsdbApiError('rate_limited', 'limit', 429);
+      if (league === '4391' && round === 1) return [event('nfl', { strStatus: 'NS', intHomeScore: null, intAwayScore: null })];
+      return [];
+    },
+  };
+  const summary = await syncTheSportsDb('123', { source, persistence, now: () => NOW });
+  assert.deepEqual(summary.failedRounds, ['americanfootball_nfl:2026:2']);
+  assert.ok(writes.includes('games/tsdb_2475337'));
+});

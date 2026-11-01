@@ -7,10 +7,13 @@ exports.TheSportsDbClient = exports.TsdbApiError = void 0;
 exports.parseEvents = parseEvents;
 const axios_1 = __importDefault(require("axios"));
 class TsdbApiError extends Error {
-    constructor(kind, message, status) {
+    constructor(kind, message, status, 
+    /** Seconds the provider asked us to wait (Retry-After), when given. */
+    retryAfterSeconds) {
         super(message);
         this.kind = kind;
         this.status = status;
+        this.retryAfterSeconds = retryAfterSeconds;
         this.name = "TsdbApiError";
     }
 }
@@ -21,17 +24,21 @@ const BASE_URL = "https://www.thesportsdb.com/api/v1/json";
  * season list stops at 15 events and the day list at 3, while one NFL week
  * (16 games) or one UFC card comes back whole from `eventsround`.
  *
- * Requests are spaced by [minIntervalMs]. A non-JSON body (seen when calls
- * come too fast) is retried once after [retryDelayMs].
+ * Requests are spaced by [minIntervalMs]. A rate limit (429) or a non-JSON
+ * body (seen when calls come too fast) is retried up to [maxRetries] times,
+ * waiting the provider's Retry-After when given, otherwise a growing delay
+ * starting at [retryDelayMs].
  */
 class TheSportsDbClient {
-    constructor(apiKey, http = axios_1.default, minIntervalMs = 3000, retryDelayMs = 20000, sleep = (ms) => new Promise((r) => setTimeout(r, ms)), timeoutMs = 10000) {
+    constructor(apiKey, http = axios_1.default, minIntervalMs = 5000, retryDelayMs = 30000, sleep = (ms) => new Promise((r) => setTimeout(r, ms)), timeoutMs = 10000, maxRetries = 3, log = (message, detail) => console.warn(message, detail)) {
         this.apiKey = apiKey;
         this.http = http;
         this.minIntervalMs = minIntervalMs;
         this.retryDelayMs = retryDelayMs;
         this.sleep = sleep;
         this.timeoutMs = timeoutMs;
+        this.maxRetries = maxRetries;
+        this.log = log;
         this.lastRequestAt = 0;
         if (!apiKey)
             throw new Error("TheSportsDB API key is required");
@@ -39,15 +46,22 @@ class TheSportsDbClient {
     async eventsRound(leagueId, round, season) {
         const query = `id=${encodeURIComponent(leagueId)}&r=${encodeURIComponent(round)}&s=${encodeURIComponent(season)}`;
         const path = `/eventsround.php?${query}`;
-        try {
-            return parseEvents(await this.request(path));
-        }
-        catch (error) {
-            if (!(error instanceof TsdbApiError) ||
-                (error.kind !== "invalid_response" && error.kind !== "rate_limited"))
-                throw error;
-            await this.sleep(this.retryDelayMs);
-            return parseEvents(await this.request(path));
+        for (let attempt = 0;; attempt += 1) {
+            try {
+                return parseEvents(await this.request(path));
+            }
+            catch (error) {
+                if (!(error instanceof TsdbApiError) ||
+                    (error.kind !== "invalid_response" && error.kind !== "rate_limited") ||
+                    attempt >= this.maxRetries)
+                    throw error;
+                const delay = Math.max((error.retryAfterSeconds ?? 0) * 1000, this.retryDelayMs * (attempt + 1));
+                this.log("TheSportsDB throttled; waiting before retry", {
+                    kind: error.kind, status: error.status, attempt: attempt + 1, waitMs: delay,
+                    retryAfterSeconds: error.retryAfterSeconds,
+                });
+                await this.sleep(delay);
+            }
         }
     }
     async request(path) {
@@ -66,8 +80,11 @@ class TheSportsDbClient {
         catch (error) {
             const candidate = error;
             const status = candidate.response?.status;
-            if (status === 429)
-                throw new TsdbApiError("rate_limited", "TheSportsDB rate limit exceeded", 429);
+            if (status === 429) {
+                const header = candidate.response?.headers?.["retry-after"];
+                const seconds = Number(Array.isArray(header) ? header[0] : header);
+                throw new TsdbApiError("rate_limited", "TheSportsDB rate limit exceeded", 429, Number.isFinite(seconds) && seconds > 0 && seconds <= 300 ? seconds : undefined);
+            }
             if (candidate.code === "ECONNABORTED" || candidate.code === "ETIMEDOUT") {
                 throw new TsdbApiError("timeout", "TheSportsDB request timed out");
             }

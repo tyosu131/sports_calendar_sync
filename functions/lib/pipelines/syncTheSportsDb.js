@@ -135,6 +135,7 @@ async function syncTheSportsDb(apiKey, options = {}) {
     const persistence = options.persistence ?? firestorePersistence(admin.firestore());
     const now = (options.now ?? (() => new Date()))();
     const writes = new Map();
+    const failedRounds = [];
     const skipCounts = {};
     const skip = (reason) => { skipCounts[reason] = (skipCounts[reason] ?? 0) + 1; };
     let fetched = 0;
@@ -143,12 +144,27 @@ async function syncTheSportsDb(apiKey, options = {}) {
         if (competition.kind === "teams") {
             const season = nflSeason(now);
             for (let round = 1; round <= exports.NFL_REGULAR_SEASON_ROUNDS; round += 1) {
-                batches.push({ season, events: await source.eventsRound(competition.providerLeagueId, round, season) });
+                // A throttled week must not discard the weeks already read.
+                try {
+                    batches.push({ season, events: await source.eventsRound(competition.providerLeagueId, round, season) });
+                }
+                catch (error) {
+                    failedRounds.push(`${competition.competitionKey}:${season}:${round}`);
+                    console.error("TheSportsDB round failed", { competition: competition.competitionKey, season, round,
+                        error: error instanceof Error ? error.message : String(error) });
+                }
             }
         }
         else {
             for (const season of ufcSeasons(now)) {
-                batches.push({ season, events: await upcomingEventRounds(source, competition.providerLeagueId, season, new Date(now.getTime() - UFC_LOOKBACK_MS)) });
+                try {
+                    batches.push({ season, events: await upcomingEventRounds(source, competition.providerLeagueId, season, new Date(now.getTime() - UFC_LOOKBACK_MS)) });
+                }
+                catch (error) {
+                    failedRounds.push(`${competition.competitionKey}:${season}`);
+                    console.error("TheSportsDB UFC season failed", { season,
+                        error: error instanceof Error ? error.message : String(error) });
+                }
             }
             const followId = (0, theSportsDbAdapter_1.tsdbLeagueFollowId)(competition.providerLeagueId);
             writes.set(`team:${followId}`, { kind: "team", id: followId,
@@ -196,6 +212,7 @@ async function syncTheSportsDb(apiKey, options = {}) {
         await batch.commit();
     }
     const summary = {
+        failedRounds,
         requests,
         eventsFetched: fetched,
         gamesUpserted: ordered.filter((write) => write.kind === "game").length,
