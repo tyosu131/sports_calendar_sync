@@ -4,6 +4,7 @@ import '../../domain/models/team.dart';
 import '../../domain/policies/team_display_name_policy.dart';
 import '../../domain/policies/team_presentation_policy.dart';
 import 'team_presentation_badge.dart';
+import '../../core/config/app_strings.dart';
 
 /// A list tile for displaying a team with follow/unfollow action.
 class TeamListTile extends StatelessWidget {
@@ -53,7 +54,7 @@ class TeamListTile extends StatelessWidget {
             isFollowing ? Icons.favorite : Icons.favorite_border,
             color: isFollowing ? theme.colorScheme.primary : null,
           ),
-          tooltip: isFollowing ? 'フォロー解除' : 'フォローする',
+          tooltip: isFollowing ? tr('フォロー解除') : tr('フォローする'),
           onPressed: onFollowToggle,
         ),
       ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../core/utils/date_time_utils.dart';
 import '../../data/providers/game_providers.dart';
@@ -12,6 +13,7 @@ import '../widgets/competition_badge.dart';
 import '../widgets/game_presentation_scope.dart';
 import '../widgets/game_status_chip.dart';
 import '../widgets/team_presentation_badge.dart';
+import '../../core/config/app_strings.dart';
 
 /// In-app schedule view for followed-team games.
 ///
@@ -35,10 +37,10 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
     final gamesAsync = ref.watch(scheduleGamesForFollowedTeamsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('スケジュール')),
+      appBar: AppBar(title: Text(tr('スケジュール'))),
       body: gamesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('エラー: $e')),
+        error: (e, _) => Center(child: Text(trArgs('エラー: {e}', {'e': '$e'}))),
         data: (games) {
           if (games.isEmpty) {
             return const _ScheduleEmptyState();
@@ -191,7 +193,7 @@ class ScheduleMonthCalendar extends StatelessWidget {
                 Row(
                   children: [
                     IconButton(
-                      tooltip: '前の月',
+                      tooltip: tr('前の月'),
                       visualDensity: VisualDensity.compact,
                       onPressed: canGoPrevious
                           ? () => onMonthChanged(
@@ -208,7 +210,9 @@ class ScheduleMonthCalendar extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            '${visibleMonth.year}年${visibleMonth.month}月',
+                            isEnglishUi
+                                ? '${DateFormat('MMMM').format(DateTime(visibleMonth.year, visibleMonth.month))} ${visibleMonth.year}'
+                                : '${visibleMonth.year}年${visibleMonth.month}月',
                             textAlign: TextAlign.center,
                             style: theme.textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
@@ -216,7 +220,7 @@ class ScheduleMonthCalendar extends StatelessWidget {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'フォロー中チームの試合予定',
+                            tr('フォロー中チームの試合予定'),
                             textAlign: TextAlign.center,
                             style: theme.textTheme.labelMedium?.copyWith(
                               color: colorScheme.onSurfaceVariant,
@@ -226,7 +230,7 @@ class ScheduleMonthCalendar extends StatelessWidget {
                       ),
                     ),
                     IconButton(
-                      tooltip: '次の月',
+                      tooltip: tr('次の月'),
                       visualDensity: VisualDensity.compact,
                       onPressed: canGoNext
                           ? () => onMonthChanged(
@@ -241,14 +245,14 @@ class ScheduleMonthCalendar extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 8),
-                const _WeekdayHeader(),
-                const SizedBox(height: 4),
+                _WeekdayHeader(),
+                SizedBox(height: 4),
                 LayoutBuilder(
                   builder: (context, constraints) {
                     final compact = constraints.maxWidth < 700;
                     return GridView.builder(
                       shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
+                      physics: NeverScrollableScrollPhysics(),
                       itemCount: days.length,
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 7,
@@ -258,12 +262,12 @@ class ScheduleMonthCalendar extends StatelessWidget {
                       ),
                       itemBuilder: (context, index) {
                         final date = days[index];
-                        if (date == null) return const SizedBox.shrink();
+                        if (date == null) return SizedBox.shrink();
 
                         return _DateCell(
                           date: date,
                           selectedDate: selectedDate,
-                          games: gamesByDate[date] ?? const <Game>[],
+                          games: gamesByDate[date] ?? <Game>[],
                           compact: compact,
                           onTap: () => onDateSelected(date),
                         );
@@ -297,7 +301,7 @@ class _WeekdayHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
+    final weekdays = [tr('日'), tr('月'), tr('火'), tr('水'), tr('木'), tr('金'), tr('土')];
     return Row(
       children: [
         for (var index = 0; index < weekdays.length; index++)
@@ -409,7 +413,7 @@ class _DateCell extends StatelessWidget {
                         borderRadius: BorderRadius.circular(999),
                       ),
                       child: Text(
-                        '${games.length}試合',
+                        trArgs('{n}試合', {'n': '${games.length}'}),
                         style: TextStyle(
                           color: foregroundColor,
                           fontSize: 10,
@@ -540,9 +544,9 @@ class _CompactGameLine extends StatelessWidget {
               game.awayScore,
               format: ScoreFormat.compact,
             )!
-          : '終了',
-    GameStatus.postponed => '延期',
-    GameStatus.cancelled => '中止',
+          : tr('終了'),
+    GameStatus.postponed => tr('延期'),
+    GameStatus.cancelled => tr('中止'),
   };
 }
 
@@ -623,11 +627,11 @@ class _CalendarGamePreview extends StatelessWidget {
       case GameStatus.live:
         return score == null ? 'LIVE' : '$score LIVE';
       case GameStatus.finished:
-        return score == null ? '終了' : '$score 終了';
+        return score == null ? tr('終了') : trArgs('{score} 終了', {'score': score});
       case GameStatus.postponed:
-        return '延期';
+        return tr('延期');
       case GameStatus.cancelled:
-        return '中止';
+        return tr('中止');
     }
   }
 }
@@ -785,7 +789,7 @@ class _SelectDateHint extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
-              '日付を選択すると試合詳細を表示します',
+              tr('日付を選択すると試合詳細を表示します'),
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onSurfaceVariant,
@@ -806,7 +810,7 @@ class _SelectedDateDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final title = '${_formatSelectedDate(selectedDate)}の試合';
+    final title = trArgs('{date}の試合', {'date': _formatSelectedDate(selectedDate)});
 
     return Center(
       child: ConstrainedBox(
@@ -929,13 +933,13 @@ class _ScheduleEmptyState extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              '表示できる試合がありません',
+              tr('表示できる試合がありません'),
               style: Theme.of(context).textTheme.titleMedium,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(
-              'フォロー中チームの試合があると、ここに日付別で表示されます。',
+              tr('フォロー中チームの試合があると、ここに日付別で表示されます。'),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onSurfaceVariant,
               ),
@@ -953,9 +957,9 @@ class _SelectedDateEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
+    return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 32),
-      child: Center(child: Text('この日の試合はありません')),
+      child: Center(child: Text(tr('この日の試合はありません'))),
     );
   }
 }

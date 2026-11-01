@@ -15,6 +15,7 @@ import '../widgets/team_presentation_badge.dart';
 import '../widgets/game_card.dart';
 import '../widgets/game_presentation_scope.dart';
 import '../widgets/calendar_sync_button.dart';
+import '../../core/config/app_strings.dart';
 
 /// Detail screen for a single team: shows schedule + follow/sync actions.
 class TeamDetailScreen extends ConsumerWidget {
@@ -33,10 +34,10 @@ class TeamDetailScreen extends ConsumerWidget {
     return Scaffold(
       body: teamAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('エラー: $e')),
+        error: (e, _) => Center(child: Text(trArgs('エラー: {e}', {'e': '$e'}))),
         data: (team) {
           if (team == null) {
-            return const Center(child: Text('チームが見つかりませんでした'));
+            return Center(child: Text(tr('チームが見つかりませんでした')));
           }
           final games = gamesAsync.valueOrNull;
           final resolver = games == null
@@ -64,7 +65,7 @@ class TeamDetailScreen extends ConsumerWidget {
                         isFollowing ? Icons.favorite : Icons.favorite_border,
                         color: isFollowing ? Colors.red : null,
                       ),
-                      tooltip: isFollowing ? 'フォロー解除' : 'フォローする',
+                      tooltip: isFollowing ? tr('フォロー解除') : tr('フォローする'),
                       onPressed: () => toggleFollow(
                         context,
                         ref,
@@ -82,8 +83,8 @@ class TeamDetailScreen extends ConsumerWidget {
                         data: (games) => IconButton(
                           icon: const Icon(Icons.content_copy_outlined),
                           tooltip: games.isEmpty
-                              ? 'コピーできる試合がありません'
-                              : 'ローカルICSをコピー',
+                              ? tr('コピーできる試合がありません')
+                              : tr('ローカルICSをコピー'),
                           onPressed: games.isEmpty
                               ? null
                               : () => _showLocalIcsSheet(
@@ -110,7 +111,7 @@ class TeamDetailScreen extends ConsumerWidget {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          '直近の試合',
+                          tr('直近の試合'),
                           style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
@@ -123,11 +124,11 @@ class TeamDetailScreen extends ConsumerWidget {
                     child: Center(child: CircularProgressIndicator()),
                   ),
                   error: (e, _) =>
-                      SliverToBoxAdapter(child: Center(child: Text('エラー: $e'))),
+                      SliverToBoxAdapter(child: Center(child: Text(trArgs('エラー: {e}', {'e': '$e'})))),
                   data: (games) {
                     if (games.isEmpty) {
                       return SliverToBoxAdapter(
-                        child: _TeamDetailEmptyState(message: '直近の試合はありません'),
+                        child: _TeamDetailEmptyState(message: tr('直近の試合はありません')),
                       );
                     }
                     return SliverList(
@@ -211,7 +212,7 @@ class _LocalIcsSheet extends StatelessWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    '$teamName のローカルICS',
+                    trArgs('{team} のローカルICS', {'team': teamName}),
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -221,7 +222,7 @@ class _LocalIcsSheet extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Free MVP sample mode 用に、このチームの $gameCount 試合をICSテキストとして生成しました。',
+              trArgs('Free MVP sample mode 用に、このチームの {n} 試合をICSテキストとして生成しました。', {'n': '$gameCount'}),
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onSurfaceVariant,
               ),
@@ -261,11 +262,11 @@ class _LocalIcsSheet extends StatelessWidget {
                   }
                   Navigator.of(context).pop();
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('ローカルICSをコピーしました')),
+                    SnackBar(content: Text(tr('ローカルICSをコピーしました'))),
                   );
                 },
                 icon: const Icon(Icons.copy_outlined),
-                label: const Text('ICSをコピー'),
+                label: Text(tr('ICSをコピー')),
               ),
             ),
           ],

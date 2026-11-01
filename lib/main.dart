@@ -8,6 +8,7 @@ import 'core/utils/app_router.dart';
 import 'data/providers/auth_providers.dart';
 import 'domain/models/user_profile.dart';
 import 'firebase_options.dart';
+import 'core/config/app_strings.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,15 +36,14 @@ class SportsCalendarApp extends ConsumerWidget {
       );
     });
 
-    return MaterialApp.router(
+    return ValueListenableBuilder<DisplayLanguageMode>(
+      valueListenable: displayLanguageMode,
+      builder: (context, mode, _) => MaterialApp.router(
       // Rebuild every route when the name language changes. GoRouter keeps
       // the current location, so the visible stack is restored.
-      builder: (context, child) => ValueListenableBuilder<DisplayLanguageMode>(
-        valueListenable: displayLanguageMode,
-        builder: (context, mode, _) =>
-            KeyedSubtree(key: ValueKey(mode), child: child!),
-      ),
-      title: 'スポーツカレンダー',
+      builder: (context, child) =>
+          KeyedSubtree(key: ValueKey(mode), child: child!),
+      title: tr('スポーツカレンダー'),
       debugShowCheckedModeBanner: false,
 
       // Localization: Japanese primary, English fallback
@@ -53,7 +53,9 @@ class SportsCalendarApp extends ConsumerWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: const [Locale('ja', 'JP'), Locale('en', 'US')],
-      locale: const Locale('ja', 'JP'),
+      locale: mode == DisplayLanguageMode.english
+          ? const Locale('en', 'US')
+          : const Locale('ja', 'JP'),
 
       // Material 3 theme with a sports-inspired color seed
       theme: ThemeData(
@@ -74,6 +76,7 @@ class SportsCalendarApp extends ConsumerWidget {
 
       // GoRouter integration
       routerConfig: router,
+      ),
     );
   }
 }

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../domain/models/sport_definition.dart';
 import '../../domain/policies/home_sport_navigation.dart';
 import '../theme/presentation_decoration.dart';
+import '../../core/config/app_strings.dart';
 
 /// League list for the current sport tab.
 ///
@@ -43,7 +44,7 @@ class _SportLeagueBrowserState extends State<SportLeagueBrowser> {
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
       children: [
         Text(
-          'リーグ',
+          tr('リーグ'),
           key: ValueKey('sport-league-title-${widget.tab.id}'),
           style: theme.textTheme.headlineLarge?.copyWith(
             fontWeight: FontWeight.w800,
@@ -54,7 +55,7 @@ class _SportLeagueBrowserState extends State<SportLeagueBrowser> {
         SearchBar(
           key: ValueKey('sport-league-search-${widget.tab.id}'),
           controller: _queryController,
-          hintText: 'リーグを検索',
+          hintText: tr('リーグを検索'),
           leading: const Icon(Icons.search),
           elevation: const WidgetStatePropertyAll(0),
           backgroundColor: WidgetStatePropertyAll(
@@ -67,7 +68,7 @@ class _SportLeagueBrowserState extends State<SportLeagueBrowser> {
             if (_query.isNotEmpty)
               IconButton(
                 icon: const Icon(Icons.clear),
-                tooltip: '検索をクリア',
+                tooltip: tr('検索をクリア'),
                 onPressed: () {
                   _queryController.clear();
                   setState(() => _query = '');
@@ -78,9 +79,9 @@ class _SportLeagueBrowserState extends State<SportLeagueBrowser> {
         ),
         const SizedBox(height: 16),
         if (!hasAny)
-          const _LeagueMessage(message: '表示できるリーグがありません')
+          _LeagueMessage(message: tr('表示できるリーグがありません'))
         else if (competitions.isEmpty)
-          const _LeagueMessage(message: '一致するリーグはありません')
+          _LeagueMessage(message: tr('一致するリーグはありません'))
         else
           for (final competition in competitions)
             _LeagueRow(
@@ -121,7 +122,7 @@ class _LeagueRow extends StatelessWidget {
                 const SizedBox(width: 14),
                 Expanded(
                   child: Text(
-                    competition.displayNameJa,
+                    competitionTitle(competition),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.titleMedium?.copyWith(

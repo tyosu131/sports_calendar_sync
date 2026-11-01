@@ -162,8 +162,8 @@ void main() {
     );
     expect(listingService, isNot(contains('catch')));
     expect(listingService, contains('findReadableMembershipForCompetition'));
-    expect(searchScreen, contains("Text('エラー: \$e')"));
-    expect(leagueScreen, contains("'エラー: \$error'"));
+    expect(searchScreen, contains("trArgs('エラー: {e}', {'e': '\$e'})"));
+    expect(leagueScreen, contains("trArgs('エラー: {e}', {'e': '\$error'})"));
   });
 
   test(

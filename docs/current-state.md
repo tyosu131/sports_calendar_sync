@@ -1,5 +1,15 @@
 # Current State — sports_calendar_sync
 
+## Per-sport tabs, full English UI, followed-team colors (2026-11-01)
+
+Client only. No deploy.
+
+- Home and Team Search tabs are one per sport: 野球, サッカー, バスケ, アメフト, ホッケー, 格闘技 (その他スポーツ remains only for a category without its own tab). The tab bar scrolls horizontally.
+- 「名前の言語」 = English now switches the whole UI, not only names: screen text goes through `tr()` / `trArgs()` (`lib/core/config/app_strings.dart`, Japanese is the source text, English is the dictionary). A missing entry stays Japanese; `test/ui_language_test.dart` fails if any `tr()` text has no English entry. Dates, weekday headers, status labels, league titles and the Material locale follow the setting.
+- Foreign league titles show in English even in the automatic mode (Japanese domestic ones stay Japanese).
+- Home followed-team cards use the team's `presentationColor` when present, otherwise a stable decorative color per team id (not an official kit color). Nothing writes `presentationColor` yet.
+- Not reproduced / not fixed: Calendar-sync sheet asking for FaceTime on iPhone; a stray 「＞」 on the followed-team row. Both need a screenshot.
+
 ## NFL / UFC scaffold, name language, away airplane, reference clock (2026-10-31)
 
 Client + Functions name policy only. No deploy, no Firestore write, no provider call.

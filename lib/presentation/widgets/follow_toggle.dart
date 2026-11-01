@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../data/providers/auth_providers.dart';
 import '../../data/providers/repository_providers.dart';
+import '../../core/config/app_strings.dart';
 
 /// Writes a follow only when the session and the follow list are both known.
 ///
@@ -21,7 +22,7 @@ Future<void> toggleFollow(
   if (session.profileFailed) {
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(const SnackBar(content: Text('フォロー状態を確認できません')));
+    ).showSnackBar(SnackBar(content: Text(tr('フォロー状態を確認できません'))));
     return;
   }
   if (session.followedIds == null) return;
@@ -49,6 +50,6 @@ Future<void> toggleFollow(
     if (!context.mounted) return;
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(const SnackBar(content: Text('フォローを更新できませんでした')));
+    ).showSnackBar(SnackBar(content: Text(tr('フォローを更新できませんでした'))));
   }
 }

@@ -14,6 +14,7 @@ import 'drawn_place_icons.dart';
 import 'game_presentation_scope.dart';
 import 'game_status_chip.dart';
 import 'team_presentation_badge.dart';
+import '../../core/config/app_strings.dart';
 
 /// Displays a single game/match as a card.
 class GameCard extends StatelessWidget {
@@ -103,7 +104,7 @@ class GameCard extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(999),
                               ),
                               child: Text(
-                                '今日',
+                                tr('今日'),
                                 style: theme.textTheme.labelSmall?.copyWith(
                                   color: theme.colorScheme.onPrimary,
                                   fontWeight: FontWeight.bold,

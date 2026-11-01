@@ -222,15 +222,14 @@ void main() {
   });
 
   group('NFL and UFC', () {
-    test('UFC is registered and grouped under その他スポーツ', () {
+    test('NFL and UFC each get their own sport tab', () {
       final ufc = SportsRegistry.findByKey('mma_ufc');
       expect(ufc, isNotNull);
       expect(ufc!.sportCategory, 'mma');
       expect(SportsRegistry.findByKey('americanfootball_nfl'), isNotNull);
-      final other = homeSportTabs().singleWhere(
-        (tab) => tab.id == HomeSportTabIds.other,
-      );
-      expect(other.sportCategories, containsAll(['americanFootball', 'mma']));
+      final ids = homeSportTabs().map((tab) => tab.id);
+      expect(ids, containsAll([HomeSportTabIds.americanFootball, HomeSportTabIds.mma]));
+      expect(ids, isNot(contains(HomeSportTabIds.other)));
       expect(CompetitionDisplayPolicy.forKey('mma_ufc')!.label, 'UFC');
       expect(
         CompetitionDisplayPolicy.forKey('americanfootball_nfl')!.label,

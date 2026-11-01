@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/models/user_profile.dart';
 import '../repositories/user_repository.dart';
 import 'repository_providers.dart';
+import '../../core/config/app_strings.dart';
 
 // ── Auth state ────────────────────────────────────────────────────────────────
 
@@ -98,7 +99,7 @@ class ProfileDocumentMissing implements Exception {
   const ProfileDocumentMissing();
 
   @override
-  String toString() => 'プロフィールを確認できません';
+  String toString() => tr('プロフィールを確認できません');
 }
 
 /// Followed team ids after auth and the profile read have settled for the

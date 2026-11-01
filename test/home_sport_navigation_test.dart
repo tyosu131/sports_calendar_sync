@@ -34,10 +34,10 @@ void main() {
     final tabs = followDiscoverySportTabs();
     expect(tabs.first.label, 'フォロー中');
     expect(tabs.first.showsAllSports, isTrue);
-    expect(tabs.map((tab) => tab.label), ['フォロー中', '野球', 'サッカー', 'その他スポーツ']);
+    expect(tabs.map((tab) => tab.label), ['フォロー中', '野球', 'サッカー', 'バスケ', 'アメフト', 'ホッケー', '格闘技']);
   });
 
-  test('home tabs are favorites, baseball, football, then other sports', () {
+  test('home tabs are favorites, then one tab per sport', () {
     final tabs = homeSportTabs();
 
     expect(defaultHomeSportTabIndex(tabs), 0);
@@ -45,18 +45,27 @@ void main() {
       HomeSportTabIds.favorites,
       HomeSportTabIds.baseball,
       HomeSportTabIds.football,
-      HomeSportTabIds.other,
+      HomeSportTabIds.basketball,
+      HomeSportTabIds.americanFootball,
+      HomeSportTabIds.hockey,
+      HomeSportTabIds.mma,
     ]);
-    expect(tabs.map((tab) => tab.label), ['お気に入り', '野球', 'サッカー', 'その他スポーツ']);
+    expect(tabs.map((tab) => tab.label), [
+      'お気に入り',
+      '野球',
+      'サッカー',
+      'バスケ',
+      'アメフト',
+      'ホッケー',
+      '格闘技',
+    ]);
     expect(tabs.first.showsAllSports, isTrue);
     expect(tabs[1].sportCategories, {'baseball'});
     expect(tabs[2].sportCategories, {'football'});
-    expect(tabs[3].sportCategories, {
-      'basketball',
-      'americanFootball',
-      'hockey',
-      'mma',
-    });
+    expect(tabs[3].sportCategories, {'basketball'});
+    expect(tabs[4].sportCategories, {'americanFootball'});
+    expect(tabs[5].sportCategories, {'hockey'});
+    expect(tabs[6].sportCategories, {'mma'});
     const leagueLabels = {
       'Jリーグ',
       'プレミアリーグ',
@@ -81,16 +90,21 @@ void main() {
       'お気に入り',
       '野球',
       'サッカー',
-      'その他スポーツ',
+      'ホッケー',
     ]);
     expect(footballFirst.last.sportCategories, {'hockey'});
 
     final basketballOnly = homeSportTabs(enabledCategories: ['basketball']);
     expect(basketballOnly.map((tab) => tab.id), [
       HomeSportTabIds.favorites,
-      HomeSportTabIds.other,
+      HomeSportTabIds.basketball,
     ]);
     expect(basketballOnly.last.sportCategories, {'basketball'});
+    // A category without its own tab is kept under その他スポーツ.
+    final unknown = homeSportTabs(enabledCategories: ['football', 'rugby']);
+    expect(unknown.last.id, HomeSportTabIds.other);
+    expect(unknown.last.label, 'その他スポーツ');
+    expect(unknown.last.sportCategories, {'rugby'});
     expect(SportsRegistry.enabledCategories, isNot(contains('rugby')));
   });
 
@@ -100,7 +114,9 @@ void main() {
       final tabs = homeSportTabs();
       final baseball = tabs[1];
       final football = tabs[2];
-      final other = tabs[3];
+      final basketball = tabs[3];
+      final americanFootball = tabs[4];
+      final hockey = tabs[5];
       final teams = [
         _team('giants', 'baseball_npb'),
         _team('mlb', 'baseball_mlb'),
@@ -132,10 +148,15 @@ void main() {
         'arsenal',
         'cup',
       ]);
-      expect(teamsForHomeSportTab(teams, other).map((team) => team.id), [
+      expect(teamsForHomeSportTab(teams, basketball).map((team) => team.id), [
         'lakers',
         'bleague',
-        'nfl',
+      ]);
+      expect(
+        teamsForHomeSportTab(teams, americanFootball).map((team) => team.id),
+        ['nfl'],
+      );
+      expect(teamsForHomeSportTab(teams, hockey).map((team) => team.id), [
         'nhl',
       ]);
       expect(
@@ -198,7 +219,10 @@ void main() {
     expect(groups.map((group) => group.tab.id), [
       HomeSportTabIds.baseball,
       HomeSportTabIds.football,
-      HomeSportTabIds.other,
+      HomeSportTabIds.basketball,
+      HomeSportTabIds.americanFootball,
+      HomeSportTabIds.hockey,
+      HomeSportTabIds.mma,
     ]);
     expect(groups[0].competitions.map((item) => item.competitionKey), [
       'baseball_npb',
@@ -210,9 +234,15 @@ void main() {
     ]);
     expect(groups[2].competitions.map((item) => item.competitionKey), [
       'basketball_nba',
-      'americanfootball_nfl',
-      'hockey_nhl',
       'basketball_b_league',
+    ]);
+    expect(groups[3].competitions.map((item) => item.competitionKey), [
+      'americanfootball_nfl',
+    ]);
+    expect(groups[4].competitions.map((item) => item.competitionKey), [
+      'hockey_nhl',
+    ]);
+    expect(groups[5].competitions.map((item) => item.competitionKey), [
       'mma_ufc',
     ]);
     expect(competitionsForHomeSportTab(homeSportTabs().first), isEmpty);

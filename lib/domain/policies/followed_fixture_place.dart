@@ -1,3 +1,4 @@
+import '../../core/config/app_strings.dart';
 /// Where one perspective team is listed on a fixture.
 ///
 /// [stadium] means that team's id is the fixture home id.
@@ -12,8 +13,8 @@ enum FollowedFixturePlace { stadium, travel }
 /// Spoken side fact. The chip shows an icon only; this is not drawn on the card.
 String followedFixturePlaceSemanticsLabel(FollowedFixturePlace place) =>
     switch (place) {
-      FollowedFixturePlace.stadium => 'フォロー中のチームはホーム側',
-      FollowedFixturePlace.travel => 'フォロー中のチームはアウェイ側',
+      FollowedFixturePlace.stadium => tr('フォロー中のチームはホーム側'),
+      FollowedFixturePlace.travel => tr('フォロー中のチームはアウェイ側'),
     };
 
 /// Venue cues for the cards a person actually scans.

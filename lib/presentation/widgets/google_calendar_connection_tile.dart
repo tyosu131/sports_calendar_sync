@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../data/repositories/google_calendar_connection_repository.dart';
+import '../../core/config/app_strings.dart';
 
 enum GoogleCalendarTileState { loading, disconnected, connecting, syncing, connected, syncError, reauthRequired, error }
 enum GoogleCalendarTileMode { manage, sync }
@@ -113,14 +114,14 @@ class _GoogleCalendarConnectionTileState extends State<GoogleCalendarConnectionT
     final connected = _state == GoogleCalendarTileState.connected ||
         _state == GoogleCalendarTileState.syncError || _state == GoogleCalendarTileState.syncing;
     final subtitle = switch (_state) {
-      GoogleCalendarTileState.loading => '確認中',
-      GoogleCalendarTileState.connecting => '処理中',
-      GoogleCalendarTileState.syncing => '連携済み・同期中',
-      GoogleCalendarTileState.connected => '連携済み・同期済み',
-      GoogleCalendarTileState.syncError => '連携済み・同期エラー（タップして再試行）',
-      GoogleCalendarTileState.reauthRequired => '再連携が必要です',
-      GoogleCalendarTileState.error => 'エラー（タップして再試行）',
-      GoogleCalendarTileState.disconnected => '未連携',
+      GoogleCalendarTileState.loading => tr('確認中'),
+      GoogleCalendarTileState.connecting => tr('処理中'),
+      GoogleCalendarTileState.syncing => tr('連携済み・同期中'),
+      GoogleCalendarTileState.connected => tr('連携済み・同期済み'),
+      GoogleCalendarTileState.syncError => tr('連携済み・同期エラー（タップして再試行）'),
+      GoogleCalendarTileState.reauthRequired => tr('再連携が必要です'),
+      GoogleCalendarTileState.error => tr('エラー（タップして再試行）'),
+      GoogleCalendarTileState.disconnected => tr('未連携'),
     };
     return ListTile(
       leading: const Icon(Icons.event_available),
@@ -136,9 +137,9 @@ class _GoogleCalendarConnectionTileState extends State<GoogleCalendarConnectionT
           ? const SizedBox.square(dimension: 22, child: CircularProgressIndicator(strokeWidth: 2))
           : connected
               ? widget.mode == GoogleCalendarTileMode.manage
-                  ? TextButton(onPressed: _disconnect, child: const Text('連携解除'))
-                  : TextButton(onPressed: _sync, child: const Text('今すぐ同期'))
-              : FilledButton(onPressed: _connect, child: Text(_state == GoogleCalendarTileState.reauthRequired ? '再連携' : 'Google Calendarと連携')),
+                  ? TextButton(onPressed: _disconnect, child: Text(tr('連携解除')))
+                  : TextButton(onPressed: _sync, child: Text(tr('今すぐ同期')))
+              : FilledButton(onPressed: _connect, child: Text(_state == GoogleCalendarTileState.reauthRequired ? tr('再連携') : tr('Google Calendarと連携'))),
     );
   }
 }

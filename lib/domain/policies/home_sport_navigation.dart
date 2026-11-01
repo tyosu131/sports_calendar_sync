@@ -1,4 +1,7 @@
+import '../../core/config/app_strings.dart';
+import '../../core/config/display_language_setting.dart';
 import '../../core/config/sports_registry.dart';
+import 'japanese_domestic_football.dart';
 import '../models/game.dart';
 import '../models/sport_definition.dart';
 import '../models/team.dart';
@@ -11,6 +14,13 @@ abstract final class HomeSportTabIds {
   static const favorites = 'favorites';
   static const baseball = 'baseball';
   static const football = 'football';
+  static const basketball = 'basketball';
+  static const americanFootball = 'americanFootball';
+  static const hockey = 'hockey';
+  static const mma = 'mma';
+
+  /// Sports this app has no dedicated tab for. Kept so a newly registered
+  /// category is never lost from Home.
   static const other = 'other';
 }
 
@@ -41,43 +51,49 @@ class HomeSportTab {
   }
 }
 
-const _baseballCategory = 'baseball';
-const _footballCategory = 'football';
+/// One tab per sport, in this order. Each id is also the sport category.
+const _sportTabOrder = <({String id, String category, String label})>[
+  (id: HomeSportTabIds.baseball, category: 'baseball', label: '野球'),
+  (id: HomeSportTabIds.football, category: 'football', label: 'サッカー'),
+  (id: HomeSportTabIds.basketball, category: 'basketball', label: 'バスケ'),
+  (
+    id: HomeSportTabIds.americanFootball,
+    category: 'americanFootball',
+    label: 'アメフト',
+  ),
+  (id: HomeSportTabIds.hockey, category: 'hockey', label: 'ホッケー'),
+  (id: HomeSportTabIds.mma, category: 'mma', label: '格闘技'),
+];
 
-/// Home opens on お気に入り, then 野球, サッカー, and その他スポーツ.
+/// Home opens on お気に入り, then one tab per enabled sport.
 ///
-/// A primary tab is omitted when that category is not enabled. Every other
-/// enabled category is grouped into その他スポーツ. League names are never tabs.
+/// A sport tab is omitted when that category is not enabled. An enabled
+/// category without a dedicated tab is grouped into その他スポーツ. League
+/// names are never tabs.
 List<HomeSportTab> homeSportTabs({List<String>? enabledCategories}) {
   final present = (enabledCategories ?? SportsRegistry.enabledCategories)
       .toSet();
   final tabs = <HomeSportTab>[
-    const HomeSportTab(id: HomeSportTabIds.favorites, label: 'お気に入り'),
+    HomeSportTab(id: HomeSportTabIds.favorites, label: tr('お気に入り')),
   ];
-  if (present.contains(_baseballCategory)) {
+  for (final sport in _sportTabOrder) {
+    if (!present.contains(sport.category)) continue;
     tabs.add(
-      const HomeSportTab(
-        id: HomeSportTabIds.baseball,
-        label: '野球',
-        sportCategories: {_baseballCategory},
+      HomeSportTab(
+        id: sport.id,
+        label: tr(sport.label),
+        sportCategories: {sport.category},
       ),
     );
   }
-  if (present.contains(_footballCategory)) {
-    tabs.add(
-      const HomeSportTab(
-        id: HomeSportTabIds.football,
-        label: 'サッカー',
-        sportCategories: {_footballCategory},
-      ),
-    );
-  }
-  final other = present.difference({_baseballCategory, _footballCategory});
+  final other = present.difference({
+    for (final sport in _sportTabOrder) sport.category,
+  });
   if (other.isNotEmpty) {
     tabs.add(
       HomeSportTab(
         id: HomeSportTabIds.other,
-        label: 'その他スポーツ',
+        label: tr('その他スポーツ'),
         sportCategories: Set.unmodifiable(other),
       ),
     );
@@ -155,9 +171,9 @@ class SportSubNavDestination {
 }
 
 /// Exactly ホーム and リーグ. Do not append competitions here.
-const sportSubNavDestinations = <SportSubNavDestination>[
-  SportSubNavDestination(id: SportSubNavIds.home, label: 'ホーム'),
-  SportSubNavDestination(id: SportSubNavIds.leagues, label: 'リーグ'),
+List<SportSubNavDestination> get sportSubNavDestinations => [
+  SportSubNavDestination(id: SportSubNavIds.home, label: tr('ホーム')),
+  SportSubNavDestination(id: SportSubNavIds.leagues, label: tr('リーグ')),
 ];
 
 /// Favorites is cross-sport, so it does not show ホーム | リーグ.
@@ -176,7 +192,7 @@ List<HomeSportTab> followDiscoverySportTabs({List<String>? enabledCategories}) {
   return [
     for (final tab in homeSportTabs(enabledCategories: enabledCategories))
       if (tab.showsAllSports)
-        const HomeSportTab(id: HomeSportTabIds.favorites, label: 'フォロー中')
+        HomeSportTab(id: HomeSportTabIds.favorites, label: tr('フォロー中'))
       else
         tab,
   ];
@@ -258,4 +274,15 @@ String competitionBadgeLabel(SportDefinition competition) {
   final name = competition.displayNameJa.trim();
   if (name.runes.length <= 4) return name;
   return String.fromCharCodes(name.runes.take(2));
+}
+
+/// Competition name for league rows and titles.
+///
+/// Japanese domestic competitions use Japanese; others use English. The
+/// English Settings choice makes every title English.
+String competitionTitle(SportDefinition competition) {
+  if (displayLanguageForcesEnglish) return competition.displayNameEn;
+  return isJapaneseDomesticCompetition(competition.competitionKey)
+      ? competition.displayNameJa
+      : competition.displayNameEn;
 }

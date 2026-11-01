@@ -7,6 +7,7 @@ import '../../data/providers/repository_providers.dart';
 import '../widgets/calendar_sync_sheet.dart';
 import '../widgets/google_calendar_connection_tile.dart';
 import '../widgets/public_policy_links.dart';
+import '../../core/config/app_strings.dart';
 
 /// Settings screen: account info, calendar sync URL, sign out.
 class SettingsScreen extends ConsumerWidget {
@@ -19,12 +20,12 @@ class SettingsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        leading: const SettingsBackButton(),
-        title: const Text('設定'),
+        leading: SettingsBackButton(),
+        title: Text(tr('設定')),
       ),
       body: userAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('エラー: $e')),
+        loading: () => Center(child: CircularProgressIndicator()),
+        error: (e, _) => Center(child: Text(trArgs('エラー: {e}', {'e': '$e'}))),
         data: (profile) {
           if (profile == null) {
             return Center(
@@ -33,9 +34,9 @@ class SettingsScreen extends ConsumerWidget {
                 children: [
                   FilledButton(
                     onPressed: () => context.push('/signin'),
-                    child: const Text('サインイン'),
+                    child: Text(tr('サインイン')),
                   ),
-                  const PublicPolicyLinks(),
+                  PublicPolicyLinks(),
                 ],
               ),
             );
@@ -44,32 +45,32 @@ class SettingsScreen extends ConsumerWidget {
           return ListView(
             children: [
               // Account section
-              _SectionHeader(title: 'アカウント'),
+              _SectionHeader(title: tr('アカウント')),
               ListTile(
                 leading: profile.photoUrl != null
                     ? CircleAvatar(
                         backgroundImage: NetworkImage(profile.photoUrl!),
                       )
-                    : const CircleAvatar(child: Icon(Icons.person)),
-                title: Text(profile.displayName ?? 'ユーザー'),
+                    : CircleAvatar(child: Icon(Icons.person)),
+                title: Text(profile.displayName ?? tr('ユーザー')),
                 subtitle: Text(profile.email),
               ),
-              const Divider(),
+              Divider(),
 
               if (!useSampleData) ...[
                 // Personalized calendar sync is an authenticated production
                 // flow; sample mode keeps using its local ICS builder.
-                const CalendarSyncSettingsSection(),
-                const Divider(),
+                CalendarSyncSettingsSection(),
+                Divider(),
               ],
 
               // App section
-              _SectionHeader(title: 'アプリ'),
+              _SectionHeader(title: tr('アプリ')),
               ListTile(
-                leading: const Icon(Icons.language),
-                title: const Text('名前の言語'),
+                leading: Icon(Icons.language),
+                title: Text(tr('名前の言語')),
                 subtitle: Text(_languageLabel(profile.preferredLanguage)),
-                trailing: const Icon(Icons.chevron_right),
+                trailing: Icon(Icons.chevron_right),
                 onTap: () => _showLanguagePicker(
                   context,
                   ref,
@@ -77,14 +78,14 @@ class SettingsScreen extends ConsumerWidget {
                   profile.preferredLanguage,
                 ),
               ),
-              const Divider(),
+              Divider(),
 
               // Sign out
               const PublicPolicyLinks(),
               ListTile(
                 leading: Icon(Icons.logout, color: theme.colorScheme.error),
                 title: Text(
-                  'サインアウト',
+                  tr('サインアウト'),
                   style: TextStyle(color: theme.colorScheme.error),
                 ),
                 onTap: () => _confirmSignOut(context, ref),
@@ -105,7 +106,7 @@ class SettingsScreen extends ConsumerWidget {
     final selected = await showDialog<String>(
       context: context,
       builder: (ctx) => SimpleDialog(
-        title: const Text('名前の言語'),
+        title: Text(tr('名前の言語')),
         children: [
           SimpleDialogOption(
             onPressed: () => Navigator.pop(ctx, 'ja'),
@@ -142,22 +143,22 @@ class SettingsScreen extends ConsumerWidget {
 
   /// `ja` is the automatic rule; `en` makes every name English.
   static String _languageLabel(String? value) =>
-      value == 'en' ? 'English（すべて英語）' : '自動（日本のチーム・選手・会場は日本語、海外は英語）';
+      value == 'en' ? tr('English（すべて英語）') : tr('自動（日本のチーム・選手・会場は日本語、海外は英語）');
 
   Future<void> _confirmSignOut(BuildContext context, WidgetRef ref) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('サインアウト'),
-        content: const Text('サインアウトしますか？'),
+        title: Text(tr('サインアウト')),
+        content: Text(tr('サインアウトしますか？')),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('キャンセル'),
+            child: Text(tr('キャンセル')),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('サインアウト'),
+            child: Text(tr('サインアウト')),
           ),
         ],
       ),
@@ -206,18 +207,18 @@ class CalendarSyncSettingsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Column(
     children: [
-      _SectionHeader(title: 'カレンダー同期'),
+      _SectionHeader(title: tr('カレンダー同期')),
       googleCalendarTile,
       ListTile(
         leading: const Icon(Icons.apple),
         title: const Text('Apple Calendar'),
-        subtitle: const Text('Apple Calendarで購読'),
+        subtitle: Text(tr('Apple Calendarで購読')),
         trailing: appleAction,
       ),
       ListTile(
         leading: const Icon(Icons.calendar_month),
-        title: const Text('その他のカレンダー'),
-        subtitle: const Text('ICS購読URLをコピー・共有'),
+        title: Text(tr('その他のカレンダー')),
+        subtitle: Text(tr('ICS購読URLをコピー・共有')),
         trailing: otherAction,
       ),
     ],

@@ -6,6 +6,7 @@ import '../../core/config/sports_registry.dart';
 import '../../data/providers/auth_providers.dart';
 import '../../data/providers/game_providers.dart';
 import '../../data/providers/team_providers.dart';
+import '../../domain/policies/home_sport_navigation.dart';
 import '../../domain/models/sport_definition.dart';
 import '../../domain/models/team.dart';
 import '../../domain/policies/league_browse_presentation.dart';
@@ -14,6 +15,7 @@ import '../../domain/policies/team_presentation_policy.dart';
 import '../theme/presentation_decoration.dart';
 import '../widgets/follow_toggle.dart';
 import '../widgets/team_presentation_badge.dart';
+import '../../core/config/app_strings.dart';
 
 /// Teams for one registry competition, opened from the in-sport league list.
 ///
@@ -29,28 +31,28 @@ class LeagueTeamsScreen extends ConsumerWidget {
     final definition = SportsRegistry.findByKey(competitionKey);
     if (definition == null || !definition.enabled) {
       return Scaffold(
-        appBar: AppBar(title: const Text('リーグ')),
-        body: const _LeagueTeamsMessage(message: 'このリーグは見つかりません'),
+        appBar: AppBar(title: Text(tr('リーグ'))),
+        body: _LeagueTeamsMessage(message: tr('このリーグは見つかりません')),
       );
     }
 
     final teamsAsync = ref.watch(teamsByCompetitionProvider(competitionKey));
     return Scaffold(
-      appBar: AppBar(title: Text(definition.displayNameJa)),
+      appBar: AppBar(title: Text(competitionTitle(definition))),
       body: teamsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => _LeagueTeamsMessage(
-          message: 'エラー: $error',
-          actionLabel: '再試行',
+          message: trArgs('エラー: {e}', {'e': '$error'}),
+          actionLabel: tr('再試行'),
           onAction: () =>
               ref.invalidate(teamsByCompetitionProvider(competitionKey)),
         ),
         data: (teams) {
           if (teams.isEmpty) {
             return _LeagueTeamsMessage(
-              message: 'このリーグのチームはまだありません',
-              detail: 'チームが登録されると、ここに表示されます。',
-              actionLabel: 'チームを探す',
+              message: tr('このリーグのチームはまだありません'),
+              detail: tr('チームが登録されると、ここに表示されます。'),
+              actionLabel: tr('チームを探す'),
               onAction: () => context.push('/search'),
             );
           }
@@ -135,11 +137,11 @@ class _LeagueTeamCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final fullName = teamDisplayNames.teamName(team);
     final accent = teamBrowseCardFill(team.id);
-    final followLabel = isFollowing ? 'フォロー中' : 'フォロー';
+    final followLabel = isFollowing ? tr('フォロー中') : tr('フォロー');
     final matchLine = !gamesSettled
         ? null
         : next == null
-        ? (gamesFailed ? null : '次の試合は未定')
+        ? (gamesFailed ? null : tr('次の試合は未定'))
         : next!.opponent;
 
     return Material(
@@ -168,7 +170,7 @@ class _LeagueTeamCard extends StatelessWidget {
                   _FollowPill(
                     label: followLabel,
                     filled: isFollowing,
-                    tooltip: isFollowing ? 'フォロー解除' : 'フォローする',
+                    tooltip: isFollowing ? tr('フォロー解除') : tr('フォローする'),
                     onPressed: onFollowToggle,
                   ),
                 ],

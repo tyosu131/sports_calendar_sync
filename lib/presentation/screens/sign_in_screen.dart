@@ -9,6 +9,7 @@ import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import '../../data/auth/apple_sign_in_service.dart';
 import '../../core/utils/auth_failure_message.dart';
 import '../../data/providers/repository_providers.dart';
+import '../../core/config/app_strings.dart';
 
 /// Sign-in screen supporting the V1 Google and Apple options.
 class SignInScreen extends ConsumerStatefulWidget {
@@ -127,7 +128,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                'スポーツカレンダー',
+                tr('スポーツカレンダー'),
                 style: theme.textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -135,7 +136,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                '好きなチームの試合日程をカレンダーに同期',
+                tr('好きなチームの試合日程をカレンダーに同期'),
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -166,7 +167,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                 OutlinedButton.icon(
                   onPressed: _signInWithGoogle,
                   icon: const Icon(Icons.g_mobiledata, size: 24),
-                  label: const Text('Googleでサインイン'),
+                  label: Text(tr('Googleでサインイン')),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
@@ -179,7 +180,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                 if (isIos && configured)
                   SignInWithAppleButton(
                     onPressed: _signInWithApple,
-                    text: 'Appleでサインイン',
+                    text: tr('Appleでサインイン'),
                     style: theme.brightness == Brightness.dark
                         ? SignInWithAppleButtonStyle.white
                         : SignInWithAppleButtonStyle.black,
@@ -188,7 +189,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                   OutlinedButton.icon(
                     onPressed: _signInWithApple,
                     icon: const Icon(Icons.apple, size: 24),
-                    label: const Text('Appleでサインイン'),
+                    label: Text(tr('Appleでサインイン')),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
@@ -206,12 +207,12 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                       color: theme.colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(Icons.apple, size: 24),
                         SizedBox(width: 8),
-                        Text('Appleでサインイン（準備中）'),
+                        Text(tr('Appleでサインイン（準備中）')),
                       ],
                     ),
                   ),

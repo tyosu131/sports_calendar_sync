@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/competition_vs_frame.dart';
+import '../../core/config/app_strings.dart';
 
 /// Colored side of a match card.
 ///
@@ -26,7 +27,7 @@ class CompetitionVsSide extends StatelessWidget {
     return Semantics(
       key: Key(home ? 'vs-frame-home' : 'vs-frame-away'),
       container: true,
-      label: home ? 'ホーム側' : 'アウェイ側',
+      label: home ? tr('ホーム側') : tr('アウェイ側'),
       child: CustomPaint(
         key: Key(home ? 'vs-frame-home-paint' : 'vs-frame-away-paint'),
         painter: CompetitionVsFramePainter(side: side, color: color),

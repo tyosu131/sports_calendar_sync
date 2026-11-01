@@ -1,4 +1,5 @@
 import '../models/game.dart';
+import '../../core/config/app_strings.dart';
 
 enum GameStatusColorRole { live, finished, postponed, cancelled }
 
@@ -15,16 +16,16 @@ class GameStatusPresentation {
           'LIVE',
           GameStatusColorRole.live,
         ),
-        GameStatus.finished => const GameStatusPresentation(
-          '終了',
+        GameStatus.finished => GameStatusPresentation(
+          tr('終了'),
           GameStatusColorRole.finished,
         ),
-        GameStatus.postponed => const GameStatusPresentation(
-          '延期',
+        GameStatus.postponed => GameStatusPresentation(
+          tr('延期'),
           GameStatusColorRole.postponed,
         ),
-        GameStatus.cancelled => const GameStatusPresentation(
-          '中止',
+        GameStatus.cancelled => GameStatusPresentation(
+          tr('中止'),
           GameStatusColorRole.cancelled,
         ),
       };

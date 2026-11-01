@@ -1,5 +1,7 @@
 import 'package:intl/intl.dart';
 
+import '../config/display_language_setting.dart';
+
 /// Utility class for timezone-aware date/time formatting.
 /// All external API data arrives as UTC; this class handles JST conversion
 /// and display formatting.
@@ -8,6 +10,10 @@ class DateTimeUtils {
 
   static const _jstOffset = Duration(hours: 9);
 
+  /// An explicit [locale] wins; otherwise the Settings language decides.
+  static bool _isJa(String? locale) =>
+      locale != null ? locale == 'ja' : !displayLanguageForcesEnglish;
+
   /// Convert UTC [DateTime] to JST [DateTime]
   static DateTime toJst(DateTime utc) {
     return utc.toUtc().add(_jstOffset);
@@ -15,9 +21,9 @@ class DateTimeUtils {
 
   /// Format a UTC [DateTime] as a JST display string
   /// e.g. "2025年7月15日(火) 19:00"
-  static String formatJst(DateTime utc, {String locale = 'ja'}) {
+  static String formatJst(DateTime utc, {String? locale}) {
     final jst = toJst(utc);
-    if (locale == 'ja') {
+    if (_isJa(locale)) {
       final formatter = DateFormat('yyyy年M月d日(E) HH:mm', 'ja');
       return formatter.format(jst);
     }
@@ -37,18 +43,18 @@ class DateTimeUtils {
   }
 
   /// JST calendar date, including the year. Same clock as [formatJst].
-  static String formatJstDate(DateTime utc, {String locale = 'ja'}) {
+  static String formatJstDate(DateTime utc, {String? locale}) {
     final jst = toJst(utc);
-    if (locale == 'ja') {
+    if (_isJa(locale)) {
       return DateFormat('yyyy年M月d日(E)', 'ja').format(jst);
     }
     return DateFormat('MMM d, yyyy').format(jst);
   }
 
   /// Format date only (for grouping games by day)
-  static String formatDateOnly(DateTime utc, {String locale = 'ja'}) {
+  static String formatDateOnly(DateTime utc, {String? locale}) {
     final jst = toJst(utc);
-    if (locale == 'ja') {
+    if (_isJa(locale)) {
       return DateFormat('M月d日(E)', 'ja').format(jst);
     }
     return DateFormat('MMM d').format(jst);

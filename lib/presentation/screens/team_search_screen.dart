@@ -9,6 +9,7 @@ import '../widgets/follow_toggle.dart';
 import '../widgets/sport_sub_nav_bar.dart';
 import '../widgets/team_list_tile.dart';
 import 'sport_league_browser.dart';
+import '../../core/config/app_strings.dart';
 
 /// Search and follow discovery. Mirrors Home sport tabs and ホーム | リーグ.
 class TeamSearchScreen extends ConsumerWidget {
@@ -101,13 +102,13 @@ class _TeamSearchScaffoldState extends ConsumerState<_TeamSearchScaffold> {
 
         return Scaffold(
           appBar: AppBar(
-            title: const Text('チームを探す'),
+            title: Text(tr('チームを探す')),
             bottom: TabBar(
               key: const ValueKey('team-search-sport-tabs'),
-              isScrollable: false,
-              tabAlignment: TabAlignment.fill,
-              padding: EdgeInsets.zero,
-              labelPadding: EdgeInsets.zero,
+              isScrollable: true,
+              tabAlignment: TabAlignment.start,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              labelPadding: const EdgeInsets.symmetric(horizontal: 14),
               indicatorSize: TabBarIndicatorSize.label,
               labelStyle: theme.textTheme.titleSmall?.copyWith(
                 fontSize: 13,
@@ -241,7 +242,7 @@ class _TeamNameSearchBar extends StatelessWidget {
         return SearchBar(
           key: fieldKey,
           controller: controller,
-          hintText: 'チーム名で検索...',
+          hintText: tr('チーム名で検索...'),
           leading: const Icon(Icons.search),
           elevation: const WidgetStatePropertyAll(0),
           backgroundColor: WidgetStatePropertyAll(
@@ -254,7 +255,7 @@ class _TeamNameSearchBar extends StatelessWidget {
             if (value.text.isNotEmpty)
               IconButton(
                 icon: const Icon(Icons.clear),
-                tooltip: '検索をクリア',
+                tooltip: tr('検索をクリア'),
                 onPressed: controller.clear,
               ),
           ],
@@ -277,15 +278,15 @@ class _SportTeamSearchResults extends ConsumerWidget {
 
     return resultsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('エラー: $e')),
+      error: (e, _) => Center(child: Text(trArgs('エラー: {e}', {'e': '$e'}))),
       data: (teams) {
         if (teams.isEmpty) {
           final followedOnly = sportTabId == HomeSportTabIds.favorites;
           final emptyMessage = followedOnly
               ? (searchQuery.trim().isEmpty
-                    ? 'フォロー中のチームはありません'
-                    : '条件に合うフォロー中のチームはありません')
-              : 'チームが見つかりませんでした';
+                    ? tr('フォロー中のチームはありません')
+                    : tr('条件に合うフォロー中のチームはありません'))
+              : tr('チームが見つかりませんでした');
           return _TeamSearchEmptyState(message: emptyMessage);
         }
         return ListView.builder(

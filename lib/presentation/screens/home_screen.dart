@@ -11,12 +11,14 @@ import '../../domain/policies/home_sport_navigation.dart';
 import '../../domain/policies/team_display_name_policy.dart';
 import '../../domain/policies/team_presentation_policy.dart';
 import '../theme/competition_vs_frame.dart' show contrastRatio;
+import '../theme/presentation_decoration.dart' show teamBrowseCardFill;
 import '../widgets/game_card.dart';
 import '../widgets/game_presentation_scope.dart';
 import '../widgets/sport_sub_nav_bar.dart';
 import '../widgets/team_presentation_badge.dart';
 import '../widgets/calendar_sync_button.dart';
 import 'sport_league_browser.dart';
+import '../../core/config/app_strings.dart';
 
 /// Home screen: upcoming games for followed teams, grouped by sport.
 ///
@@ -95,13 +97,13 @@ class _HomeScaffoldState extends State<_HomeScaffold> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('スポーツカレンダー'),
+        title: Text(tr('スポーツカレンダー')),
         actions: [
           // In-app calendar view (not iCalendar sync).
           if (account.kind == AccountGateKind.ready)
             IconButton(
               icon: const Icon(Icons.event_note_outlined),
-              tooltip: 'スケジュールを表示',
+              tooltip: tr('スケジュールを表示'),
               onPressed: () => context.push('/schedule'),
             ),
           // Calendar sync button
@@ -115,13 +117,12 @@ class _HomeScaffoldState extends State<_HomeScaffold> {
         ],
         bottom: TabBar(
           key: const ValueKey('home-sport-tabs'),
-          // Four sport labels share the phone width. A scrollable Material 3
-          // tab bar adds a 52px start offset plus 16px label padding, which
-          // clips 「その他スポーツ」 at 390px.
-          isScrollable: false,
-          tabAlignment: TabAlignment.fill,
-          padding: EdgeInsets.zero,
-          labelPadding: EdgeInsets.zero,
+          // One tab per sport (up to seven) does not fit the phone width, so
+          // the bar scrolls horizontally from the left edge.
+          isScrollable: true,
+          tabAlignment: TabAlignment.start,
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          labelPadding: const EdgeInsets.symmetric(horizontal: 14),
           indicatorSize: TabBarIndicatorSize.label,
           labelStyle: theme.textTheme.titleSmall?.copyWith(
             fontSize: 13,
@@ -157,7 +158,7 @@ class _HomeScaffoldState extends State<_HomeScaffold> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/search'),
         icon: const Icon(Icons.add),
-        label: const Text('チームを追加'),
+        label: Text(tr('チームを追加')),
       ),
     );
   }
@@ -204,7 +205,7 @@ class _HomeSportFeed extends ConsumerWidget {
       case AccountGateKind.loading:
         return const Center(child: CircularProgressIndicator());
       case AccountGateKind.failed:
-        return Center(child: Text('エラー: ${account.error}'));
+        return Center(child: Text(trArgs('エラー: {e}', {'e': '${account.error}'})));
       case AccountGateKind.signedOut:
         return const _SignInPrompt();
       case AccountGateKind.missingProfile:
@@ -226,7 +227,7 @@ class _ProfileUnavailable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(child: Text('プロフィールを確認できません'));
+    return Center(child: Text(tr('プロフィールを確認できません')));
   }
 }
 
@@ -247,7 +248,7 @@ class _HomeContent extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return followedTeamsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('エラー: $e')),
+      error: (e, _) => Center(child: Text(trArgs('エラー: {e}', {'e': '$e'}))),
       data: (teams) {
         if (teams.isEmpty) {
           return const _EmptyFollowedTeams();
@@ -265,7 +266,7 @@ class _HomeContent extends ConsumerWidget {
               const Center(child: CircularProgressIndicator()),
             ],
           ),
-          error: (e, _) => Center(child: Text('エラー: $e')),
+          error: (e, _) => Center(child: Text(trArgs('エラー: {e}', {'e': '$e'}))),
           data: (homeGames) {
             final games = gamesForHomeSportTab(homeGames.games, tab);
             return GamePresentationScope(
@@ -322,7 +323,7 @@ class _FollowedTeamsSection extends StatelessWidget {
               Icon(Icons.favorite, size: 18, color: colorScheme.primary),
               const SizedBox(width: 8),
               Text(
-                'フォロー中のチーム',
+                tr('フォロー中のチーム'),
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -371,15 +372,17 @@ class _FollowedTeamCard extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final logoUrl = teamPresentationLogo(team);
     final displayName = teamDisplayNames.teamName(team);
-    // Reviewed team color when present; otherwise the neutral surface.
-    final teamColor = parseTeamPresentationColor(team.presentationColor);
-    final fill = teamColor ?? backgroundColor;
-    final ink = teamColor == null
-        ? null
-        : contrastRatio(Colors.white, teamColor) >=
-              contrastRatio(Colors.black, teamColor)
+    // The provider / reviewed team color when present. Otherwise a stable
+    // decorative color for the team id, so every card is colored. These
+    // fallback colors are not official kit colors.
+    final fill =
+        parseTeamPresentationColor(team.presentationColor) ??
+        teamBrowseCardFill(team.id);
+    final ink =
+        contrastRatio(Colors.white, fill) >= contrastRatio(Colors.black, fill)
         ? Colors.white
         : Colors.black;
+    final teamColor = fill;
 
     return SizedBox(
       width: 196,
@@ -394,7 +397,7 @@ class _FollowedTeamCard extends StatelessWidget {
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: teamColor ?? borderColor),
+              border: Border.all(color: teamColor),
             ),
             child: Row(
               children: [
@@ -449,14 +452,14 @@ class _NoUpcomingGames extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              '直近の試合はありません',
+              tr('直近の試合はありません'),
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 6),
             Text(
-              'フォロー中チームの試合が追加されると、ここに表示されます。',
+              tr('フォロー中チームの試合が追加されると、ここに表示されます。'),
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onSurfaceVariant,
@@ -491,7 +494,7 @@ class _EmptyFollowedTeams extends StatelessWidget {
               Icon(Icons.sports, size: 72, color: colorScheme.outline),
               const SizedBox(height: 16),
               Text(
-                'フォローしているチームがありません',
+                tr('フォローしているチームがありません'),
                 style: Theme.of(
                   context,
                 ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -499,7 +502,7 @@ class _EmptyFollowedTeams extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                '「チームを追加」からお気に入りのチームを登録してください。',
+                tr('「チームを追加」からお気に入りのチームを登録してください。'),
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
@@ -509,7 +512,7 @@ class _EmptyFollowedTeams extends StatelessWidget {
               FilledButton.icon(
                 onPressed: () => context.push('/search'),
                 icon: const Icon(Icons.search),
-                label: const Text('チームを探す'),
+                label: Text(tr('チームを探す')),
               ),
             ],
           ),
@@ -543,7 +546,7 @@ class _EmptySportFollow extends StatelessWidget {
               Icon(Icons.sports, size: 72, color: colorScheme.outline),
               const SizedBox(height: 16),
               Text(
-                '$labelでフォローしているチームがありません',
+                trArgs('{label}でフォローしているチームがありません', {'label': label}),
                 style: Theme.of(
                   context,
                 ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -551,7 +554,7 @@ class _EmptySportFollow extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                '「チームを追加」から、このスポーツのチームを登録できます。',
+                tr('「チームを追加」から、このスポーツのチームを登録できます。'),
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
@@ -561,7 +564,7 @@ class _EmptySportFollow extends StatelessWidget {
               FilledButton.icon(
                 onPressed: () => context.push('/search'),
                 icon: const Icon(Icons.search),
-                label: const Text('チームを探す'),
+                label: Text(tr('チームを探す')),
               ),
             ],
           ),
@@ -593,7 +596,7 @@ class _SignInPrompt extends StatelessWidget {
               Icon(Icons.lock_outline, size: 72, color: colorScheme.outline),
               const SizedBox(height: 16),
               Text(
-                'サインインが必要です',
+                tr('サインインが必要です'),
                 style: Theme.of(
                   context,
                 ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -601,7 +604,7 @@ class _SignInPrompt extends StatelessWidget {
               const SizedBox(height: 24),
               FilledButton(
                 onPressed: () => context.push('/signin'),
-                child: const Text('サインイン'),
+                child: Text(tr('サインイン')),
               ),
             ],
           ),

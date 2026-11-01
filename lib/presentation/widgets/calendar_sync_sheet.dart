@@ -7,6 +7,7 @@ import '../../data/providers/repository_providers.dart';
 import '../../data/repositories/google_calendar_connection_repository.dart';
 import 'google_calendar_connection_tile.dart';
 import 'ics_share_sheet.dart';
+import '../../core/config/app_strings.dart';
 
 typedef EnsureCalendarFeed = Future<String> Function();
 typedef ExternalUriLauncher = Future<bool> Function(Uri uri);
@@ -25,8 +26,8 @@ class CalendarIcsActionButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) => IconButton(
         tooltip: action == CalendarIcsAction.apple
-            ? 'Apple Calendarで開く'
-            : '購読URLをコピー・共有',
+            ? tr('Apple Calendarで開く')
+            : tr('購読URLをコピー・共有'),
         icon: Icon(action == CalendarIcsAction.apple
             ? Icons.open_in_new
             : Icons.chevron_right),
@@ -50,8 +51,8 @@ class CalendarIcsActionButton extends ConsumerWidget {
             if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                 content: Text(action == CalendarIcsAction.apple
-                    ? 'Apple Calendarを開けませんでした'
-                    : '購読URLを取得できませんでした'),
+                    ? tr('Apple Calendarを開けませんでした')
+                    : tr('購読URLを取得できませんでした')),
               ));
             }
           }
@@ -100,7 +101,7 @@ class CalendarSyncSheet extends StatelessWidget {
           (uri) => launchUrl(uri, mode: LaunchMode.externalApplication))(uri);
       if (!opened) throw StateError('Apple Calendar could not be opened');
     } catch (_) {
-      if (context.mounted) _showError(context, 'Apple Calendarを開けませんでした');
+      if (context.mounted) _showError(context, tr('Apple Calendarを開けませんでした'));
     }
   }
 
@@ -109,7 +110,7 @@ class CalendarSyncSheet extends StatelessWidget {
       final url = await _icsUrl();
       if (context.mounted) await IcsShareSheet.show(context, url);
     } catch (_) {
-      if (context.mounted) _showError(context, '購読URLを取得できませんでした');
+      if (context.mounted) _showError(context, tr('購読URLを取得できませんでした'));
     }
   }
 
@@ -126,7 +127,7 @@ class CalendarSyncSheet extends StatelessWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Text('カレンダーに同期',
+                child: Text(tr('カレンダーに同期'),
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         )),
@@ -140,14 +141,14 @@ class CalendarSyncSheet extends StatelessWidget {
               ListTile(
                 leading: const Icon(Icons.apple),
                 title: const Text('Apple Calendar'),
-                subtitle: const Text('Apple Calendarで購読'),
+                subtitle: Text(tr('Apple Calendarで購読')),
                 trailing: const Icon(Icons.open_in_new),
                 onTap: () => _openApple(context),
               ),
               ListTile(
                 leading: const Icon(Icons.calendar_month),
-                title: const Text('その他のカレンダー'),
-                subtitle: const Text('購読URLをコピー・共有'),
+                title: Text(tr('その他のカレンダー')),
+                subtitle: Text(tr('購読URLをコピー・共有')),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => _openOther(context),
               ),

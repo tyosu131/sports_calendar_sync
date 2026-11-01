@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../core/config/app_strings.dart';
 
 /// Must match the reviewed Hosting/Branding origin for the released build.
 /// The default is the prepared site, not evidence that it has been published.
@@ -18,7 +19,7 @@ Uri publicPolicyUri(String path, {String origin = publicSiteUrl}) {
       base.hasFragment ||
       (base.path.isNotEmpty && base.path != '/') ||
       !const ['/', '/privacy', '/terms'].contains(path)) {
-    throw const FormatException('Invalid public policy URL');
+    throw FormatException('Invalid public policy URL');
   }
   return base.resolve(path);
 }
@@ -41,7 +42,7 @@ class PublicPolicyLinks extends StatelessWidget {
     }
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('ページを開けませんでした。時間をおいて再度お試しください。')),
+        SnackBar(content: Text(tr('ページを開けませんでした。時間をおいて再度お試しください。'))),
       );
     }
   }
@@ -50,10 +51,10 @@ class PublicPolicyLinks extends StatelessWidget {
   Widget build(BuildContext context) => Wrap(
     alignment: WrapAlignment.center,
     children: [
-      for (final (label, path) in const [
-        ('アプリについて', '/'),
-        ('プライバシーポリシー', '/privacy'),
-        ('利用規約', '/terms'),
+      for (final (label, path) in [
+        (tr('アプリについて'), '/'),
+        (tr('プライバシーポリシー'), '/privacy'),
+        (tr('利用規約'), '/terms'),
       ])
         TextButton(onPressed: () => _open(context, path), child: Text(label)),
     ],

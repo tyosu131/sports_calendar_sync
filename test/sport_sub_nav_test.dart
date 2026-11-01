@@ -271,7 +271,7 @@ void main() {
         findsOneWidget,
       );
       expect(
-        _inPage(HomeSportTabIds.football, find.text('プレミアリーグ')),
+        _inPage(HomeSportTabIds.football, find.text('Premier League')),
         findsOneWidget,
       );
       expect(_inPage(HomeSportTabIds.football, find.text('NPB')), findsNothing);
@@ -298,7 +298,7 @@ void main() {
         findsNothing,
       );
       expect(
-        _inPage(HomeSportTabIds.football, find.text('プレミアリーグ')),
+        _inPage(HomeSportTabIds.football, find.text('Premier League')),
         findsOneWidget,
       );
       await tester.tap(find.byTooltip('検索をクリア'));
@@ -410,12 +410,12 @@ void main() {
       );
       _expectTwoDestinations(tester);
 
-      await tester.tap(find.text('その他スポーツ'));
+      await tester.tap(find.text('バスケ'));
       await tester.pumpAndSettle();
       _expectSelectedIcons(tester, leagues: false);
       expect(
         _inPage(
-          HomeSportTabIds.other,
+          HomeSportTabIds.basketball,
           find.byKey(const ValueKey('sport-league-basketball_nba')),
         ),
         findsNothing,
@@ -429,21 +429,23 @@ void main() {
       await tester.pumpAndSettle();
       expect(
         _inPage(
-          HomeSportTabIds.other,
+          HomeSportTabIds.basketball,
           find.byKey(const ValueKey('sport-league-basketball_nba')),
         ),
         findsOneWidget,
       );
       expect(
         _inPage(
-          HomeSportTabIds.other,
+          HomeSportTabIds.basketball,
           find.byKey(const ValueKey('sport-league-basketball_b_league')),
         ),
         findsOneWidget,
       );
-      expect(_inPage(HomeSportTabIds.other, find.text('NPB')), findsNothing);
+      expect(_inPage(HomeSportTabIds.basketball, find.text('NPB')), findsNothing);
       _expectTwoDestinations(tester);
 
+      // The tab bar scrolls; bring the first tab back into view.
+      await tester.ensureVisible(find.text('お気に入り'));
       await tester.tap(find.text('お気に入り'));
       await tester.pumpAndSettle();
       expect(find.byType(NavigationBar), findsNothing);
@@ -635,7 +637,7 @@ void main() {
       ],
     );
     expect(find.text('このリーグのチームはまだありません'), findsOneWidget);
-    expect(find.text('プレミアリーグ'), findsOneWidget);
+    expect(find.text('Premier League'), findsOneWidget);
 
     await pumpScreen(competitionKey: 'not_a_league');
     expect(find.text('このリーグは見つかりません'), findsOneWidget);

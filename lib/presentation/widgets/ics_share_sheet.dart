@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
+import '../../core/config/app_strings.dart';
 
 /// Actions for calendar clients that consume a generic ICS subscription URL.
 ///
@@ -27,31 +28,31 @@ class IcsShareSheet extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('その他のカレンダー',
+              Text(tr('その他のカレンダー'),
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       )),
               const SizedBox(height: 8),
-              const Text('お使いのカレンダーに購読URLを登録してください。'),
+              Text(tr('お使いのカレンダーに購読URLを登録してください。')),
               const SizedBox(height: 16),
               ListTile(
                 leading: const Icon(Icons.copy),
-                title: const Text('購読URLをコピー'),
+                title: Text(tr('購読URLをコピー')),
                 onTap: () async {
                   await Clipboard.setData(ClipboardData(text: icsUrl));
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('購読URLをコピーしました')),
+                      SnackBar(content: Text(tr('購読URLをコピーしました'))),
                     );
                   }
                 },
               ),
               ListTile(
                 leading: const Icon(Icons.share),
-                title: const Text('URLをシェア'),
+                title: Text(tr('URLをシェア')),
                 onTap: () => SharePlus.instance.share(ShareParams(
                   text: icsUrl,
-                  subject: 'スポーツカレンダー購読URL',
+                  subject: tr('スポーツカレンダー購読URL'),
                 )),
               ),
             ],

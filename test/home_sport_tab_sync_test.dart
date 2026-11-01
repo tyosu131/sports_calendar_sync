@@ -88,13 +88,21 @@ double _pageLeft(WidgetTester tester, String id) {
   return tester.getTopLeft(find.byKey(ValueKey('home-sport-page-$id'))).dx;
 }
 
-const _sportTabLabels = ['お気に入り', '野球', 'サッカー', 'その他スポーツ'];
+const _sportTabLabels = [
+  'お気に入り',
+  '野球',
+  'サッカー',
+  'バスケ',
+  'アメフト',
+  'ホッケー',
+  '格闘技',
+];
 
 void _expectSportTabLabelsFit(WidgetTester tester) {
   final bar = find.byType(TabBar);
-  final barRect = tester.getRect(bar);
   final tabBar = tester.widget<TabBar>(bar);
-  expect(tabBar.isScrollable, isFalse);
+  // One tab per sport does not fit 390px, so the bar scrolls.
+  expect(tabBar.isScrollable, isTrue);
   expect(tester.getSize(bar).width, 390);
 
   for (final label in _sportTabLabels) {
@@ -105,8 +113,8 @@ void _expectSportTabLabelsFit(WidgetTester tester) {
     expect(text.overflow, isNot(TextOverflow.ellipsis));
 
     final rect = tester.getRect(finder);
-    expect(rect.left, greaterThanOrEqualTo(barRect.left - 0.5));
-    expect(rect.right, lessThanOrEqualTo(barRect.right + 0.5));
+    // Tabs scroll horizontally, so only the full label width is checked.
+    expect(rect.width, greaterThan(0));
 
     final paragraph = tester.renderObject<RenderParagraph>(finder);
     final painter = TextPainter(
@@ -274,7 +282,8 @@ void main() {
     await _pumpHome(tester, profile: _profile(const []));
     _expectSportTabLabelsFit(tester);
 
-    await tester.tap(find.text('その他スポーツ'));
+    await tester.ensureVisible(find.text('格闘技'));
+    await tester.tap(find.text('格闘技'));
     await tester.pumpAndSettle();
     _expectSportTabLabelsFit(tester);
     expect(find.byKey(const ValueKey('sport-sub-nav')), findsOneWidget);
