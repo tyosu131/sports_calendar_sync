@@ -5,7 +5,7 @@ const { test } = require('node:test');
 const search = require('./fixtures/thesportsdb/team-search.json');
 const { parseTeamInfos, parseTeamColor } = require('../lib/providers/thesportsdb/client');
 const {
-  syncTeamColors, matchingTeam, TEAM_COLOR_SCOPES, TEAM_COLOR_LOOKUPS_PER_RUN,
+  syncTeamColors, matchingTeam, clubNames, TEAM_COLOR_SCOPES, TEAM_COLOR_LOOKUPS_PER_RUN,
 } = require('../lib/pipelines/syncTeamColors');
 
 const NOW = new Date('2026-11-01T00:00:00Z');
@@ -58,7 +58,9 @@ test('colors are saved when found; a club with no provider color is marked check
   const summary = await syncTeamColors('123', { source, persistence: store, now: () => NOW });
   assert.deepEqual(summary, {
     looked: 4, colorsSaved: 2, noColor: 2, failed: [],
-    noColorTeams: ['kawasaki_frontale (Kawasaki Frontale)', 'unknown_fc (Nobody FC)'],
+    // Kawasaki is at the provider with an empty color; "Nobody FC" is not there at all.
+    noColorTeams: ['kawasaki_frontale (Kawasaki Frontale)'],
+    noMatchTeams: ['unknown_fc (Nobody FC)'],
   });
   const byId = Object.fromEntries(store.updates.map((u) => [u.id, u.fields]));
   assert.equal(byId.tsdb_team_134923.presentationColor, '#FB4F14');
@@ -94,4 +96,12 @@ test('teams outside the color scopes are ignored', async () => {
   const summary = await syncTeamColors('123', { source: { searchTeams: async () => { throw new Error('no'); } }, persistence: store, now: () => NOW });
   assert.equal(summary.looked, 0);
   assert.equal(store.updates.length, 0);
+});
+
+test('a short catalog name also matches the provider\'s fuller name', () => {
+  assert.ok(clubNames('Kashima').includes('Kashima Antlers'));
+  const provider = [{ idTeam: '9', strTeam: 'Kashima Antlers', strSport: 'Soccer', strCountry: 'Japan', primaryColor: '#B1002D' }];
+  assert.equal(matchingTeam(provider, 'Kashima', jScope), undefined);
+  assert.equal(matchingTeam(provider, clubNames('Kashima'), jScope).idTeam, '9');
+  assert.equal(matchingTeam(provider, clubNames('Kashima'), { sport: 'Soccer', country: 'England' }), undefined);
 });

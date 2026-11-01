@@ -33,17 +33,21 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.TEAM_COLOR_SCOPES = exports.TEAM_COLOR_RUN_BUDGET_MS = exports.TEAM_COLOR_RECHECK_DAYS = exports.TEAM_COLOR_LOOKUPS_PER_RUN = void 0;
+exports.TEAM_COLOR_SCOPES = exports.TEAM_COLOR_CHECK_VERSION = exports.TEAM_COLOR_RUN_BUDGET_MS = exports.TEAM_COLOR_RECHECK_DAYS = exports.TEAM_COLOR_LOOKUPS_PER_RUN = void 0;
 exports.firestoreTeamColorPersistence = firestoreTeamColorPersistence;
+exports.clubNames = clubNames;
 exports.matchingTeam = matchingTeam;
 exports.syncTeamColors = syncTeamColors;
 const admin = __importStar(require("firebase-admin"));
 const client_1 = require("../providers/thesportsdb/client");
+const clubPresentation_1 = require("../domain/clubPresentation");
 /** Team color lookups per run. One burst stays under the provider's rate limit. */
 exports.TEAM_COLOR_LOOKUPS_PER_RUN = 10;
 /** A team the provider had no color for is asked again after this many days. */
 exports.TEAM_COLOR_RECHECK_DAYS = 30;
 exports.TEAM_COLOR_RUN_BUDGET_MS = 240000;
+/** Bump when matching rules change, so teams checked under older rules are looked at again. */
+exports.TEAM_COLOR_CHECK_VERSION = "2";
 /**
  * Competitions whose team colors are read, and what the provider must say
  * about a matching team. A name alone is never trusted: sport and country
@@ -67,7 +71,8 @@ function firestoreTeamColorPersistence(db) {
                 if (doc.get("presentationColor"))
                     continue;
                 const checked = Date.parse(String(doc.get("presentationColorCheckedAt") ?? ""));
-                if (Number.isFinite(checked) && checked > cutoff)
+                if (Number.isFinite(checked) && checked > cutoff &&
+                    doc.get("presentationColorCheckVersion") === exports.TEAM_COLOR_CHECK_VERSION)
                     continue;
                 const sourceTeamId = doc.get("sourceProvider") === "thesportsdb" ? doc.get("sourceTeamId") : undefined;
                 result.push({
@@ -87,12 +92,24 @@ function firestoreTeamColorPersistence(db) {
 function nameKey(value) {
     return value.normalize("NFKC").toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
 }
-/** The one provider team that is the same club, or undefined. Sport, country and exact name must agree. */
-function matchingTeam(candidates, nameEn, scope) {
-    const key = nameKey(nameEn);
-    if (!key)
+/**
+ * English names that identify a club: its own name plus the English aliases in
+ * the reviewed presentation catalog (e.g. "Kashima" and "Kashima Antlers").
+ */
+function clubNames(nameEn) {
+    const entry = (0, clubPresentation_1.clubPresentation)([nameEn]);
+    const aliases = (entry?.aliases ?? []).filter((alias) => /^[\x20-\x7e]+$/.test(alias));
+    return [...new Set([nameEn, ...aliases])];
+}
+/**
+ * The one provider team that is the same club, or undefined. Sport and country
+ * must agree and the provider name must equal one of [names] exactly.
+ */
+function matchingTeam(candidates, names, scope) {
+    const keys = new Set((typeof names === "string" ? [names] : names).map(nameKey).filter(Boolean));
+    if (keys.size === 0)
         return undefined;
-    const matches = candidates.filter((team) => team.strSport === scope.sport && team.strCountry === scope.country && nameKey(team.strTeam) === key);
+    const matches = candidates.filter((team) => team.strSport === scope.sport && team.strCountry === scope.country && keys.has(nameKey(team.strTeam)));
     return matches.length === 1 ? matches[0] : undefined;
 }
 /**
@@ -110,7 +127,7 @@ async function syncTeamColors(apiKey, options = {}) {
     }
     const persistence = options.persistence ?? firestoreTeamColorPersistence(admin.firestore());
     const now = (options.now ?? (() => new Date()))();
-    const summary = { looked: 0, colorsSaved: 0, noColor: 0, noColorTeams: [], failed: [] };
+    const summary = { looked: 0, colorsSaved: 0, noColor: 0, noColorTeams: [], noMatchTeams: [], failed: [] };
     const targets = (await persistence.targets(now)).slice(0, options.limit ?? exports.TEAM_COLOR_LOOKUPS_PER_RUN);
     for (const target of targets) {
         const scope = exports.TEAM_COLOR_SCOPES[target.competitionKey];
@@ -124,12 +141,12 @@ async function syncTeamColors(apiKey, options = {}) {
                     continue;
                 const found = await source.lookupTeamColor(target.sourceTeamId);
                 color = found?.primaryColor;
-                providerTeamId = target.sourceTeamId;
+                providerTeamId = found ? target.sourceTeamId : undefined;
             }
             else {
                 if (!source.searchTeams)
                     continue;
-                const found = matchingTeam(await source.searchTeams(target.nameEn), target.nameEn, scope);
+                const found = matchingTeam(await source.searchTeams(target.nameEn), clubNames(target.nameEn), scope);
                 color = found?.primaryColor;
                 providerTeamId = found?.idTeam;
             }
@@ -139,13 +156,18 @@ async function syncTeamColors(apiKey, options = {}) {
                     presentationColor: color,
                     presentationColorSource: `thesportsdb:${providerTeamId}`,
                     presentationColorCheckedAt: now.toISOString(),
+                    presentationColorCheckVersion: exports.TEAM_COLOR_CHECK_VERSION,
                 });
                 summary.colorsSaved += 1;
             }
             else {
-                await persistence.update(target.id, { presentationColorCheckedAt: now.toISOString() });
+                await persistence.update(target.id, {
+                    presentationColorCheckedAt: now.toISOString(),
+                    presentationColorCheckVersion: exports.TEAM_COLOR_CHECK_VERSION,
+                });
                 summary.noColor += 1;
-                summary.noColorTeams.push(`${target.id} (${target.nameEn})`);
+                // Found at the provider without a color, or not found at all?
+                (providerTeamId ? summary.noColorTeams : summary.noMatchTeams).push(`${target.id} (${target.nameEn})`);
             }
         }
         catch (error) {
