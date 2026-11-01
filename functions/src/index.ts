@@ -150,3 +150,15 @@ export const triggerTheSportsDbSync = functions
     requireAdmin(context);
     return { success: true, summary: await syncTheSportsDb(THESPORTSDB_API_KEY.value()) };
   });
+
+import { syncTeamColors } from "./pipelines/syncTeamColors";
+
+/** Fills in team colors from the provider, ten teams per run, until every team has been checked. */
+export const scheduledSyncTeamColors = functions
+  .runWith({ timeoutSeconds: 300 })
+  .region("asia-northeast1")
+  .pubsub.schedule("every 2 hours")
+  .timeZone("Asia/Tokyo")
+  .onRun(async (_context: unknown) => {
+    await syncTeamColors(THESPORTSDB_API_KEY.value());
+  });

@@ -48,10 +48,21 @@ export interface TsdbTeamColor {
   primaryColor?: string;
 }
 
+/** One team from `searchteams.php`. Color is `#RRGGBB` or absent (the provider often leaves it empty). */
+export interface TsdbTeamInfo {
+  idTeam: string;
+  strTeam: string;
+  strSport: string;
+  strCountry: string;
+  primaryColor?: string;
+}
+
 export interface TsdbEventSource {
   eventsRound(leagueId: string, round: number, season: string): Promise<TsdbEvent[]>;
   /** Primary team color from the provider. Optional so event-only test sources keep working. */
   lookupTeamColor?(teamId: string): Promise<TsdbTeamColor | undefined>;
+  /** Teams matching a name, with sport, country and color. */
+  searchTeams?(name: string): Promise<TsdbTeamInfo[]>;
 }
 
 const BASE_URL = "https://www.thesportsdb.com/api/v1/json";
@@ -95,6 +106,10 @@ export class TheSportsDbClient implements TsdbEventSource {
 
   async lookupTeamColor(teamId: string): Promise<TsdbTeamColor | undefined> {
     return this.getWithRetry(`/lookupteam.php?id=${encodeURIComponent(teamId)}`, parseTeamColor);
+  }
+
+  async searchTeams(name: string): Promise<TsdbTeamInfo[]> {
+    return this.getWithRetry(`/searchteams.php?t=${encodeURIComponent(name)}`, parseTeamInfos);
   }
 
   private async getWithRetry<T>(path: string, parse: (body: unknown) => T): Promise<T> {
@@ -205,4 +220,32 @@ export function parseTeamColor(body: unknown): TsdbTeamColor | undefined {
     idTeam: team.idTeam,
     ...(typeof color === "string" && /^#[0-9a-fA-F]{6}$/.test(color.trim()) ? { primaryColor: color.trim().toUpperCase() } : {}),
   };
+}
+
+function validColor(value: unknown): string | undefined {
+  return typeof value === "string" && /^#[0-9a-fA-F]{6}$/.test(value.trim()) ? value.trim().toUpperCase() : undefined;
+}
+
+/** `{"teams":[...]}` or `{"teams":null}` (no match). Entries without an id or name are dropped. */
+export function parseTeamInfos(body: unknown): TsdbTeamInfo[] {
+  if (!body || typeof body !== "object" || !("teams" in body)) {
+    throw new TsdbApiError("invalid_response", "TheSportsDB response has no teams field");
+  }
+  const teams = (body as { teams: unknown }).teams;
+  if (teams === null) return [];
+  if (!Array.isArray(teams)) throw new TsdbApiError("invalid_response", "TheSportsDB teams is not a list");
+  const result: TsdbTeamInfo[] = [];
+  for (const value of teams) {
+    const team = value as Record<string, unknown> | null;
+    if (!team || typeof team.idTeam !== "string" || typeof team.strTeam !== "string") continue;
+    const color = validColor(team.strColour1);
+    result.push({
+      idTeam: team.idTeam,
+      strTeam: team.strTeam,
+      strSport: typeof team.strSport === "string" ? team.strSport : "",
+      strCountry: typeof team.strCountry === "string" ? team.strCountry : "",
+      ...(color ? { primaryColor: color } : {}),
+    });
+  }
+  return result;
 }

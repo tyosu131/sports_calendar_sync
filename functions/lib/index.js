@@ -49,7 +49,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.triggerTheSportsDbSync = exports.scheduledSyncTheSportsDb = exports.triggerFootballSync = exports.scheduledSyncFootball = exports.syncGoogleCalendarOnFollowChange = exports.syncGoogleCalendarNow = exports.googleCalendarOAuthCallback = exports.disconnectGoogleCalendar = exports.getGoogleCalendarConnectionStatus = exports.beginGoogleCalendarConnection = exports.rotateCalendarFeed = exports.ensureCalendarFeed = exports.getCalendar = void 0;
+exports.scheduledSyncTeamColors = exports.triggerTheSportsDbSync = exports.scheduledSyncTheSportsDb = exports.triggerFootballSync = exports.scheduledSyncFootball = exports.syncGoogleCalendarOnFollowChange = exports.syncGoogleCalendarNow = exports.googleCalendarOAuthCallback = exports.disconnectGoogleCalendar = exports.getGoogleCalendarConnectionStatus = exports.beginGoogleCalendarConnection = exports.rotateCalendarFeed = exports.ensureCalendarFeed = exports.getCalendar = void 0;
 const admin = __importStar(require("firebase-admin"));
 const functions = __importStar(require("firebase-functions/v1"));
 const params_1 = require("firebase-functions/params");
@@ -179,5 +179,15 @@ exports.triggerTheSportsDbSync = functions
     .https.onCall(async (_data, context) => {
     (0, adminAuthorization_1.requireAdmin)(context);
     return { success: true, summary: await (0, syncTheSportsDb_1.syncTheSportsDb)(THESPORTSDB_API_KEY.value()) };
+});
+const syncTeamColors_1 = require("./pipelines/syncTeamColors");
+/** Fills in team colors from the provider, ten teams per run, until every team has been checked. */
+exports.scheduledSyncTeamColors = functions
+    .runWith({ timeoutSeconds: 300 })
+    .region("asia-northeast1")
+    .pubsub.schedule("every 2 hours")
+    .timeZone("Asia/Tokyo")
+    .onRun(async (_context) => {
+    await (0, syncTeamColors_1.syncTeamColors)(THESPORTSDB_API_KEY.value());
 });
 //# sourceMappingURL=index.js.map

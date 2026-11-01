@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.TSDB_COLOR_LOOKUPS_PER_RUN = exports.TSDB_WRITE_CHUNK_SIZE = exports.TSDB_RUN_BUDGET_MS = exports.UFC_CARDS_PER_RUN = exports.UFC_MAX_ROUND = exports.NFL_WEEKS_AFTER = exports.NFL_WEEKS_BEFORE = exports.NFL_REGULAR_SEASON_ROUNDS = exports.TSDB_COMPETITIONS = void 0;
+exports.TSDB_WRITE_CHUNK_SIZE = exports.TSDB_RUN_BUDGET_MS = exports.UFC_CARDS_PER_RUN = exports.UFC_MAX_ROUND = exports.NFL_WEEKS_AFTER = exports.NFL_WEEKS_BEFORE = exports.NFL_REGULAR_SEASON_ROUNDS = exports.TSDB_COMPETITIONS = void 0;
 exports.nflSeason = nflSeason;
 exports.ufcSeasons = ufcSeasons;
 exports.nflRoundsToRead = nflRoundsToRead;
@@ -67,8 +67,6 @@ const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 /** The scheduled function times out at 540 s; stop waiting well before that. */
 exports.TSDB_RUN_BUDGET_MS = 480000;
 exports.TSDB_WRITE_CHUNK_SIZE = 400;
-/** Team color lookups per run. Each is one more provider call, so colors fill in over several runs. */
-exports.TSDB_COLOR_LOOKUPS_PER_RUN = 8;
 /** NFL seasons are named by the year they start; January–February belong to the previous year. */
 function nflSeason(now) {
     const year = now.getUTCFullYear();
@@ -97,10 +95,6 @@ function firestorePersistence(db) {
         gameRef: (id) => db.collection("games").doc(id),
         teamRef: (id) => db.collection("teams").doc(id),
         newBatch: () => db.batch(),
-        teamsWithoutColor: async (teamIds) => {
-            const snapshots = await Promise.all(teamIds.map((id) => db.collection("teams").doc(id).get()));
-            return snapshots.filter((snapshot) => !snapshot.get("presentationColor")).map((snapshot) => snapshot.id);
-        },
     };
 }
 /**
@@ -181,8 +175,6 @@ async function syncTheSportsDb(apiKey, options = {}) {
     let fetched = 0;
     let games = 0;
     let teams = 0;
-    let colors = 0;
-    const colorCandidates = [];
     for (const competition of options.competitions ?? exports.TSDB_COMPETITIONS) {
         const writes = new Map();
         const batches = [];
@@ -269,31 +261,6 @@ async function syncTheSportsDb(apiKey, options = {}) {
                 games += 1;
             else
                 teams += 1;
-            if (competition.kind === "teams" && write.kind === "team")
-                colorCandidates.push(write.id);
-        }
-    }
-    // Team colors come from the provider, a few per run, for teams that have none
-    // yet. Last, so a short time budget costs colors before it costs games.
-    if (colorCandidates.length > 0 && inner.lookupTeamColor) {
-        try {
-            const missing = (await persistence.teamsWithoutColor(colorCandidates)).slice(0, exports.TSDB_COLOR_LOOKUPS_PER_RUN);
-            const colorWrites = new Map();
-            for (const teamId of missing) {
-                requests += 1;
-                const found = await inner.lookupTeamColor(teamId.replace(/^tsdb_team_/, ""));
-                if (found?.primaryColor) {
-                    colorWrites.set(`team:${teamId}`, { kind: "team", id: teamId, data: { presentationColor: found.primaryColor } });
-                    colors += 1;
-                }
-                // Keep what was read if a later lookup is throttled.
-                await persist(persistence, colorWrites);
-                colorWrites.clear();
-            }
-        }
-        catch (error) {
-            failedRounds.push("colors");
-            console.error("TheSportsDB read failed", { label: "colors", error: error instanceof Error ? error.message : String(error) });
         }
     }
     const summary = {
@@ -302,7 +269,6 @@ async function syncTheSportsDb(apiKey, options = {}) {
         eventsFetched: fetched,
         gamesUpserted: games,
         teamsUpserted: teams,
-        colorsSaved: colors,
         skipCounts,
     };
     console.info("TheSportsDB sync complete", summary);

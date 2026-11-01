@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TheSportsDbClient = exports.TsdbApiError = void 0;
 exports.parseEvents = parseEvents;
 exports.parseTeamColor = parseTeamColor;
+exports.parseTeamInfos = parseTeamInfos;
 const axios_1 = __importDefault(require("axios"));
 class TsdbApiError extends Error {
     constructor(kind, message, status, 
@@ -55,6 +56,9 @@ class TheSportsDbClient {
     }
     async lookupTeamColor(teamId) {
         return this.getWithRetry(`/lookupteam.php?id=${encodeURIComponent(teamId)}`, parseTeamColor);
+    }
+    async searchTeams(name) {
+        return this.getWithRetry(`/searchteams.php?t=${encodeURIComponent(name)}`, parseTeamInfos);
     }
     async getWithRetry(path, parse) {
         for (let attempt = 0;; attempt += 1) {
@@ -173,5 +177,34 @@ function parseTeamColor(body) {
         idTeam: team.idTeam,
         ...(typeof color === "string" && /^#[0-9a-fA-F]{6}$/.test(color.trim()) ? { primaryColor: color.trim().toUpperCase() } : {}),
     };
+}
+function validColor(value) {
+    return typeof value === "string" && /^#[0-9a-fA-F]{6}$/.test(value.trim()) ? value.trim().toUpperCase() : undefined;
+}
+/** `{"teams":[...]}` or `{"teams":null}` (no match). Entries without an id or name are dropped. */
+function parseTeamInfos(body) {
+    if (!body || typeof body !== "object" || !("teams" in body)) {
+        throw new TsdbApiError("invalid_response", "TheSportsDB response has no teams field");
+    }
+    const teams = body.teams;
+    if (teams === null)
+        return [];
+    if (!Array.isArray(teams))
+        throw new TsdbApiError("invalid_response", "TheSportsDB teams is not a list");
+    const result = [];
+    for (const value of teams) {
+        const team = value;
+        if (!team || typeof team.idTeam !== "string" || typeof team.strTeam !== "string")
+            continue;
+        const color = validColor(team.strColour1);
+        result.push({
+            idTeam: team.idTeam,
+            strTeam: team.strTeam,
+            strSport: typeof team.strSport === "string" ? team.strSport : "",
+            strCountry: typeof team.strCountry === "string" ? team.strCountry : "",
+            ...(color ? { primaryColor: color } : {}),
+        });
+    }
+    return result;
 }
 //# sourceMappingURL=client.js.map

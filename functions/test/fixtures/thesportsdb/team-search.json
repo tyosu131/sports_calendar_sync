@@ -1,0 +1,7 @@
+{
+  "_source": "Trimmed from owner-run curl of https://www.thesportsdb.com/api/v1/json/123/searchteams.php (2026-11-01). Only fields the app reads are kept.",
+  "kawasaki": {"teams": [{"idTeam": "137709", "strTeam": "Kawasaki Frontale", "strSport": "Soccer", "strColour1": "", "strCountry": "Japan"}]},
+  "arsenal": {"teams": [{"idTeam": "133604", "strTeam": "Arsenal", "strSport": "Soccer", "strColour1": "#EF0107", "strCountry": "England"}]},
+  "japan": {"teams": [{"idTeam": "134503", "strTeam": "Japan", "strSport": "Soccer", "strColour1": "#000080", "strCountry": "Japan"}]},
+  "bengals": {"teams": [{"idTeam": "134923", "strTeam": "Cincinnati Bengals", "strColour1": "#FB4F14", "strColour2": "#000000"}]}
+}

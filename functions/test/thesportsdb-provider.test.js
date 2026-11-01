@@ -9,7 +9,7 @@ const {
 } = require('../lib/adapters/theSportsDbAdapter');
 const {
   syncTheSportsDb, upcomingEventRounds, nflSeason, ufcSeasons, nflRoundsToRead, TSDB_COMPETITIONS,
-  UFC_CARDS_PER_RUN, TSDB_COLOR_LOOKUPS_PER_RUN,
+  UFC_CARDS_PER_RUN,
 } = require('../lib/pipelines/syncTheSportsDb');
 const { presentCalendarGame } = require('../lib/calendar/eventPresentation');
 
@@ -264,35 +264,4 @@ test('team color parsing keeps only a #RRGGBB primary color', () => {
   assert.deepEqual(parseTeamColor({ teams: [{ idTeam: '1', strColour1: null }] }), { idTeam: '1' });
   assert.equal(parseTeamColor({ teams: null }), undefined);
   assert.throws(() => parseTeamColor({}), TsdbApiError);
-});
-
-test('team colors are looked up for teams without one, a few per run, and saved with merge', async () => {
-  const writes = [];
-  const lookups = [];
-  const stored = new Set(['tsdb_team_134923']); // already has a color
-  const persistence = {
-    gameRef: (id) => ({ path: `games/${id}` }),
-    teamRef: (id) => ({ path: `teams/${id}` }),
-    newBatch: () => ({ set: (ref, data, options) => writes.push({ path: ref.path, data, options }), commit: async () => {} }),
-    teamsWithoutColor: async (ids) => ids.filter((id) => !stored.has(id)),
-  };
-  const source = {
-    eventsRound: async (league, round) => {
-      if (league !== '4391' || round !== 1) return [];
-      return Array.from({ length: 12 }, (_, i) => event('nfl', {
-        idEvent: `e${i}`, idHomeTeam: String(134900 + i), idAwayTeam: String(134923 + (i === 0 ? 0 : 100 + i)),
-        strHomeTeam: `Home ${i}`, strAwayTeam: `Away ${i}`, strStatus: 'NS', intHomeScore: null, intAwayScore: null,
-        strTimestamp: '2026-11-04T23:00:00',
-      }));
-    },
-    lookupTeamColor: async (id) => { lookups.push(id); return { idTeam: id, primaryColor: '#112233' }; },
-  };
-  const summary = await syncTheSportsDb('123', { source, persistence, now: () => NOW, competitions: [NFL] });
-  assert.equal(lookups.length, TSDB_COLOR_LOOKUPS_PER_RUN);
-  assert.ok(!lookups.includes('134923'));
-  assert.equal(summary.colorsSaved, TSDB_COLOR_LOOKUPS_PER_RUN);
-  const colorWrites = writes.filter((w) => w.data.presentationColor);
-  assert.equal(colorWrites.length, TSDB_COLOR_LOOKUPS_PER_RUN);
-  assert.ok(colorWrites.every((w) => w.options.merge === true && w.path.startsWith('teams/tsdb_team_')));
-  assert.deepEqual(Object.keys(colorWrites[0].data), ['presentationColor']);
 });
